@@ -1,0 +1,64 @@
+//--- start of classes (types) definition ---//
+class Service {
+	name ""
+	running false
+
+	action start {
+		precondition { }
+		postcondition {
+			// '$this' is a reference of an object that owns this action
+			$this.running true
+		}
+	}
+
+	action stop {
+		precondition { }
+		postcondition {
+			$this.running false
+		}
+	}
+}
+
+class Client {
+	refer as *Service
+
+	action changeReference(s as *Service) {
+		precondition { }
+		postcondition {
+			$this.refer $s
+		}
+	}
+}
+//--- end of classes definition ---//
+
+
+//--- start of initial state ---//
+a as Service {
+	name "A"
+	running true
+}
+
+b as Service {
+	name "B"
+	running false
+}
+
+c as Client {
+	refer $a
+}
+//--- end of initial state ---//
+
+
+//--- goal state ---//
+constraint goal {
+	$a.running false
+}
+
+
+//--- global constraint ---//
+constraint global {
+	// 'c' must always refer to a running service
+	// in PDDL: (forall (?s - service) (imply (refer c ?s) (running ?s)))
+	$c.refer.running true  
+}
+

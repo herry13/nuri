@@ -1,0 +1,35 @@
+#include file("class.inc")
+machine1 as Server {
+   name       "Machine #1"
+   running    true
+   ipAddress  "10.0.0.11"
+   hasService $web1
+}
+web1 as Service {
+   name    "Web Service #1"
+   running true
+   on      $machine1
+}
+machine2 as Server {
+   name       "Machine #2"
+   running    false
+   ipAddress  "10.0.0.12"
+   hasService $web2
+}
+web2 as Service {
+   name    "Web Service #2"
+   running false
+   on      $machine2
+}
+pc as Client {
+   name      "PC Client"
+   running   true
+   ipAddress "10.0.0.20"
+   refer     $web1
+}
+constraint goal {
+   $machine1.running false
+}
+constraint global {
+   $pc.refer.running true
+}
