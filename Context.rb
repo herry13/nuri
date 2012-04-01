@@ -118,6 +118,9 @@ module Sfplanner
 			end
 		end
 
+		class ContextVisitor #TODO
+		end
+
 		class ContextState<Context
 			def to_sfp(tab=0)
 				ts = tabspace( (tab > 0 ? tab-1 : tab) )
