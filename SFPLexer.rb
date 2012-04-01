@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-04-01 04:11:24
+# Generated at: 2012-04-01 19:56:17
 # 
 
 # ~~~> start load path setup
@@ -70,14 +70,15 @@ module SFP
                    :T__26 => 26, :T__25 => 25, :T__24 => 24, :T__23 => 23, 
                    :T__22 => 22, :T__21 => 21, :T__20 => 20, :OCTAL_ESC => 17, 
                    :FLOAT => 10, :ID => 6, :EOF => -1, :T__19 => 19, :ESC_SEQ => 14, 
-                   :BOOLEAN => 9, :T__18 => 18, :NL => 4, :COMMENT => 12, 
-                   :T__42 => 42, :INTEGER => 8, :T__43 => 43, :T__40 => 40, 
-                   :T__41 => 41, :T__46 => 46, :T__47 => 47, :T__44 => 44, 
-                   :T__45 => 45, :T__48 => 48, :T__49 => 49, :UNICODE_ESC => 16, 
-                   :NULL => 7, :HEX_DIGIT => 15, :T__30 => 30, :T__31 => 31, 
-                   :T__32 => 32, :WS => 13, :T__33 => 33, :T__34 => 34, 
-                   :T__35 => 35, :T__36 => 36, :T__37 => 37, :T__38 => 38, 
-                   :T__39 => 39, :STRING => 5 )
+                   :BOOLEAN => 9, :T__51 => 51, :T__52 => 52, :T__18 => 18, 
+                   :NL => 4, :COMMENT => 12, :T__50 => 50, :T__42 => 42, 
+                   :INTEGER => 8, :T__43 => 43, :T__40 => 40, :T__41 => 41, 
+                   :T__46 => 46, :T__47 => 47, :T__44 => 44, :T__45 => 45, 
+                   :T__48 => 48, :T__49 => 49, :UNICODE_ESC => 16, :NULL => 7, 
+                   :HEX_DIGIT => 15, :T__30 => 30, :T__31 => 31, :T__32 => 32, 
+                   :T__33 => 33, :WS => 13, :T__34 => 34, :T__35 => 35, 
+                   :T__36 => 36, :T__37 => 37, :T__38 => 38, :T__39 => 39, 
+                   :STRING => 5 )
     
   end
 
@@ -98,17 +99,19 @@ module SFP
                      "T__30", "T__31", "T__32", "T__33", "T__34", "T__35", 
                      "T__36", "T__37", "T__38", "T__39", "T__40", "T__41", 
                      "T__42", "T__43", "T__44", "T__45", "T__46", "T__47", 
-                     "T__48", "T__49", "NULL", "BOOLEAN", "ID", "INTEGER", 
-                     "FLOAT", "COMMENT", "NL", "WS", "STRING", "EXPONENT", 
-                     "HEX_DIGIT", "ESC_SEQ", "OCTAL_ESC", "UNICODE_ESC" ].freeze
+                     "T__48", "T__49", "T__50", "T__51", "T__52", "NULL", 
+                     "BOOLEAN", "ID", "INTEGER", "FLOAT", "COMMENT", "NL", 
+                     "WS", "STRING", "EXPONENT", "HEX_DIGIT", "ESC_SEQ", 
+                     "OCTAL_ESC", "UNICODE_ESC" ].freeze
     RULE_METHODS = [ :t__18!, :t__19!, :t__20!, :t__21!, :t__22!, :t__23!, 
                      :t__24!, :t__25!, :t__26!, :t__27!, :t__28!, :t__29!, 
                      :t__30!, :t__31!, :t__32!, :t__33!, :t__34!, :t__35!, 
                      :t__36!, :t__37!, :t__38!, :t__39!, :t__40!, :t__41!, 
                      :t__42!, :t__43!, :t__44!, :t__45!, :t__46!, :t__47!, 
-                     :t__48!, :t__49!, :null!, :boolean!, :id!, :integer!, 
-                     :float!, :comment!, :nl!, :ws!, :string!, :exponent!, 
-                     :hex_digit!, :esc_seq!, :octal_esc!, :unicode_esc! ].freeze
+                     :t__48!, :t__49!, :t__50!, :t__51!, :t__52!, :null!, 
+                     :boolean!, :id!, :integer!, :float!, :comment!, :nl!, 
+                     :ws!, :string!, :exponent!, :hex_digit!, :esc_seq!, 
+                     :octal_esc!, :unicode_esc! ].freeze
 
     
     def initialize( input=nil, options = {} )
@@ -825,8 +828,8 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 36:9: '.'
-      match( 0x2e )
+      # at line 36:9: '+'
+      match( 0x2b )
 
       
       @state.type = type
@@ -849,8 +852,8 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 37:9: '$'
-      match( 0x24 )
+      # at line 37:9: '-'
+      match( 0x2d )
 
       
       @state.type = type
@@ -886,19 +889,19 @@ module SFP
 
     end
 
-    # lexer rule null! (NULL)
+    # lexer rule t__50! (T__50)
     # (in SFP.g)
-    def null!
+    def t__50!
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 33 )
 
-      type = NULL
+      type = T__50
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 355:4: 'null'
-      match( "null" )
+      # at line 39:9: '/'
+      match( 0x2f )
 
       
       @state.type = type
@@ -910,18 +913,90 @@ module SFP
 
     end
 
+    # lexer rule t__51! (T__51)
+    # (in SFP.g)
+    def t__51!
+      # -> uncomment the next line to manually enable rule tracing
+      # trace_in( __method__, 34 )
+
+      type = T__51
+      channel = ANTLR3::DEFAULT_CHANNEL
+
+      
+      # - - - - main rule block - - - -
+      # at line 40:9: '.'
+      match( 0x2e )
+
+      
+      @state.type = type
+      @state.channel = channel
+
+    ensure
+      # -> uncomment the next line to manually enable rule tracing
+      # trace_out( __method__, 34 )
+
+    end
+
+    # lexer rule t__52! (T__52)
+    # (in SFP.g)
+    def t__52!
+      # -> uncomment the next line to manually enable rule tracing
+      # trace_in( __method__, 35 )
+
+      type = T__52
+      channel = ANTLR3::DEFAULT_CHANNEL
+
+      
+      # - - - - main rule block - - - -
+      # at line 41:9: '$'
+      match( 0x24 )
+
+      
+      @state.type = type
+      @state.channel = channel
+
+    ensure
+      # -> uncomment the next line to manually enable rule tracing
+      # trace_out( __method__, 35 )
+
+    end
+
+    # lexer rule null! (NULL)
+    # (in SFP.g)
+    def null!
+      # -> uncomment the next line to manually enable rule tracing
+      # trace_in( __method__, 36 )
+
+      type = NULL
+      channel = ANTLR3::DEFAULT_CHANNEL
+
+      
+      # - - - - main rule block - - - -
+      # at line 389:4: 'null'
+      match( "null" )
+
+      
+      @state.type = type
+      @state.channel = channel
+
+    ensure
+      # -> uncomment the next line to manually enable rule tracing
+      # trace_out( __method__, 36 )
+
+    end
+
     # lexer rule boolean! (BOOLEAN)
     # (in SFP.g)
     def boolean!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 34 )
+      # trace_in( __method__, 37 )
 
       type = BOOLEAN
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 359:2: ( 'true' | 'false' )
+      # at line 393:2: ( 'true' | 'false' )
       alt_1 = 2
       look_1_0 = @input.peek( 1 )
 
@@ -934,11 +1009,11 @@ module SFP
       end
       case alt_1
       when 1
-        # at line 359:4: 'true'
+        # at line 393:4: 'true'
         match( "true" )
 
       when 2
-        # at line 360:4: 'false'
+        # at line 394:4: 'false'
         match( "false" )
 
       end
@@ -948,7 +1023,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 34 )
+      # trace_out( __method__, 37 )
 
     end
 
@@ -956,14 +1031,14 @@ module SFP
     # (in SFP.g)
     def id!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 35 )
+      # trace_in( __method__, 38 )
 
       type = ID
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 363:7: ( 'a' .. 'z' | 'A' .. 'Z' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' )*
+      # at line 397:7: ( 'a' .. 'z' | 'A' .. 'Z' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' )*
       if @input.peek( 1 ).between?( 0x41, 0x5a ) || @input.peek( 1 ).between?( 0x61, 0x7a )
         @input.consume
       else
@@ -973,7 +1048,7 @@ module SFP
       end
 
 
-      # at line 363:27: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' )*
+      # at line 397:27: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' )*
       while true # decision 2
         alt_2 = 2
         look_2_0 = @input.peek( 1 )
@@ -1006,7 +1081,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 35 )
+      # trace_out( __method__, 38 )
 
     end
 
@@ -1014,15 +1089,15 @@ module SFP
     # (in SFP.g)
     def integer!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 36 )
+      # trace_in( __method__, 39 )
 
       type = INTEGER
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 367:9: ( '-' )? ( '0' .. '9' )+
-      # at line 367:9: ( '-' )?
+      # at line 401:9: ( '-' )? ( '0' .. '9' )+
+      # at line 401:9: ( '-' )?
       alt_3 = 2
       look_3_0 = @input.peek( 1 )
 
@@ -1031,11 +1106,11 @@ module SFP
       end
       case alt_3
       when 1
-        # at line 367:9: '-'
+        # at line 401:9: '-'
         match( 0x2d )
 
       end
-      # at file 367:13: ( '0' .. '9' )+
+      # at file 401:13: ( '0' .. '9' )+
       match_count_4 = 0
       while true
         alt_4 = 2
@@ -1047,7 +1122,7 @@ module SFP
         end
         case alt_4
         when 1
-          # at line 367:13: '0' .. '9'
+          # at line 401:13: '0' .. '9'
           match_range( 0x30, 0x39 )
 
         else
@@ -1067,7 +1142,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 36 )
+      # trace_out( __method__, 39 )
 
     end
 
@@ -1075,20 +1150,20 @@ module SFP
     # (in SFP.g)
     def float!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 37 )
+      # trace_in( __method__, 40 )
 
       type = FLOAT
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 371:5: ( ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT )
+      # at line 405:5: ( ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT )
       alt_14 = 3
       alt_14 = @dfa14.predict( @input )
       case alt_14
       when 1
-        # at line 371:9: ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )?
-        # at line 371:9: ( '-' )?
+        # at line 405:9: ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )?
+        # at line 405:9: ( '-' )?
         alt_5 = 2
         look_5_0 = @input.peek( 1 )
 
@@ -1097,11 +1172,11 @@ module SFP
         end
         case alt_5
         when 1
-          # at line 371:9: '-'
+          # at line 405:9: '-'
           match( 0x2d )
 
         end
-        # at file 371:13: ( '0' .. '9' )+
+        # at file 405:13: ( '0' .. '9' )+
         match_count_6 = 0
         while true
           alt_6 = 2
@@ -1113,7 +1188,7 @@ module SFP
           end
           case alt_6
           when 1
-            # at line 371:14: '0' .. '9'
+            # at line 405:14: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
@@ -1127,7 +1202,7 @@ module SFP
         end
 
         match( 0x2e )
-        # at line 371:29: ( '0' .. '9' )*
+        # at line 405:29: ( '0' .. '9' )*
         while true # decision 7
           alt_7 = 2
           look_7_0 = @input.peek( 1 )
@@ -1138,14 +1213,14 @@ module SFP
           end
           case alt_7
           when 1
-            # at line 371:30: '0' .. '9'
+            # at line 405:30: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
             break # out of loop for decision 7
           end
         end # loop for decision 7
-        # at line 371:41: ( EXPONENT )?
+        # at line 405:41: ( EXPONENT )?
         alt_8 = 2
         look_8_0 = @input.peek( 1 )
 
@@ -1154,14 +1229,14 @@ module SFP
         end
         case alt_8
         when 1
-          # at line 371:41: EXPONENT
+          # at line 405:41: EXPONENT
           exponent!
 
         end
 
       when 2
-        # at line 372:9: ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )?
-        # at line 372:9: ( '-' )?
+        # at line 406:9: ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )?
+        # at line 406:9: ( '-' )?
         alt_9 = 2
         look_9_0 = @input.peek( 1 )
 
@@ -1170,12 +1245,12 @@ module SFP
         end
         case alt_9
         when 1
-          # at line 372:9: '-'
+          # at line 406:9: '-'
           match( 0x2d )
 
         end
         match( 0x2e )
-        # at file 372:17: ( '0' .. '9' )+
+        # at file 406:17: ( '0' .. '9' )+
         match_count_10 = 0
         while true
           alt_10 = 2
@@ -1187,7 +1262,7 @@ module SFP
           end
           case alt_10
           when 1
-            # at line 372:18: '0' .. '9'
+            # at line 406:18: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
@@ -1200,7 +1275,7 @@ module SFP
           match_count_10 += 1
         end
 
-        # at line 372:29: ( EXPONENT )?
+        # at line 406:29: ( EXPONENT )?
         alt_11 = 2
         look_11_0 = @input.peek( 1 )
 
@@ -1209,14 +1284,14 @@ module SFP
         end
         case alt_11
         when 1
-          # at line 372:29: EXPONENT
+          # at line 406:29: EXPONENT
           exponent!
 
         end
 
       when 3
-        # at line 373:9: ( '-' )? ( '0' .. '9' )+ EXPONENT
-        # at line 373:9: ( '-' )?
+        # at line 407:9: ( '-' )? ( '0' .. '9' )+ EXPONENT
+        # at line 407:9: ( '-' )?
         alt_12 = 2
         look_12_0 = @input.peek( 1 )
 
@@ -1225,11 +1300,11 @@ module SFP
         end
         case alt_12
         when 1
-          # at line 373:9: '-'
+          # at line 407:9: '-'
           match( 0x2d )
 
         end
-        # at file 373:13: ( '0' .. '9' )+
+        # at file 407:13: ( '0' .. '9' )+
         match_count_13 = 0
         while true
           alt_13 = 2
@@ -1241,7 +1316,7 @@ module SFP
           end
           case alt_13
           when 1
-            # at line 373:14: '0' .. '9'
+            # at line 407:14: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
@@ -1263,7 +1338,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 37 )
+      # trace_out( __method__, 40 )
 
     end
 
@@ -1271,14 +1346,14 @@ module SFP
     # (in SFP.g)
     def comment!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 38 )
+      # trace_in( __method__, 41 )
 
       type = COMMENT
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 377:5: ( '//' (~ ( '\\n' | '\\r' ) )* | '/*' ( options {greedy=false; } : . )* '*/' )
+      # at line 411:5: ( '//' (~ ( '\\n' | '\\r' ) )* | '/*' ( options {greedy=false; } : . )* '*/' )
       alt_17 = 2
       look_17_0 = @input.peek( 1 )
 
@@ -1297,9 +1372,9 @@ module SFP
       end
       case alt_17
       when 1
-        # at line 377:9: '//' (~ ( '\\n' | '\\r' ) )*
+        # at line 411:9: '//' (~ ( '\\n' | '\\r' ) )*
         match( "//" )
-        # at line 377:14: (~ ( '\\n' | '\\r' ) )*
+        # at line 411:14: (~ ( '\\n' | '\\r' ) )*
         while true # decision 15
           alt_15 = 2
           look_15_0 = @input.peek( 1 )
@@ -1310,7 +1385,7 @@ module SFP
           end
           case alt_15
           when 1
-            # at line 377:14: ~ ( '\\n' | '\\r' )
+            # at line 411:14: ~ ( '\\n' | '\\r' )
             if @input.peek( 1 ).between?( 0x0, 0x9 ) || @input.peek( 1 ).between?( 0xb, 0xc ) || @input.peek( 1 ).between?( 0xe, 0xff )
               @input.consume
             else
@@ -1330,9 +1405,9 @@ module SFP
         # <-- action
 
       when 2
-        # at line 378:9: '/*' ( options {greedy=false; } : . )* '*/'
+        # at line 412:9: '/*' ( options {greedy=false; } : . )* '*/'
         match( "/*" )
-        # at line 378:14: ( options {greedy=false; } : . )*
+        # at line 412:14: ( options {greedy=false; } : . )*
         while true # decision 16
           alt_16 = 2
           look_16_0 = @input.peek( 1 )
@@ -1352,7 +1427,7 @@ module SFP
           end
           case alt_16
           when 1
-            # at line 378:42: .
+            # at line 412:42: .
             match_any
 
           else
@@ -1371,7 +1446,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 38 )
+      # trace_out( __method__, 41 )
 
     end
 
@@ -1379,15 +1454,15 @@ module SFP
     # (in SFP.g)
     def nl!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 39 )
+      # trace_in( __method__, 42 )
 
       type = NL
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 381:6: ( '\\r' )? '\\n'
-      # at line 381:6: ( '\\r' )?
+      # at line 415:6: ( '\\r' )? '\\n'
+      # at line 415:6: ( '\\r' )?
       alt_18 = 2
       look_18_0 = @input.peek( 1 )
 
@@ -1396,7 +1471,7 @@ module SFP
       end
       case alt_18
       when 1
-        # at line 381:6: '\\r'
+        # at line 415:6: '\\r'
         match( 0xd )
 
       end
@@ -1408,7 +1483,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 39 )
+      # trace_out( __method__, 42 )
 
     end
 
@@ -1416,14 +1491,14 @@ module SFP
     # (in SFP.g)
     def ws!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 40 )
+      # trace_in( __method__, 43 )
 
       type = WS
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 384:9: ( ' ' | '\\t' )
+      # at line 418:9: ( ' ' | '\\t' )
       if @input.peek(1) == 0x9 || @input.peek(1) == 0x20
         @input.consume
       else
@@ -1443,7 +1518,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 40 )
+      # trace_out( __method__, 43 )
 
     end
 
@@ -1451,16 +1526,16 @@ module SFP
     # (in SFP.g)
     def string!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 41 )
+      # trace_in( __method__, 44 )
 
       type = STRING
       channel = ANTLR3::DEFAULT_CHANNEL
 
       
       # - - - - main rule block - - - -
-      # at line 390:8: '\"' ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )* '\"'
+      # at line 424:8: '\"' ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )* '\"'
       match( 0x22 )
-      # at line 390:12: ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )*
+      # at line 424:12: ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )*
       while true # decision 19
         alt_19 = 3
         look_19_0 = @input.peek( 1 )
@@ -1473,11 +1548,11 @@ module SFP
         end
         case alt_19
         when 1
-          # at line 390:14: ESC_SEQ
+          # at line 424:14: ESC_SEQ
           esc_seq!
 
         when 2
-          # at line 390:24: ~ ( '\\\\' | '\"' )
+          # at line 424:24: ~ ( '\\\\' | '\"' )
           if @input.peek( 1 ).between?( 0x0, 0x21 ) || @input.peek( 1 ).between?( 0x23, 0x5b ) || @input.peek( 1 ).between?( 0x5d, 0xff )
             @input.consume
           else
@@ -1500,7 +1575,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 41 )
+      # trace_out( __method__, 44 )
 
     end
 
@@ -1508,11 +1583,11 @@ module SFP
     # (in SFP.g)
     def exponent!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 42 )
+      # trace_in( __method__, 45 )
 
       
       # - - - - main rule block - - - -
-      # at line 394:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
+      # at line 428:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
       if @input.peek(1) == 0x45 || @input.peek(1) == 0x65
         @input.consume
       else
@@ -1522,7 +1597,7 @@ module SFP
       end
 
 
-      # at line 394:22: ( '+' | '-' )?
+      # at line 428:22: ( '+' | '-' )?
       alt_20 = 2
       look_20_0 = @input.peek( 1 )
 
@@ -1543,7 +1618,7 @@ module SFP
 
 
       end
-      # at file 394:33: ( '0' .. '9' )+
+      # at file 428:33: ( '0' .. '9' )+
       match_count_21 = 0
       while true
         alt_21 = 2
@@ -1555,7 +1630,7 @@ module SFP
         end
         case alt_21
         when 1
-          # at line 394:34: '0' .. '9'
+          # at line 428:34: '0' .. '9'
           match_range( 0x30, 0x39 )
 
         else
@@ -1571,7 +1646,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 42 )
+      # trace_out( __method__, 45 )
 
     end
 
@@ -1579,11 +1654,11 @@ module SFP
     # (in SFP.g)
     def hex_digit!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 43 )
+      # trace_in( __method__, 46 )
 
       
       # - - - - main rule block - - - -
-      # at line 397:13: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
+      # at line 431:13: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
       if @input.peek( 1 ).between?( 0x30, 0x39 ) || @input.peek( 1 ).between?( 0x41, 0x46 ) || @input.peek( 1 ).between?( 0x61, 0x66 )
         @input.consume
       else
@@ -1596,7 +1671,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 43 )
+      # trace_out( __method__, 46 )
 
     end
 
@@ -1604,11 +1679,11 @@ module SFP
     # (in SFP.g)
     def esc_seq!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 44 )
+      # trace_in( __method__, 47 )
 
       
       # - - - - main rule block - - - -
-      # at line 401:5: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
+      # at line 435:5: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
       alt_22 = 3
       look_22_0 = @input.peek( 1 )
 
@@ -1625,7 +1700,7 @@ module SFP
       end
       case alt_22
       when 1
-        # at line 401:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
+        # at line 435:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
         match( 0x5c )
         if @input.peek(1) == 0x22 || @input.peek(1) == 0x27 || @input.peek(1) == 0x5c || @input.peek(1) == 0x62 || @input.peek(1) == 0x66 || @input.peek(1) == 0x6e || @input.peek(1) == 0x72 || @input.peek(1) == 0x74
           @input.consume
@@ -1638,17 +1713,17 @@ module SFP
 
 
       when 2
-        # at line 402:9: UNICODE_ESC
+        # at line 436:9: UNICODE_ESC
         unicode_esc!
 
       when 3
-        # at line 403:9: OCTAL_ESC
+        # at line 437:9: OCTAL_ESC
         octal_esc!
 
       end
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 44 )
+      # trace_out( __method__, 47 )
 
     end
 
@@ -1656,11 +1731,11 @@ module SFP
     # (in SFP.g)
     def octal_esc!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 45 )
+      # trace_in( __method__, 48 )
 
       
       # - - - - main rule block - - - -
-      # at line 408:5: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+      # at line 442:5: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
       alt_23 = 3
       look_23_0 = @input.peek( 1 )
 
@@ -1697,45 +1772,45 @@ module SFP
       end
       case alt_23
       when 1
-        # at line 408:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+        # at line 442:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
         match( 0x5c )
-        # at line 408:14: ( '0' .. '3' )
-        # at line 408:15: '0' .. '3'
+        # at line 442:14: ( '0' .. '3' )
+        # at line 442:15: '0' .. '3'
         match_range( 0x30, 0x33 )
 
-        # at line 408:25: ( '0' .. '7' )
-        # at line 408:26: '0' .. '7'
+        # at line 442:25: ( '0' .. '7' )
+        # at line 442:26: '0' .. '7'
         match_range( 0x30, 0x37 )
 
-        # at line 408:36: ( '0' .. '7' )
-        # at line 408:37: '0' .. '7'
+        # at line 442:36: ( '0' .. '7' )
+        # at line 442:37: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
       when 2
-        # at line 409:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
+        # at line 443:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
         match( 0x5c )
-        # at line 409:14: ( '0' .. '7' )
-        # at line 409:15: '0' .. '7'
+        # at line 443:14: ( '0' .. '7' )
+        # at line 443:15: '0' .. '7'
         match_range( 0x30, 0x37 )
 
-        # at line 409:25: ( '0' .. '7' )
-        # at line 409:26: '0' .. '7'
+        # at line 443:25: ( '0' .. '7' )
+        # at line 443:26: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
       when 3
-        # at line 410:9: '\\\\' ( '0' .. '7' )
+        # at line 444:9: '\\\\' ( '0' .. '7' )
         match( 0x5c )
-        # at line 410:14: ( '0' .. '7' )
-        # at line 410:15: '0' .. '7'
+        # at line 444:14: ( '0' .. '7' )
+        # at line 444:15: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
       end
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 45 )
+      # trace_out( __method__, 48 )
 
     end
 
@@ -1743,11 +1818,11 @@ module SFP
     # (in SFP.g)
     def unicode_esc!
       # -> uncomment the next line to manually enable rule tracing
-      # trace_in( __method__, 46 )
+      # trace_in( __method__, 49 )
 
       
       # - - - - main rule block - - - -
-      # at line 415:9: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
+      # at line 449:9: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
       match( 0x5c )
       match( 0x75 )
       hex_digit!
@@ -1757,7 +1832,7 @@ module SFP
 
     ensure
       # -> uncomment the next line to manually enable rule tracing
-      # trace_out( __method__, 46 )
+      # trace_out( __method__, 49 )
 
     end
 
@@ -1769,8 +1844,8 @@ module SFP
     # but instead use the next_token method, which will
     # build and emit the actual next token
     def token!
-      # at line 1:8: ( T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | T__26 | T__27 | T__28 | T__29 | T__30 | T__31 | T__32 | T__33 | T__34 | T__35 | T__36 | T__37 | T__38 | T__39 | T__40 | T__41 | T__42 | T__43 | T__44 | T__45 | T__46 | T__47 | T__48 | T__49 | NULL | BOOLEAN | ID | INTEGER | FLOAT | COMMENT | NL | WS | STRING )
-      alt_24 = 41
+      # at line 1:8: ( T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | T__26 | T__27 | T__28 | T__29 | T__30 | T__31 | T__32 | T__33 | T__34 | T__35 | T__36 | T__37 | T__38 | T__39 | T__40 | T__41 | T__42 | T__43 | T__44 | T__45 | T__46 | T__47 | T__48 | T__49 | T__50 | T__51 | T__52 | NULL | BOOLEAN | ID | INTEGER | FLOAT | COMMENT | NL | WS | STRING )
+      alt_24 = 44
       alt_24 = @dfa24.predict( @input )
       case alt_24
       when 1
@@ -1902,39 +1977,51 @@ module SFP
         t__49!
 
       when 33
-        # at line 1:202: NULL
-        null!
+        # at line 1:202: T__50
+        t__50!
 
       when 34
-        # at line 1:207: BOOLEAN
-        boolean!
+        # at line 1:208: T__51
+        t__51!
 
       when 35
-        # at line 1:215: ID
-        id!
+        # at line 1:214: T__52
+        t__52!
 
       when 36
-        # at line 1:218: INTEGER
-        integer!
+        # at line 1:220: NULL
+        null!
 
       when 37
-        # at line 1:226: FLOAT
-        float!
+        # at line 1:225: BOOLEAN
+        boolean!
 
       when 38
-        # at line 1:232: COMMENT
-        comment!
+        # at line 1:233: ID
+        id!
 
       when 39
-        # at line 1:240: NL
-        nl!
+        # at line 1:236: INTEGER
+        integer!
 
       when 40
-        # at line 1:243: WS
-        ws!
+        # at line 1:244: FLOAT
+        float!
 
       when 41
-        # at line 1:246: STRING
+        # at line 1:250: COMMENT
+        comment!
+
+      when 42
+        # at line 1:258: NL
+        nl!
+
+      when 43
+        # at line 1:261: WS
+        ws!
+
+      when 44
+        # at line 1:264: STRING
         string!
 
       end
@@ -1969,64 +2056,64 @@ module SFP
 
       def description
         <<-'__dfa_description__'.strip!
-          370:1: FLOAT : ( ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT );
+          404:1: FLOAT : ( ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT );
         __dfa_description__
       end
     end
     class DFA24 < ANTLR3::DFA
       EOT = unpack( 2, -1, 1, 25, 1, -1, 2, 25, 2, -1, 4, 25, 2, -1, 3, 
-                    25, 1, 48, 1, 50, 2, -1, 1, 54, 1, -1, 1, 57, 2, -1, 
-                    1, 58, 3, -1, 6, 25, 1, 66, 8, 25, 1, 75, 1, 76, 12, 
-                    -1, 7, 25, 1, -1, 6, 25, 1, 90, 1, 25, 2, -1, 2, 25, 
-                    1, -1, 5, 25, 1, 99, 1, 100, 1, 101, 2, 25, 1, -1, 1, 
-                    104, 1, -1, 1, 101, 2, 25, 1, 107, 2, 25, 3, -1, 2, 
-                    25, 1, -1, 2, 25, 1, -1, 1, 25, 1, 115, 4, 25, 1, 120, 
-                    1, -1, 4, 25, 1, -1, 2, 25, 1, 127, 3, 25, 1, -1, 1, 
-                    131, 2, 25, 1, -1, 2, 25, 1, 136, 1, 25, 1, -1, 1, 138, 
-                    1, -1 )
-      EOF = unpack( 139, -1 )
+                    25, 1, 48, 1, 50, 1, 52, 1, 54, 1, 57, 1, 60, 1, 61, 
+                    2, -1, 1, 62, 3, -1, 6, 25, 1, 70, 8, 25, 1, 79, 1, 
+                    80, 16, -1, 7, 25, 1, -1, 6, 25, 1, 94, 1, 25, 2, -1, 
+                    2, 25, 1, -1, 5, 25, 1, 103, 1, 104, 1, 105, 2, 25, 
+                    1, -1, 1, 108, 1, -1, 1, 105, 2, 25, 1, 111, 2, 25, 
+                    3, -1, 2, 25, 1, -1, 2, 25, 1, -1, 1, 25, 1, 119, 4, 
+                    25, 1, 124, 1, -1, 4, 25, 1, -1, 2, 25, 1, 131, 3, 25, 
+                    1, -1, 1, 135, 2, 25, 1, -1, 2, 25, 1, 140, 1, 25, 1, 
+                    -1, 1, 142, 1, -1 )
+      EOF = unpack( 143, -1 )
       MIN = unpack( 1, 9, 1, -1, 1, 97, 1, -1, 1, 114, 1, 108, 2, -1, 1, 
-                    120, 1, 99, 2, 104, 2, -1, 2, 111, 1, 102, 2, 61, 1, 
-                    -1, 1, 46, 1, 61, 1, 42, 1, 48, 2, -1, 1, 46, 3, -1, 
-                    3, 108, 1, 109, 1, 97, 1, 116, 1, 45, 1, 116, 2, 101, 
-                    1, 117, 1, 101, 1, 115, 1, 116, 1, 108, 2, 45, 12, -1, 
-                    1, 101, 1, 115, 1, 40, 1, 112, 2, 115, 1, 101, 1, -1, 
-                    1, 105, 2, 110, 1, 101, 1, 99, 1, 116, 1, 45, 1, 108, 
-                    2, -1, 1, 40, 1, 101, 1, -1, 1, 111, 1, 116, 1, 115, 
-                    1, 110, 1, 111, 3, 45, 1, 111, 1, 99, 1, -1, 1, 45, 
-                    1, -1, 1, 45, 1, 115, 1, 114, 1, 45, 1, 100, 1, 110, 
-                    3, -1, 1, 110, 1, 111, 1, -1, 1, 105, 1, 97, 1, -1, 
-                    1, 115, 1, 45, 1, 100, 1, 110, 1, 116, 1, 105, 1, 45, 
-                    1, -1, 1, 105, 1, 100, 1, 101, 1, 110, 1, -1, 1, 116, 
-                    1, 105, 1, 45, 1, 116, 1, 105, 1, 116, 1, -1, 1, 45, 
-                    1, 111, 1, 105, 1, -1, 1, 110, 1, 111, 1, 45, 1, 110, 
-                    1, -1, 1, 45, 1, -1 )
+                    120, 1, 99, 2, 104, 2, -1, 2, 111, 1, 102, 3, 61, 1, 
+                    46, 1, 61, 1, 42, 1, 48, 2, -1, 1, 46, 3, -1, 3, 108, 
+                    1, 109, 1, 97, 1, 116, 1, 45, 1, 116, 2, 101, 1, 117, 
+                    1, 101, 1, 115, 1, 116, 1, 108, 2, 45, 16, -1, 1, 101, 
+                    1, 115, 1, 40, 1, 112, 2, 115, 1, 101, 1, -1, 1, 105, 
+                    2, 110, 1, 101, 1, 99, 1, 116, 1, 45, 1, 108, 2, -1, 
+                    1, 40, 1, 101, 1, -1, 1, 111, 1, 116, 1, 115, 1, 110, 
+                    1, 111, 3, 45, 1, 111, 1, 99, 1, -1, 1, 45, 1, -1, 1, 
+                    45, 1, 115, 1, 114, 1, 45, 1, 100, 1, 110, 3, -1, 1, 
+                    110, 1, 111, 1, -1, 1, 105, 1, 97, 1, -1, 1, 115, 1, 
+                    45, 1, 100, 1, 110, 1, 116, 1, 105, 1, 45, 1, -1, 1, 
+                    105, 1, 100, 1, 101, 1, 110, 1, -1, 1, 116, 1, 105, 
+                    1, 45, 1, 116, 1, 105, 1, 116, 1, -1, 1, 45, 1, 111, 
+                    1, 105, 1, -1, 1, 110, 1, 111, 1, 45, 1, 110, 1, -1, 
+                    1, 45, 1, -1 )
       MAX = unpack( 1, 125, 1, -1, 1, 105, 1, -1, 1, 114, 1, 111, 2, -1, 
                     1, 120, 1, 115, 1, 104, 1, 114, 2, -1, 1, 114, 1, 117, 
-                    1, 110, 2, 61, 1, -1, 3, 61, 1, 57, 2, -1, 1, 101, 3, 
-                    -1, 3, 108, 1, 110, 1, 97, 1, 116, 1, 122, 1, 116, 2, 
-                    101, 1, 117, 1, 101, 1, 115, 1, 116, 1, 108, 2, 122, 
-                    12, -1, 1, 101, 1, 115, 1, 40, 1, 112, 2, 115, 1, 101, 
-                    1, -1, 1, 105, 2, 110, 1, 101, 1, 99, 1, 116, 1, 122, 
-                    1, 108, 2, -1, 1, 40, 1, 101, 1, -1, 1, 111, 1, 116, 
-                    1, 115, 1, 110, 1, 111, 3, 122, 1, 111, 1, 99, 1, -1, 
-                    1, 122, 1, -1, 1, 122, 1, 115, 1, 114, 1, 122, 1, 100, 
-                    1, 110, 3, -1, 1, 110, 1, 111, 1, -1, 1, 105, 1, 97, 
-                    1, -1, 1, 115, 1, 122, 1, 100, 1, 110, 1, 116, 1, 105, 
-                    1, 122, 1, -1, 1, 105, 1, 100, 1, 101, 1, 110, 1, -1, 
-                    1, 116, 1, 105, 1, 122, 1, 116, 1, 105, 1, 116, 1, -1, 
-                    1, 122, 1, 111, 1, 105, 1, -1, 1, 110, 1, 111, 1, 122, 
-                    1, 110, 1, -1, 1, 122, 1, -1 )
+                    1, 110, 6, 61, 1, 57, 2, -1, 1, 101, 3, -1, 3, 108, 
+                    1, 110, 1, 97, 1, 116, 1, 122, 1, 116, 2, 101, 1, 117, 
+                    1, 101, 1, 115, 1, 116, 1, 108, 2, 122, 16, -1, 1, 101, 
+                    1, 115, 1, 40, 1, 112, 2, 115, 1, 101, 1, -1, 1, 105, 
+                    2, 110, 1, 101, 1, 99, 1, 116, 1, 122, 1, 108, 2, -1, 
+                    1, 40, 1, 101, 1, -1, 1, 111, 1, 116, 1, 115, 1, 110, 
+                    1, 111, 3, 122, 1, 111, 1, 99, 1, -1, 1, 122, 1, -1, 
+                    1, 122, 1, 115, 1, 114, 1, 122, 1, 100, 1, 110, 3, -1, 
+                    1, 110, 1, 111, 1, -1, 1, 105, 1, 97, 1, -1, 1, 115, 
+                    1, 122, 1, 100, 1, 110, 1, 116, 1, 105, 1, 122, 1, -1, 
+                    1, 105, 1, 100, 1, 101, 1, 110, 1, -1, 1, 116, 1, 105, 
+                    1, 122, 1, 116, 1, 105, 1, 116, 1, -1, 1, 122, 1, 111, 
+                    1, 105, 1, -1, 1, 110, 1, 111, 1, 122, 1, 110, 1, -1, 
+                    1, 122, 1, -1 )
       ACCEPT = unpack( 1, -1, 1, 1, 1, -1, 1, 3, 2, -1, 1, 6, 1, 7, 4, -1, 
-                       1, 14, 1, 15, 5, -1, 1, 26, 4, -1, 1, 31, 1, 35, 
-                       1, -1, 1, 39, 1, 40, 1, 41, 17, -1, 1, 22, 1, 21, 
-                       1, 23, 1, 24, 1, 27, 1, 37, 1, 28, 1, 32, 1, 29, 
-                       1, 38, 1, 30, 1, 36, 7, -1, 1, 10, 8, -1, 1, 20, 
-                       1, 25, 2, -1, 1, 4, 10, -1, 1, 19, 1, -1, 1, 2, 6, 
-                       -1, 1, 11, 1, 12, 1, 34, 2, -1, 1, 33, 2, -1, 1, 
-                       8, 7, -1, 1, 13, 4, -1, 1, 9, 6, -1, 1, 5, 3, -1, 
-                       1, 18, 4, -1, 1, 16, 1, -1, 1, 17 )
-      SPECIAL = unpack( 139, -1 )
+                       1, 14, 1, 15, 10, -1, 1, 35, 1, 38, 1, -1, 1, 42, 
+                       1, 43, 1, 44, 17, -1, 1, 22, 1, 21, 1, 23, 1, 24, 
+                       1, 26, 1, 30, 1, 27, 1, 31, 1, 40, 1, 28, 1, 32, 
+                       1, 29, 1, 41, 1, 33, 1, 34, 1, 39, 7, -1, 1, 10, 
+                       8, -1, 1, 20, 1, 25, 2, -1, 1, 4, 10, -1, 1, 19, 
+                       1, -1, 1, 2, 6, -1, 1, 11, 1, 12, 1, 37, 2, -1, 1, 
+                       36, 2, -1, 1, 8, 7, -1, 1, 13, 4, -1, 1, 9, 6, -1, 
+                       1, 5, 3, -1, 1, 18, 4, -1, 1, 16, 1, -1, 1, 17 )
+      SPECIAL = unpack( 143, -1 )
       TRANSITION = [
         unpack( 1, 28, 1, 27, 2, -1, 1, 27, 18, -1, 1, 28, 1, -1, 1, 29, 
                 1, 1, 1, 24, 3, -1, 1, 12, 1, 3, 1, 21, 1, 19, 1, 13, 1, 
@@ -2052,138 +2139,142 @@ module SFP
         unpack( 1, 46, 7, -1, 1, 45 ),
         unpack( 1, 47 ),
         unpack( 1, 49 ),
-        unpack(  ),
-        unpack( 1, 52, 1, -1, 10, 26, 3, -1, 1, 51 ),
-        unpack( 1, 53 ),
-        unpack( 1, 56, 4, -1, 1, 56, 13, -1, 1, 55 ),
-        unpack( 10, 52 ),
-        unpack(  ),
-        unpack(  ),
-        unpack( 1, 52, 1, -1, 10, 26, 11, -1, 1, 52, 31, -1, 1, 52 ),
+        unpack( 1, 51 ),
+        unpack( 1, 55, 1, -1, 10, 26, 3, -1, 1, 53 ),
+        unpack( 1, 56 ),
+        unpack( 1, 59, 4, -1, 1, 59, 13, -1, 1, 58 ),
+        unpack( 10, 55 ),
         unpack(  ),
         unpack(  ),
+        unpack( 1, 55, 1, -1, 10, 26, 11, -1, 1, 55, 31, -1, 1, 55 ),
         unpack(  ),
-        unpack( 1, 59 ),
-        unpack( 1, 60 ),
-        unpack( 1, 61 ),
-        unpack( 1, 62, 1, 63 ),
+        unpack(  ),
+        unpack(  ),
+        unpack( 1, 63 ),
         unpack( 1, 64 ),
         unpack( 1, 65 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
-        unpack( 1, 67 ),
+        unpack( 1, 66, 1, 67 ),
         unpack( 1, 68 ),
         unpack( 1, 69 ),
-        unpack( 1, 70 ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
         unpack( 1, 71 ),
         unpack( 1, 72 ),
         unpack( 1, 73 ),
         unpack( 1, 74 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
+        unpack( 1, 75 ),
+        unpack( 1, 76 ),
         unpack( 1, 77 ),
         unpack( 1, 78 ),
-        unpack( 1, 79 ),
-        unpack( 1, 80 ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
         unpack( 1, 81 ),
         unpack( 1, 82 ),
         unpack( 1, 83 ),
-        unpack(  ),
         unpack( 1, 84 ),
         unpack( 1, 85 ),
         unpack( 1, 86 ),
         unpack( 1, 87 ),
+        unpack(  ),
         unpack( 1, 88 ),
         unpack( 1, 89 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
+        unpack( 1, 90 ),
         unpack( 1, 91 ),
-        unpack(  ),
-        unpack(  ),
         unpack( 1, 92 ),
         unpack( 1, 93 ),
-        unpack(  ),
-        unpack( 1, 94 ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
         unpack( 1, 95 ),
+        unpack(  ),
+        unpack(  ),
         unpack( 1, 96 ),
         unpack( 1, 97 ),
+        unpack(  ),
         unpack( 1, 98 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
+        unpack( 1, 99 ),
+        unpack( 1, 100 ),
+        unpack( 1, 101 ),
         unpack( 1, 102 ),
-        unpack( 1, 103 ),
-        unpack(  ),
         unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
                  26, 25 ),
-        unpack(  ),
         unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
                  26, 25 ),
-        unpack( 1, 105 ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
         unpack( 1, 106 ),
+        unpack( 1, 107 ),
+        unpack(  ),
         unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
                  26, 25 ),
-        unpack( 1, 108 ),
+        unpack(  ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
         unpack( 1, 109 ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
         unpack( 1, 110 ),
-        unpack( 1, 111 ),
-        unpack(  ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
         unpack( 1, 112 ),
         unpack( 1, 113 ),
         unpack(  ),
+        unpack(  ),
+        unpack(  ),
         unpack( 1, 114 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
+        unpack( 1, 115 ),
+        unpack(  ),
         unpack( 1, 116 ),
         unpack( 1, 117 ),
+        unpack(  ),
         unpack( 1, 118 ),
-        unpack( 1, 119 ),
         unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
                  26, 25 ),
-        unpack(  ),
+        unpack( 1, 120 ),
         unpack( 1, 121 ),
         unpack( 1, 122 ),
         unpack( 1, 123 ),
-        unpack( 1, 124 ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
         unpack(  ),
         unpack( 1, 125 ),
         unpack( 1, 126 ),
-        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
-                 26, 25 ),
+        unpack( 1, 127 ),
         unpack( 1, 128 ),
+        unpack(  ),
         unpack( 1, 129 ),
         unpack( 1, 130 ),
-        unpack(  ),
         unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
                  26, 25 ),
         unpack( 1, 132 ),
         unpack( 1, 133 ),
-        unpack(  ),
         unpack( 1, 134 ),
-        unpack( 1, 135 ),
+        unpack(  ),
         unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
                  26, 25 ),
+        unpack( 1, 136 ),
         unpack( 1, 137 ),
+        unpack(  ),
+        unpack( 1, 138 ),
+        unpack( 1, 139 ),
+        unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
+                 26, 25 ),
+        unpack( 1, 141 ),
         unpack(  ),
         unpack( 1, 25, 2, -1, 10, 25, 7, -1, 26, 25, 4, -1, 1, 25, 1, -1, 
                  26, 25 ),
@@ -2201,7 +2292,7 @@ module SFP
 
       def description
         <<-'__dfa_description__'.strip!
-          1:1: Tokens : ( T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | T__26 | T__27 | T__28 | T__29 | T__30 | T__31 | T__32 | T__33 | T__34 | T__35 | T__36 | T__37 | T__38 | T__39 | T__40 | T__41 | T__42 | T__43 | T__44 | T__45 | T__46 | T__47 | T__48 | T__49 | NULL | BOOLEAN | ID | INTEGER | FLOAT | COMMENT | NL | WS | STRING );
+          1:1: Tokens : ( T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | T__26 | T__27 | T__28 | T__29 | T__30 | T__31 | T__32 | T__33 | T__34 | T__35 | T__36 | T__37 | T__38 | T__39 | T__40 | T__41 | T__42 | T__43 | T__44 | T__45 | T__46 | T__47 | T__48 | T__49 | T__50 | T__51 | T__52 | NULL | BOOLEAN | ID | INTEGER | FLOAT | COMMENT | NL | WS | STRING );
         __dfa_description__
       end
     end

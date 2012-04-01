@@ -80,7 +80,7 @@ module Sfplanner
 				ts = tabspace(tab)
 				result = ''
 				@attributes.each { |key,value|
-					if value.is_a?(ContextReferenceType) or value.is_a?(ContextNull) or value.is_a?(ContextIn) or value.is_a?(ContextSet) or value.is_a?(ContextKeyword)
+					if value.is_a?(ContextReferenceType) or value.is_a?(ContextNull) or value.is_a?(ContextIn) or value.is_a?(ContextSet) or value.is_a?(ContextAbstract)
 						result += ts + key + ' ' + value.to_sfp + "\n"
 					elsif value.is_a?(Context)
 						result += value.to_sfp(tab)
@@ -186,126 +186,123 @@ module Sfplanner
 			end
 		end
 
-		class ContextKeyword<Context
-		end
+		class ContextAbstract<Context
+			attr_accessor :op
 
-		class ContextIn<ContextKeyword
-			def initialize(owner=nil, value=nil)
-				@name = 'in'
+			def initialize(name=nil, owner=nil, value=nil, op='')
+				@name = name
 				@owner = owner
 				@attributes = value
+				@op = op
 			end
 
 			def to_sfp
-				return 'in ' + @attributes.to_sfp
+				return op + ' ' + @attributes.to_sfp
 			end
 		end
 
-		class ContextNot<ContextKeyword
+		class ContextIn<ContextAbstract
 			def initialize(owner=nil, value=nil)
-				@name = 'not'
-				@owner = owner
-				@attributes = value
-			end
-
-			def to_sfp
-				return 'not ' + @attributes.to_sfp
+				super('in', owner, value, 'in')
 			end
 		end
 
-		class ContextGreater<ContextKeyword
+		class ContextNot<ContextAbstract
 			def initialize(owner=nil, value=nil)
-				@name = 'greater'
-				@owner = owner
-				@attributes = value
-			end
-
-			def to_sfp
-				return '> ' + (@attributes.is_a?(Context) ? @attributes.to_sfp : @attributes.to_s)
+				super('not', owner, value, 'not')
 			end
 		end
 
-		class ContextGreaterEquals<ContextKeyword
-			def initialize(owner=nil, value=nil)
-				@name = 'greater_equal'
-				@owner = owner
-				@attributes = value
+		class ContextFormula<ContextAbstract
+			def initialize(owner=nil)
+				super('formula', owner, Array.new, '')
 			end
 
-			def to_sfp
-				return '>= ' + (@attributes.is_a?(Context) ? @attributes.to_sfp : @attributes.to_s)
-			end
-		end
-
-		class ContextLess<ContextKeyword
-			def initialize(owner=nil, value=nil)
-				@name = 'less'
-				@owner = owner
-				@attributes = value
+			def add(value)
+				@attributes.push(value)
 			end
 
-			def to_sfp
-				return '< ' + (@attributes.is_a?(Context) ? @attributes.to_sfp : @attributes.to_s)
+			def to_sfp(tab=0)
+				result = 'formula'
+				return result
 			end
 		end
 
-		class ContextLessEquals<ContextKeyword
-			def initialize(owner=nil, value=nil)
-				@name = 'less_equal'
-				@owner = owner
-				@attributes = value
-			end
-
+		class ContextOpNumber<ContextAbstract
 			def to_sfp
-				return '<= ' + (@attributes.is_a?(Context) ? @attributes.to_sfp : @attributes.to_s)
+				return @op + ' ' + (@attributes.is_a?(Context) ? @attributes.to_sfp : @attributes.to_s)
 			end
 		end
 
-		class ContextAdd<ContextKeyword
+		class ContextAdd<ContextOpNumber
 			def initialize(owner=nil, value=nil)
-				@name = 'add'
-				@owner = owner
-				@attributes = value
-			end
-
-			def to_sfp
-				return '+= ' + @attributes.to_s
+				super('add', owner, value, '+')
 			end
 		end
 
-		class ContextSubstract<ContextKeyword
+		class ContextSubstract<ContextOpNumber
 			def initialize(owner=nil, value=nil)
-				@name = 'substract'
-				@owner = owner
-				@attributes = value
-			end
-
-			def to_sfp
-				return '-= ' + @attributes.to_s
+				super('substract', owner, value, '-')
 			end
 		end
 
-		class ContextMultiply<ContextKeyword
+		class ContextMultiply<ContextOpNumber
 			def initialize(owner=nil, value=nil)
-				@name = 'multiply'
-				@owner = owner
-				@attributes = value
-			end
-
-			def to_sfp
-				return '*= ' + @attributes.to_s
+				super('multiply', owner, value, '*')
 			end
 		end
 
-		class ContextDivide<ContextKeyword
+		class ContextDivide<ContextOpNumber
 			def initialize(owner=nil, value=nil)
-				@name = 'divide'
-				@owner = owner
-				@attributes = value
+				super('divide', owner, value, '/')
 			end
+		end
 
-			def to_sfp
-				return '/= ' + @attributes.to_s
+		class ContextGreater<ContextOpNumber
+			def initialize(owner=nil, value=nil)
+				super('greater', owner, value, '>')
+			end
+		end
+
+		class ContextGreaterEquals<ContextOpNumber
+			def initialize(owner=nil, value=nil)
+				super('greater_equals', owner, value, '>=')
+			end
+		end
+
+		class ContextLess<ContextOpNumber
+			def initialize(owner=nil, value=nil)
+				super('less', owner, value, '<')
+			end
+		end
+
+		class ContextLessEquals<ContextOpNumber
+			def initialize(owner=nil, value=nil)
+				super('less_equals', owner, value, '<=')
+			end
+		end
+
+		class ContextBinaryAdd<ContextOpNumber
+			def initialize(owner=nil, value=nil)
+				super('add', owner, value, '+=')
+			end
+		end
+
+		class ContextBinarySubstract<ContextOpNumber
+			def initialize(owner=nil, value=nil)
+				super('substract', owner, value, '-=')
+			end
+		end
+
+		class ContextBinaryMultiply<ContextOpNumber
+			def initialize(owner=nil, value=nil, op='*=')
+				super('multiply', owner, value, '*=')
+			end
+		end
+
+		class ContextBinaryDivide<ContextOpNumber
+			def initialize(owner=nil, value=nil, op='/=')
+				super('divide', owner, value, '/=')
 			end
 		end
 

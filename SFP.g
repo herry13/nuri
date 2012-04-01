@@ -248,9 +248,9 @@ constraint_statement
 			{ @now.set($reference.text, Sfplanner::Lang::ContextGreater.new(@now, $comp_value.value)) }
 	;
 
-comp_value
-	:	INTEGER
-	|	reference
+comp_value returns [ value ]
+	:	INTEGER   { $value = $INTEGER.text.to_i }
+	|	reference { $value = Sfplanner::Lang::Reference.new($reference.text) }
 	;
 
 conditional_constraint
@@ -276,24 +276,53 @@ postcondition_body
 mutation_statement
 	:	reference value { @now.set($reference.text, $value.val) }
 	|	reference NULL  { @now.set($reference.text, Sfplanner::Lang::ContextNull.new('null')) }
-	|	reference '+=' mutation_value
-			{ @now.set($reference.text, Sfplanner::Lang::ContextAdd.new(@now, $mutation_value.value)) }
-	|	reference '-=' mutation_value
-			{ @now.set($reference.text, Sfplanner::Lang::ContextSubstract.new(@now, $mutation_value.value)) }
-	|	reference '*=' mutation_value
-			{ @now.set($reference.text, Sfplanner::Lang::ContextMultiply.new(@now, $mutation_value.value)) }
-	|	reference '/=' mutation_value
-			{ @now.set($reference.text, Sfplanner::Lang::ContextDivide.new(@now, $mutation_value.value)) }
-	|	reference formula // TODO
+	|	reference '+=' formula_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextBinaryAdd.new(@now, $formula_value.value)) }
+	|	reference '-=' formula_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextBinarySubstract.new(@now, $formula_value.value)) }
+	|	reference '*=' formula_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextBinaryMultiply.new(@now, $formula_value.value)) }
+	|	reference '/=' formula_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextBinaryDivide.new(@now, $formula_value.value)) }
+	|	reference formula
+			{ @now.set($reference.text, $formula.value) }
 	;
 
-mutation_value returns [ value ]
+formula_value returns [ value ]
 	:	INTEGER   { $value = $INTEGER.text.to_i }
 	|	reference { $value = Sfplanner::Lang::Reference.new($reference.text) }
 	;
 
 formula returns [ value ]
-	:	mutation_value (formula_op mutation_value)+
+	:	'('
+		{
+			$value = Sfplanner::Lang::ContextFormula.new(@now)
+			@now = $value
+		}
+		formula_value { @now.add( formula_value.value ) }
+		formula_item+
+		{	@now = @now.owner  }
+		')'
+	;
+
+formula_item
+	:	formula_op formula_value
+		{
+			case $formula_op.text
+			when '+'
+				@now.add( Sfplanner::Lang::ContextAdd(@now, $formula_value.value) )
+			when '-'
+				@now.add( Sfplanner::Lang::ContextSubstract(@now, $formula_value.value) )
+			when '*'
+				@now.add( Sfplanner::Lang::ContextMultiply(@now, $formula_value.value) )
+			when '/'
+				@now.add( Sfplanner::Lang::ContextDivide(@now, $formula_value.value) )
+			end
+		}
+	;
+
+formula_op
+	:	'+' | '-' | '*' | '/'
 	;
 
 set_value returns [ val ]
