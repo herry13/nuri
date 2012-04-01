@@ -7,9 +7,10 @@ module Sfplanner
 			
 			def initialize(path='')
 				if path == nil
-					raise
+					path = ''
+				else
+					@path = path.sub(/^\$/, '')
 				end
-				@path = path
 			end
 
 			def append(str)
@@ -55,14 +56,14 @@ module Sfplanner
 			end
 
 			def to_sfp
-				return @path
+				return '$' + @path
 			end
 
 			def to_json
 			end
 
 			def to_s
-				return @path
+				return to_sfp
 			end
 		end
 	end

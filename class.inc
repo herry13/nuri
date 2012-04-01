@@ -62,6 +62,11 @@ class Client extends Machine {
       }
       postcondition {
          $this.refer $s
+	$pc.x5 += 3
+	$pc.x6 -= 3
+	$pc.x7 /= 3
+	$pc.x8 *= 3
+
       }
    }
 }

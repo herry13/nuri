@@ -15,25 +15,46 @@ options {
 
 	attr_accessor :root, :now
 
-	## put these lines into initialize()
+	@anonymous_id
+	@missing_reftype
+
+	# this method should be called first before starting the parser
 	def init
 		@root = Sfplanner::Lang::Context.new("root")
 		@now = @root
+		@missing_reftype = Hash.new
+		@anonymous_id = 0
+	end
+
+	def next_anonymous_id
+		@anonymous_id += 1
+		return @anonymous_id
 	end
 
 	def get_string(str)
 		return str.text[ 1, str.text.length-2 ]
 	end
 
-	def copyXtoY(x, y)
+	def copyXtoY(x, y, is_object=false)
 		x.attributes.each { |key,value|
+			#y.attributes[key] = (value.is_a?(Sfplanner::Lang::Context) ? value.clone : value)
 			y.attributes[key] = value
+			if y.attributes[key].is_a?(Sfplanner::Lang::ContextReferenceType) and is_object #y.is_a?(ContextObject)
+				y.attributes[key] = Sfplanner::Lang::ContextNull(key, y, y.attributes[key].supertype)
+			end
+		}
+	end
+
+	def resolve_missing_reftype
+		@missing_reftype.each { |ref,value|
+			value.supertype = @root.get(ref)
 		}
 	end
 }
 
 sfp
 	:	NL* include* header* (state | composite)?
+		{ resolve_missing_reftype }
 	;
 
 include
@@ -70,7 +91,7 @@ header
 
 state
 	:	{
-			@now.set('init', Sfplanner::Lang::Context.new('init', @now, nil, Sfplanner::Lang::STATE))
+			@now.set('init', Sfplanner::Lang::ContextState.new('init', @now))
 			@now = @now.get('init')
 		}
 		attribute+ constraint*
@@ -84,13 +105,13 @@ composite
 class_definition
 	:	'class' ID
 		{
-			@now.set($ID.text, Sfplanner::Lang::Context.new($ID.text, @now, nil, Sfplanner::Lang::CLASS))
+			@now.set($ID.text, Sfplanner::Lang::ContextClass.new($ID.text, @now))
 			@now = @now.get($ID.text)
 		}
 		(extends_class
 			{
-				@now.super = $extends_class.value
-				copyXtoY(@now.super, @now)
+				@now.supertype = $extends_class.value
+				copyXtoY(@now.supertype, @now)
 			}
 		)?
 		('{' NL* ( attribute | action )* '}')? NL*
@@ -98,36 +119,50 @@ class_definition
 	;
 	
 extends_class returns [ value ]
-	: 'extends' path { $value = @root.get($path.text) }
+	:	'extends' path
+		{
+			c = @root.get($path.text)
+			if c == nil
+				raise 'undefined super class "' + $path.text + '"'
+			else
+				$value = @root.get($path.text)
+			end
+		}
 	;
 
 attribute
 	:	ID
 		(	value { @now.set($ID.text, $value.val) }
-		|	{
-				@now.set($ID.text, Sfplanner::Lang::Context.new($ID.text, @now, nil, Sfplanner::Lang::OBJECT))
-				@now = @now.get($ID.text)
-			}
-			object
-			{	@now = @now.owner  }
 		|	reference_type { @now.set($ID.text, $reference_type.value) }
 		)
 		NL+
+	|	object_def NL+
 	;
 
-object
-  : 'as' path
+object_def
+  : ID 'as' path
 	{
 		c = @root.get($path.text)
-		copyXtoY(c, @now)
-		@now.super = c
+		if c.is_a?(Sfplanner::Lang::ContextClass)
+			@now.set($ID.text, c.new_object($ID.text, @now))
+			@now = @now.get($ID.text)
+		elsif c.is_a?(Sfplanner::Lang::ContextObject)
+			c = c.clone
+			c.name = $ID.text
+			c.owner = @now
+			@now.set($ID.text, c)
+			@now = c
+		else
+			raise 'undefined super class "' + $path.text + '"'
+		end
 	}
 	('{' NL* ( object_attribute | state_dependency )* '}')?
+	{	@now = @now.owner  }
   ;
 
 object_attribute
 	:	attribute
-	|	ID NULL NL+
+	|	ID NULL { @now.set($ID.text, Sfplanner::Lang::ContextNull.new('null', @now)) } NL+
 	;
 
 state_dependency
@@ -145,7 +180,7 @@ dep_condition
 action
 	:	'action' ID
 		{
-			@now.set($ID.text, Sfplanner::Lang::Context.new($ID.text, @now, nil, Sfplanner::Lang::ACTION))
+			@now.set($ID.text, Sfplanner::Lang::ContextAction.new($ID.text, @now))
 			@now = @now.get($ID.text)
 		}
 		parameters? '{' NL* precondition postcondition '}' NL+
@@ -158,12 +193,15 @@ parameters
 	
 parameter
 	:	ID reference_type
+		{
+			@now.set($ID.text, $reference_type.value)
+		}
 	;
 
 precondition
 	:	'precondition'
 		{
-			@now.set('precondition', Sfplanner::Lang::Context.new('precondition', @now, nil, Sfplanner::Lang::PRECONDITION))
+			@now.set('precondition', Sfplanner::Lang::ContextConstraint.new('precondition', @now))
 			@now = @now.get('precondition')
 		}
 		'{' NL* constraint_body '}' NL+
@@ -173,7 +211,7 @@ precondition
 postcondition
 	:	'postcondition'
 		{
-			@now.set('postcondition', Sfplanner::Lang::Context.new('postcondition', @now, nil, Sfplanner::Lang::POSTCONDITION))
+			@now.set('postcondition', Sfplanner::Lang::ContextMutation.new('postcondition', @now))
 			@now = @now.get('postcondition')
 		}
 		'{' NL* postcondition_body '}' NL+
@@ -183,10 +221,9 @@ postcondition
 constraint
 	:	'constraint' ID 
 		{
-			@now.set($ID.text, Sfplanner::Lang::Context.new($ID.text, @now, nil, Sfplanner::Lang::CONSTRAINT))
+			@now.set($ID.text, Sfplanner::Lang::ContextConstraint.new($ID.text, @now))
 			@now = @now.get($ID.text)
 		}
-	
 		'{' NL* constraint_body '}' NL+
 		{ @now = @now.owner }
 	;
@@ -197,24 +234,39 @@ constraint_body
 
 constraint_statement
 	:	reference value { @now.set($reference.text, $value.val) }
-	|	reference NULL
-	|	reference 'not' value
-	|	reference 'in' set
-	|	reference binary_comp binary_comp_value
+	|	reference NULL  { @now.set($reference.text, Sfplanner::Lang::ContextNull.new('null', @now)) }
+	|	reference 'not' value { @now.set($reference.text, Sfplanner::Lang::ContextNot.new(@now, $value.val)) }
+	|	reference 'in' set_value { @now.set($reference.text, Sfplanner::Lang::ContextIn.new(@now, $set_value.val)) }
 	|	conditional_constraint
+	|	reference '<' comp_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextLess.new(@now, $comp_value.value)) }
+	|	reference '<=' comp_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextLessEquals.new(@now, $comp_value.value)) }
+	|	reference '>=' comp_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextGreaterEquals.new(@now, $comp_value.value)) }
+	|	reference '>' comp_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextGreater.new(@now, $comp_value.value)) }
 	;
 
-binary_comp_value
-	:	NUMBER
+comp_value
+	:	INTEGER
 	|	reference
 	;
 
 conditional_constraint
-	:	'if' constraint_statement NL* conditional_constraint_then
+	:	'if'
+		{
+			id = next_anonymous_id.to_s
+			@now.set(id, Sfplanner::Lang::ContextConditional.new(@now))
+			@now = @now.get(id)
+			@now.if_clause = true
+		}
+		constraint_statement NL* conditional_constraint_then
+		{	@now = @now.owner  }
 	;
 
 conditional_constraint_then
-	:	'then' constraint_statement
+	:	'then' { @now.if_clause = false } constraint_statement
 	;
 
 postcondition_body
@@ -222,33 +274,51 @@ postcondition_body
 	;
 
 mutation_statement
-	:	reference value
-	|	reference NULL
-	|	reference binary_op binary_op_value
+	:	reference value { @now.set($reference.text, $value.val) }
+	|	reference NULL  { @now.set($reference.text, Sfplanner::Lang::ContextNull.new('null')) }
+	|	reference '+=' mutation_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextAdd.new(@now, $mutation_value.value)) }
+	|	reference '-=' mutation_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextSubstract.new(@now, $mutation_value.value)) }
+	|	reference '*=' mutation_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextMultiply.new(@now, $mutation_value.value)) }
+	|	reference '/=' mutation_value
+			{ @now.set($reference.text, Sfplanner::Lang::ContextDivide.new(@now, $mutation_value.value)) }
+	|	reference formula // TODO
 	;
 
-binary_op_value
-	:	reference
-	|	NUMBER
+mutation_value returns [ value ]
+	:	INTEGER   { $value = $INTEGER.text.to_i }
+	|	reference { $value = Sfplanner::Lang::Reference.new($reference.text) }
 	;
 
-set
-	:	'(' ( set_value (',' set_value)* )? ')'
+formula returns [ value ]
+	:	mutation_value (formula_op mutation_value)+
 	;
 
-set_value
-	:	value
+set_value returns [ val ]
+	:	{
+			$val = Sfplanner::Lang::ContextSet.new(@now)
+			@now = $val
+		}
+		'(' ( set_item (',' set_item)* )? ')'
+		{	@now = @now.owner  }
+	;
+
+set_item
+	:	value { @now.add($value.val) }
 	;
 
 value returns [ val ]
 	:	primitive_value { $val = $primitive_value.value }
 	|	reference { $val = Sfplanner::Lang::Reference.new($reference.text) }
-	|	set
+	|	set_value { $val = $set_value.val }
 	;
 
 primitive_value returns [ value ]
-	:	BOOLEAN { $value = ($BOOLEAN.text == '"true"' ? true : false ) }
-	|	NUMBER  { $value = $NUMBER.text.to_i }
+	:	BOOLEAN { $value = ($BOOLEAN.text == 'true' ? true : false ) }
+	|	INTEGER { $value = $INTEGER.text.to_i }
+	|	FLOAT   { $value = $FLOAT.text.to_f }
 	|	STRING  { $value = $STRING.text[ 1, $STRING.text.length-2 ] }
 	;
 
@@ -261,7 +331,15 @@ reference
 	;
 
 reference_type returns [ value ]
-	:	'as' '*'path { $value = Sfplanner::Lang::Context.new('null', @now, @root.get($path.text), Sfplanner::Lang::REFERENCE_TYPE) }
+	:	'as' '*'path
+		{
+			$value = Sfplanner::Lang::ContextReferenceType.new('null', @now, @root.get($path.text))
+			if $value.supertype == nil
+				@missing_reftype[$path.text] = $value
+				#raise 'error undefine class "' + $path.text + '"'
+			end
+			#puts $path.text + " :: " + @root.get($path.text).to_s
+		}
 	;
 
 binary_op
@@ -290,9 +368,12 @@ BOOLEAN
 ID  :	('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')*
     ;
 
-NUMBER
+INTEGER
     :   '-'?'0'..'9'+
-    |   '-'?('0'..'9')+ '.' ('0'..'9')* EXPONENT?
+	;
+
+FLOAT
+    :   '-'?('0'..'9')+ '.' ('0'..'9')* EXPONENT?
     |   '-'?'.' ('0'..'9')+ EXPONENT?
     |   '-'?('0'..'9')+ EXPONENT
     ;

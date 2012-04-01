@@ -1,5 +1,6 @@
 #include file("class.inc")
-machine1 as VM {
+
+/*machine1 as VM {
    name       "Machine #1"
    running    true
    ipAddress  "10.0.0.11"
@@ -22,12 +23,22 @@ web2 as Service {
    on      $machine2
 }
 web3 as Service
-
+*/
 pc as Client {
    name      "PC Client"
    running   true
    ipAddress "10.0.0.20"
    refer     $web1
+
+	/*action test {
+		precondition { }
+		postcondition {
+			$pc.x5 += 3
+			$pc.x6 -= 3
+			$pc.x7 /= 3
+			$pc.x8 *= 3
+		}
+	}*/
 }
 constraint goal {
    $machine1.running false
@@ -36,6 +47,12 @@ constraint global {
    $pc.refer.running true
 }
 
-//constraint final {
-//	$pc.refer in ($web1, web2)
-//}
+constraint final {
+	$pc.x1 > 3
+	$pc.x2 >= 3
+	$pc.x3 < 3
+	$pc.x4 <= 3
+	if $pc.refer $web1 then $web1.running true
+	$pc.name not $web3
+	$pc.refer in ($web1, $web2)
+}
