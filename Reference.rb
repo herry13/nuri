@@ -15,8 +15,11 @@ module Sfplanner
 
 			def append(str)
 				if str.is_a?(String)
-					@path = @path + '.' + str
+					ref = self.clone
+					ref.path = @path + '.' + str
+					return ref
 				end
+				return nil
 			end
 
 			def get_next

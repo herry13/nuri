@@ -58,6 +58,11 @@ module Sfplanner
 				end
 			end
 
+			def remove(key)
+				@attributes[key].owner = nil
+				return @attributes.delete(key)
+			end
+
 			def get_root
 				if @owner == nil
 					return self
@@ -66,6 +71,12 @@ module Sfplanner
 			end
 
 			def accept(visitor)
+				if @attributes.is_a?(Hash)
+					ref = self.get_reference
+					@attributes.each { |key,value|
+						visitor.visit(ref.append(key), value)
+					}
+				end
 			end
 
 			def clone
@@ -119,6 +130,8 @@ module Sfplanner
 		end
 
 		class ContextVisitor #TODO
+			def accept(ref, value)
+			end
 		end
 
 		class ContextState<Context

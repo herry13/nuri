@@ -7,6 +7,7 @@ module Sfplanner
 	module Planner
 		class ContextToSAS
 			attr_accessor :sas, :root, :variables, :types, :var_id, :use_cost
+			attr_accessor :init, :goal, :global, :final, :types, :variables, :actions
 
 			def initialize(context)
 				@root = context
@@ -15,7 +16,11 @@ module Sfplanner
 				@var_id = 0
 				@use_cost = false
 
-				preprocess
+				@types = Hash.new
+				@variables = Hash.new
+				@actions = Hash.new
+
+				processContext
 				generate_sas
 			end
 
@@ -67,7 +72,24 @@ module Sfplanner
 				return sas
 			end
 
-			def preprocess #TODO
+			# a method to translator Context into SAS+
+			def processContext
+				# TODO
+
+				# 1) populate type values
+
+				@init = @root.remove('init')
+				@goal = @init.remove('goal')
+				@global = @init.remove('global')
+				@final = @init.remove('final')
+
+				# 2) populate variables
+				populateVariables
+			end
+
+			def populateVariables
+				visitor = VariableCollector.new
+				@init.accept(visitor)
 			end
 
 			def get_variable(name)
@@ -82,6 +104,20 @@ module Sfplanner
 				var = Variable.new(@var_id, name, type, layer)
 				@var_id += 1
 				return var
+			end
+		end
+
+		class VariableCollector < Sfplanner::Lang::ContextVisitor
+			def visit(ref, value)
+				if value.is_a?(Sfplanner::Lang::ContextAction)
+				else
+					puts ref.to_sfp + " := " + value.to_s + " :: " + value.class.to_s
+					if value.is_a?(Sfplanner::Lang::Context)
+						value.accept(self)
+					elsif value.is_a?(Sfplanner::Lang::Reference)
+					else
+					end
+				end
 			end
 		end
 
