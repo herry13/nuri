@@ -4,6 +4,12 @@ require 'Reference'
 
 module Sfplanner
 	module Lang
+		TYPE_BOOLEAN = 'org.sfplanner.lang.Boolean'
+		TYPE_INTEGER = 'org.sfplanner.lang.Integer'
+		TYPE_FLOAT = 'org.sfplanner.lang.Float'
+		TYPE_STRING = 'org.sfplanner.lang.String'
+		TYPE_OBJECT = 'org.sfplanner.lang.Object'
+
 		class Context
 			attr_accessor :name, :owner, :supertype, :attributes
 			
@@ -18,7 +24,7 @@ module Sfplanner
 				if owner != nil
 					return owner.get_reference.append(@name)
 				end
-				return Sfplanner::Lang::Reference.new(name)
+				return Sfplanner::Lang::Reference.new(ROOT)
 			end
 
 			def has(key)
@@ -31,7 +37,7 @@ module Sfplanner
 				end
 			end
 
-			def get(ref)
+			def get(ref, lazy=true)
 				if ref.is_a?(Reference)
 					
 					if ref.path == nil or ref.path.length <= 0
@@ -40,13 +46,13 @@ module Sfplanner
 
 					first = ref.get_first
 					if first == 'parent'
-						return @owner.get(ref.get_next_reference)
+						return @owner.get(ref.get_next_reference, lazy)
 					elsif first == 'root'
-						return get_root.get(ref.get_next_reference)
+						return get_root.get(ref.get_next_reference, lazy)
 					else
-						value = get(first)
+						value = get(first, lazy)
 						if value.is_a?(Context)
-							return value.get(ref.get_next_reference)
+							return value.get(ref.get_next_reference, lazy)
 						end
 						ref = ref.get_next_reference
 						if ref.path == nil or ref.path.length <= 0
@@ -59,7 +65,10 @@ module Sfplanner
 			end
 
 			def remove(key)
-				@attributes[key].owner = nil
+				value = get(key)
+				if value != nil && value.is_a?(Context)
+					value.owner = nil
+				end
 				return @attributes.delete(key)
 			end
 
@@ -91,7 +100,12 @@ module Sfplanner
 				ts = tabspace(tab)
 				result = ''
 				@attributes.each { |key,value|
-					if value.is_a?(ContextReferenceType) or value.is_a?(ContextNull) or value.is_a?(ContextIn) or value.is_a?(ContextSet) or value.is_a?(ContextAbstract)
+					if value.is_a?(ContextReferenceType) or
+						value.is_a?(ContextNull) or
+						value.is_a?(ContextIn) or
+						value.is_a?(ContextSet) or
+						value.is_a?(ContextAbstract)
+
 						result += ts + key + ' ' + value.to_sfp + "\n"
 					elsif value.is_a?(Context)
 						result += value.to_sfp(tab)
@@ -166,6 +180,13 @@ module Sfplanner
 		end
 
 		class ContextObject<Context
+			attr_accessor :is_pointers
+
+			def initialize(name, owner=nil, supertype=nil)
+				super(name, owner, supertype)
+				@is_pointers = Hash.new
+			end
+
 			def to_sfp(tab=0)
 				ts = tabspace(tab)
 				result = ts + @name + ' as ' + @supertype.to_s + " {\n"

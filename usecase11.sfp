@@ -1,0 +1,58 @@
+// classes
+class Service {
+	name	""
+	running	false
+}
+
+class Client {
+	refer as *Service
+}
+
+// actions
+action startService(s as *Service) {
+	precondition { }
+	postcondition {
+		$s.running true
+	}
+}
+
+action stopService(s as *Service) {
+	precondition { }
+	postcondition {
+		$s.running false
+	}
+}
+
+action changeReference(c as *Client, s as *Service) {
+	precondition {	}
+	postcondition {
+		$c.refer $s
+	}
+}
+
+// initial state
+a as Service {
+	name	"A"
+	running	true
+}
+
+b as Service {
+	name	"B"
+	running	false
+}
+
+c as Client {
+	refer $root.a   // $a is a reference to service 'a'
+}
+
+// goal state
+constraint goal {
+	$c.refer	$c.refer // $b     // $b is a reference to service 'b'
+	$a.running	false
+}
+
+// global constraint
+constraint global {
+	$c.refer.running true  // 'c' must always refer to a running service
+	                       // in PDDL: (forall (s? - service) (imply (refer c s?) (running ?s)))
+}

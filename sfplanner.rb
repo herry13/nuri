@@ -7,9 +7,10 @@ require 'Reference'
 require 'ContextToSAS'
 
 #sfpfile = 'problem.sfp'
-sfpfile = 'problem3.sfp'
+#sfpfile = 'problem3.sfp'
 #sfpfile = 'problem4.sfp'
 #sfpfile = 'class.inc'
+sfpfile = 'usecase11.sfp'
 
 translator = Sfplanner::Lang::Translator.new
 context = translator.sfpToContext(sfpfile)

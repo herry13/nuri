@@ -2,6 +2,10 @@
 
 module Sfplanner
 	module Lang
+			PREFIX = '$'
+			ROOT = "root"
+			PARENT = "parent"
+	
 		class Reference
 			attr_accessor :path
 			
@@ -13,10 +17,24 @@ module Sfplanner
 				end
 			end
 
-			def append(str)
-				if str.is_a?(String)
+			def total_parts
+				parts = path.split('.')
+				return parts.length
+			end
+
+			def strip_prefix_root
+				path = @path.sub(/^\$?root\.?/, '')
+				return Reference.new(path)
+			end
+
+			def append(val)
+				if val.is_a?(String)
 					ref = self.clone
-					ref.path = @path + '.' + str
+					ref.path = @path + '.' + val
+					return ref
+				elsif val.is_a?(Reference)
+					ref = self.clone
+					ref.path = @path + '.' + val.path
 					return ref
 				end
 				return nil
