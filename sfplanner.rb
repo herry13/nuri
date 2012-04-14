@@ -14,10 +14,10 @@ sfpfile = 'usecase11.sfp'
 
 translator = Sfplanner::Lang::Translator.new
 context = translator.sfpToContext(sfpfile)
-puts context.to_sfp
+#puts context.to_sfp
 
 csas = Sfplanner::Planner::ContextToSAS.new(context)
-puts csas.sas
+#puts csas.sas
 
-ref = Sfplanner::Lang::Reference.new('$init.machine1.parent.machine2.hasService')
+#ref = Sfplanner::Lang::Reference.new('$init.machine1.parent.machine2.hasService')
 #puts context.get(ref)

@@ -41,18 +41,22 @@ b as Service {
 	running	false
 }
 
-c as Client {
+c1 as Client {
 	refer $root.a   // $a is a reference to service 'a'
+}
+c2 as Client {
+	refer $root.a
 }
 
 // goal state
 constraint goal {
-	$c.refer	$c.refer // $b     // $b is a reference to service 'b'
+	$c1.refer	$b     // $b is a reference to service 'b'
 	$a.running	false
+	//$c1.refer
 }
 
 // global constraint
 constraint global {
-	$c.refer.running true  // 'c' must always refer to a running service
+	$c1.refer.running true  // 'c' must always refer to a running service
 	                       // in PDDL: (forall (s? - service) (imply (refer c s?) (running ?s)))
 }

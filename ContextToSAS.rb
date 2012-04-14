@@ -45,6 +45,9 @@ module Sfplanner
 
 			def variables_to_sas #TODO
 				sas = ''
+				@variables.each { |name,var|
+					sas += var.to_sas
+				}
 				return sas
 			end
 
@@ -90,18 +93,42 @@ module Sfplanner
 
 				# 4) for each variable, set its goal value
 				setVariablesGoalValue(@goal)
+				setVariablesGoalValue(@global)
 
+				puts "\n>> variables:"
 				@variables.each { |key,var| puts var.to_s }
 			end
 
 			def setVariablesGoalValue(goal)
 				goal.attributes.each { |key,value|
 					ref = Sfplanner::Lang::Reference.new(key).strip_prefix_root
-					if @variables.has_key?(ref.to_sfp)
-						puts "\t>> " + ref.to_s
-						@variables[ref.to_sfp].goal = value
-						create_axioms(ref, value)
+					
+					if value.is_a?(Sfplanner::Lang::Reference)
+						if @variables.has_key?(ref.to_sfp)
+						else
+						end
+					else # the value is not a reference
+						if @variables.has_key?(ref.to_sfp)
+							@variables[ref.to_sfp].goal = value
+						else
+							create_axioms(ref, value)
+						end
 					end
+					
+					#create_axioms(ref, value)
+					puts '<<-- ' + ref.to_s + " := " + value.to_s + "\n"
+
+=begin					
+					if @variables.has_key?(ref.to_sfp)
+						if value.is_a?(Sfplanner::Lang::Reference)
+							value = @init.get(value ,false)
+						end
+						#@variables[ref.to_sfp].goal = value
+						axioms = create_axioms(ref, value)
+					else
+						puts "undefined: " + ref.to_sfp
+					end
+=end
 				}
 			end
 
@@ -115,40 +142,42 @@ module Sfplanner
 				# - $x not in Set
 				if value != nil
 					if not value.is_a?(Sfplanner::Lang::Reference)
-						left = get_particles(ref, value)
+						left = get_molecules(ref, value)
 						left.each { |p| puts ">> " + p.to_s }
+						
 					else
-						left = get_particles(ref)
-						right = get_particles(value)
+						left = get_molecules(ref)
+						right = get_molecules(value)
+						
 						left.each { |p| puts ">> " + p.to_s }
 						right.each { |p| puts ">>>> " + p.to_s }
 					end
 				end
 			end
-
-			def cross_particles(p1, p2)
-				p = Particle.new
+=begin
+			def cross_molecules(p1, p2)
+				p = Molecule.new
 				p1.each { |a| p.add(a) }
 				p2.each { |a| p.add(a) }
 			end
-
-			def get_particles(ref, value=nil)
+=end
+			def get_molecules(ref, value=nil)
 				bucket = Set.new
 				total = ref.total_parts
 				names = Array.new(total)
 				values = Array.new(total)
 				values[total-1] = value
-				generate_particles(bucket, ref, names,values, 0, total)
+				generate_molecules(bucket, ref, names,values, 0, total)
 				return bucket
 			end
 
-			def generate_particles(bucket, ref, names, values, index, max)
+			def generate_molecules(bucket, ref, names, values, index, max)
 				if index >= max
-					particle = Particle.new
+					molecule = Molecule.new
 					(0..max-1).each { |i|
-						particle.add( Atom.new( @variables[names[i]], values[i] ) )
+						molecule.add( Atom.new( @variables[names[i]], values[i] ) )
 					}
-					bucket.add(particle)
+					bucket.add(molecule)
 					return
 				end
 				names[index] = ref.get_first
@@ -160,17 +189,17 @@ module Sfplanner
 
 				nextref = ref.get_next_reference
 				if values[index] != nil
-					generate_particles(bucket, nextref, names, values, index+1, max)
+					generate_molecules(bucket, nextref, names, values, index+1, max)
 				else
 					val = @init.get( Sfplanner::Lang::Reference.new(names[index]) )
 					if val.is_a?(Sfplanner::Lang::ContextObject)
 						values[index] = val
-						generate_particles(bucket, nextref, names, values, index+1, max)
+						generate_molecules(bucket, nextref, names, values, index+1, max)
 					else
 						var = @variables[ names[index] ]
-						@types[ var.type ].each { |val|
+						var.values.each { |val|
 							values[index] = val
-							generate_particles(bucket, nextref, names, values, index+1, max)
+							generate_molecules(bucket, nextref, names, values, index+1, max)
 						}
 					end
 				end
@@ -194,6 +223,14 @@ module Sfplanner
 			def populateVariables
 				visitor = VariableCollector.new(self, @init)
 				@init.accept(visitor)
+				@variables.each { |name,var|
+					value = @init.get(Sfplanner::Lang::Reference.new(name))
+					if value.is_a?(Sfplanner::Lang::Reference)
+						var.values = @types[var.type]
+					else
+						var.values = Array[value]
+					end
+				}
 			end
 
 			def get_variable(name)
@@ -211,11 +248,6 @@ module Sfplanner
 
 			def register_variable(root, ref, init, goal=nil)
 				if get_variable(ref.to_s) == nil
-					#if init_value.is_a?(Sfplanner::Lang::Reference)
-					#	type = get_type( root.get(init_value) );
-					#else
-					#	type = get_type(init_value)
-					#end
 					if init.is_a?(Sfplanner::Lang::Reference)
 						init = root.get( init, false )
 					end
@@ -247,11 +279,20 @@ module Sfplanner
 			end
 		end
 
-		class Particle < Set
-			def combine(particle)
-				p = Particle.new
+		class Molecule < Set
+			def to_axiom(variable, preValue, postValue)
+				@variable = variable
+				effect = Condition.new(variable, preValue, postValue)
+				axiom = Axiom.new(effect)
+				self.each { |atom|
+					axiom.conditions.push( atom.to_condition )
+				}
+			end
+		
+			def combine(molecule)
+				p = Molecule.new
 				self.each { |a| p.add(a) }
-				particle.each { |b| p.add(b) }
+				molecule.each { |b| p.add(b) }
 				return p
 			end
 
@@ -262,12 +303,35 @@ module Sfplanner
 			end
 		end
 
+		class Axiom
+			attr_accessor :conditions, :effect
+
+			def initialize(effect=nil)
+				@conditions = Array.new
+				@effect = effect
+			end
+
+			def to_sas
+				sas = "begin_rule\n"
+				@conditions.each { |param|
+					sas += param.to_sas + "\n"
+				}
+				sas += @effect.to_sas + "\n"
+				sas += "end_rule\n"
+				return sas
+			end
+		end
+
 		class Atom
 			attr_accessor :variable, :value
 
 			def initialize(var, val)
 				@variable = var
 				@value = val
+			end
+
+			def to_condition
+				return Condition.new(@variable, @value)
 			end
 
 			def to_s
@@ -362,7 +426,7 @@ module Sfplanner
 				sas = "begin_variable\n"
 				sas += @name + "\n"
 				sas += @layer.to_s + "\n"
-				sas += @values.size + "\n"
+				sas += @values.size.to_s + "\n"
 				@values.each { |value|
 					sas += value.to_s + "\n"
 				}
@@ -410,27 +474,14 @@ module Sfplanner
 			end
 		end
 
-		class Axiom
-			attr_accessor :conditions, :effect
-
-			def initialize(effect=nil)
-				@conditions = Array.new
-				@effect = effect
-			end
-
-			def to_sas
-				sas = "begin_rule\n"
-				@conditions.each { |param|
-					sas += param.to_sas + "\n"
-				}
-				sas += @effect.to_sas + "\n"
-				sas += "end_rule\n"
-				return sas
-			end
-		end
-
 		class Condition
 			attr_accessor :variable, :pre, :post
+			
+			def initialize(variable, preValue, postValue=nil)
+				@variable = variable
+				@pre = preValue
+				@post = postValue
+			end
 			
 			def is_prevail?
 				return ( @post == nil )
