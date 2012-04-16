@@ -146,6 +146,11 @@ module Sfplanner
 						left.each { |p| puts ">> " + p.to_s }
 						
 					else
+						# left = X
+						# right = X
+						# X = values of type(left and right)
+						# left cross right and remove inconsistent molecule
+					
 						left = get_molecules(ref)
 						right = get_molecules(value)
 						
