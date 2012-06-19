@@ -7,7 +7,8 @@ module Sfplanner
 	module Planner
 		class ContextToSAS
 			attr_accessor :sas, :root, :variables, :types, :var_id, :use_cost
-			attr_accessor :init, :goal, :global, :final, :types, :variables, :actions
+			attr_accessor :init, :goal, :global, :final
+			attr_accessor :types, :variables, :actions, :axioms
 
 			def initialize(context)
 				@root = context
@@ -19,6 +20,7 @@ module Sfplanner
 				@types = Hash.new
 				@variables = Hash.new
 				@actions = Hash.new
+				@axioms = Array.new
 
 				processContext
 				generate_sas
@@ -114,21 +116,7 @@ module Sfplanner
 							create_axioms(ref, value)
 						end
 					end
-					
-					#create_axioms(ref, value)
 					puts '<<-- ' + ref.to_s + " := " + value.to_s + "\n"
-
-=begin					
-					if @variables.has_key?(ref.to_sfp)
-						if value.is_a?(Sfplanner::Lang::Reference)
-							value = @init.get(value ,false)
-						end
-						#@variables[ref.to_sfp].goal = value
-						axioms = create_axioms(ref, value)
-					else
-						puts "undefined: " + ref.to_sfp
-					end
-=end
 				}
 			end
 
@@ -142,9 +130,12 @@ module Sfplanner
 				# - $x not in Set
 				if value != nil
 					if not value.is_a?(Sfplanner::Lang::Reference)
-						left = get_molecules(ref, value)
-						left.each { |p| puts ">> " + p.to_s }
-						
+						var = register_axiom_variable(ref.to_s)
+            get_molecules(ref, value).each { |m|
+              axiom = m.to_axiom(var, false, true)
+              axioms.push(axiom)
+              puts ">> " + m.to_s + "\n" + axiom.to_sas
+            }
 					else
 						# left = X
 						# right = X
@@ -245,21 +236,32 @@ module Sfplanner
 				return nil
 			end
 
+      def register_variable(root, ref, init, goal=nil)
+        if get_variable(ref.to_s) == nil
+          if init.is_a?(Sfplanner::Lang::Reference)
+            init = root.get( init, false )
+          end
+          type = get_type( init )
+          var = new_variable(ref.to_sfp, init, goal, type)
+          @variables[var.name] = var
+          return var
+        end
+        return nil
+      end
+      
+      def register_axiom_variable(name=nil, init=false, goal=true)
+        if name == nil
+          name = "axiom_" + @var_id.to_s
+        end
+        var = new_variable(name, init, goal, Sfplanner::Lang::TYPE_BOOLEAN, 1)
+        @variables[var.name] = var
+        return var
+      end
+      
 			def new_variable(name, init=nil, goal=nil, type=nil, layer=-1)
 				var = Variable.new(@var_id, name, init, goal, type, layer)
 				@var_id += 1
 				return var
-			end
-
-			def register_variable(root, ref, init, goal=nil)
-				if get_variable(ref.to_s) == nil
-					if init.is_a?(Sfplanner::Lang::Reference)
-						init = root.get( init, false )
-					end
-					type = get_type( init )
-					var = new_variable(ref.to_sfp, init, goal, type)
-					@variables[var.name] = var
-				end
 			end
 
 			def add_type_value(type, value)
@@ -287,11 +289,12 @@ module Sfplanner
 		class Molecule < Set
 			def to_axiom(variable, preValue, postValue)
 				@variable = variable
-				effect = Condition.new(variable, preValue, postValue)
+				effect = Parameter.new(variable, preValue, postValue)
 				axiom = Axiom.new(effect)
 				self.each { |atom|
 					axiom.conditions.push( atom.to_condition )
 				}
+				return axiom
 			end
 		
 			def combine(molecule)
@@ -324,23 +327,6 @@ module Sfplanner
 				sas += @effect.to_sas + "\n"
 				sas += "end_rule\n"
 				return sas
-			end
-		end
-
-		class Atom
-			attr_accessor :variable, :value
-
-			def initialize(var, val)
-				@variable = var
-				@value = val
-			end
-
-			def to_condition
-				return Condition.new(@variable, @value)
-			end
-
-			def to_s
-				return variable.name + "=" + value.to_s
 			end
 		end
 
@@ -479,7 +465,7 @@ module Sfplanner
 			end
 		end
 
-		class Condition
+		class Parameter
 			attr_accessor :variable, :pre, :post
 			
 			def initialize(variable, preValue, postValue=nil)
