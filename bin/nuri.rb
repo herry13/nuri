@@ -1,26 +1,50 @@
 #!/usr/bin/env ruby
 
-module_dir = File.join(File.dirname(__FILE__), '../modules')
-$LOAD_PATH.unshift( module_dir )
-
 require 'rubygems'
 require 'mongrel'
 require 'json'
+require 'pp'
 
 class Daemon < Mongrel::HttpHandler
-	attr_accessor :mods
+	attr_accessor :modules, :config, :http
 
 	def initialize
-		@mods = Array.new()
+		@modules = Array.new()
+		self.loadModules
+	end
+
+	def loadModules
+		# load installed modules
+		modules_dir = File.join(File.dirname(__FILE__), '../modules')
+		Dir.foreach(modules_dir) { |mod|
+			modpath = modules_dir + "/" + mod
+			if File.directory?(modpath) and File.file?(modpath + "/main.rb")
+				require mod + "/main"
+				m =  eval(mod.capitalize + "::Main.new")
+				@modules << m
+			end
+		}
+	end
+
+	def start
+		@config = JSON.parse(File.read(File.join(File.dirname(__FILE__), '../etc/config.json')))
+		@http = Mongrel::HttpServer.new(@config['host'], @config['port'])
+		@http.register("/", self)
+		@http.run.join
+		puts "Start server on " + @config['host'] + ":" + @config['port'].to_s
 	end
 
 	def process(req, res)
-		self.getState(req, res)
+		if req.params['REQUEST_METHOD'] == 'GET'
+			self.get(req, res)
+		else req.params['REQUEST_METHOD'] == 'POST'
+			self.set(req, res)
+		end
 	end
 
-	def getState(req, res)
+	def get(req, res)
 		data = ''
-		@mods.each { |m|
+		@modules.each { |m|
 			data += JSON.generate(m.getState)
 		}
 
@@ -29,20 +53,14 @@ class Daemon < Mongrel::HttpHandler
 			out.write(data)
 		end
 	end
+
+	def set(req, res)
+		res.start(200) do |head, out|
+			head["Content-Type"] = "plain/text"
+			out.write('')
+		end
+	end
 end
 
 daemon = Daemon.new
-
-# load installed modules
-Dir.foreach(module_dir) { |mod|
-	modpath = module_dir + "/" + mod
-	if File.directory?(modpath) and File.file?(modpath + "/main.rb")
-		require mod + "/main"
-		m =  eval(mod.capitalize + "::Main.new")
-		daemon.mods << m
-	end
-}
-
-h = Mongrel::HttpServer.new("0.0.0.0", "8080")
-h.register("/", daemon)
-h.run.join
+daemon.start

@@ -3,9 +3,31 @@ require 'json'
 
 module Apache
 	class Main
+		attr_accessor :state
+
+		def initialize
+			@state = JSON['{"apache":{"_isa":"Apache"}}']
+		end
+
 		def getState
-			data = JSON '{"apache": {"_isa": "Apache"}}'
-			return data
+			data = `/usr/bin/sudo /bin/rpm -qa httpd`
+			@state["apache"]["installed"] = ( (data =~ /httpd/) != nil )
+			if @state["apache"]["installed"]
+				data = `/usr/bin/sudo /sbin/service httpd status`
+				@state["apache"]["running"] = ( (data =~ /.*running.*/) != nil )
+			else
+				@state["apache"]["running"] = false
+			end
+
+			data = `/usr/bin/sudo /bin/grep -e "^Listen " /etc/httpd/conf/httpd.conf`
+			if data.length > 0
+				data = data.split(' ')
+				@state["apache"]["port"] = data[1].to_i
+			else
+				@stata["apache"]["port"] = 80
+			end
+
+			return @state
 		end
 	end
 end
