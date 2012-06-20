@@ -24,7 +24,15 @@ module Apache
 				data = data.split(' ')
 				@state["apache"]["port"] = data[1].to_i
 			else
-				@stata["apache"]["port"] = 80
+				@state["apache"]["port"] = 80
+			end
+
+			data = `/usr/bin/sudo /bin/grep -e "^DocumentRoot " /etc/httpd/conf/httpd.conf`
+			if data.length > 0
+				data = data.split(' ')
+				@state["apache"]["document_root"] = data[0].sub(/"/, '')
+			else
+				@state["apache"]["document_root"] = ""
 			end
 
 			return @state

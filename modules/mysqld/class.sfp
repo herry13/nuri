@@ -1,0 +1,6 @@
+class Mysqld {
+	installed is false
+	running is false
+	port is 3306
+	admin_password is ""
+}

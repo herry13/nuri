@@ -1,0 +1,6 @@
+class Apache {
+	installed is false
+	running is false
+	port is 80
+	document_root is "/var/www/html"
+}
