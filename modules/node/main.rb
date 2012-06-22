@@ -8,7 +8,8 @@ module Node
 		def initialize
 			@state = JSON['{}']
 			data = `/bin/hostname`
-			data = '"' + data.strip + '"'
+			data.strip!
+			data = '"' + data + '"' if ((data =~ /\./) != nil)
 			@state[data] = JSON['{"_isa":"Node"}']
 		end
 

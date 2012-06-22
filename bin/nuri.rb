@@ -19,7 +19,7 @@ class Daemon < Mongrel::HttpHandler
 		Dir.foreach(modules_dir) { |mod|
 			modpath = modules_dir + "/" + mod
 			if File.directory?(modpath) and File.file?(modpath + "/main.rb")
-				require mod + "/main"
+				require modpath + "/main"
 				m =  eval(mod.capitalize + "::Main.new")
 				@modules << m
 			end
@@ -30,8 +30,8 @@ class Daemon < Mongrel::HttpHandler
 		@config = JSON.parse(File.read(File.join(File.dirname(__FILE__), '../etc/config.json')))
 		@http = Mongrel::HttpServer.new(@config['host'], @config['port'])
 		@http.register("/", self)
-		@http.run.join
 		puts "Start server on " + @config['host'] + ":" + @config['port'].to_s
+		@http.run.join
 	end
 
 	def process(req, res)
