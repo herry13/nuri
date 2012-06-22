@@ -40,7 +40,7 @@ module Apache
 				data = (File.file?("/etc/httpd/conf/httpd.conf") ? `/bin/grep -e "^DocumentRoot " /etc/httpd/conf/httpd.conf` : "")
 				if data.length > 0
 					data = data.split(' ')
-					@state["apache"]["document_root"] = data[0].sub(/"/, '')
+					@state["apache"]["document_root"] = data[1].sub(/"/, '')
 				else
 					@state["apache"]["document_root"] = ""
 				end
@@ -55,7 +55,7 @@ module Apache
 					@state["apache"]["running"] = false
 				end
 				# port
-				data = `/bin/grep -e "^Listen " /etc/apache2/ports.conf`
+				data = (File.file?("/etc/apache2/ports.conf") ? `/bin/grep -e "^Listen " /etc/apache2/ports.conf` : "")
 				if data.length > 0
 					data = data.split(' ')
 					@state["apache"]["port"] = data[1].to_i
@@ -63,12 +63,10 @@ module Apache
 					@state["apache"]["port"] = 80
 				end
 				# document root
-				data = `/bin/grep -e "DocumentRoot " /etc/apache2/sites-available/default`
-puts data
+				data = (File.file?("/etc/apache2/sites-available/default") ? `/bin/grep -e "DocumentRoot " /etc/apache2/sites-available/default` : "")
 				if data.length > 0
 					data.strip!
-					data = data.split(' ')
-puts data[0] + " -- " + data[1]
+					data = data.strip.split(' ')
 					@state["apache"]["document_root"] = data[1]
 				else
 					@state["apache"]["docment_root"] = ""
