@@ -3,17 +3,27 @@ require 'json'
 
 module Node
 	class Main
-		attr_accessor :state
+		attr_accessor :state, :name
 
 		def initialize
 			@state = JSON['{}']
 			data = `/bin/hostname`
-			data.strip!
-			data = '"' + data + '"' if ((data =~ /\./) != nil)
-			@state[data] = JSON['{"_isa":"Node"}']
+			@name = data.strip!
+			@name = '"' + @name + '"' if ((@name =~ /\./) != nil)
+			@state[@name] = JSON['{"_isa":"Node"}']
+		end
+
+		def getOS
+			if File.file?("/etc/issue")
+				data = `/bin/cat /etc/issue`
+				return "ubuntu" if (data =~ /Ubuntu/) != nil
+				return "sl" if (data =~ /Scientific Linux/) != nil
+			end
+			return "unknown"
 		end
 
 		def getState
+			@state[@name]["os"] = self.getOS()
 			return @state
 		end
 	end
