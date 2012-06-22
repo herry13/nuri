@@ -65,7 +65,9 @@ module Apache
 				# document root
 				data = `/bin/grep -e "DocumentRoot " /etc/apache2/sites-available/default`
 				if data.length > 0
-					data = data.strip.split(' ')
+					data.strip!
+					data = data.split(' ')
+puts data[0] + " -- " + data[1]
 					@state["apache"]["document_root"] = data[1]
 				else
 					@state["apache"]["docment_root"] = ""
