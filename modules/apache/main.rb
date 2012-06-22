@@ -39,8 +39,8 @@ module Apache
 				# document root
 				data = (File.file?("/etc/httpd/conf/httpd.conf") ? `/bin/grep -e "^DocumentRoot " /etc/httpd/conf/httpd.conf` : "")
 				if data.length > 0
-					data = data.split(' ')[1]
-					data.sub!(/"/,'')
+					data = data.split(' ')
+					data = data[1].sub(/"/,'')
 					@state["apache"]["document_root"] = data.sub(/"/,'')
 				else
 					@state["apache"]["document_root"] = ""
