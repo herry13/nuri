@@ -20,16 +20,16 @@ module Apache
 			os = self.getOS()
 			if os == 'sl'
 				# installed & running
-				data = `/usr/bin/sudo /bin/rpm -qa httpd` if os == 'sl'
+				data = `/bin/rpm -qa httpd` if os == 'sl'
 				@state["apache"]["installed"] = ( (data =~ /httpd/) != nil )
 				if @state["apache"]["installed"]
-					data = `/usr/bin/sudo /sbin/service httpd status`
+					data = `/sbin/service httpd status`
 					@state["apache"]["running"] = ( (data =~ /.*running.*/) != nil )
 				else
 					@state["apache"]["running"] = false
 				end
 				# port
-				data = `/usr/bin/sudo /bin/grep -e "^Listen " /etc/httpd/conf/httpd.conf`
+				data = (File.file?("/etc/httpd/conf/httpd.conf") ? `/bin/grep -e "^Listen " /etc/httpd/conf/httpd.conf` : "")
 				if data.length > 0
 					data = data.split(' ')
 					@state["apache"]["port"] = data[1].to_i
@@ -37,7 +37,7 @@ module Apache
 					@state["apache"]["port"] = 80
 				end
 				# document root
-				data = `/usr/bin/sudo /bin/grep -e "^DocumentRoot " /etc/httpd/conf/httpd.conf`
+				data = (File.file?("/etc/httpd/conf/httpd.conf") ? `/bin/grep -e "^DocumentRoot " /etc/httpd/conf/httpd.conf` : "")
 				if data.length > 0
 					data = data.split(' ')
 					@state["apache"]["document_root"] = data[0].sub(/"/, '')
