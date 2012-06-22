@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
 
+rootdir = File.dirname(__FILE__) + "/.."
+
 require 'rubygems'
 require 'mongrel'
 require 'json'
 require 'pp'
+require rootdir + "/lib/util.rb"
 
 class Daemon < Mongrel::HttpHandler
 	attr_accessor :modules, :config, :http
