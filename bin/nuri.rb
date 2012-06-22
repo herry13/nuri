@@ -9,7 +9,7 @@ class Daemon < Mongrel::HttpHandler
 	attr_accessor :modules, :config, :http
 
 	def initialize
-		@modules = Array.new()
+		@modules = Hash.new()
 		self.loadModules
 	end
 
@@ -20,8 +20,8 @@ class Daemon < Mongrel::HttpHandler
 			modpath = modules_dir + "/" + mod
 			if File.directory?(modpath) and File.file?(modpath + "/main.rb")
 				require modpath + "/main"
-				m =  eval(mod.capitalize + "::Main.new")
-				@modules << m
+				m = eval(mod.capitalize + "::Main.new")
+				@modules[mod] = m
 			end
 		}
 	end
@@ -43,14 +43,19 @@ class Daemon < Mongrel::HttpHandler
 	end
 
 	def get(req, res)
-		data = ''
-		@modules.each { |m|
-			data += JSON.generate(m.getState)
-		}
-
-		res.start(200) do |head, out|
-			head["Content-Type"] = "application/json"
-			out.write(data)
+		if @modules['node'] != nil
+			data = JSON.generate(@modules['node'].getState(@modules))
+		#@modules.each { |m|
+		#	data += JSON.generate(m.getState)
+		#}
+			res.start(200) do |head, out|
+				head["Content-Type"] = "application/json"
+				out.write(data)
+			end
+		else
+			res.start(500) do |head, out|
+				out.write('')
+			end
 		end
 	end
 
@@ -62,5 +67,4 @@ class Daemon < Mongrel::HttpHandler
 	end
 end
 
-daemon = Daemon.new
-daemon.start
+Daemon.new.start

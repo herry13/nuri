@@ -22,8 +22,9 @@ module Node
 			return "unknown"
 		end
 
-		def getState
+		def getState(modules)
 			@state[@name]["os"] = self.getOS()
+			modules.each { |name,mod| @state[@name][name] = mod.getState if name != 'node' }
 			return @state
 		end
 	end

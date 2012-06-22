@@ -1,0 +1,9 @@
+class Network {
+	mac is ""
+	ip is ""
+	mask is ""
+	bcast is ""
+	ip6 is ""
+	mask6 is ""
+	bcast6 is ""
+}
