@@ -64,6 +64,7 @@ module Apache
 				end
 				# document root
 				data = `/bin/grep -e "DocumentRoot " /etc/apache2/sites-available/default`
+puts data
 				if data.length > 0
 					data.strip!
 					data = data.split(' ')
