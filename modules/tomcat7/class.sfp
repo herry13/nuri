@@ -1,0 +1,5 @@
+class Tomcat {
+	installed is false
+	running is false
+	port is 80
+}

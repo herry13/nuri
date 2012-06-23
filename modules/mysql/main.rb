@@ -10,7 +10,7 @@ module Mysql
 		end
 
 		def getState
-			os = self.getOS()
+			os = self.getPlatform()
 			if os == 'sl'
 				# installed & running
 				data = `/bin/rpm -qa mysql-server` if os == 'sl'

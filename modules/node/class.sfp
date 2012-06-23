@@ -1,6 +1,6 @@
 class Node {
 	hostname is ""
-	type is ""
+	os is ""
 	platform is ""
 	arch is ""
 	release is ""

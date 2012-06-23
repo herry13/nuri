@@ -1,0 +1,7 @@
+class PM {
+	name is ""
+	cpus is 0
+	memory is 0
+	running is false
+	vms is ()
+}

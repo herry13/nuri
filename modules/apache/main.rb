@@ -5,19 +5,14 @@ module Apache
 	class Main
 		attr_accessor :state
 
+		include Util
+
 		def initialize
 			@state = JSON['{"_isa":"Apache"}']
 		end
 
-		def getOS
-			data = `cat /etc/issue`
-			return "ubuntu" if ((data =~ /Ubuntu/) != nil)
-			return "sl" if ((data =~ /Scientific Linux/) != nil)
-			return nil
-		end
-
 		def getState
-			os = self.getOS()
+			os = self.getPlatform()
 			if os == 'sl'
 				# installed & running
 				data = `/bin/rpm -qa httpd` if os == 'sl'

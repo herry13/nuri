@@ -48,9 +48,6 @@ class Daemon < Mongrel::HttpHandler
 	def get(req, res)
 		if @modules['node'] != nil
 			data = JSON.generate(@modules['node'].getState(@modules))
-		#@modules.each { |m|
-		#	data += JSON.generate(m.getState)
-		#}
 			res.start(200) do |head, out|
 				head["Content-Type"] = "application/json"
 				out.write(data)

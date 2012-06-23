@@ -1,0 +1,9 @@
+class VM {
+	name is ""
+	cpus is 0
+	memory is 0
+	image_file is ""
+	image_size is 0
+	running is false
+	on isref PM
+}
