@@ -1,5 +1,5 @@
 class Network {
-	mac is ""
+	hwaddr is ""
 	ip is ""
 	mask is ""
 	bcast is ""

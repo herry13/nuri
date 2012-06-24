@@ -1,15 +1,29 @@
 #!/usr/bin/env ruby
 
-rootdir = File.dirname(__FILE__) + "/.."
-
 require 'rubygems'
 require 'mongrel'
 require 'json'
 require 'pp'
-require rootdir + "/lib/util.rb"
+require 'logger'
 
-class Daemon < Mongrel::HttpHandler
-	attr_accessor :modules, :config, :http
+
+class Nuri < Mongrel::HttpHandler
+	## class variables and methods
+	@@rootdir = File.dirname(__FILE__) + "/.."
+	@@logger = Logger.new(@@rootdir + "/log/message.log")
+
+	def self.rootdir
+		return @@rootdir
+	end
+
+	def self.log
+		return @@logger
+	end
+
+	## object variables and methods
+	@modules = Hash.new()
+	@config
+	@http
 
 	def initialize
 		@modules = Hash.new()
@@ -18,23 +32,37 @@ class Daemon < Mongrel::HttpHandler
 
 	def loadModules
 		# load installed modules
-		modules_dir = File.join(File.dirname(__FILE__), '../modules')
+		Nuri.log.info "Load modules..."
+		modules_dir = @@rootdir + "/modules"
 		Dir.foreach(modules_dir) { |mod|
 			modpath = modules_dir + "/" + mod
 			if File.directory?(modpath) and File.file?(modpath + "/main.rb")
 				require modpath + "/main"
-				m = eval(mod.capitalize + "::Main.new")
-				@modules[mod] = m
+				begin
+					m = eval(mod.capitalize + "::Main.new")
+					@modules[mod] = m
+				rescue Exception => e
+					Nuri.log.error "Cannot load module " + mod
+				end
 			end
 		}
+		Nuri.log.info "Successfully load " + @modules.length.to_s + " modules"
 	end
 
 	def start
-		@config = JSON.parse(File.read(File.join(File.dirname(__FILE__), '../etc/config.json')))
+		configFile = '/etc/nuri/config.json'
+		configFile = @@rootdir + "/etc/config.json" if not File.file?(configFile)
+		@config = JSON.parse(File.read(configFile))
 		@http = Mongrel::HttpServer.new(@config['host'], @config['port'])
 		@http.register("/", self)
-		puts "Start server on " + @config['host'] + ":" + @config['port'].to_s
+		Nuri.log.info "Start server on " + @config['host'] + ":" + @config['port'].to_s +
+			" with PID #{Process.pid}"
 		@http.run.join
+	end
+
+	def stop
+		@http.graceful_shutdown
+		Nuri.log.info "Nuri is stopped"
 	end
 
 	def process(req, res)
@@ -46,25 +74,42 @@ class Daemon < Mongrel::HttpHandler
 	end
 
 	def get(req, res)
-		if @modules['node'] != nil
+		begin
 			data = JSON.generate(@modules['node'].getState(@modules))
 			res.start(200) do |head, out|
 				head["Content-Type"] = "application/json"
 				out.write(data)
 			end
-		else
-			res.start(500) do |head, out|
-				out.write('')
-			end
+		rescue Exception => e
+			res.start(500) do |head, out| out.write(''); end
 		end
 	end
 
 	def set(req, res)
-		res.start(200) do |head, out|
-			head["Content-Type"] = "plain/text"
-			out.write('')
+		begin
+			data = ''
+			res.start(200) do |head, out|
+				head["Content-Type"] = "application/json"
+				out.write(data)
+			end
+		rescue Exception => e
+			res.start(500) do |head, out| out.write(''); end
 		end
 	end
 end
 
-Daemon.new.start
+def loadLibrary
+	rootdir = Nuri.rootdir
+	Dir.foreach(rootdir + "/lib") { |f|
+		require rootdir + "/lib/" + f if File.extname(f) == '.rb'
+	}
+	Nuri.log.info "Finish loading libraries"
+end
+
+loadLibrary()
+nuri = Nuri.new
+Signal.trap("QUIT") {
+	Nuri.log.info "Quit"
+	nuri.stop
+}
+nuri.start
