@@ -3,16 +3,17 @@ require 'json'
 
 module Apache
 	class Main
-		attr_accessor :state
-
-		include Util
-
 		def initialize
 			@state = JSON['{"_isa":"Apache"}']
 		end
 
-		def getState
-			os = self.getPlatform()
+		# set state of this component in JSON -- TODO
+		def set(state)
+		end
+
+		# get state of this component in JSON
+		def get
+			os = Nuri.platform
 			if os == 'sl'
 				# installed & running
 				data = `/bin/rpm -qa httpd` if os == 'sl'

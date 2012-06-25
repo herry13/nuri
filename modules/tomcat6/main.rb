@@ -6,14 +6,17 @@ module Tomcat6
 	class Main
 		attr_accessor :state
 
-		include Util
-
 		def initialize
 			@state = JSON['{"_isa":"Tomcat6"}']
 		end
 
-		def getState
-			os = self.getPlatform()
+		# set state of component
+		def set
+		end
+
+		# get state of component in JSON
+		def get
+			os = Nuri.platform()
 			if os == 'sl'
 				# installed & running
 				data = `/bin/rpm -qa tomcat6`

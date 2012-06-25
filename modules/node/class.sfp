@@ -7,4 +7,10 @@ class Node {
 	memory_total is 0
 	memory_free is 0
 	cpus is 0
+
 }
+
+/*class VM {
+	image_file is ""
+	on isref PM
+}*/

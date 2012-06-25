@@ -3,14 +3,17 @@ module Mysql
 	class Main
 		attr_accessor :state
 
-		include Util
-
 		def initialize
 			@state = JSON['{}']
 		end
 
-		def getState
-			os = self.getPlatform()
+		# set state of this component -- TODO
+		def set(state)
+		end
+
+		# get state of this component in JSON
+		def get
+			os = Nuri.platform
 			if os == 'sl'
 				# installed & running
 				data = `/bin/rpm -qa mysql-server` if os == 'sl'

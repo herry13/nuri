@@ -1,9 +1,7 @@
-class Network {
+class NetDevice {
 	hwaddr is ""
 	ip is ""
-	mask is ""
-	bcast is ""
+	netmask is ""
 	ip6 is ""
-	mask6 is ""
-	bcast6 is ""
+	netmask6 is ""
 }

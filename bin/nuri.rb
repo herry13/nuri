@@ -20,6 +20,17 @@ class Nuri < Mongrel::HttpHandler
 		return @@logger
 	end
 
+	def self.os
+		return (`uname -o`).strip
+	end
+
+	def self.platform
+		data = `cat /etc/issue`
+		return "ubuntu" if ((data =~ /Ubuntu/) != nil)
+		return "sl" if ((data =~ /Scientific Linux/) != nil)
+		return nil
+	end
+
 	## object variables and methods
 	@modules = Hash.new()
 	@config
@@ -73,18 +84,24 @@ class Nuri < Mongrel::HttpHandler
 		end
 	end
 
+	# get state
 	def get(req, res)
 		begin
-			data = JSON.generate(@modules['node'].getState(@modules))
+			data = @modules['node'].get.clone
+			name = @modules['node'].name
+			@modules.each { |n,m| data[name][n] = m.get.clone if n != 'node' }
+
 			res.start(200) do |head, out|
 				head["Content-Type"] = "application/json"
-				out.write(data)
+				out.write(JSON.generate(data))
 			end
 		rescue Exception => e
-			res.start(500) do |head, out| out.write(''); end
+			res.start(500) do |head, out| out.write(e.to_s); end
+			Nuri.log.error e.to_s
 		end
 	end
 
+	# set state
 	def set(req, res)
 		begin
 			data = ''
