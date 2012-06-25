@@ -19,7 +19,7 @@ module Tomcat6
 				data = `/bin/rpm -qa tomcat6`
 				@state["installed"] = ((data =~ /tomcat6/) != nil)
 				if @state["installed"]
-					data = `/usr/bin/sudo /sbin/service tomcat6 status`
+					data = `/usr/bin/sudo -n /sbin/service tomcat6 status`
 					@state["running"] = ((data =~ /running/) != nil)
 				else
 					@state["running"] = false
@@ -29,7 +29,7 @@ module Tomcat6
 				data = `/usr/bin/dpkg-query -W tomcat6`
 				@state["installed"] = ((data =~ /tomcat6/) != nil)
 				if @state["installed"]
-					data = `/usr/bin/sudo /usr/sbin/service tomcat6 status`
+					data = `/usr/bin/sudo -n /usr/sbin/service tomcat6 status`
 					@state["running"] = ((data =~ /running/) != nil)
 				else
 					@state["running"] = false
