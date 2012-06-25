@@ -1,0 +1,6 @@
+class Service:
+	running is false
+	c isa Client
+
+class Client:
+	refer isref Service
