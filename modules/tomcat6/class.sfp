@@ -1,4 +1,4 @@
-class Tomcat {
+class Tomcat6 {
 	installed is false
 	running is false
 	port is 80
