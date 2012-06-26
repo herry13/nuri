@@ -1,4 +1,5 @@
 class NetDevice {
+	dhcp is on
 	hwaddr is ""
 	ip is ""
 	netmask is ""

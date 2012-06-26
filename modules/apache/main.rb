@@ -75,44 +75,79 @@ module Apache
 		end
 
 		def install
-			result = system('/usr/bin/apt-get -y install apache2')
-			return (result == true)
+			platform = Nuri.platform
+			if platform == 'ubuntu'
+				result = system('/usr/bin/apt-get -y install apache2')
+				return (result == true)
+			elsif platform == 'sl'
+			end
+			return false
 		end
 	
 		def uninstall
-			result = system('/usr/bin/apt-get -y remove apache2')
-			system('/usr/bin/apt-get -y autoremove') if (result == true)
-			return (result == true)
+			platform = Nuri.platform
+			if platform == 'ubuntu'
+				result = system('/usr/bin/apt-get -y remove apache2')
+				system('/usr/bin/apt-get -y autoremove') if (result == true)
+				return (result == true)
+			elsif platform == 'sl'
+			end
+			return false
 		end
 	
 		def start
-			result = system('/usr/bin/service apache2 start')
-			return (result == true)
+			platform = Nuri.platform
+			if platform == 'ubuntu'
+				result = system('/usr/bin/service apache2 start')
+				return (result == true)
+			elsif platform == 'sl'
+			end
+			return false
 		end
 	
 		def stop
-			result = system('/usr/bin/service apache2 stop')
-			return (result == true)
+			platform = Nuri.platform
+			if platform == 'ubuntu'
+				result = system('/usr/bin/service apache2 stop')
+				return (result == true)
+			elsif platform == 'sl'
+			end
+			return false
 		end
 	
 		def setPort(p)
-			Augeas::open do |aug|
-				aug.set("/files/etc/apache2/ports.conf/*[self::directive='NameVirtualHost']/arg", "*:" + p.to_s)
-				aug.set("/files/etc/apache2/ports.conf/*[self::directive='Listen']/arg", p.to_s)
-				aug.set('/files/etc/apache2/sites-available/default/VirtualHost/arg', "*:" + p.to_s)
-				unless aug.save
-					raise IOError, "Failed to save changes"
+			platform = Nuri.platform
+			if platform == 'ubuntu'
+				Augeas::open do |aug|
+					aug.set("/files/etc/apache2/ports.conf/*[self::directive='NameVirtualHost']/arg", "*:" + p.to_s)
+					aug.set("/files/etc/apache2/ports.conf/*[self::directive='Listen']/arg", p.to_s)
+					aug.set('/files/etc/apache2/sites-available/default/VirtualHost/arg', "*:" + p.to_s)
+					return true if aug.save
+				end
+			elsif platform == 'sl'
+				Augeas::open do |aug|
+					aug.set("/files/etc/httpd/conf/httpd.conf/*[self::directive='Listen']/arg", p.to_s)
+					return true if aug.save
 				end
 			end
+			return false
 		end
 	
 		def setDocumentRoot(dir)
-			Augeas::open do |aug|
-				aug.set("/files/etc/apache2/sites-available/default/VirtualHost/*[self::directive='DocumentRoot']/arg", dir)
-				unless aug.save
-					raise IOError, "Failed to save changes"
+			platform = Nuri.platform
+			if platform == 'ubuntu'
+				Augeas::open do |aug|
+					aug.set("/files/etc/apache2/sites-available/default/VirtualHost/*[self::directive='DocumentRoot']/arg", dir)
+					return true if aug.save
+				end
+			elsif platform == 'sl'
+				Augeas::open do |aug|
+					aug.set("/files/etc/httpd/conf/httpd.conf/*[self::directive='DocumentRoot']/arg", "\"" + dir + "\"")
+					aug.set("/files/etc/httpd/conf/httpd.conf/Directory/arg", "\"" + dir + "\"")
+					return true if aug.save
 				end
 			end
+			return false
 		end
 	end
 end
