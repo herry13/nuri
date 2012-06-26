@@ -3,4 +3,52 @@ class Apache {
 	running is false
 	port is 80
 	document_root is "/var/www/html"
+
+	procedure install {
+		conditions { }
+		effects {
+			this.installed is true
+		}
+	}
+
+	procedure uninstall {
+		conditions {
+			this.running is false
+		}
+		effects {
+			this.installed is false
+		}
+	}
+
+	procedure start {
+		conditions {
+			this.installed is true
+		}
+		effects {
+			this.running is true
+		}
+	}
+
+	procedure stop {
+		conditions {
+			this.running is true
+		}
+		effects {
+			this.running is false
+		}
+	}
+
+	procedure setPort(p isa integer) {
+		conditions { }
+		effects {
+			this.port is p
+		}
+	}
+
+	procedure setDocumentRoot(dir isa string) {
+		conditions { }
+		effects {
+			this.document_root is dir
+		}
+	}
 }

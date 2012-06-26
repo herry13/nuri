@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'json'
+require 'augeas'
 
 module Apache
 	class Main
@@ -71,6 +72,47 @@ module Apache
 			end
 
 			return @state
+		end
+
+		def install
+			result = system('/usr/bin/apt-get -y install apache2')
+			return (result == true)
+		end
+	
+		def uninstall
+			result = system('/usr/bin/apt-get -y remove apache2')
+			system('/usr/bin/apt-get -y autoremove') if (result == true)
+			return (result == true)
+		end
+	
+		def start
+			result = system('/usr/bin/service apache2 start')
+			return (result == true)
+		end
+	
+		def stop
+			result = system('/usr/bin/service apache2 stop')
+			return (result == true)
+		end
+	
+		def setPort(p)
+			Augeas::open do |aug|
+				aug.set("/files/etc/apache2/ports.conf/*[self::directive='NameVirtualHost']/arg", "*:" + p.to_s)
+				aug.set("/files/etc/apache2/ports.conf/*[self::directive='Listen']/arg", p.to_s)
+				aug.set('/files/etc/apache2/sites-available/default/VirtualHost/arg', "*:" + p.to_s)
+				unless aug.save
+					raise IOError, "Failed to save changes"
+				end
+			end
+		end
+	
+		def setDocumentRoot(dir)
+			Augeas::open do |aug|
+				aug.set("/files/etc/apache2/sites-available/default/VirtualHost/*[self::directive='DocumentRoot']/arg", dir)
+				unless aug.save
+					raise IOError, "Failed to save changes"
+				end
+			end
 		end
 	end
 end
