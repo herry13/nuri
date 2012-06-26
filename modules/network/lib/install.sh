@@ -1,3 +1,9 @@
 #!/bin/sh
 
-echo $1
+DIR=`pwd`
+cd $1
+ruby extconf.rb
+make
+make install
+make clean 
+cd $DIR

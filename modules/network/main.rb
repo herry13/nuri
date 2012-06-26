@@ -4,6 +4,12 @@ rescue LoadError
 	dir = File.dirname(__FILE__) + "/lib"
 	exec = dir + "/install.sh"
 	`sh #{exec} #{dir}`
+	Nuri.log.info "Install gem \"netifaces\""
+	begin
+		require 'netifaces'
+	rescue LoadError
+		raise 'Cannot install gem "netifaces"'
+	end
 end
 
 module Network
