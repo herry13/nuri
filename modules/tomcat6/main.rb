@@ -39,9 +39,14 @@ module Tomcat6
 				end
 			end
 			# port
-			doc = XML::Parser.file('/etc/tomcat6/server.xml').parse
-			node = doc.find_first('/Server/Service/Connector')
-			@state["port"] = (node != nil ? node.attributes['port'].to_i : 8080)
+			configFile = '/etc/tomcat6/server.xml'
+			if File.file?(configFile)
+				doc = XML::Parser.file(configFile).parse
+				node = doc.find_first('/Server/Service/Connector')
+				@state["port"] = (node != nil ? node.attributes['port'].to_i : 8080)
+			else
+				@state["port"] = 0
+			end
 
 			return @state
 		end
