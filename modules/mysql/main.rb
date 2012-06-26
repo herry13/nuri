@@ -30,7 +30,7 @@ module Mysql
 					data = data.split('=')
 					@state["port"] = data[1].strip.to_i
 				else
-					@state["port"] = 3306
+					@state["port"] = 0
 				end
 			elsif os == 'ubuntu'
 				# installed & running
@@ -48,7 +48,7 @@ module Mysql
 					data = data.split('=')
 					@state["port"] = data[1].strip.to_i
 				else
-					@state["port"] = 3306
+					@state["port"] = 0
 				end
 			end
 			@state["admin_password"] = ""

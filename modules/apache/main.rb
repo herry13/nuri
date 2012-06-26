@@ -30,7 +30,7 @@ module Apache
 					data = data.split(' ')
 					@state["port"] = data[1].to_i
 				else
-					@state["port"] = 80
+					@state["port"] = 0
 				end
 				# document root
 				data = (File.file?("/etc/httpd/conf/httpd.conf") ? `/bin/grep -e "^DocumentRoot " /etc/httpd/conf/httpd.conf` : "")
@@ -57,7 +57,7 @@ module Apache
 					data = data.split(' ')
 					@state["port"] = data[1].to_i
 				else
-					@state["port"] = 80
+					@state["port"] = 0
 				end
 				# document root
 				data = (File.file?("/etc/apache2/sites-available/default") ? `/bin/grep -e "DocumentRoot " /etc/apache2/sites-available/default` : "")
