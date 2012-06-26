@@ -1,6 +1,64 @@
 class Mysqld {
-	installed is false
-	running is false
+	installed is no
+	running is no
 	port is 3306
 	admin_password is ""
+
+	procedure install {
+		conditions {
+			this.installed is no
+		}
+		effects {
+			this.installed is yes
+		}
+	}
+
+	procedure uninstall {
+		conditions {
+			this.running is no
+		}
+		effects {
+			this.installed is no
+		}
+	}
+
+	procedure start {
+		conditions {
+			this.installed is yes
+			this.running is no
+		}
+		effects {
+			this.running is yes
+		}
+	}
+
+	procedure stop {
+		conditions {
+			this.installed is yes
+			this.running is yes
+		}
+		effects {
+			this.running is no
+		}
+	}
+
+	procedure setPort(p isa integer) {
+		conditions {
+			this.installed is yes
+			this.running is no
+		}
+		effects {
+			this.port is p
+		}
+	}
+
+	procedure setAdminPassword(passwd is string) {
+		conditions {
+			this.installed is yes
+			this.running is no
+		}
+		effects {
+			this.admin_password is passwd
+		}
+	}
 }

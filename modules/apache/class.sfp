@@ -1,52 +1,62 @@
 class Apache {
-	installed is false
-	running is false
+	installed is no
+	running is no
 	port is 80
 	document_root is "/var/www/html"
 
 	procedure install {
-		conditions { }
+		conditions {
+			this.installed is no
+		}
 		effects {
-			this.installed is true
+			this.installed is yes
 		}
 	}
 
 	procedure uninstall {
 		conditions {
-			this.running is false
+			this.running is no
 		}
 		effects {
-			this.installed is false
+			this.installed is no
 		}
 	}
 
 	procedure start {
 		conditions {
-			this.installed is true
+			this.installed is yes
+			this.running is no
 		}
 		effects {
-			this.running is true
+			this.running is yes
 		}
 	}
 
 	procedure stop {
 		conditions {
-			this.running is true
+			this.installed is yes
+			this.running is yes
 		}
 		effects {
-			this.running is false
+			this.running is no
 		}
 	}
 
 	procedure setPort(p isa integer) {
-		conditions { }
+		conditions {
+			this.installed is yes
+			this.running is no
+		}
 		effects {
 			this.port is p
 		}
 	}
 
 	procedure setDocumentRoot(dir isa string) {
-		conditions { }
+		conditions {
+			this.installed is yes
+			this.running is no
+		}
 		effects {
 			this.document_root is dir
 		}
