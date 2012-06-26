@@ -1,4 +1,5 @@
 class Mysqld {
+	version is ""
 	installed is no
 	running is no
 	port is 3306
@@ -55,7 +56,7 @@ class Mysqld {
 	procedure setAdminPassword(passwd is string) {
 		conditions {
 			this.installed is yes
-			this.running is no
+			this.running is yes
 		}
 		effects {
 			this.admin_password is passwd
