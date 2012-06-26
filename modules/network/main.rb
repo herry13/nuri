@@ -1,6 +1,6 @@
 begin
 	require 'netifaces'
-rescue
+rescue LoadError
 	puts 'required gem is not found'
 end
 
