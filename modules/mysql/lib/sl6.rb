@@ -16,7 +16,7 @@ module Mysql
 			data = `/bin/rpm -qa mysql-server`
 			@state["installed"] = ( (data =~ /mysql\-server/) != nil )
 			if @state["installed"]
-				@state["version"] = data.sub(/mysql\-server\-/,'')
+				@state["version"] = data.sub(/mysql\-server\-/,'').strip
 				data = `/sbin/service mysqld status`
 				@state["running"] = ( (data =~ /.*running.*/) != nil )
 			else
