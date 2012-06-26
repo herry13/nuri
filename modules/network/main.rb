@@ -1,4 +1,8 @@
-require 'netifaces'
+begin
+	require 'netifaces'
+rescue
+	puts 'required gem is not found'
+end
 
 module Network
 	IPV4 = 2
