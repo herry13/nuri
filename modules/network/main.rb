@@ -3,7 +3,7 @@ begin
 rescue LoadError
 	dir = File.dirname(__FILE__) + "/lib"
 	exec = dir + "/install.sh"
-	`#{exec} #{dir}`
+	`sh #{exec} #{dir}`
 end
 
 module Network
