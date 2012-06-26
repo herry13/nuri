@@ -11,4 +11,5 @@ require './main.rb'
 mysql = Mysql::Main.new
 #mysql.install
 #mysql.uninstall
-puts mysql.setPort(3308).to_s
+#puts mysql.setPort(3306).to_s
+mysql.setAdminPassword("mysql")

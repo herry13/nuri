@@ -35,20 +35,26 @@ module Mysql
 			else
 				@state["port"] = 0
 			end
-			@state["admin_password"] = ""
+			@state["admin_password"] = (`/bin/echo /etc/mysql/nuri.cnf`).sub(/\n$/,'')
 
 			return @state
 		end
 
 		def install
-			return false if system('echo mysql-server mysql-server/root_password select PASSWORD | debconf-set-selections') != true
-			return false if system('echo mysql-server mysql-server/root_password_again select PASSWORD | debconf-set-selections') != true
-			return (system('/usr/bin/apt-get -y install mysql-server') == true)
+			return false if system('echo mysql-server mysql-server/root_password select mysql | debconf-set-selections') != true
+			return false if system('echo mysql-server mysql-server/root_password_again select mysql | debconf-set-selections') != true
+			if system('/usr/bin/apt-get -y install mysql-server') == true
+				return (system('/bin/echo mysql > /etc/mysql/nuri.cnf') == true and
+					system('/bin/chmod 0400 /etc/mysql/nuri.cnf') == true)
+			end
+			return false
 		end
 
 		def uninstall
 			result = system('/usr/bin/apt-get -y purge mysql-server*')
 			if result == true
+				system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
+				system('/bin/rm /etc/mysql/nuri.cnf')
 				system('/usr/bin/apt-get -y autoremove')
 				system("/usr/bin/dpkg -l | /bin/grep ^rc | /usr/bin/cut -d' ' -f3| /usr/bin/xargs /usr/bin/apt-get -y purge")
 			end
@@ -69,12 +75,17 @@ module Mysql
 				paths.each { |path|
 					aug.set(path, p.to_s)
 				}
-				#aug.set("/files/etc/mysql/my.cnf/*/port", p.to_s)
 				return aug.save
 			end
 		end
 
 		def setAdminPassword(passwd)
+			system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
+			oldpass = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'').sub(/"/,'\"')
+			passwd.sub!(/"/,'\"')
+			return (system("mysqladmin -u root -p\"#{oldpass}\" password \"#{passwd}\"") == true and
+				system("/bin/echo \"#{passwd}\" > /etc/mysql/nuri.cnf") == true and
+				system('/bin/chmod 0400 /etc/mysql/nuri.cnf'))
 		end
 	end
 end

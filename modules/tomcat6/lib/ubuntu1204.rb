@@ -39,5 +39,38 @@ module Tomcat6
 
 			return @state
 		end
+
+		def install
+			return (system('/usr/bin/apt-get -y install tomcat6') == true)
+		end
+	
+		def uninstall
+			result = system('/usr/bin/apt-get -y purge tomcat6')
+			if result == true
+				system('/usr/bin/apt-get -y autoremove')
+				system("/usr/bin/dpkg -l | /bin/grep ^rc | /usr/bin/cut -d' ' -f3| /usr/bin/xargs /usr/bin/apt-get -y purge")
+			end
+			return (result == true)
+		end
+	
+		def start
+			return (system('/usr/bin/service tomcat6 start') == true)
+		end
+	
+		def stop
+			return (system('/usr/bin/service tomcat6 stop') == true)
+		end
+	
+		def setPort(p)
+			configFile = '/etc/tomcat6/server.xml'
+			if File.file?(configFile)
+				doc = XML::Parser.file(configFile).parse
+				nodes = doc.find('/Server/Service/Connector')
+				nodes.each do |node|
+					attr = node.attributes['port'] = p.to_s
+					doc.save(configFile, :indent => true, :encoding => XML::Encoding::UTF_8)
+				end
+			end
+		end
 	end
 end
