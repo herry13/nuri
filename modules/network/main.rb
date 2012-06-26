@@ -1,7 +1,9 @@
 begin
 	require 'netifaces'
 rescue LoadError
-	puts 'required gem is not found'
+	dir = File.dirname(__FILE__) + "/lib"
+	exec = dir + "/install.sh"
+	`#{exec} #{dir}`
 end
 
 module Network
