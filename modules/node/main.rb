@@ -25,7 +25,7 @@ module Node
 			# get platform, architecture, kernel version
 			@state[@name]["os"] = Nuri.os
 			@state[@name]["platform"] = Nuri.platform()
-			@state[@name]["release"] = `uname -r`.strip
+			@state[@name]["version"] = `uname -r`.strip
 			@state[@name]["arch"] = `uname -p`.strip
 			@state[@name]["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i
 

@@ -1,4 +1,5 @@
 class Apache {
+	version is ""
 	installed is no
 	running is no
 	port is 80

@@ -20,6 +20,7 @@ module Apache
 				data = `/bin/rpm -qa httpd` if os == 'sl'
 				@state["installed"] = ( (data =~ /httpd/) != nil )
 				if @state["installed"]
+					@state["version"] = data.sub(/httpd\-/,'')
 					data = `/sbin/service httpd status`
 					@state["running"] = ( (data =~ /.*running.*/) != nil )
 				else
@@ -43,13 +44,16 @@ module Apache
 					@state["document_root"] = ""
 				end
 			elsif os == 'ubuntu'
+				# version
 				# installed & running
 				data = `/usr/bin/dpkg-query -W apache2` if os == 'ubuntu'
 				@state["installed"] = ((data =~ /apache2/) != nil)
 				if @state["installed"]
+					@state["version"] = data.split(' ')[1]
 					data = `/usr/bin/service apache2 status`
 					@state["running"] = ((data =~ /running/) != nil)
 				else
+					@state["version"] = ""
 					@state["running"] = false
 				end
 				# port

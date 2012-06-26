@@ -19,9 +19,11 @@ module Mysql
 				data = `/bin/rpm -qa mysql-server` if os == 'sl'
 				@state["installed"] = ( (data =~ /mysql\-server/) != nil )
 				if @state["installed"]
+					@state["version"] = data.sub(/mysql\-server\-/,'')
 					data = `/sbin/service mysqld status`
 					@state["running"] = ( (data =~ /.*running.*/) != nil )
 				else
+					@state["version"] = ""
 					@state["running"] = false
 				end
 				# port
@@ -37,9 +39,11 @@ module Mysql
 				data = `/usr/bin/dpkg-query -W mysql-server` if os == 'ubuntu'
 				@state["installed"] = ((data =~ /mysql\-server/) != nil)
 				if @state["installed"]
+					@state["version"] = data.split(' ')[1]
 					data = `/usr/bin/service mysql status`
 					@state["running"] = ((data =~ /running/) != nil)
 				else
+					@state["version"] = ""
 					@state["running"] = false
 				end
 				# port

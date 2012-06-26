@@ -22,9 +22,11 @@ module Tomcat6
 				data = `/bin/rpm -qa tomcat6`
 				@state["installed"] = ((data =~ /tomcat6/) != nil)
 				if @state["installed"]
+					@state["version"] = data.sub(/tomcat6\-/,'')
 					data = `/usr/bin/sudo -n /sbin/service tomcat6 status`
 					@state["running"] = ((data =~ /running/) != nil)
 				else
+					@state["version"] = ""
 					@state["running"] = false
 				end
 			elsif os == 'ubuntu'
@@ -32,9 +34,11 @@ module Tomcat6
 				data = `/usr/bin/dpkg-query -W tomcat6`
 				@state["installed"] = ((data =~ /tomcat6/) != nil)
 				if @state["installed"]
+					@state["version"] = data.split(' ')[1]
 					data = `/usr/bin/sudo -n /usr/sbin/service tomcat6 status`
 					@state["running"] = ((data =~ /running/) != nil)
 				else
+					@state["version"] = ""
 					@state["running"] = false
 				end
 			end
