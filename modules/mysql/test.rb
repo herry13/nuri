@@ -1,9 +1,14 @@
-require 'pp'
-require '../../lib/util.rb'
+#!/usr/bin/env ruby
 
-include Util
+class Nuri
+	def self.platform
+		return "ubuntu"
+	end
+end
 
-puts getOS
+require './main.rb'
 
-puts Util.public_method_defined? :getOS
-
+mysql = Mysql::Main.new
+#mysql.install
+#mysql.uninstall
+puts mysql.setPort(3308).to_s
