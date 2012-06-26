@@ -18,7 +18,7 @@ module Apache
 			data = `/bin/rpm -qa httpd`
 			@state["installed"] = ( (data =~ /httpd/) != nil )
 			if @state["installed"]
-				@state["version"] = data.sub(/httpd\-/,'')
+				@state["version"] = data.sub(/httpd\-/,'').strip
 				data = `/sbin/service httpd status`
 				@state["running"] = ( (data =~ /.*running.*/) != nil )
 			else

@@ -20,7 +20,7 @@ module Tomcat6
 			data = `/bin/rpm -qa tomcat6`
 			@state["installed"] = ((data =~ /tomcat6/) != nil)
 			if @state["installed"]
-				@state["version"] = data.sub(/tomcat6\-/,'')
+				@state["version"] = data.sub(/tomcat6\-/,'').strip
 				data = `/usr/bin/sudo -n /sbin/service tomcat6 status`
 				@state["running"] = ((data =~ /running/) != nil)
 			else
