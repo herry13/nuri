@@ -3,7 +3,7 @@ class Mysqld
 	installed is no
 	running is no
 	port is 3306
-	admin_password is ""
+	root_password is ""
 
 	procedure install
 		conditions {
@@ -59,7 +59,7 @@ class Mysqld
 			self.running is yes
 		}
 		effects {
-			self.admin_password is passwd
+			self.root_password is passwd
 		}
 	end
 end

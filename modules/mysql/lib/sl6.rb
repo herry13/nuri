@@ -31,7 +31,7 @@ module Mysql
 			else
 				@state["port"] = 0
 			end
-			@state["admin_password"] = ""
+			@state["root_password"] = ""
 
 			return @state
 		end

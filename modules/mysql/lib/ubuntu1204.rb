@@ -35,7 +35,7 @@ module Mysql
 			else
 				@state["port"] = 0
 			end
-			@state["admin_password"] = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'')
+			@state["root_password"] = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'')
 
 			return @state
 		end
@@ -79,7 +79,7 @@ module Mysql
 			end
 		end
 
-		def setAdminPassword(passwd)
+		def setRootPassword(passwd)
 			system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
 			oldpass = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'').sub(/"/,'\"')
 			passwd.sub!(/"/,'\"')
