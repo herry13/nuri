@@ -1,0 +1,8 @@
+class NetDevice {
+	dhcp is on
+	hwaddr is ""
+	ip is ""
+	netmask is ""
+	ip6 is ""
+	netmask6 is ""
+}

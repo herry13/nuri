@@ -1,0 +1,65 @@
+class Mysqld
+	version is ""
+	installed is no
+	running is no
+	port is 3306
+	root_password is ""
+
+	procedure install
+		conditions {
+			self.installed is no
+		}
+		effects {
+			self.installed is yes
+		}
+	end
+
+	procedure uninstall
+		conditions {
+			self.running is no
+		}
+		effects {
+			self.installed is no
+		}
+	end
+
+	procedure start
+		conditions {
+			self.installed is yes
+			self.running is no
+		}
+		effects {
+			self.running is yes
+		}
+	end
+
+	procedure stop
+		conditions {
+			self.installed is yes
+			self.running is yes
+		}
+		effects {
+			self.running is no
+		}
+	end
+
+	procedure setPort(p isa integer)
+		conditions {
+			self.installed is yes
+			self.running is no
+		}
+		effects {
+			self.port is p
+		}
+	end
+
+	procedure setAdminPassword(passwd is string)
+		conditions {
+			self.installed is yes
+			self.running is yes
+		}
+		effects {
+			self.root_password is passwd
+		}
+	end
+end
