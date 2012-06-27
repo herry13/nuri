@@ -35,7 +35,7 @@ module Mysql
 			else
 				@state["port"] = 0
 			end
-			@state["admin_password"] = (`/bin/echo /etc/mysql/nuri.cnf`).sub(/\n$/,'')
+			@state["admin_password"] = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'')
 
 			return @state
 		end
