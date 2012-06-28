@@ -34,3 +34,9 @@ Required Ruby Gems
 - libxml-ruby
 - antlr3
 - ruby-augeas
+
+Event-Based Server (emnuri.rb)
+------------------------------
+Required Ruby Gems
+- eventmachine
+- eventmachine_httpserver

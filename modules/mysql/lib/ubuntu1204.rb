@@ -44,6 +44,7 @@ module Mysql
 			return false if system('echo mysql-server mysql-server/root_password select mysql | debconf-set-selections') != true
 			return false if system('echo mysql-server mysql-server/root_password_again select mysql | debconf-set-selections') != true
 			if system('/usr/bin/apt-get -y install mysql-server') == true
+				self.stop
 				return (system('/bin/echo mysql > /etc/mysql/nuri.cnf') == true and
 					system('/bin/chmod 0400 /etc/mysql/nuri.cnf') == true)
 			end
