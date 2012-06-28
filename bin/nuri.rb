@@ -5,135 +5,118 @@ require 'mongrel'
 require 'json'
 require 'pp'
 require 'logger'
-require File.dirname(__FILE__) + '/planit.rb'
+require File.dirname(__FILE__) + "/../lib/lib"
 
-class Nuri < Mongrel::HttpHandler
-	## class variables and methods
-	@@rootdir = File.dirname(__FILE__) + "/.."
-	@@logger = Logger.new(@@rootdir + "/log/message.log")
+module Nuri
+	class Main < Mongrel::HttpHandler
+		def initialize
+			self.readConfig
+			self.loadModules
+		end
+	
+		def readConfig
+			configFile = '/etc/nuri/config.json'
+			configFile = Nuri::Util.rootdir + "/etc/config.json" if not File.file?(configFile)
+			@config = JSON.parse(File.read(configFile))
+		end
 
-	def self.rootdir
-		return @@rootdir
-	end
+		def loadModules
+			# load installed modules
+			Nuri::Util.log "Load modules..."
+			modules_dir = Nuri::Util.rootdir + "/modules"
 
-	def self.log
-		return @@logger
-	end
-
-	def self.os
-		return (`uname -o`).strip
-	end
-
-	def self.platform
-		data = `cat /etc/issue`
-		return "ubuntu" if ((data =~ /Ubuntu/) != nil)
-		return "sl" if ((data =~ /Scientific Linux/) != nil)
-		return nil
-	end
-
-	## object variables and methods
-	@modules = Hash.new()
-
-	def initialize
-		@modules = Hash.new()
-		self.loadModules
-	end
-
-	def loadModules
-		# load installed modules
-		Nuri.log.info "Load modules..."
-		modules_dir = @@rootdir + "/modules"
-		Dir.foreach(modules_dir) { |mod|
-			modpath = modules_dir + "/" + mod
-			if File.directory?(modpath) and File.file?(modpath + "/main.rb")
-				require modpath + "/main"
-				begin
-					m = eval(mod.capitalize + "::Main.new")
-					@modules[mod] = m
-				rescue Exception => e
-					Nuri.log.error "Cannot load module " + mod
+			# load module 'Node'
+			require modules_dir + "/node/node"
+			@root = Nuri::Module::Node.new
+			Dir.foreach(modules_dir) { |mod|
+				next if mod == 'node'
+				path = modules_dir + "/" + mod
+				if File.directory?(path) and File.file?(path + "/" + mod + ".rb")
+					require path + "/" + mod
+					begin
+						m = eval("Nuri::Module::" + mod.capitalize + ".new")
+						m.name = mod if m.name == nil
+						@root.children[m.name] = m
+						Nuri::Util.log "Successfully load module " + mod
+					rescue Exception => e
+						Nuri::Util.log.error "Cannot load module " + mod + " -- " + e.to_s
+					end
+				end
+			}
+		end
+	
+		def start
+			@http = Mongrel::HttpServer.new(@config['host'], @config['port'])
+			@http.register("/", self)
+			Nuri::Util.log "Start server on " + @config['host'] + ":" + @config['port'].to_s +
+				" with PID #{Process.pid}"
+			@http.run.join
+		end
+	
+		def stop
+			@http.graceful_shutdown
+			Nuri::Util.log "Nuri is stopped"
+		end
+	
+		def process(req, res)
+			if req.params['REQUEST_METHOD'] == 'GET'
+				if req.params['REQUEST_PATH'] == '/state' or
+					(req.params['REQUEST_PATH'] =~ /^\/state\/.*/) != nil
+					return self.getState(req, res)
+				end
+			else req.params['REQUEST_METHOD'] == 'POST'
+				if req.params['REQUEST_PATH'] == '/state' or
+					(req.params['REQUEST_PATH'] =~ /^\/state\/.*/) != nil
+					return self.setState(req, res)
 				end
 			end
-		}
-		Nuri.log.info "Successfully load " + @modules.length.to_s + " modules"
-	end
-
-	def start
-		configFile = '/etc/nuri/config.json'
-		configFile = @@rootdir + "/etc/config.json" if not File.file?(configFile)
-		@config = JSON.parse(File.read(configFile))
-		@http = Mongrel::HttpServer.new(@config['host'], @config['port'])
-		@http.register("/", self)
-		Nuri.log.info "Start server on " + @config['host'] + ":" + @config['port'].to_s +
-			" with PID #{Process.pid}"
-		@http.run.join
-	end
-
-	def stop
-		@http.graceful_shutdown
-		Nuri.log.info "Nuri is stopped"
-	end
-
-	def process(req, res)
-		if req.params['REQUEST_METHOD'] == 'GET'
-			if req.params['REQUEST_PATH'] == '/state'
-				return self.getState(req, res)
-			end
-		else req.params['REQUEST_METHOD'] == 'POST'
-			if req.params['REQUEST_PATH'] == '/state'
-				return self.setState(req, res)
+			res.start(404) do |head, out| out.write(''); end
+		end
+	
+		def sendError(res, msg)
+			res.start(500) do |head, out| out.write(msg); end
+			Nuri::Util.log.error msg
+		end
+	
+		# get state
+		def getState(req, res)
+			begin
+				path = req.params['REQUEST_PATH'].sub(/^\/state\/?/,'')
+				data = JSON['{"state":""}']
+				state = @root.getState(path)
+				if state.is_a?(Nuri::Undefined)
+					res.start(404) do |head, out| out.write(''); end
+				else
+					res.start(200) do |head, out|
+						head["Content-Type"] = "application/json"
+						data['state'] = state
+						out.write(JSON.generate(data))
+					end
+				end
+			rescue Exception => e
+				self.sendError(res, e.to_s)
 			end
 		end
-		res.start(404) do |head, out| out.write(''); end
-	end
-
-	def sendError(res, msg)
-		res.start(500) do |head, out| out.write(msg); end
-		Nuri.log.error msg
-	end
-
-	# get state
-	def getState(req, res)
-		begin
-			data = @modules['node'].getState.clone
-			name = @modules['node'].name
-			@modules.each { |n,m| data[name][n] = m.getState.clone if n != 'node' }
-
-			res.start(200) do |head, out|
-				head["Content-Type"] = "application/json"
-				out.write(JSON.generate(data))
+	
+		# set state
+		def setState(req, res)
+			begin
+				data = ''
+				res.start(200) do |head, out|
+					head["Content-Type"] = "application/json"
+					out.write(data)
+				end
+			rescue Exception => e
+				self.sendError(res, e.to_s)
 			end
-		rescue Exception => e
-			self.sendError(res, e.to_s)
-		end
-	end
-
-	# set state
-	def setState(req, res)
-		begin
-			data = ''
-			res.start(200) do |head, out|
-				head["Content-Type"] = "application/json"
-				out.write(data)
-			end
-		rescue Exception => e
-			self.sendError(res, e.to_s)
 		end
 	end
 end
 
-def loadLibrary
-	rootdir = Nuri.rootdir
-	Dir.foreach(rootdir + "/lib") { |f|
-		require rootdir + "/lib/" + f if File.extname(f) == '.rb'
-	}
-	Nuri.log.info "Finish loading libraries"
-end
-
-loadLibrary()
-nuri = Nuri.new
+nuri = Nuri::Main.new
 Signal.trap("QUIT") {
-	Nuri.log.info "Quit"
+	Nuri::Util.log "Quit"
 	nuri.stop
 }
+Nuri::Util.log "Start"
 nuri.start
