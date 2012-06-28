@@ -53,6 +53,7 @@ module Nuri
 
 			def getPathValue(state, path)
 				return state if path == nil or path == ''
+				return Nuri::Undefined.new if not state.is_a?(Hash)
 				first, nextpath = path.split('/', 2)
 				if state.has_key?(first) # defined?(state[first])
 					return self.getPathValue(state[first], nextpath)
