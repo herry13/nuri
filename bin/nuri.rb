@@ -5,7 +5,7 @@ require 'mongrel'
 require 'json'
 require 'pp'
 require 'logger'
-
+require File.dirname(__FILE__) + '/planit.rb'
 
 class Nuri < Mongrel::HttpHandler
 	## class variables and methods
@@ -33,8 +33,6 @@ class Nuri < Mongrel::HttpHandler
 
 	## object variables and methods
 	@modules = Hash.new()
-	@config
-	@http
 
 	def initialize
 		@modules = Hash.new()

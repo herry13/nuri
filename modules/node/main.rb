@@ -28,7 +28,6 @@ module Node
 			@state[@name]["version"] = `uname -r`.strip
 			@state[@name]["arch"] = `uname -p`.strip
 			@state[@name]["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i
-
 			return @state
 		end
 	end
