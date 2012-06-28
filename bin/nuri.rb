@@ -78,31 +78,40 @@ class Nuri < Mongrel::HttpHandler
 
 	def process(req, res)
 		if req.params['REQUEST_METHOD'] == 'GET'
-			self.get(req, res)
+			if req.params['REQUEST_PATH'] == '/state'
+				return self.getState(req, res)
+			end
 		else req.params['REQUEST_METHOD'] == 'POST'
-			self.set(req, res)
+			if req.params['REQUEST_PATH'] == '/state'
+				return self.setState(req, res)
+			end
 		end
+		res.start(404) do |head, out| out.write(''); end
+	end
+
+	def sendError(res, msg)
+		res.start(500) do |head, out| out.write(msg); end
+		Nuri.log.error msg
 	end
 
 	# get state
-	def get(req, res)
+	def getState(req, res)
 		begin
-			data = @modules['node'].get.clone
+			data = @modules['node'].getState.clone
 			name = @modules['node'].name
-			@modules.each { |n,m| data[name][n] = m.get.clone if n != 'node' }
+			@modules.each { |n,m| data[name][n] = m.getState.clone if n != 'node' }
 
 			res.start(200) do |head, out|
 				head["Content-Type"] = "application/json"
 				out.write(JSON.generate(data))
 			end
 		rescue Exception => e
-			res.start(500) do |head, out| out.write(e.to_s); end
-			Nuri.log.error e.to_s
+			self.sendError(res, e.to_s)
 		end
 	end
 
 	# set state
-	def set(req, res)
+	def setState(req, res)
 		begin
 			data = ''
 			res.start(200) do |head, out|
@@ -110,7 +119,7 @@ class Nuri < Mongrel::HttpHandler
 				out.write(data)
 			end
 		rescue Exception => e
-			res.start(500) do |head, out| out.write(''); end
+			self.sendError(res, e.to_s)
 		end
 	end
 end

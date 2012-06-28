@@ -9,11 +9,11 @@ module Apache
 		end
 
 		# set state of this component in JSON -- TODO
-		def set(state)
+		def setState(state)
 		end
 
 		# get state of this component in JSON
-		def get
+		def getState
 			# installed & running
 			data = `/usr/bin/dpkg-query -W apache2`
 			@state["installed"] = ((data =~ /apache2/) != nil)

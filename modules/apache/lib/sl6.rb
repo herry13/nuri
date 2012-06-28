@@ -9,11 +9,11 @@ module Apache
 		end
 
 		# set state of this component in JSON -- TODO
-		def set(state)
+		def setState(state)
 		end
 
 		# get state of this component in JSON
-		def get
+		def getState
 			# installed & running
 			data = `/bin/rpm -qa httpd`
 			@state["installed"] = ( (data =~ /httpd/) != nil )

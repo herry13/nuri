@@ -12,10 +12,10 @@ module Node
 		end
 
 		# set state of this component -- TODO
-		def set(state)
+		def setState(state)
 		end
 
-		def get
+		def getState
 			# get memory info
 			mem = `free`
 			mem = mem.split("\n")[1].split(" ")

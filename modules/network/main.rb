@@ -30,11 +30,11 @@ module Network
 		end
 
 		# set state of this component -- TODO
-		def set(state)
+		def setState(state)
 		end
 
 		# get state of this component in JSON
-		def get
+		def getState
 			Netifaces.interfaces.sort.each do |dev|
 				@state[dev] = JSON'{"_isa": "NetDevice"}'
 				addresses = Netifaces.addresses(dev)

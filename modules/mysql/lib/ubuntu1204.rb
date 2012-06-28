@@ -11,11 +11,11 @@ module Mysql
 		end
 
 		# set state of this component -- TODO
-		def set(state)
+		def setState(state)
 		end
 
 		# get state of this component in JSON
-		def get
+		def getState
 			# installed & running
 			data = `/usr/bin/dpkg-query -W mysql-server`
 			@state["installed"] = ((data =~ /mysql\-server/) != nil)
