@@ -3,5 +3,6 @@
 	"port": 9090,
 	"secure": false,
 	"ssl_certificate": "cert.pem",
-	"ssl_key": "key.pem"
+	"ssl_key": "key.pem",
+	"daemon": false
 }

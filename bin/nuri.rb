@@ -5,13 +5,20 @@ require 'mongrel'
 require 'json'
 require 'pp'
 require 'logger'
+require 'thread'
+require 'uri'
+require 'net/http'
 require File.dirname(__FILE__) + "/../lib/lib"
 
 module Nuri
 	class Main < Mongrel::HttpHandler
+		attr_accessor :config
+
 		def initialize
 			self.readConfig
 			self.loadModules
+			@locked = false
+			@mutex = Mutex.new
 		end
 	
 		def readConfig
@@ -64,13 +71,13 @@ module Nuri
 					(req.params['REQUEST_PATH'] =~ /^\/state\/.*/) != nil
 					return self.getState(req, res)
 				end
-			else req.params['REQUEST_METHOD'] == 'POST'
+			elsif req.params['REQUEST_METHOD'] == 'POST'
 				if req.params['REQUEST_PATH'] == '/state' or
 					(req.params['REQUEST_PATH'] =~ /^\/state\/.*/) != nil
-					self.setState(req, res)
+					return self.setState(req, res)
 				elsif req.params['REQUEST_PATH'] == '/goal' or
 					(req.params['REQUEST_PATH'] =~ /^\/goal\/.*/) != nil
-					self.setGoal(req, res)
+					return self.setGoal(req, res)
 				end
 			end
 			res.start(404) do |head, out| out.write(''); end
@@ -102,14 +109,41 @@ module Nuri
 		end
 
 		def setGoal(req, res)
-			begin
-				path = req.params['REQUEST_URI'].sub(/^\/goal\/?/,'')
-				@root.resetGoal
-				@root.setGoal(path, (JSON[req.body.read])['value'])
-				puts JSON.generate(@root.getGoal) # debug
-			rescue Excetion => e
-				self.sendError(res, e.to_s)
+			if not self.lock
+				res.start(403) do |head,out| out.write(''); end
+			else
+				begin
+					path = req.params['REQUEST_URI'].sub(/^\/goal\/?/,'')
+					@root.resetGoal
+					@root.setGoal(path, (JSON[req.body.read])['value'])
+					puts JSON.generate(@root.getGoal) # debug
+					res.start(200) do |head,out| out.write(''); end
+					# applying the goal state
+					self.apply
+				rescue Excetion => e
+					self.sendError(res, e.to_s)
+				end
 			end
+		end
+
+		def lock(locked=true)
+			@mutex.synchronize {
+				return false if @locked and locked
+				@locked = locked
+				return true
+			}
+		end
+
+		# apply the goal state
+		def apply
+			Thread.new() {
+				puts 'Implement changes.'
+				sleep 5
+				# TODO -- put planning stuffs here
+				self.lock(false)
+				puts 'The changes has been applied'
+				res.start(200) do |head,out| out.write(''); end
+			}
 		end
 	
 		# set state
@@ -129,10 +163,15 @@ module Nuri
 	end
 end
 
+# create the nuri's server
 nuri = Nuri::Main.new
-Signal.trap("QUIT") {
-	Nuri::Util.log "Quit"
-	nuri.stop
-}
+# set as daemon if it's defined in configuration file
+if nuri.config['daemon']
+	exit if fork
+	Process.setsid
+	exit if fork
+	puts "Nuri is running with PID=" + Process.pid.to_s
+end
+# start the server
 Nuri::Util.log "Start"
 nuri.start
