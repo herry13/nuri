@@ -10,11 +10,6 @@ module Nuri
 				@state['_isa'] = "Node"
 			end
 	
-			# set state of this component -- TODO
-			def setState(path, data)
-				return true
-			end
-	
 			def getState(path=nil)
 				return self.getStateAll if path == nil or path.strip == ''
 				path.strip!

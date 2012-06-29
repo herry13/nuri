@@ -10,10 +10,6 @@ module Nuri
 				@state['_isa'] = 'Tomcat6'
 			end
 	
-			# set state of component
-			def setState
-			end
-	
 			# get state of component in JSON
 			def getState
 				# installed & running

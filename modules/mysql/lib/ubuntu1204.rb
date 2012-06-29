@@ -10,10 +10,6 @@ module Nuri
 				@state['_isa'] = 'Mysql'
 			end
 	
-			# set state of this component -- TODO
-			def setState(state)
-			end
-	
 			# get state of this component in JSON
 			def getState
 				# installed & running

@@ -10,10 +10,6 @@ module Nuri
 				@state['_isa'] = 'Apache'
 			end
 	
-			# set state of this component in JSON -- TODO
-			def setState(state)
-			end
-	
 			# get state of this component in JSON
 			def getState
 				# installed & running

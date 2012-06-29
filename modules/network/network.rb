@@ -30,10 +30,6 @@ module Nuri
 					Math.sqrt(masks[2]+1) + Math.sqrt(masks[3]+1)
 			end
 	
-			# set state of this component -- TODO
-			def setState(state)
-			end
-	
 			# get state of this component in JSON
 			def getState
 				Netifaces.interfaces.sort.each do |dev|

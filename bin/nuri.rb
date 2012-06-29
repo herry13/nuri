@@ -67,16 +67,19 @@ module Nuri
 	
 		def process(req, res)
 			if req.params['REQUEST_METHOD'] == 'GET'
-				if req.params['REQUEST_PATH'] == '/state' or
-					(req.params['REQUEST_PATH'] =~ /^\/state\/.*/) != nil
+				if req.params['REQUEST_URI'] == '/state' or
+					(req.params['REQUEST_URI'] =~ /^\/state\/.*/) != nil
 					return self.getState(req, res)
+				elsif req.params['REQUEST_URI'] == '/goal' or
+					(req.params['REQUEST_URI'] =~ /^\/goal\/.*/) != nil
+					return self.getGoal(req, res)
 				end
 			elsif req.params['REQUEST_METHOD'] == 'POST'
-				if req.params['REQUEST_PATH'] == '/state' or
-					(req.params['REQUEST_PATH'] =~ /^\/state\/.*/) != nil
+				if req.params['REQUEST_URI'] == '/state' or
+					(req.params['REQUEST_URI'] =~ /^\/state\/.*/) != nil
 					return self.setState(req, res)
-				elsif req.params['REQUEST_PATH'] == '/goal' or
-					(req.params['REQUEST_PATH'] =~ /^\/goal\/.*/) != nil
+				elsif req.params['REQUEST_URI'] == '/goal' or
+					(req.params['REQUEST_URI'] =~ /^\/goal\/.*/) != nil
 					return self.setGoal(req, res)
 				end
 			end
@@ -108,19 +111,19 @@ module Nuri
 			end
 		end
 
-		def setGoal(req, res)
+		def setState(req, res)
 			if not self.lock
 				res.start(403) do |head,out| out.write(''); end
 			else
 				begin
-					path = req.params['REQUEST_URI'].sub(/^\/goal\/?/,'')
+					path = req.params['REQUEST_URI'].sub(/^\/state\/?/,'')
 					@root.resetGoal
 					@root.setGoal(path, (JSON[req.body.read])['value'])
 					puts JSON.generate(@root.getGoal) # debug
 					res.start(200) do |head,out| out.write(''); end
 					# applying the goal state
 					self.apply
-				rescue Excetion => e
+				rescue Exception => e
 					self.sendError(res, e.to_s)
 				end
 			end
@@ -145,7 +148,20 @@ module Nuri
 				res.start(200) do |head,out| out.write(''); end
 			}
 		end
-	
+
+		def setGoal(req, res)
+			# TODO -- put your BSig execution here
+		end
+
+		def getGoal(req, res)
+			begin
+				goal = JSON.generate(@root.getGoal)
+				res.start(200) do |head,out| out.write(goal); end
+			rescue Exception => e
+				self.sendError(res, e.to_s)
+			end
+		end
+=begin	
 		# set state
 		def setState(req, res)
 			begin
@@ -160,6 +176,7 @@ module Nuri
 				self.sendError(res, e.to_s)
 			end
 		end
+=end
 	end
 end
 
