@@ -39,6 +39,34 @@ module Nuri
 	
 				return @state
 			end
+
+			def install
+				return (system('/usr/bin/yum -y install tomcat6') == true)
+			end
+
+			def uninstall
+				return (system('/usr/bin/yum -y remove tomcat6') == true)
+			end
+
+			def start
+				return (system('/sbin/service tomcat6 start') == true)
+			end
+
+			def stop
+				return (system('/sbin/service tomcat6 stop') == true)
+			end
+
+			def setPort(p)
+				configFile = '/etc/tomcat6/server.xml'
+				if File.file?(configFile)
+					doc = XML::Parser.file(configFile).parse
+					nodes = doc.find('/Server/Service/Connector')
+					nodes.each do |node|
+						attr = node.attributes['port'] = p.to_s
+						doc.save(configFile, :indent => true, :encoding => XML::Encoding::UTF_8)
+					end
+				end
+			end
 		end
 	end
 end
