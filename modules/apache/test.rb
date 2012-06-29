@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require File.dirname(__FILE__) + "/../../lib/lib"
-require './main.rb'
+require './apache.rb'
 
 apache = Nuri::Module::Apache.new
 #puts apache.install.to_s
@@ -10,4 +10,8 @@ apache = Nuri::Module::Apache.new
 #puts apache.stop.to_s
 #puts apache.start.to_s
 
-puts JSON.generate(apache.getState)
+#puts JSON.generate(apache.getState)
+
+apache.stop
+apache.setDocumentRoot('/var/www')
+apache.start
