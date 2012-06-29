@@ -67,13 +67,16 @@ module Nuri
 			else req.params['REQUEST_METHOD'] == 'POST'
 				if req.params['REQUEST_PATH'] == '/state' or
 					(req.params['REQUEST_PATH'] =~ /^\/state\/.*/) != nil
-					return self.setState(req, res)
+					self.setState(req, res)
+				elsif req.params['REQUEST_PATH'] == '/goal' or
+					(req.params['REQUEST_PATH'] =~ /^\/goal\/.*/) != nil
+					self.setGoal(req, res)
 				end
 			end
 			res.start(404) do |head, out| out.write(''); end
 		end
 	
-		def sendError(res, msg)
+		def sendError(res, msg='')
 			res.start(500) do |head, out| out.write(msg); end
 			Nuri::Util.log.error msg
 		end
@@ -82,14 +85,14 @@ module Nuri
 		def getState(req, res)
 			begin
 				path = req.params['REQUEST_PATH'].sub(/^\/state\/?/,'')
-				data = JSON['{"state":""}']
+				data = JSON['{"value":""}']
 				state = @root.getState(path)
 				if state.is_a?(Nuri::Undefined)
 					res.start(404) do |head, out| out.write(''); end
 				else
 					res.start(200) do |head, out|
 						head["Content-Type"] = "application/json"
-						data['state'] = state
+						data['value'] = state
 						out.write(JSON.generate(data))
 					end
 				end
@@ -97,16 +100,29 @@ module Nuri
 				self.sendError(res, e.to_s)
 			end
 		end
+
+		def setGoal(req, res)
+			begin
+				path = req.params['REQUEST_URI'].sub(/^\/goal\/?/,'')
+				@root.resetGoal
+				@root.setGoal(path, (JSON[req.body.read])['value'])
+				puts JSON.generate(@root.getGoal) # debug
+			rescue Excetion => e
+				self.sendError(res, e.to_s)
+			end
+		end
 	
 		# set state
 		def setState(req, res)
 			begin
-				data = ''
-				res.start(200) do |head, out|
-					head["Content-Type"] = "application/json"
-					out.write(data)
+				path = req.params['REQUEST_URI'].sub(/^\/state\/?/,'')
+				if @root.setState(path, (JSON[req.body.read])['value'])
+					res.start(200) do |head, out| out.write(''); end
+				else
+					self.sendError(res, 'Cannot set the state!')
 				end
 			rescue Exception => e
+				puts e.backtrace.join("\n")
 				self.sendError(res, e.to_s)
 			end
 		end
