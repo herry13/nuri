@@ -9,8 +9,9 @@ def test(sfp)
 	tokens = ANTLR3::CommonTokenStream.new(lexer)
 	parser = SFP::Parser.new(tokens)
 	parser.sfp
+	return parser.context
 end
-test('../../modules/node/node.sfp')
+puts test('../../modules/node/node.sfp').inspect
 test('../../modules/apache/apache.sfp')
 test('../../modules/mysql/mysql.sfp')
 test('../../modules/tomcat6/tomcat6.sfp')

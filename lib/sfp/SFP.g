@@ -6,13 +6,37 @@ options {
 }
 
 @headers {
+=begin
+Features:
+- reference
+- state-dependency (supports multiple conditions using 'or' keyword)
+- object namespace
+- set membership operators (in, not in, add, remove)
+- numeric comparators (>, >=, <, <=) and mutation operators (+, -, *, /)
+- new object
+- procedure's cost
+- constraint/mutation iterator for Set of values or objects of particular class
+- Set of all-objects of particular class as procedure's parameter
+- include file
+
+TODO:
+- provenance
+=end
+
 }
 
 @members {
+	def context
+		return @root
+	end
+
+	def loadFile(file)
+		
 }
 
-sfp
-	:	NL* include* header* (state_section | composite | constraint)*
+sfp 
+	:	{ @root = Hash.new }
+		NL* include* header* (state_section | composite | constraint)*
 	;
 
 include
@@ -21,6 +45,7 @@ include
 
 include_file
 	:	'file' STRING
+		{ self.loadFile($STRING.text[1,$STRING.text.length-1]) }
 	;
 	
 header
