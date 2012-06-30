@@ -161,22 +161,6 @@ module Nuri
 				self.sendError(res, e.to_s)
 			end
 		end
-=begin	
-		# set state
-		def setState(req, res)
-			begin
-				path = req.params['REQUEST_URI'].sub(/^\/state\/?/,'')
-				if @root.setState(path, (JSON[req.body.read])['value'])
-					res.start(200) do |head, out| out.write(''); end
-				else
-					self.sendError(res, 'Cannot set the state!')
-				end
-			rescue Exception => e
-				puts e.backtrace.join("\n")
-				self.sendError(res, e.to_s)
-			end
-		end
-=end
 	end
 end
 
