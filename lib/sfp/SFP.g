@@ -34,7 +34,7 @@ TODO:
 	end
 
 	def toRef(path)
-		return "($." + path + ")"
+		return "$." + path
 	end
 
 	def context
@@ -65,7 +65,7 @@ sfp
 			@root = Hash.new
 			@now = @root
 			@id = 0
-			@sfp = Nuri::Sfp.new
+			@sfp = Nuri::Sfp::Main.new
 		}
 		NL* include* header* (state_section | composite | constraint)*
 	;

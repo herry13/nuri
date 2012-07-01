@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-07-01 03:17:40
+# Generated at: 2012-07-01 08:41:49
 # 
 
 # ~~~> start load path setup
@@ -138,7 +138,7 @@ module SFP
     	end
 
     	def toRef(path)
-    		return "($." + path + ")"
+    		return "$." + path
     	end
 
     	def context
@@ -200,7 +200,7 @@ module SFP
         			@root = Hash.new
         			@now = @root
         			@id = 0
-        			@sfp = Nuri::Sfp.new
+        			@sfp = Nuri::Sfp::Main.new
         		
         # <-- action
         # at line 70:3: ( NL )*

@@ -11,9 +11,15 @@ infile = '../../modules/node/node.sfp'
 #infile = '../../modules/network/network.sfp'
 infile = './svcref-0.sfp'
 
-sfp = Nuri::Sfp.new
+sfp = Nuri::Sfp::Main.new
 sfp.processFile(infile)
-puts sfp.toContext.inspect
+root = sfp.toContext
+puts root.inspect
+
+visitor = Nuri::Sfp::ValueVisitor.new
+root.accept(visitor)
+visitor = Nuri::Sfp::ClassVisitor.new
+root.accept(visitor)
 
 #f = File.new(infile)
 #sfp.process(f.read)
