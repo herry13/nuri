@@ -12,14 +12,15 @@ infile = '../../modules/node/node.sfp'
 infile = './svcref-0.sfp'
 
 sfp = Nuri::Sfp::Main.new
-sfp.processFile(infile)
-root = sfp.toContext
-puts root.inspect
+sfp.parseFile(infile)
+#root = sfp.to_context
+#puts root.inspect
+sfp.to_sas
 
-visitor = Nuri::Sfp::ValueVisitor.new
-root.accept(visitor)
-visitor = Nuri::Sfp::ClassVisitor.new
-root.accept(visitor)
+#visitor = Nuri::Sfp::VariableVisitor.new
+#root.accept(visitor)
+#visitor = Nuri::Sfp::ClassVisitor.new
+#root.accept(visitor)
 
 #f = File.new(infile)
 #sfp.process(f.read)

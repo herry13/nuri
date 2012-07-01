@@ -43,8 +43,8 @@ TODO:
 
 	def processFile(file)
 		# TODO
-		@sfp.processFile(file)
-		@sfp.toContext.each_pair { |key,val|
+		@sfp.parseFile(file)
+		@sfp.to_context.each_pair { |key,val|
 			if val['_context'] == 'class' or val['_context'] == 'state' or
 				val['_context'] == 'composite' or val['_context'] == 'constraint'
 				@root[key] = val

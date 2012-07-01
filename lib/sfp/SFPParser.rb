@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-07-01 08:41:49
+# Generated at: 2012-07-01 17:30:59
 # 
 
 # ~~~> start load path setup
@@ -147,8 +147,8 @@ module SFP
 
     	def processFile(file)
     		# TODO
-    		@sfp.processFile(file)
-    		@sfp.toContext.each_pair { |key,val|
+    		@sfp.parseFile(file)
+    		@sfp.to_context.each_pair { |key,val|
     			if val['_context'] == 'class' or val['_context'] == 'state' or
     				val['_context'] == 'composite' or val['_context'] == 'constraint'
     				@root[key] = val
