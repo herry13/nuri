@@ -5,7 +5,7 @@ require File.dirname(__FILE__) + "/SFPLexer"
 
 module Nuri
 	class Sfp
-		def loadFile(file)
+		def processFile(file)
 			f = File.open(file, 'rb')
 			lexer = SFP::Lexer.new(f)
 			tokens = ANTLR3::CommonTokenStream.new(lexer)
@@ -13,7 +13,11 @@ module Nuri
 			@parser.sfp
 		end
 
-		def load(text)
+		def process(text)
+			lexer = SFP::Lexer.new(text)
+			tokens = ANTLR3::CommonTokenStream.new(lexer)
+			@parser = SFP::Parser.new(tokens)
+			@parser.sfp
 		end
 
 		def toContext

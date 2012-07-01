@@ -2,17 +2,19 @@
 
 require './SFPParser'
 require './SFPLexer'
+require './sfp'
 
-def test(sfp)
-	f = File.open(sfp, 'rb')
-	lexer = SFP::Lexer.new(f)
-	tokens = ANTLR3::CommonTokenStream.new(lexer)
-	parser = SFP::Parser.new(tokens)
-	parser.sfp
-	return parser.context
-end
-puts test('../../modules/node/node.sfp').inspect
-test('../../modules/apache/apache.sfp')
-test('../../modules/mysql/mysql.sfp')
-test('../../modules/tomcat6/tomcat6.sfp')
-test('../../modules/network/network.sfp')
+infile = '../../modules/node/node.sfp'
+#infile = '../../modules/apache/apache.sfp'
+#infile = '../../modules/mysql/mysql.sfp'
+#infile = '../../modules/tomcat6/tomcat6.sfp'
+#infile = '../../modules/network/network.sfp'
+infile = './svcref-0.sfp'
+
+sfp = Nuri::Sfp.new
+sfp.processFile(infile)
+puts sfp.toContext.inspect
+
+#f = File.new(infile)
+#sfp.process(f.read)
+#puts sfp.toContext.inspect

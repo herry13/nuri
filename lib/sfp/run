@@ -1,0 +1,4 @@
+#!/bin/sh
+
+antlr4ruby SFP.g
+./test.rb
