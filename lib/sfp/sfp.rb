@@ -48,6 +48,12 @@ String.send(:define_method, "ref?") {
 	return (s.length > 0 and s[0,1] == '$')
 }
 
+# remove root from a reference
+String.send(:define_method, "no_root") {
+	return self.to_s.sub(/^\$\.?/, '') if self.ref?
+	return self.to_s
+}
+
 # add path to the end of a reference 
 String.send(:define_method, "push") { |value|
 	return self.to_s + "." + value if self.ref?
@@ -102,9 +108,9 @@ Numeric.send(:define_method, 'isobject?') { return false }
 
 # Nil additional methods
 # return type of Nil
-NilClass.send(:define_method, 'isa?') { |type|
-	@type = type if type == nil
-	return @type if defined?(@type)
+NilClass.send(:define_method, 'isa?') { #|type|
+#	@type = type if type == nil
+	return @isa if defined?(@isa)
 	return nil
 }
 
@@ -121,14 +127,21 @@ Hash.send(:define_method, 'isa?') {
 	return nil
 }
 
-# return true this context is an object, otherwise false
+# return true if this context is an object, otherwise false
 Hash.send(:define_method, 'isvalue?') {
+	#return (self.isobject?)
+	return (self.isobject? or self.null?)
+}
+
+# return true if this context is an object, otherwise false
+Hash.send(:define_method, 'isobject?') {
 	return (self.has_key?('_context') and self['_context'] == 'object')
 }
 
-# return true this context is an object, otherwise false
-Hash.send(:define_method, 'isobject?') {
-	return self.isvalue?
+# return true if this context in a reference, otherwise false
+Hash.send(:define_method, 'null?') {
+	return (self.has_key?('_context') and self['_context'] == 'reference' and
+		self.has_key?('_value') and self['_value'] == nil)
 }
 
 # return a fullpath reference if this context is an object, otherwise nil
@@ -198,8 +211,10 @@ Hash.send(:define_method, 'expanded?') {
 Hash.send(:define_method, 'inherits') { |parent|
 	parent.each_pair { |key,value|
 		next if key[0,1] == '_' or self.has_key?(key)
+puts "\tcopy: " + key
 		if value.is_a?(Hash)
 			self[key] = value.clone
+			self[key]['_parent'] = self
 		else
 			self[key] = value
 		end

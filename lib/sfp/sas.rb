@@ -15,21 +15,27 @@ module Nuri
 					'string' => Array.new,
 					'reference' => Array.new
 				}
+
+				# foreach subclass, inherits superclass
+				root.accept(ClassExpander.new(root))
+				# foreach object, inherits class
+				root['current'].accept(ObjectExpander.new(root))
+puts 'pc2: ' + root['current']['pc2'].keys.inspect
+puts '$.pc2.refer: ' + root.at?('$.current.pc2.refer')['_context']
+
 				# collect classes
 				root.accept(Nuri::Sfp::ClassCollector.new(@types))
 				# collect variables
 				root['current'].accept(Nuri::Sfp::VariableCollector.new(@variables, @types))
 
 				# debugging
-				puts @variables.keys.inspect #debug
-				dump_types #debug
-				puts root['current'].at?('$.a').name #debug
-				puts root['current'].at?('a').name #debug
+				puts 'vars: ' + @variables.keys.inspect #debug
+				#dump_types #debug
+				#puts root['current'].at?('$.a').name #debug
+				#puts root['current'].at?('a').name #debug
 				
-				# foreach subclass, inherits superclass
-				root.accept(ClassExpander.new(root))
-				# foreach object, inherits class
-				root['current'].accept(ObjectExpander.new(root))
+				# set goal value
+				root['desired'].accept(GoalSetter.new(@variables, @types))
 			end
 
 			def dump_types
@@ -42,6 +48,25 @@ module Nuri
 					}
 					puts ''
 				}
+			end
+		end
+
+		class VariableNotFoundException < Exception
+		end
+
+		class GoalSetter
+			def initialize(variables, types)
+				@vars = variables
+				@types = types
+			end
+
+			def visit(name, value, ref)
+				return if name[0,1] == '_'
+				if @vars.has_key?(name)
+					puts "goal: " + name + "," + ref + ","
+				else
+					raise VariableNotFoundException, ref.push(name.no_root)
+				end
 			end
 		end
 
@@ -69,8 +94,10 @@ module Nuri
 
 			def visit(name, value, ref)
 				return if not value.is_a?(Hash) or not value.isobject? or value.isa? == nil
+puts 'inherits: ' + name + " < " + value.isa?
 				parent = @root.at?(value.isa?)
 				value.inherits(parent)
+puts 'results: ' + value.keys.inspect
 			end
 		end
 
