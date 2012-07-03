@@ -47,8 +47,8 @@ current state {
 desired constraint {
 	a.running is false
 	pc1.refer is b
-	pc2.refer is null
-	b.running is false
+	pc2.refer is b
+	b.running is true
 }
 global constraint {
 	pc1.refer.running is true

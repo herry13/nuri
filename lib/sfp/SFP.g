@@ -21,6 +21,7 @@ Features:
 TODO:
 - provenance
 - state-dependency (supports multiple conditions using 'or' keyword)
+- constraint namespace
 =end
 
 	require File.dirname(__FILE__) + "/sfp"
@@ -31,6 +32,10 @@ TODO:
 	def nextId
 		++@id
 		return "c" + @id.to_s
+	end
+
+	def null_value(isa=nil)
+		return { '_context' => 'null', '_isa' => isa }
 	end
 
 	def toRef(path)
@@ -146,7 +151,7 @@ object_def
 		{
 			@now[$ID.text] = {	'_self' => $ID.text,
 				'_context' => 'object',
-				'_parent' => @now
+				'_parent' => @now,
 			}
 			@now = @now[$ID.text]
 		}
@@ -166,7 +171,7 @@ object_body
 object_attribute
 	:	attribute
 	|	ID equals_op NULL NL+
-		{	@now[$ID.text] = nil	}
+		{	@now[$ID.text] = self.null_value	}
 	;
 
 state_dependency
@@ -193,8 +198,8 @@ procedure
 			@now[$ID.text] = { '_self' => $ID.text,
 				'_context' => 'procedure',
 				'_parent' => @now,
-				'_conditions' => { '_context' => 'constraint' },
-				'_effects' => { '_context' => 'mutation' }
+				'_conditions' => { '_context' => 'constraint', '_type' => 'and' },
+				'_effects' => { '_context' => 'mutation', '_type' => 'and' }
 			}
 			@now = @now[$ID.text]
 		}
@@ -230,6 +235,7 @@ conditions
 			@now = @now['_conditions']
 		}
 		'{' NL* constraint_body '}' NL+
+
 		{	self.gotoParent()	}
 	;
 
@@ -250,6 +256,7 @@ constraint
 		{
 			@now[$ID.text] = { '_self' => $ID.text,
 				'_context' => 'constraint',
+				'_type' => 'and',
 				'_parent' => @now
 			}
 			@now = @now[$ID.text]
@@ -301,38 +308,38 @@ constraint_statement returns [key, val]
 	:	reference equals_op value
 		{
 			$key = $reference.val
-			$val = { '_context' => 'equals', '_value' => $value.val }
+			$val = { '_context' => 'constraint', '_type' => 'equals', '_value' => $value.val }
 		}
 	|	reference equals_op NULL
 		{
 			$key = $reference.val
-			$val = { '_context' => 'equals', '_value' => nil }
+			$val = { '_context' => 'constraint', '_type' => 'equals', '_value' => self.null_value }
 		}
 	|	reference not_equals_op value
 		{
 			$key = $reference.val
-			$val = { '_context' => 'not-equals', '_value' => $value.val }
+			$val = { '_context' => 'constraint', '_type' => 'not-equals', '_value' => $value.val }
 		}
 	|	reference not_equals_op NULL
 		{
 			$key = $reference.val
-			$val = { '_context' => 'not-equals', '_value' => nil }
+			$val = { '_context' => 'constraint', '_type' => 'not-equals', '_value' => self.null_value }
 		}
 	|	reference 'is'? 'in' set_value
 		{
 			$key = $reference.val
-			$val = { '_context' => 'in', '_value' => $set_value.val }
+			$val = { '_context' => 'constraint', '_type' => 'in', '_value' => $set_value.val }
 		}
 	|	reference ('isnt'|'not') 'in' set_value
 		{
 			$key = $reference.val
-			$val = { '_context' => 'not-in', '_value' => $set_value.val }
+			$val = { '_context' => 'constraint', '_type' => 'not-in', '_value' => $set_value.val }
 		}
 	|	conditional_constraint
 	|	reference binary_comp comp_value
 		{
 			$key = $reference.val
-			$val = { '_context' => $binary_comp.text, '_value' => $comp_value.val }
+			$val = { '_context' => 'constraint', '_type' => $binary_comp.text, '_value' => $comp_value.val }
 		}
 	;
 
@@ -404,21 +411,24 @@ mutation_statement returns [key, val]
 	:	reference equals_op value
 		{
 			$key = $reference.val
-			$val = { '_context' => 'equals',
+			$val = { '_context' => 'mutation',
+				'_type' => 'equals',
 				'_value' => $value.val
 			}
 		}
 	|	reference equals_op NULL
 		{
 			$key = $reference.val
-			$val = { '_context' => 'equals',
-				'_value' => nil
+			$val = { '_context' => 'mutation',
+				'_type' => 'equals',
+				'_value' => self.null_value
 			}
 		}
 	|	reference binary_op NUMBER
 		{
 			$key = $reference.val
-			$val = { '_context' => $binary_op.text,
+			$val = { '_context' => 'mutation',
+				'_type' => $binary_op.text,
 				'_value' => $NUMBER.text.to_f
 			}
 		}
@@ -443,21 +453,24 @@ mutation_statement returns [key, val]
 		{
 			id = '_' + self.nextId
 			@now[id] = { '_self' => id,
-				'_context' => 'delete',
+				'_context' => 'mutation',
+				'_type' => 'delete',
 				'_value' => self.toRef($path.text)
 			}
 		}
 	|	reference 'add(' value ')'
 		{
 			$key = $reference.val
-			$val = { '_context' => 'add',
+			$val = { '_context' => 'mutation',
+				'_type' => 'add',
 				'_value' => $value.val
 			}
 		}
 	|	reference 'remove(' value ')'
 		{
 			$key = $reference.val
-			$val = { '_context' => 'remove',
+			$val = { '_context' => 'mutation',
+				'_type' => 'remove',
 				'_value' => $value.val
 			}
 		}
@@ -514,9 +527,8 @@ reference returns [val]
 reference_type returns [val]
 	:	'isref' path
 		{
-			$val = { '_context' => 'reference',
-				'_isa' => self.toRef($path.text),
-				'_value' => nil
+			$val = { '_context' => 'null',
+				'_isa' => self.toRef($path.text)
 			}
 		}
 	;
@@ -545,7 +557,7 @@ binary_comp
 	|	'<='
 	;
 
-NULL
+NULL 
 	:	'null'
 	;
 

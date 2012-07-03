@@ -1,48 +1,5 @@
 #!/usr/bin/env ruby
 
-require File.dirname(__FILE__) + "/SFPParser"
-require File.dirname(__FILE__) + "/SFPLexer"
-require File.dirname(__FILE__) + "/sas"
-require File.dirname(__FILE__) + "/mod"
-
-module Nuri
-	module Sfp
-		# main class which processes configuration description in SFP language either
-		# in file or as a string
-		class Main
-
-			# enable this class to process SFP into FDR (SAS+)
-			include Nuri::Sfp::Sas
-
-			def initialize
-			end
-
-			# parse SFP file
-			def parseFile(file)
-				f = File.open(file, 'rb')
-				lexer = SFP::Lexer.new(f)
-				tokens = ANTLR3::CommonTokenStream.new(lexer)
-				@parser = SFP::Parser.new(tokens)
-				@parser.sfp
-			end
-
-			# parse SFP in a string
-			def parse(text)
-				lexer = SFP::Lexer.new(text)
-				tokens = ANTLR3::CommonTokenStream.new(lexer)
-				@parser = SFP::Parser.new(tokens)
-				@parser.sfp
-			end
-	
-			# return context representation of SFP description
-			def to_context
-				return @parser.context
-			end
-		end
-	end
-end
-
-=begin
 ### String additional method for handling Reference
 # return true if this string is a reference, otherwise false
 String.send(:define_method, "ref?") {
@@ -73,13 +30,19 @@ String.send(:define_method, 'isa?') {
 	return 'reference'
 }
 
+String.send(:define_method, 'resolve') { |root|
+	return self if not self.ref?
+	return root.at?(self)
+}
+
 # return true because String is a value
 String.send(:define_method, 'isvalue?') { return true }
 
 # return false because String is not an object
 String.send(:define_method, 'isobject?') { return false }
-
 String.send(:define_method, 'null?') { return false }
+String.send(:define_method, 'isconstraint?') { return false }
+String.send(:define_method, 'isprocedure?') { return false }
 
 ### Boolean additional methods
 # return type of TrueClass i.e. 'boolean'
@@ -90,8 +53,10 @@ TrueClass.send(:define_method, 'isvalue?') { return true }
 
 # return false because TrueClass is not an object
 TrueClass.send(:define_method, 'isobject?') { return false }
-
 TrueClass.send(:define_method, 'null?') { return false }
+TrueClass.send(:define_method, "ref?") { return false }
+TrueClass.send(:define_method, 'isconstraint?') { return false }
+TrueClass.send(:define_method, 'isprocedure?') { return false }
 
 # return type of FalseClass i.e. 'boolean'
 FalseClass.send(:define_method, 'isa?') { return 'boolean' }
@@ -101,8 +66,10 @@ FalseClass.send(:define_method, 'isvalue?') { return true }
 
 # return false because FalseClass is not an object
 FalseClass.send(:define_method, 'isobject?') { return false }
-
 FalseClass.send(:define_method, 'null?') { return false }
+FalseClass.send(:define_method, "ref?") { return false }
+FalseClass.send(:define_method, 'isconstraint?') { return false }
+FalseClass.send(:define_method, 'isprocedure?') { return false }
 
 ### Numeric additional methods
 # return type of Numeric i.e. 'number'
@@ -113,27 +80,10 @@ Numeric.send(:define_method, 'isvalue?') { return true }
 
 # return false because Numeric is not an object
 Numeric.send(:define_method, 'isobject?') { return false }
-
 Numeric.send(:define_method, 'null?') { return false }
-
-##### Nil additional methods
-# return type of Nil
-NilClass.send(:define_method, 'isa?') {
-	return @isa if defined?(@isa)
-	return nil
-}
-
-NilClass.send(:define_method, 'isa') { |type|
-	@isa = type
-}
-
-NilClass.send(:define_method, 'null?') { return true }
-
-# return true because Nil is a value
-NilClass.send(:define_method, 'isvalue?') { return true }
-
-# return false because Nil is not an object
-NilClass.send(:define_method, 'isobject?') { return false }
+Numeric.send(:define_method, "ref?") { return false }
+Numeric.send(:define_method, 'isconstraint?') { return false }
+Numeric.send(:define_method, 'isprocedure?') { return false }
 
 ##### Hash additional methods
 # return type of this context object, otherwise return nil
@@ -141,6 +91,8 @@ Hash.send(:define_method, 'isa?') {
 	return self['_isa'] if self.has_key?('_isa')
 	return nil
 }
+
+Hash.send(:define_method, "ref?") { return false }
 
 # return true if this context is an object, otherwise false
 Hash.send(:define_method, 'isvalue?') {
@@ -152,15 +104,19 @@ Hash.send(:define_method, 'isobject?') {
 	return (self.has_key?('_context') and self['_context'] == 'object')
 }
 
-# return true if this context in a reference, otherwise false
+# return true if this context is a null value, otherwise false
 Hash.send(:define_method, 'null?') {
-	return (self.has_key?('_context') and self['_context'] == 'reference' and
-		self.has_key?('_value') and self['_value'] == nil)
+	return (self.has_key?('_context') and self['_context'] == 'null')
 }
 
-# return a fullpath reference if this context is an object, otherwise nil
+Hash.send(:define_method, 'to_null') { |isa|
+	return nil if not self.isclass?
+	return { '_context' => 'null', '_isa' => self.ref }
+}
+
+# return the name of this context if this is an object, otherwise nil
 Hash.send(:define_method, 'name') {
-	return self.ref if self.isobject?
+	return self['_self'] if self.isobject?
 	return nil
 }
 
@@ -169,19 +125,18 @@ Hash.send(:define_method, 'isclass?') {
 	return (self.has_key?('_context') and self['_context'] == 'class')
 }	
 
-# return the superclass' reference if this context class has a superclass
-Hash.send(:define_method, 'extends?') {
-	return self['_extends'] if self.isclass? and self.has_key?('_extends')
-	return nil
+Hash.send(:define_method, 'isconstraint?') {
+	return (self.has_key?('_context') and self['_context'] == 'constraint')
 }
 
-# accept method as implementation of Visitor pattern
-Hash.send(:define_method, "accept") { |visitor|
-	self.each_pair { |key,value|
-		next if key == '_parent'
-		visitor.visit(key, value, self.ref)
-		value.accept(visitor) if value.is_a?(Hash)
-	}
+Hash.send(:define_method, 'isprocedure?') {
+	return (self.has_key?('_context') and self['_context'] == 'procedure')
+}	
+
+# return the superclass' reference if this context class has a superclass
+Hash.send(:define_method, 'extends?') { 
+	return self['_extends'] if self.isclass? and self.has_key?('_extends')
+	return nil
 }
 
 # return a fullpath of reference of this context
@@ -189,6 +144,15 @@ Hash.send(:define_method, "ref") {
 	return '$' if not self.has_key?('_parent') or self['_parent'] == nil
 	me = (self.has_key?('_self') ? self['_self'] : '')
 	return self['_parent'].ref + "." + me
+}
+
+# accept method as implementation of Visitor pattern
+Hash.send(:define_method, "accept") { |visitor|
+	self.each_pair { |key,value|
+		next if key == '_parent'
+		gonext = visitor.visit(key, value, self.ref)
+		value.accept(visitor) if value.is_a?(Hash) and gonext == true
+	}
 }
 
 # resolve a reference, return nil if there's no value with such path
@@ -225,7 +189,6 @@ Hash.send(:define_method, 'expanded?') {
 Hash.send(:define_method, 'inherits') { |parent|
 	parent.each_pair { |key,value|
 		next if key[0,1] == '_' or self.has_key?(key)
-puts "\tcopy: " + key
 		if value.is_a?(Hash)
 			self[key] = value.clone
 			self[key]['_parent'] = self
@@ -235,4 +198,3 @@ puts "\tcopy: " + key
 	}
 	@expanded = true
 }
-=end
