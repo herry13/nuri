@@ -187,14 +187,16 @@ Hash.send(:define_method, 'expanded?') {
 # Expand this context by copying attributes and procedures of its superclass
 # or its type
 Hash.send(:define_method, 'inherits') { |parent|
-	parent.each_pair { |key,value|
-		next if key[0,1] == '_' or self.has_key?(key)
-		if value.is_a?(Hash)
-			self[key] = value.clone
-			self[key]['_parent'] = self
-		else
-			self[key] = value
-		end
-	}
+	if parent != nil
+		parent.each_pair { |key,value|
+			next if key[0,1] == '_' or self.has_key?(key)
+			if value.is_a?(Hash)
+				self[key] = value.clone
+				self[key]['_parent'] = self
+			else
+				self[key] = value
+			end
+		}
+	end
 	@expanded = true
 }

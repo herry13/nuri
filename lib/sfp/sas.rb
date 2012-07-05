@@ -7,15 +7,26 @@ require 'json'
 
 module Nuri
 	module Sfp
+
+		def self.null_of(class_ref=nil)
+			return nil if not class_ref.is_a?(String) or not class_ref.ref?
+			return { '_context' => 'null', '_isa' => class_ref } if class_ref != nil and class_ref != ''
+		end
+
 		# include 'Sas' module to enable processing Sfp into Finite-Domain Representation (FDR)
 		module Sas
+			GLOBAL_OPERATOR = '#global_op'
+			GLOBAL_VARIABLE = '#global_var'
+
 			def to_sas
 				root = self.to_context
 				@variables = Hash.new
-				@types = { 'boolean' => Array.new,
+				@types = { 'boolean' => [true, false],
 					'number' => Array.new,
 					'string' => Array.new
 				}
+				@operators = Hash.new
+				@axioms = Array.new
 
 				# foreach subclass, inherits superclass
 				root.accept(ClassExpander.new(root))
@@ -30,35 +41,82 @@ module Nuri
 				# set goal value
 				root['desired'].delete('_parent')
 				root['desired'].accept(GoalSetter.new(root, @variables, @types))
+
+				# collect all values
+				root.accept(Nuri::Sfp::ValueCollector.new(@types))
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
 
-				root['current'].accept(Nuri::Sfp::ProcedureVisitor.new(root, @variables, @types))
+				# set domain values for each variable
+				self.setVariableValues
+
+				# generate operator and axioms for global constraints
+				self.setGlobalConstraint if root.has_key?('global')
+
+				# search procedures and generate grounded-operators
+				#root['current'].accept(Nuri::Sfp::ProcedureVisitor.new(root, @variables, @types))
 
 				self.dump_types
 				self.dump_vars
+				self.dump_operators
 
 				#root.accept(ParentEliminator.new)
 				#puts JSON.pretty_generate(root)
 			end
 
+			def setGlobalConstraint
+				var = Variable.new(GLOBAL_VARIABLE, 'boolean', -1, true, true, false)
+				@variables[var.name] = var
+				
+				op = Operator.new(GLOBAL_OPERATOR)
+				op[var] = Parameter.new(var, true, true)
+				@operators[op.name] = op
+			end
+
+			# set possible values for each variable
+			def setVariableValues
+				@variables.each_value { |var|
+					var.goal = var.init if var.final # init = goal if this is a final variable
+					var << var.init if var.init != nil and not var.init.ref? and not var.init.null?
+					var << var.goal if var.goal != nil and not var.goal.ref? and not var.goal.null?
+					if not var.final
+						# if not a final variable, add all its type's values
+						@types[var.type].each { |item| var << item if not item.ref? }
+					end
+					var.uniq!
+				}
+			end
+
 			def dump_types
+				puts '--- types'
 				@types.each_pair { |name,values|
 					next if values == nil
 					print name + ": "
 					values.each { |val|
-						print val.to_s + " " if not val.isobject?
-						print val.name + " " if val.isobject?
+						if val.null?
+							print 'null '
+						elsif val.isobject?
+							print val.name + " "
+						else
+							print val.to_s + " "
+						end
 					}
 					puts ''
 				}
 			end
 
 			def dump_vars
+				puts '--- variables'
 				@variables.each_value { |value| puts value.to_s }
+			end
+
+			def dump_operators
+				puts '--- operators'
+				@operators.each_value { |op| puts op.to_s }
 			end
 		end
 
+		# remove '_parent' attribute (mainly to avoid cyclic in JSON)
 		class ParentEliminator
 			def visit(name, value, ref)
 				value.delete('_parent') if value.is_a?(Hash) and value.has_key?('_parent')
@@ -66,9 +124,14 @@ module Nuri
 			end
 		end
 
+		# this exception is thrown if a variable is not exist
 		class VariableNotFoundException < Exception
 		end
 
+		# generate Visitor class which has 3 attributes
+		# - root : Hash instance of root Context
+		# - variables: Hash instance that holds all Variable instances
+		# - types: Hash instance that holds all types (primitive or non-primitive)
 		class Visitor
 			def initialize(root, variables=nil, types=nil)
 				@root = root
@@ -77,6 +140,7 @@ module Nuri
 			end
 		end
 
+		# Visitor that process all procedure contexts
 		class ProcedureVisitor < Visitor
 			def visit(name, value, ref)
 				return if name[0,1] == '_'
@@ -86,6 +150,7 @@ module Nuri
 			end
 		end
 
+		# Visitor that set goal value of each variable
 		class GoalSetter < Visitor
 			def equals(name, value)
 				value['_isa'] = @vars[name].type if value.null?
@@ -135,7 +200,11 @@ module Nuri
 		# collecting all classes and put them into @bucket
 		class ClassCollector < Collector
 			def visit(name, value, ref)
-				@bucket[ref.push(name)] = Array.new if value.respond_to?('isclass?') and value.isclass?
+				if value.respond_to?('isclass?') and value.isclass?
+					varname = ref.push(name)
+					@bucket[varname] = Array.new
+					@bucket[varname] << Nuri::Sfp.null_of(varname)
+				end
 			end
 		end
 
@@ -153,21 +222,19 @@ module Nuri
 				value = value.resolve(@root['current']) if value.ref?
 				var = Variable.new(ref.push(name), value.isa?, -1, value, nil, isfinal)
 				@bucket[var.name] = var
-				@types[value.isa?].push(value) if not value.ref? and not value.null?
+				@types[value.isa?].push(value) if value.isa? != nil and not value.ref? and not value.null?
 				return true
 			end
 		end
 
-		class HashToNilSetter
-			def initialize(root)
-				@root = root
-			end
-
+		# Collects all values (primitive or non-primitive)
+		class ValueCollector < Collector
 			def visit(name, value, ref)
-				return if name[0,1] == '_' or not value.is_a?(Hash) or not value.null?
-				val = (nil).isa(@root.at?(ref.push(name)).isa?)
-				puts "\t" + ref.push(name) + " is ref-type"
-				puts "\t" + @root.at?(ref.push(name)).keys.inspect
+				@bucket[value.isa?] << value if not 
+					((name[0,1] == '_' and name != '_value') or not value.isvalue? or
+						value.ref? or value.is_a?(TrueClass) or value.is_a?(FalseClass) or
+						value.null?) and value.isa? != nil
+				return true
 			end
 		end
 
@@ -190,23 +257,14 @@ module Nuri
 				@final = final
 			end
 
-			# add new possible value, then remove any duplicate
-			def push(value)
-				super.push(value)
-				self.uniq!
-			end
-
-			# add new possible value, then remove any duplicate
-			def unshift(value)
-				super.unshift(value)
-				self.uniq!
-			end
-
 			def to_s
 				s = @name + ', ' + @type 
 				s += ', ' + (@init == nil ? '' : (@init.null? ? 'null' : (@init.isobject? ? @init.name.to_s : @init.to_s)))
 				s += ', ' + (@goal == nil ? '' : (@goal.null? ? 'null' : (@goal.isobject? ? @goal.name.to_s : @goal.to_s)))
-				s += ', ' + (@final ? 'final' : 'notfinal')
+				s += ', ' + (@final ? 'final' : 'notfinal') + "\n"
+				s += "["
+				self.each { |value| s += (value.null? ? 'null' : (value.isobject? ? value.name.to_s : value.to_s)) + ',' }
+				s = s.chop + "]"
 				return s
 			end
 
@@ -218,13 +276,53 @@ module Nuri
 			end
 		end
 
-		class Operator
-			attr_accessor :name, :params
+		class Operator < Hash
+			@@id = 0
+
+			def self.nextId; return ++@@id; end
+
+			attr_accessor :id, :name
 
 			def initialize(name)
+				@id = Nuri::Sfp::Operator.nextId
 				@name = name
-				@params = Hash.new
 			end
+
+			def to_s; return @name + ': ' + self.length.to_s ; end
+
+			def to_sas
+				# TODO
+			end
+		end
+
+		class Axiom < Hash
+			@@id = 0
+
+			def self.nextId; return ++@@id; end
+
+			attr_accessor :id
+
+			def initialize
+				@id = Nuri::Sfp::Axiom.nextId
+			end
+
+			def to_sas
+				#TODO
+			end
+		end
+
+		class Parameter
+			attr_accessor :var, :pre, :post
+
+			def initialize(var, pre, post=nil)
+				@var = var
+				@pre = pre
+				@post = post
+			end
+
+			def prevail?; return (@post == nil); end
+
+			def effect?; return (@post != nil); end
 		end
 	end
 end

@@ -48,8 +48,8 @@ TODO:
 
 	def processFile(file)
 		# TODO
-		@sfp.parseFile(file)
-		@sfp.to_context.each_pair { |key,val|
+		@parser.parseFile(file)
+		@parser.to_context.each_pair { |key,val|
 			if val['_context'] == 'class' or val['_context'] == 'state' or
 				val['_context'] == 'composite' or val['_context'] == 'constraint'
 				@root[key] = val
@@ -70,7 +70,8 @@ sfp
 			@root = Hash.new
 			@now = @root
 			@id = 0
-			@sfp = Nuri::Sfp::Main.new
+			@parser = Nuri::Sfp::Main.new
+			@root['Object'] = { '_self' => 'Object', '_context' => 'class', '_parent' => @root }
 		}
 		NL* include* header* (state_section | composite | constraint)*
 	;
@@ -152,6 +153,7 @@ object_def
 			@now[$ID.text] = {	'_self' => $ID.text,
 				'_context' => 'object',
 				'_parent' => @now,
+				'_isa' => '$.Object'
 			}
 			@now = @now[$ID.text]
 		}

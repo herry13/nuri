@@ -43,6 +43,11 @@ current state {
 		refer is a
 	}
 	pc2 isa Client
+	x {
+		y {
+			z isa Client
+		}
+	}
 }
 desired constraint {
 	a.running is false
