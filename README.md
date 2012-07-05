@@ -35,8 +35,12 @@ Required Ruby Gems
 - antlr3
 - ruby-augeas
 
-Event-Based Server (emnuri.rb)
-------------------------------
-Required Ruby Gems
-- eventmachine
-- eventmachine_httpserver
+Documentation
+-------------
+Required Gems
+- yard
+- redcarpet
+
+To build:
+	$ cd doc
+	$ ./build.sh
