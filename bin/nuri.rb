@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require File.dirname(__FILE__) + "/../lib/lib"
+$: << File.expand_path(File.dirname(__FILE__) + "/../lib")
+$: << File.expand_path(File.dirname(__FILE__) + "/../modules")
+
+#require File.dirname(__FILE__) + "/../lib/lib"
+require "nuri/main"
 
 # create the nuri's server
 nuri = Nuri::Main.new

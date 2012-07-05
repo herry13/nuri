@@ -8,7 +8,10 @@ require 'logger'
 require 'thread'
 require 'uri'
 require 'net/http'
-require File.dirname(__FILE__) + "/../lib"
+require 'nuri/util'
+require 'nuri/resource'
+require 'nuri/undefined'
+require 'modules/node/node'
 
 module Nuri
 	class Main < Mongrel::HttpHandler
@@ -35,13 +38,12 @@ module Nuri
 			modules_dir = Nuri::Util.rootdir + "/modules"
 
 			# load module 'Node'
-			require modules_dir + "/node/node"
 			@root = Nuri::Module::Node.new
 			Dir.foreach(modules_dir) { |mod|
 				next if mod == 'node'
 				path = modules_dir + "/" + mod
 				if File.directory?(path) and File.file?(path + "/" + mod + ".rb")
-					require path + "/" + mod
+					require 'modules/' + mod + '/' + mod
 					begin
 						m = eval("Nuri::Module::" + mod.capitalize + ".new")
 						m.name = mod if m.name == nil

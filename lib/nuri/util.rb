@@ -3,7 +3,7 @@ require 'logger'
 
 module Nuri
 	class Util
-		@@rootdir = File.dirname(__FILE__) + "/.."
+		@@rootdir = File.dirname(__FILE__) + "/../.."
 		@@logger = Logger.new(@@rootdir + "/log/message.log")
 		@@os = nil
 		@@platform = nil
