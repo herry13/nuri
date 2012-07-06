@@ -41,6 +41,6 @@ Required Gems
 - yard
 - redcarpet
 
-To build:
-	$ cd doc
+To build: \
+	$ cd doc \
 	$ ./build.sh
