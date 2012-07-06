@@ -1,4 +1,4 @@
-#!/usr/bin/env macruby
+#!/usr/bin/env ruby
 
 require './SFPParser'
 require './SFPLexer'

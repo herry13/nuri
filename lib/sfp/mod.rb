@@ -15,12 +15,12 @@ String.send(:define_method, "no_root") {
 
 # add path to the end of a reference 
 String.send(:define_method, "push") { |value|
-	return self.to_s + "." + value if self.ref?
-	return self.to_s + value.to_s
+	return self.to_s + "." + value #if self.ref?
+	#return self.to_s + value.to_s
 }
 
 # return first element and keep the rest
-String.send(:define_method, "pop") {
+String.send(:define_method, 'explode') {
 	return self.split('.', 2)
 }
 
@@ -38,6 +38,8 @@ String.send(:define_method, 'resolve') { |root|
 # return true because String is a value
 String.send(:define_method, 'isvalue?') { return true }
 
+String.send(:define_method, 'str') { return self.to_s }
+
 # return false because String is not an object
 String.send(:define_method, 'isobject?') { return false }
 String.send(:define_method, 'null?') { return false }
@@ -51,6 +53,8 @@ TrueClass.send(:define_method, 'isa?') { return 'boolean' }
 # return true because TrueClass is a value
 TrueClass.send(:define_method, 'isvalue?') { return true }
 
+TrueClass.send(:define_method, 'str') { return self.to_s }
+
 # return false because TrueClass is not an object
 TrueClass.send(:define_method, 'isobject?') { return false }
 TrueClass.send(:define_method, 'null?') { return false }
@@ -63,6 +67,8 @@ FalseClass.send(:define_method, 'isa?') { return 'boolean' }
 
 # return true because FalseClass is a value
 FalseClass.send(:define_method, 'isvalue?') { return true }
+
+FalseClass.send(:define_method, 'str') { return self.to_s }
 
 # return false because FalseClass is not an object
 FalseClass.send(:define_method, 'isobject?') { return false }
@@ -78,6 +84,8 @@ Numeric.send(:define_method, 'isa?') { return 'number' }
 # return true because Numeric is a value
 Numeric.send(:define_method, 'isvalue?') { return true }
 
+Numeric.send(:define_method, 'str') { return self.to_s }
+
 # return false because Numeric is not an object
 Numeric.send(:define_method, 'isobject?') { return false }
 Numeric.send(:define_method, 'null?') { return false }
@@ -90,6 +98,11 @@ Numeric.send(:define_method, 'isprocedure?') { return false }
 Hash.send(:define_method, 'isa?') {
 	return self['_isa'] if self.has_key?('_isa')
 	return nil
+}
+
+Hash.send(:define_method, 'str') {
+	return self.name if self.isvalue?
+	return ''
 }
 
 Hash.send(:define_method, "ref?") { return false }

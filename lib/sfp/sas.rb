@@ -34,10 +34,10 @@ module Nuri
 				root['current'].accept(ObjectExpander.new(root))
 
 				# collect classes
-				root.accept(Nuri::Sfp::ClassCollector.new(@types))
+				root.accept(ClassCollector.new(@types))
 
 				# collect variables
-				root['current'].accept(Nuri::Sfp::VariableCollector.new(root, @variables, @types))
+				root['current'].accept(VariableCollector.new(root, @variables, @types))
 				# set goal value
 				root['desired'].delete('_parent')
 				root['desired'].accept(GoalSetter.new(root, @variables, @types))
@@ -51,26 +51,102 @@ module Nuri
 				self.setVariableValues
 
 				# generate operator and axioms for global constraints
-				self.setGlobalConstraint if root.has_key?('global')
-
-				# search procedures and generate grounded-operators
-				#root['current'].accept(Nuri::Sfp::ProcedureVisitor.new(root, @variables, @types))
+				self.process_global_constraints(root) if root.has_key?('global')
 
 				self.dump_types
 				self.dump_vars
 				self.dump_operators
+				self.dump_axioms
+
+				# search procedures and generate grounded-operators
+				root['current'].accept(ProcedureVisitor.new(self))
 
 				#root.accept(ParentEliminator.new)
 				#puts JSON.pretty_generate(root)
 			end
 
-			def setGlobalConstraint
-				var = Variable.new(GLOBAL_VARIABLE, 'boolean', -1, true, true, false)
-				@variables[var.name] = var
+			# Generate Grounded Operator for given procedure
+			def process_procedure(proc)
+				puts 'procedure: ' + proc.ref
+				# TODO
+			end
+
+			# Process each statement in global constraint.
+			# - create a pair of global constraint variable and operator
+			# - generate positive and negative axioms for each hard constraint
+			def process_global_constraints(root)
+				puts '--- global constraint'
+				var_global = Variable.new(GLOBAL_VARIABLE, 'boolean', -1, true, true, false)
+				@variables[var_global.name] = var_global
 				
-				op = Operator.new(GLOBAL_OPERATOR)
-				op[var] = Parameter.new(var, true, true)
-				@operators[op.name] = op
+				op_global = Operator.new(GLOBAL_OPERATOR)
+				op_global[var_global.name] = Parameter.new(var_global, false, true)
+				@operators[op_global.name] = op_global
+
+				# keep generated axioms' variables
+				all_var_axiom = Array.new
+
+				# generate positive axioms
+				root['global'].each_pair { |ref,val|
+					next if ref[0,1] == '_'
+					axioms = self.ref_to_axioms(ref.no_root, root['current'], Hash.new)
+					self.solve_axioms_constraints(axioms, val, root)
+					# create an axiom variable for this statement
+					var_axiom = Variable.new('@' + Variable.nextId.to_s + '_' + ref,
+						'boolean', 1, true, true, false)
+					@variables[var_axiom.name] = var_axiom
+					all_var_axiom << var_axiom # save the variable
+					param = Parameter.new(var_axiom, false, true)
+					# add the variable to each axiom
+					axioms.each { |axiom|
+						axiom[var_axiom.name] = param
+						@axioms << axiom
+					}
+					# set this axiom variable as prevail condition of global constraint operator
+					op_global[var_axiom.name] = Parameter.new(var_axiom, true)
+				}
+
+				# generate negative axioms
+				all_var_axiom.each { |var|
+					axiom = Axiom.new
+					axiom[var.name] = Parameter.new(var, true, false)
+					axiom[var_global.name] = Parameter.new(var_global, true)
+					@axioms << axiom
+				}
+			end
+
+			# Solve constraint value (right side of constraint statement) of axioms by
+			# either assigning the value on :target variable or generate other axioms
+			# to be combined with existing ones.
+			# 
+			def solve_axioms_constraints(axioms, const, root)
+				if const['_type'] == 'equals'
+					axioms.each { |axiom| axiom[axiom.target] = const['_value'] }
+				end
+			end
+
+			# Generate a set of axioms for a given reference (left side of statement).
+			def ref_to_axioms(ref, value, params, bucket=nil)
+				return if ref == nil or ref == ''
+				bucket = Array.new if bucket == nil
+				first, nextref = ref.explode
+				varname = value.ref.push(first)
+				raise InvalidReferenceException if not @variables.has_key?(varname)
+				if nextref != nil and nextref != ''
+					@variables[varname].each { |val|
+						params[varname] = val
+						self.ref_to_axioms(nextref, val, params, bucket) if not val.null?
+					}
+				else
+					params[varname] = nil
+					axiom = Axiom.new
+					params.each_pair { |varname,val|
+						axiom[varname] = Parameter.new(@variables[varname], val)
+					}
+					axiom.target = varname
+					bucket.push(axiom)
+				end
+				return bucket
 			end
 
 			# set possible values for each variable
@@ -114,6 +190,11 @@ module Nuri
 				puts '--- operators'
 				@operators.each_value { |op| puts op.to_s }
 			end
+
+			def dump_axioms
+				puts '--- axioms'
+				@axioms.each { |ax| puts ax.to_s }
+			end
 		end
 
 		# remove '_parent' attribute (mainly to avoid cyclic in JSON)
@@ -124,8 +205,12 @@ module Nuri
 			end
 		end
 
-		# this exception is thrown if a variable is not exist
+		# This exception is thrown if a variable is not exist
 		class VariableNotFoundException < Exception
+		end
+
+		# This exception is thrown if there is an invalid reference
+		class InvalidReferenceException < Exception
 		end
 
 		# generate Visitor class which has 3 attributes
@@ -142,10 +227,16 @@ module Nuri
 
 		# Visitor that process all procedure contexts
 		class ProcedureVisitor < Visitor
+			def initialize(main)
+				@main = main
+			end
+
 			def visit(name, value, ref)
-				return if name[0,1] == '_'
-				puts 'procedure: ' + ref.push(name) if value.isprocedure?
-				# TODO
+				return false if name[0,1] == '_'
+				if value.isprocedure?
+					@main.process_procedure(value)
+					return false
+				end
 				return true
 			end
 		end
@@ -241,6 +332,13 @@ module Nuri
 		# SAS Variable is a finite-domain variable
 		# It has a finite set of possible values
 		class Variable < Array
+			@@id = 0
+
+			def self.nextId
+				@@id += 1
+				return @@id
+			end
+
 			# @name -- name of variable
 			# @type -- type of variable ('string','boolean','number', or fullpath of a class)
 			# @layer -- axiom layer ( '-1' if this is not axiom variable, otherwise >0)
@@ -276,10 +374,15 @@ module Nuri
 			end
 		end
 
+		# A class for Grounded Operator
 		class Operator < Hash
 			@@id = 0
 
-			def self.nextId; return ++@@id; end
+			# return the next operator #id
+			def self.nextId
+				@@id += 1
+				return @@id
+			end
 
 			attr_accessor :id, :name
 
@@ -295,15 +398,23 @@ module Nuri
 			end
 		end
 
+		# A class for Grounded Axiom
 		class Axiom < Hash
 			@@id = 0
 
-			def self.nextId; return ++@@id; end
+			def self.nextId
+				@@id += 1
+				return @@id
+			end
 
-			attr_accessor :id
+			attr_accessor :id, :target
 
 			def initialize
 				@id = Nuri::Sfp::Axiom.nextId
+			end
+
+			def to_s
+				return 'axiom#' + @id.to_s
 			end
 
 			def to_sas
@@ -311,6 +422,7 @@ module Nuri
 			end
 		end
 
+		# A class for operator/axiom parameter (prevail or effect condition)
 		class Parameter
 			attr_accessor :var, :pre, :post
 
@@ -320,9 +432,13 @@ module Nuri
 				@post = post
 			end
 
-			def prevail?; return (@post == nil); end
+			def prevail?
+				return (@post == nil)
+			end
 
-			def effect?; return (@post != nil); end
+			def effect?
+				return (@post != nil)
+			end
 		end
 	end
 end
