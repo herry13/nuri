@@ -42,7 +42,6 @@ Required Gems
 - redcarpet
 
 To build:
-
     $ cd doc
     $ ./build.sh
 
