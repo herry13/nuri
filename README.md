@@ -43,5 +43,6 @@ Required Gems
 
 To build:
 
-`   $ cd doc
-    $ ./build.sh`
+    $ cd doc
+    $ ./build.sh
+
