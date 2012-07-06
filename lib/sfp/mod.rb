@@ -213,3 +213,16 @@ Hash.send(:define_method, 'inherits') { |parent|
 	end
 	@expanded = true
 }
+
+# Key must be a 'String'
+Hash.send(:define_method, 'sfp_clone') {
+	h = Hash.new
+	self.each_pair { |key,value|
+		if key[0,1] != '_'
+			h[key] = (value.is_a?(Hash) ? value.sfp_clone : value.clone)
+		else
+			h[key] = value
+		end
+	}
+	return h
+}

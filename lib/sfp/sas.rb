@@ -18,8 +18,10 @@ module Nuri
 			GLOBAL_OPERATOR = '#global_op'
 			GLOBAL_VARIABLE = '#global_var'
 
+			attr_accessor :root, :variables, :types, :operators, :axioms
+
 			def to_sas
-				root = self.to_context
+				@root = self.to_context
 				@variables = Hash.new
 				@types = { 'boolean' => [true, false],
 					'number' => Array.new,
@@ -29,21 +31,21 @@ module Nuri
 				@axioms = Array.new
 
 				# foreach subclass, inherits superclass
-				root.accept(ClassExpander.new(root))
+				@root.accept(ClassExpander.new(self))
 				# foreach object, inherits class
-				root['current'].accept(ObjectExpander.new(root))
+				@root['current'].accept(ObjectExpander.new(self))
 
 				# collect classes
-				root.accept(ClassCollector.new(@types))
+				@root.accept(ClassCollector.new(@types))
 
 				# collect variables
-				root['current'].accept(VariableCollector.new(root, @variables, @types))
+				@root['current'].accept(VariableCollector.new(@root, @variables, @types))
 				# set goal value
-				root['desired'].delete('_parent')
-				root['desired'].accept(GoalSetter.new(root, @variables, @types))
+				@root['desired'].delete('_parent')
+				@root['desired'].accept(GoalVisitor.new(self))
 
 				# collect all values
-				root.accept(Nuri::Sfp::ValueCollector.new(@types))
+				@root.accept(Nuri::Sfp::ValueCollector.new(@types))
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
 
@@ -51,7 +53,7 @@ module Nuri
 				self.setVariableValues
 
 				# generate operator and axioms for global constraints
-				self.process_global_constraints(root) if root.has_key?('global')
+				self.process_global_constraints(@root) if @root.has_key?('global')
 
 				self.dump_types
 				self.dump_vars
@@ -59,16 +61,89 @@ module Nuri
 				self.dump_axioms
 
 				# search procedures and generate grounded-operators
-				root['current'].accept(ProcedureVisitor.new(self))
+				@root['current'].accept(ProcedureVisitor.new(self))
 
 				#root.accept(ParentEliminator.new)
 				#puts JSON.pretty_generate(root)
 			end
 
 			# Generate Grounded Operator for given procedure
+			# TODO
 			def process_procedure(proc)
-				puts 'procedure: ' + proc.ref
-				# TODO
+				puts '--- procedures'
+				puts '- ' + proc.ref #+ ' -- ' + proc.keys.inspect
+				# fill-in parameter's value
+				pvs = self.get_parameters_values(proc)
+				sets = self.keys_values_combinator(pvs.keys, pvs.values)
+				sets.each { |params| self.grounded_operator(proc, params) }
+			end
+
+			def subs_param(ref, params)
+				first, rest = ref.no_root.explode
+				return params[first].ref.push(rest)
+			end
+
+			def subs_params(context, params)
+				context.each_pair { |key,value|
+					next if key[0,1] == '_'
+					ref = self.subs_param(key, params)
+					#if value.is_a?(String) and value.ref?
+					#	value = self.subs_param(value, params)
+					#elsif value.is_a?(Array) and
+					#	(value['_type'] == 'in' and value['_type'] == 'not-in')
+					#	value.each_index { |x|
+					#		value[x] = self.subs_param(value[x], params) if value[x].ref?
+					#	}
+					#end
+					context[ref] = value
+					context.delete(key)
+				}
+				return context
+			end
+
+			def grounded_operator(proc, params)
+				self.subs_params(proc['_conditions'].sfp_clone, params)
+=begin
+				op = Operator.new(proc.ref)
+				proc['_conditions'].each_pair { |ref,val|
+					next if ref[0,1] == '_'
+					first, ref = ref.no_root.explode
+					ref = params[first].ref.push(ref)
+					if @variables.has_key?(ref)
+						if val['_type'] == 'equals'
+							
+						else
+						end
+						puts ref + ' -- ' + val['_type']
+					else
+						if val['_type'] == 'equals'
+						else
+						end
+					end
+				}
+=end
+			end
+
+			def get_parameters_values(proc)
+				params = { 'this' => [proc['_parent']] }
+				proc.each_pair { |name,val|
+					next if name[0,1] == '_'
+					params[name] = @types[val.isa?] if val.isa? != nil
+				}
+				return params
+			end
+
+			def keys_values_combinator(keys, values, pair=Hash.new, bucket=Array.new, index=0)
+				if index >= keys.length
+					bucket << pair.clone
+					return
+				end
+				values[index].each { |val|
+					next if val.null?
+					pair[keys[index]] = val
+					self.keys_values_combinator(keys, values, pair, bucket, index+1)
+				}
+				return bucket
 			end
 
 			# Process each statement in global constraint.
@@ -93,7 +168,7 @@ module Nuri
 					self.solve_axioms_constraints(axioms, val, root)
 					# create an axiom variable for this statement
 					var_axiom = Variable.new('@' + Variable.nextId.to_s + '_' + ref,
-						'boolean', 1, true, true, false)
+						'boolean', 1, false, true, false)
 					@variables[var_axiom.name] = var_axiom
 					all_var_axiom << var_axiom # save the variable
 					param = Parameter.new(var_axiom, false, true)
@@ -218,19 +293,29 @@ module Nuri
 		# - variables: Hash instance that holds all Variable instances
 		# - types: Hash instance that holds all types (primitive or non-primitive)
 		class Visitor
-			def initialize(root, variables=nil, types=nil)
-				@root = root
-				@vars = variables
-				@types = types
+			def initialize(main) #, root, variables=nil, types=nil)
+				@main = main
+				@root = main.root
+				@vars = main.variables
+				@types = main.types
+			end
+		end
+
+		class GroundedVisitor
+			def initialize(context, params)
+				@context = context
+				@params = params
+			end
+
+			def visit(name, value, ref)
+				puts '=> ' + name if name.ref?
+				puts '=> ' + value.str if value.ref?
+				return true
 			end
 		end
 
 		# Visitor that process all procedure contexts
 		class ProcedureVisitor < Visitor
-			def initialize(main)
-				@main = main
-			end
-
 			def visit(name, value, ref)
 				return false if name[0,1] == '_'
 				if value.isprocedure?
@@ -242,7 +327,7 @@ module Nuri
 		end
 
 		# Visitor that set goal value of each variable
-		class GoalSetter < Visitor
+		class GoalVisitor < Visitor
 			def equals(name, value)
 				value['_isa'] = @vars[name].type if value.null?
 				@vars[name].goal = value if @vars.has_key?(name)
@@ -384,11 +469,12 @@ module Nuri
 				return @@id
 			end
 
-			attr_accessor :id, :name
+			attr_accessor :id, :name, :cost
 
-			def initialize(name)
+			def initialize(name, cost=1)
 				@id = Nuri::Sfp::Operator.nextId
 				@name = name
+				@cost = cost
 			end
 
 			def to_s; return @name + ': ' + self.length.to_s ; end
