@@ -62,9 +62,11 @@ module Nuri
 
 				# search procedures and generate grounded-operators
 				@root['current'].accept(ProcedureVisitor.new(self))
+			end
 
-				#root.accept(ParentEliminator.new)
-				#puts JSON.pretty_generate(root)
+			def dump_json(root=@root)
+				root.accept(ParentEliminator.new)
+				puts JSON.pretty_generate root
 			end
 
 			# Generate Grounded Operator for given procedure
@@ -87,14 +89,14 @@ module Nuri
 				context.each_pair { |key,value|
 					next if key[0,1] == '_'
 					ref = self.subs_param(key, params)
-					#if value.is_a?(String) and value.ref?
-					#	value = self.subs_param(value, params)
+					if value.is_a?(String) and value.ref?
+						value = self.subs_param(value, params)
 					#elsif value.is_a?(Array) and
 					#	(value['_type'] == 'in' and value['_type'] == 'not-in')
 					#	value.each_index { |x|
 					#		value[x] = self.subs_param(value[x], params) if value[x].ref?
 					#	}
-					#end
+					end
 					context[ref] = value
 					context.delete(key)
 				}
@@ -102,7 +104,9 @@ module Nuri
 			end
 
 			def grounded_operator(proc, params)
-				self.subs_params(proc['_conditions'].sfp_clone, params)
+				cond = proc['_conditions'].sfp_clone
+				
+				#cond = self.subs_params(proc['_conditions'].sfp_clone, params)
 =begin
 				op = Operator.new(proc.ref)
 				proc['_conditions'].each_pair { |ref,val|

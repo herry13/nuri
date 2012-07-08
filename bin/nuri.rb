@@ -1,9 +1,8 @@
 #!/usr/bin/env ruby
 
-$: << File.expand_path(File.dirname(__FILE__) + "/../lib")
-$: << File.expand_path(File.dirname(__FILE__) + "/../modules")
+$: << File.expand_path(File.dirname(__FILE__) + "/..")
+#$: << File.expand_path(File.dirname(__FILE__) + "/../modules")
 
-#require File.dirname(__FILE__) + "/../lib/lib"
 require "nuri/main"
 
 # create the nuri's server

@@ -24,8 +24,6 @@ TODO:
 - constraint namespace
 =end
 
-	require File.dirname(__FILE__) + "/sfp"
-
 }
 
 @members {
@@ -167,7 +165,7 @@ object_def
 	;
 
 object_body
-	:	'{' NL* ( object_attribute | state_dependency )* '}'
+	:	'{' NL* ( object_attribute | state_dependency | operator )* '}'
 	;
 
 object_attribute
@@ -192,6 +190,52 @@ dep_effect
 		( value
 		| NULL 
 		)
+	;
+
+operator
+	:	'operator' ID '{' NL*
+		{
+			@now[$ID.text] = { '_self' => $ID.text,
+				'_context' => 'operator',
+				'_parent' => @now,
+				'_conditions' => { '_context' => 'constraint' },
+				'_effects' => { '_context' => 'mutation' }
+			}
+			@now = @now[$ID.text]
+		}
+		(	'cost' equals_op NUMBER NL+
+			{	@now['_cost'] = $NUMBER.text.to_i	}
+		)?
+		op_conditions? op_effects
+		'}' NL+
+		{	self.gotoParent()	}
+	;
+
+op_conditions
+	:	'conditions' '{' NL*
+		{
+			@now['_conditions']['_parent'] = @now
+			@now = @now['_conditions']
+		}
+		op_statement*
+		'}' NL+
+		{	self.gotoParent()	}
+	;
+
+op_effects
+	:	'effects' '{' NL*
+		{
+			@now['_effects']['_parent'] = @now
+			@now = @now['_effects']
+		}
+		op_statement*
+		'}' NL+
+		{	self.gotoParent()	}
+	;
+
+op_statement
+	:	reference equals_op value NL+
+		{	@now[$reference.val] = $value.val	}
 	;
 
 procedure
@@ -293,7 +337,7 @@ constraint_iterator
 			@now[id] = { '_parent' => @now,
 				'_context' => 'iterator',
 				'_self' => id,
-				'_var' => $ID.text
+				'_variable' => $ID.text
 			}
 			@now = @now[id]
 		}
@@ -398,7 +442,7 @@ mutation_iterator
 			@now[id] = { '_parent' => @now,
 				'_context' => 'iterator',
 				'_self' => id,
-				'_var' => $ID.text
+				'_variable' => $ID.text
 			}
 			@now = @now[id]
 		}
