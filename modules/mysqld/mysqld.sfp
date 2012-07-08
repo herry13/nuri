@@ -1,29 +1,29 @@
-class Mysqld
+class Mysqld extends DBService {
 	version is ""
 	installed is no
 	running is no
 	port is 3306
 	root_password is ""
 
-	procedure install
+	procedure install {
 		conditions {
 			self.installed is no
 		}
 		effects {
 			self.installed is yes
 		}
-	end
+	}
 
-	procedure uninstall
+	procedure uninstall {
 		conditions {
 			self.running is no
 		}
 		effects {
 			self.installed is no
 		}
-	end
+	}
 
-	procedure start
+	procedure start {
 		conditions {
 			self.installed is yes
 			self.running is no
@@ -31,9 +31,9 @@ class Mysqld
 		effects {
 			self.running is yes
 		}
-	end
+	}
 
-	procedure stop
+	procedure stop {
 		conditions {
 			self.installed is yes
 			self.running is yes
@@ -41,9 +41,9 @@ class Mysqld
 		effects {
 			self.running is no
 		}
-	end
+	}
 
-	procedure setPort(p isa integer)
+	procedure set_port(p isa integer) {
 		conditions {
 			self.installed is yes
 			self.running is no
@@ -51,9 +51,9 @@ class Mysqld
 		effects {
 			self.port is p
 		}
-	end
+	}
 
-	procedure setAdminPassword(passwd is string)
+	procedure set_root_pwd(passwd is string) {
 		conditions {
 			self.installed is yes
 			self.running is yes
@@ -61,5 +61,5 @@ class Mysqld
 		effects {
 			self.root_password is passwd
 		}
-	end
-end
+	}
+}

@@ -27,7 +27,7 @@ TODO:
 }
 
 @members {
-	def nextId
+	def next_id
 		++@id
 		return "c" + @id.to_s
 	end
@@ -36,15 +36,15 @@ TODO:
 		return { '_context' => 'null', '_isa' => isa }
 	end
 
-	def toRef(path)
+	def to_ref(path)
 		return "$." + path
 	end
 
-	def context
+	def to_json
 		return @root
 	end
 
-	def processFile(file)
+	def process_file(file)
 		# TODO
 		@parser.parseFile(file)
 		@parser.to_context.each_pair { |key,val|
@@ -55,7 +55,7 @@ TODO:
 		}
 	end
 
-	def gotoParent(remove_parent=false)
+	def goto_parent(remove_parent=false)
 		n = @now
 		@now = @now['_parent']
 		n.delete('_parent') if remove_parent
@@ -68,10 +68,10 @@ sfp
 			@root = Hash.new
 			@now = @root
 			@id = 0
-			@parser = Nuri::Sfp::Main.new
+			@parser = Nuri::Sfp::Parser.new
 			@root['Object'] = { '_self' => 'Object', '_context' => 'class', '_parent' => @root }
 		}
-		NL* include* header* (state_section | composite | constraint)*
+		NL* include* header* (state | composite | constraint)*
 	;
 
 include
@@ -80,7 +80,7 @@ include
 
 include_file
 	:	STRING
-		{ self.processFile($STRING.text[1,$STRING.text.length-2]) }
+		{ self.process_file($STRING.text[1,$STRING.text.length-2]) }
 	;
 	
 header
@@ -88,8 +88,8 @@ header
 	|	procedure
 	;
 
-state_section
-	:	ID 'state'
+state
+	:	ID ('state')?
 		{
 			@now[$ID.text] = { '_self' => $ID.text,
 				'_context' => 'state',
@@ -97,8 +97,10 @@ state_section
 			}
 			@now = @now[$ID.text]
 		}
-		'{' NL* attribute* '}' NL*
-		{	self.gotoParent(true)	}
+		'{' NL*
+		attribute*
+		'}' NL*
+		{	self.goto_parent(true)	}
 	;
 
 composite
@@ -111,7 +113,7 @@ composite
 			@now = @now[$ID.text]
 		}
 		'{' NL* ( attribute | constraint )* '}' NL*
-		{	self.gotoParent(true)	}
+		{	self.goto_parent(true)	}
 	;
 
 class_definition
@@ -129,12 +131,12 @@ class_definition
 		}
 		)?
 		('{' NL* ( attribute | procedure )* '}')? NL*
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 	
 extends_class returns [val]
 	:	'extends' path
-		{	$val = self.toRef($path.text)	}
+		{	$val = self.to_ref($path.text)	}
 	;
 
 attribute
@@ -157,11 +159,11 @@ object_def
 		}
 		('isa' path
 		{
-			@now['_isa'] = self.toRef($path.text)
+			@now['_isa'] = self.to_ref($path.text)
 		}
 		)?
 		object_body?
-		{	self.gotoParent();	}
+		{	self.goto_parent();	}
 	;
 
 object_body
@@ -208,7 +210,7 @@ operator
 		)?
 		op_conditions? op_effects
 		'}' NL+
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 op_conditions
@@ -219,7 +221,7 @@ op_conditions
 		}
 		op_statement*
 		'}' NL+
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 op_effects
@@ -230,7 +232,7 @@ op_effects
 		}
 		op_statement*
 		'}' NL+
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 op_statement
@@ -255,7 +257,7 @@ procedure
 			NL+
 		)?
 		conditions? effects '}' NL+
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 parameters
@@ -268,7 +270,7 @@ parameter
 	|	ID 'areall' path
 		{
 			@now[$ID.text] = { '_context' => 'all',
-				'_isa' => self.toRef($path.text),
+				'_isa' => self.to_ref($path.text),
 				'_value' => nil
 			}
 		}
@@ -282,7 +284,7 @@ conditions
 		}
 		'{' NL* constraint_body '}' NL+
 
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 effects
@@ -294,7 +296,7 @@ effects
 		'{' NL* 
 		mutation_body 
 		'}' NL+
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 constraint
@@ -308,7 +310,7 @@ constraint
 			@now = @now[$ID.text]
 		}
 		'{' NL* constraint_body '}' NL+
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 constraint_body
@@ -324,7 +326,7 @@ constraint_body
 constraint_namespace
 	:	path NL* '{' NL* (constraint_statement
 		{
-			key = self.toRef($path.text + '.' + $constraint_statement.key[2,$constraint_statement.key.length])
+			key = self.to_ref($path.text + '.' + $constraint_statement.key[2,$constraint_statement.key.length])
 			@now[key] = $constraint_statement.val
 		}
 		NL+)* '}'
@@ -333,7 +335,7 @@ constraint_namespace
 constraint_iterator
 	:	'foreach' path 'as' ID NL* '{' NL+
 		{
-			id = self.toRef($path.text)
+			id = self.to_ref($path.text)
 			@now[id] = { '_parent' => @now,
 				'_context' => 'iterator',
 				'_self' => id,
@@ -347,7 +349,7 @@ constraint_iterator
 		}
 		NL+)*
 		'}'
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 constraint_statement returns [key, val]
@@ -399,7 +401,7 @@ comp_value returns [val]
 conditional_constraint
 	:	'if'
 		{
-			id = self.nextId
+			id = self.next_id
 			@now[id] = { '_parent' => @now,
 				'_context' => 'ifthen',
 				'_if' => nil,
@@ -414,7 +416,7 @@ conditional_constraint
 			}
 		}
 		conditional_constraint_then
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 conditional_constraint_then
@@ -438,7 +440,7 @@ mutation_body
 mutation_iterator
 	:	'foreach' path 'as' ID NL* '{' NL+
 		{
-			id = self.toRef($path.text)
+			id = self.to_ref($path.text)
 			@now[id] = { '_parent' => @now,
 				'_context' => 'iterator',
 				'_self' => id,
@@ -450,7 +452,7 @@ mutation_iterator
 		{	@now[$mutation_statement.key] = $mutation_statement.val	}
 		NL+)*
 		'}'
-		{	self.gotoParent()	}
+		{	self.goto_parent()	}
 	;
 
 mutation_statement returns [key, val]
@@ -480,28 +482,28 @@ mutation_statement returns [key, val]
 		}
 	|	reference 'is' 'new' path
 		{
-			id = '_' + self.nextId
+			id = '_' + self.next_id
 			@now[id] = { '_self' => id,
 				'_context' => 'object',
-				'_isa' => self.toRef($path.text),
+				'_isa' => self.to_ref($path.text),
 				'_parent' => @now
 			}
 			@now = @now[id]
 		}
 		object_body?
 		{
-			n = self.gotoParent()
+			n = self.goto_parent()
 			@now.delete(n['_self'])
 			$key = $reference.val
 			$val = n
 		}
 	|	'delete' path
 		{
-			id = '_' + self.nextId
+			id = '_' + self.next_id
 			@now[id] = { '_self' => id,
 				'_context' => 'mutation',
 				'_type' => 'delete',
-				'_value' => self.toRef($path.text)
+				'_value' => self.to_ref($path.text)
 			}
 		}
 	|	reference 'add(' value ')'
@@ -567,14 +569,14 @@ path
 
 reference returns [val]
 	:	path
-		{	$val = self.toRef($path.text)	}
+		{	$val = self.to_ref($path.text)	}
 	;
 
 reference_type returns [val]
 	:	'isref' path
 		{
 			$val = { '_context' => 'null',
-				'_isa' => self.toRef($path.text)
+				'_isa' => self.to_ref($path.text)
 			}
 		}
 	;

@@ -31,7 +31,7 @@ module Nuri
 			end
 	
 			# get state of this component in JSON
-			def getState
+			def get_state
 				Netifaces.interfaces.sort.each do |dev|
 					@state[dev] = JSON'{"_isa": "NetDevice"}'
 					addresses = Netifaces.addresses(dev)

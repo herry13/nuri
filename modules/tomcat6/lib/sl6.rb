@@ -11,7 +11,7 @@ module Nuri
 			end
 	
 			# get state of component in JSON
-			def getState
+			def get_state
 				# installed & running
 				data = `/bin/rpm -qa tomcat6`
 				@state["installed"] = ((data =~ /tomcat6/) != nil)
@@ -52,7 +52,7 @@ module Nuri
 				return (system('/sbin/service tomcat6 stop') == true)
 			end
 
-			def setPort(p)
+			def set_port(p)
 				configFile = '/etc/tomcat6/server.xml'
 				if File.file?(configFile)
 					doc = XML::Parser.file(configFile).parse

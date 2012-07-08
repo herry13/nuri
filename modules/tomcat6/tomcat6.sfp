@@ -1,19 +1,19 @@
-class Tomcat6
+class Tomcat6 extends AppService {
 	version is ""
 	installed is false
 	running is false
 	port is 80
 
-	procedure install
+	procedure install {
 		conditions {
 			self.installed is no
 		}
 		effects {
 			self.installed is yes
 		}
-	end
+	}
 
-	procedure uninstall
+	procedure uninstall {
 		conditions {
 			self.installed is yes
 			self.running is no
@@ -21,9 +21,9 @@ class Tomcat6
 		effects {
 			self.installed is no
 		}
-	end
+	}
 
-	procedure start
+	procedure start {
 		conditions {
 			self.installed is yes
 			self.running is no
@@ -31,9 +31,9 @@ class Tomcat6
 		effects {
 			self.running is yes
 		}
-	end
+	}
 
-	procedure stop
+	procedure stop {
 		conditions {
 			self.installed is yes
 			self.running is yes
@@ -41,12 +41,12 @@ class Tomcat6
 		effects {
 			self.running is no
 		}
-	end
+	}
 
-	procedure setPort(p is integer)
+	procedure set_port(p is integer) {
 		conditions { }
 		effects {
 			self.port is p
 		}
-	end
-end
+	}
+}

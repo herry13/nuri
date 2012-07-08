@@ -4,14 +4,14 @@ require 'augeas'
 
 module Nuri
 	module Module
-		class Mysql < Nuri::Resource
+		class Mysqld < Nuri::Resource
 			def initialize
 				super
-				@state['_isa'] = 'Mysql'
+				@state['_isa'] = 'Mysqld'
 			end
 	
 			# get state of this component in JSON
-			def getState
+			def get_state
 				# installed & running
 				data = `/usr/bin/dpkg-query -W mysql-server`
 				@state["installed"] = ((data =~ /mysql\-server/) != nil)
@@ -66,7 +66,7 @@ module Nuri
 				return (system('/usr/bin/service mysql stop') == true)
 			end
 	
-			def setPort(p)
+			def set_port(p)
 				Augeas::open do |aug|
 					paths = aug.match("/files/etc/mysql/my.cnf/*/port")
 					paths.each { |path|
@@ -76,7 +76,7 @@ module Nuri
 				end
 			end
 	
-			def setRootPassword(passwd)
+			def set_root_pwd(passwd)
 				system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
 				oldpass = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'').sub(/"/,'\"')
 				passwd.sub!(/"/,'\"')

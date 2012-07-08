@@ -1,6 +1,5 @@
 if Nuri::Util.platform == 'sl'
-puts Nuri::Util.platform
-	require File.dirname(__FILE__) + "/lib/sl6.rb"
+	require 'modules/tomcat6/lib/sl6'
 elsif Nuri::Util.platform == 'ubuntu'
-	require File.dirname(__FILE__) + "/lib/ubuntu1204.rb"
+	require 'modules/tomcat6/lib/ubuntu1204'
 end

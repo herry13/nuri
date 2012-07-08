@@ -12,28 +12,29 @@ require 'lib/nuri/util'
 require 'lib/nuri/resource'
 require 'lib/nuri/undefined'
 require 'modules/node/node'
-require 'lib/sfp/main'
+require 'lib/sfp/sfp'
 
 module Nuri
 	class Main < Mongrel::HttpHandler
 		attr_accessor :config
 
 		def initialize
-			self.readConfig
-			self.loadModules
+			self.read_config
+			self.load_modules
 			@locked = false
 			@mutex = Mutex.new
 		end
 	
 		# Reads configuration file in '/etc/nuri/config.json'. If it does not
 		# exist then it tries to read '<HOME>/etc/config.json'.
-		def readConfig
-			configFile = '/etc/nuri/config.json'
-			configFile = Nuri::Util.rootdir + "/etc/config.json" if not File.file?(configFile)
-			@config = JSON.parse(File.read(configFile))
+		def read_config
+			cfile = '/etc/nuri/config.sfp'
+			cfile = Nuri::Util.rootdir + "/etc/config.sfp" if not File.file?(cfile)
+			@config = Nuri::Sfp::Parser.file_to_json(cfile)['nuri']
 		end
 
-		def loadModules
+		# Load all installed modules.
+		def load_modules
 			# load installed modules
 			Nuri::Util.log "Load modules..."
 			modules_dir = Nuri::Util.rootdir + "/modules"
@@ -56,15 +57,17 @@ module Nuri
 				end
 			}
 		end
-	
+
+		# Start nuri service.
 		def start
-			@http = Mongrel::HttpServer.new(@config['host'], @config['port'])
+			@http = Mongrel::HttpServer.new(@config.at('host'), @config.at('port').to_i)
 			@http.register("/", self)
-			Nuri::Util.log "Start server on " + @config['host'] + ":" + @config['port'].to_s +
-				" with PID #{Process.pid}"
+			Nuri::Util.log "Start server on " + @config.at('host') + ":" +
+				@config.at('port').to_i.to_s + " with PID #{Process.pid}"
 			@http.run.join
 		end
 	
+		# Stop nuri service.
 		def stop
 			@http.graceful_shutdown
 			Nuri::Util.log "Nuri is stopped"
@@ -74,34 +77,34 @@ module Nuri
 			if req.params['REQUEST_METHOD'] == 'GET'
 				if req.params['REQUEST_URI'] == '/state' or
 					(req.params['REQUEST_URI'] =~ /^\/state\/.*/) != nil
-					return self.getState(req, res)
+					return self.http_get_state(req, res)
 				elsif req.params['REQUEST_URI'] == '/goal' or
 					(req.params['REQUEST_URI'] =~ /^\/goal\/.*/) != nil
-					return self.getGoal(req, res)
+					return self.get_goal(req, res)
 				end
 			elsif req.params['REQUEST_METHOD'] == 'POST'
 				if req.params['REQUEST_URI'] == '/state' or
 					(req.params['REQUEST_URI'] =~ /^\/state\/.*/) != nil
-					return self.setState(req, res)
+					return self.set_state(req, res)
 				elsif req.params['REQUEST_URI'] == '/goal' or
 					(req.params['REQUEST_URI'] =~ /^\/goal\/.*/) != nil
-					return self.setGoal(req, res)
+					return self.set_goal(req, res)
 				end
 			end
 			res.start(404) do |head, out| out.write(''); end
 		end
 	
-		def sendError(res, msg='')
+		def send_error(res, msg='')
 			res.start(500) do |head, out| out.write(msg); end
 			Nuri::Util.log.error msg
 		end
 	
 		# get state
-		def getState(req, res)
+		def http_get_state(req, res)
 			begin
 				path = req.params['REQUEST_PATH'].sub(/^\/state\/?/,'')
 				data = JSON['{"value":""}']
-				state = @root.getState(path)
+				state = self.get_state(path)
 				if state.is_a?(Nuri::Undefined)
 					res.start(404) do |head, out| out.write(''); end
 				else
@@ -112,24 +115,28 @@ module Nuri
 					end
 				end
 			rescue Exception => e
-				self.sendError(res, e.to_s)
+				self.send_error(res, e.to_s)
 			end
 		end
 
-		def setState(req, res)
+		def get_state(path='')
+			return @root.get_state(path)
+		end
+
+		def set_state(req, res)
 			if not self.lock
 				res.start(403) do |head,out| out.write(''); end
 			else
 				begin
 					path = req.params['REQUEST_URI'].sub(/^\/state\/?/,'')
-					@root.resetGoal
-					@root.setGoal(path, (JSON[req.body.read])['value'])
-					puts JSON.generate(@root.getGoal) # debug
+					@root.reset_goal
+					@root.set_goal(path, (JSON[req.body.read])['value'])
+					puts JSON.generate(@root.get_goal) # debug
 					res.start(200) do |head,out| out.write(''); end
 					# applying the goal state
 					self.apply
 				rescue Exception => e
-					self.sendError(res, e.to_s)
+					self.send_error(res, e.to_s)
 				end
 			end
 		end
@@ -154,16 +161,16 @@ module Nuri
 			}
 		end
 
-		def setGoal(req, res)
+		def set_goal(req, res)
 			# TODO -- put your BSig execution here
 		end
 
-		def getGoal(req, res)
+		def get_goal(req, res)
 			begin
-				goal = JSON.generate(@root.getGoal)
+				goal = JSON.generate(@root.get_goal)
 				res.start(200) do |head,out| out.write(goal); end
 			rescue Exception => e
-				self.sendError(res, e.to_s)
+				self.send_error(res, e.to_s)
 			end
 		end
 	end

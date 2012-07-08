@@ -10,33 +10,33 @@ module Nuri
 				@state['_isa'] = "Node"
 			end
 	
-			def getState(path=nil)
-				return self.getStateAll if path == nil or path.strip == ''
+			def get_state(path=nil)
+				return self.get_all_state if path == nil or path.strip == ''
 				path.strip!
 				first, nextpath = path.split('/', 2)
 				if @children[first] != nil
-					state = @children[first].getState
-					return self.getPathValue(state, nextpath)
+					state = @children[first].get_state
+					return self.path_value(state, nextpath)
 				else
-					return self.getPathValue(@state, path)
+					return self.path_value(@state, path)
 				end
 				# not found
 				return Nuri::Undefined.new
 			end
 
-			def getPathValue(state, path)
+			def path_value(state, path)
 				return state if path == nil or path == ''
 				return Nuri::Undefined.new if not state.is_a?(Hash)
 				first, nextpath = path.split('/', 2)
 				if state.has_key?(first) # defined?(state[first])
-					return self.getPathValue(state[first], nextpath)
+					return self.path_value(state[first], nextpath)
 				else
 					# not found
 					return Nuri::Undefined.new
 				end
 			end
 
-			def getStateAll
+			def get_all_state
 				# get memory info
 				mem = `free`
 				mem = mem.split("\n")[1].split(" ")
@@ -53,7 +53,7 @@ module Nuri
 
 				# get state of other components
 				@children.each_pair { |name,mod|
-					@state[name] = mod.getState
+					@state[name] = mod.get_state
 				}
 
 				return @state

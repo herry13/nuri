@@ -11,7 +11,7 @@ module Nuri
 			end
 	
 			# get state of this component in JSON
-			def getState
+			def get_state
 				# installed & running
 				data = `/usr/bin/dpkg-query -W apache2`
 				@state["installed"] = ((data =~ /apache2/) != nil)
@@ -67,7 +67,7 @@ module Nuri
 				return (result == true)
 			end
 		
-			def setPort(p)
+			def set_port(p)
 				Augeas::open do |aug|
 					aug.set("/files/etc/apache2/ports.conf/*[self::directive='NameVirtualHost']/arg",
 						"*:" + p.to_s)
@@ -78,7 +78,7 @@ module Nuri
 				return false
 			end
 		
-			def setDocumentRoot(dir)
+			def set_docroot(dir)
 				Augeas::open do |aug|
 					aug.set("/files/etc/apache2/sites-available/default/VirtualHost/*[self::directive='DocumentRoot']/arg", dir)
 					return true if aug.save

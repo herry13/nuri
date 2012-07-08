@@ -1,10 +1,18 @@
-#!/usr/bin/env ruby
+require 'lib/sfp/ext'
+require 'lib/sfp/SFPParser'
+require 'lib/sfp/SFPLexer'
 
 module Nuri
 	module Sfp
 		# main class which processes configuration description in SFP language either
 		# in file or as a string
-		class Main
+		class Parser
+			# Parse SFP file and return its JSON representation
+			def self.file_to_json(file)
+				sfp = Parser.new
+				sfp.parse_file(file)
+				return sfp.to_json
+			end
 
 			# enable this class to process SFP into FDR (SAS+)
 			#include Nuri::Sfp::Sas
@@ -13,7 +21,7 @@ module Nuri
 			end
 
 			# parse SFP file
-			def parseFile(file)
+			def parse_file(file)
 				f = File.open(file, 'rb')
 				lexer = SFP::Lexer.new(f)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
@@ -29,9 +37,9 @@ module Nuri
 				@parser.sfp
 			end
 	
-			# return context representation of SFP description
-			def to_context
-				return @parser.context
+			# return JSON representation of SFP description
+			def to_json
+				return @parser.to_json
 			end
 		end
 	end
