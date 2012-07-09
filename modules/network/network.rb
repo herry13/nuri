@@ -4,7 +4,7 @@ rescue LoadError
 	dir = File.dirname(__FILE__) + "/lib"
 	exec = dir + "/install.sh"
 	`sh #{exec} #{dir}`
-	Nuri.log.info "Install gem \"netifaces\""
+	Nuri::Util.log.info "Install gem \"netifaces\""
 	begin
 		require 'netifaces'
 	rescue LoadError
