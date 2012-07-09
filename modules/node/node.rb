@@ -6,7 +6,7 @@ module Nuri
 		class Node < Nuri::Resource
 			def initialize
 				super
-				#@name = (`uname -n`).strip.sub(/\..*/,'')
+				@name = Nuri::Util.hostname.strip.sub(/\..*/,'')
 				@state['_isa'] = "Node"
 			end
 	
@@ -56,7 +56,7 @@ module Nuri
 					@state[name] = mod.get_state
 				}
 
-				return @state
+				return { @name => @state }
 			end
 		end
 	end

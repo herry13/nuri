@@ -35,3 +35,20 @@ Hash.send(:define_method, "root") {
 	return self if not self.has_key?('_parent') or self['_parent'] == nil
 	return self['_parent'].root
 }
+
+Hash.send(:define_method, "constraint?") {
+	return (self.has_key?('_context') and self['_context'] == 'constraint')
+}
+
+
+
+# add path to the end of a reference 
+String.send(:define_method, "push") { |value|
+	return self.to_s + "." + value #if self.ref?
+	#return self.to_s + value.to_s
+}
+
+# return first element and keep the rest
+String.send(:define_method, 'explode') {
+	return self.split('.', 2)
+}

@@ -219,9 +219,15 @@ operator
 		(	'cost' equals_op NUMBER NL+
 			{	@now['_cost'] = $NUMBER.text.to_i	}
 		)?
+		op_param*
 		op_conditions? op_effects
 		'}' NL+
 		{	self.goto_parent()	}
+	;
+
+op_param
+	:	ID equals_op reference NL+
+		{	@now[$ID.text] = $reference.val	}
 	;
 
 op_conditions

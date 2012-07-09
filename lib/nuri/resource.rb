@@ -11,16 +11,20 @@ module Nuri
 			@goal = JSON['{}']
 		end
 
-		def getGoal
-			@children.each_pair { |name, mod| @goal[name] = mod.getGoal }
+		def get_goal
+			@children.each_pair { |name, mod| @goal[name] = mod.get_goal }
 			return @goal
 		end
 
-		def setGoal(path, value)
+		def set_goal(state)
+			state.each { |s| puts s[0] }
+		end
+=begin
+		def set_goal(path, value)
 			if path == nil or path == '' or path == '/'
 				value.each_pair { |key,val|
 					if @children.has_key?(key)
-						@children[key].setGoal('/', val)
+						@children[key].set_goal('/', val)
 					else
 						@goal[key] = val
 					end
@@ -28,7 +32,7 @@ module Nuri
 			else
 				first, nextpath = path.split('/', 2)
 				if @children.has_key?(first)
-					@children[first].setGoal(nextpath, value)
+					@children[first].set_goal(nextpath, value)
 				elsif nextpath == nil or nextpath == ''
 					@goal[first] = value
 				else
@@ -36,10 +40,11 @@ module Nuri
 				end
 			end
 		end
+=end
 
-		def resetGoal
+		def reset_goal
 			@goal = JSON['{}']
-			@children.each_value { |mod| mod.resetGoal }
+			@children.each_value { |mod| mod.reset_goal }
 		end
 	end
 end

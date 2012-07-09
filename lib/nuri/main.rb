@@ -16,15 +16,46 @@ require 'lib/sfp/parser'
 
 module Nuri
 	class Main < Mongrel::HttpHandler
-		attr_reader :config
+		attr_reader :config, :main, :bsig
 
 		def initialize
 			self.read_config
 			self.load_modules
 			@locked = false
 			@mutex = Mutex.new
+			self.read_bsig if @config.has_key?('bsig') and @config['bsig']
+			self.read_main
+			#self.apply
 		end
-	
+
+		def read_bsig
+			Nuri::Util.log 'Read BSig description...'
+			begin
+				sfpfile = '/etc/nuri/bsig.sfp'
+				sfpfile = Nuri::Util.rootdir + '/etc/bsig.sfp' if not File.file?(sfpfile)
+				@bsig = Nuri::Sfp::Parser.file_to_json(sfpfile)
+				Nuri::Util.log 'Successfully load ' + sfpfile
+			rescue Exception => exp
+				Nuri::Util.log.error "Cannot load " + sfpfile + " -- " + e.to_s
+			rescue StandardError => stderr
+				Nuri::Util.log.error "Cannot load " + sfpfile
+			end
+		end
+
+		def read_main
+			Nuri::Util.log 'Read main description...'
+			begin
+				sfpfile = '/etc/nuri/main.sfp'
+				sfpfile = Nuri::Util.rootdir + '/etc/main.sfp' if not File.file?(sfpfile)
+				@main = Nuri::Sfp::Parser.file_to_json(sfpfile)
+				Nuri::Util.log 'Successfully load ' + sfpfile
+			rescue Exception => exp
+				Nuri::Util.log.error "Cannot load " + sfpfile + " -- " + e.to_s
+			rescue StandardError => stderr
+				Nuri::Util.log.error "Cannot load " + sfpfile
+			end
+		end
+
 		# Reads configuration file in '/etc/nuri/config.json'. If it does not
 		# exist then it tries to read '<HOME>/etc/config.json'.
 		def read_config
@@ -80,15 +111,15 @@ module Nuri
 					return self.http_get_state(req, res)
 				elsif req.params['REQUEST_URI'] == '/goal' or
 					(req.params['REQUEST_URI'] =~ /^\/goal\/.*/) != nil
-					return self.get_goal(req, res)
+					return self.http_get_goal(req, res)
 				end
 			elsif req.params['REQUEST_METHOD'] == 'POST'
 				if req.params['REQUEST_URI'] == '/state' or
 					(req.params['REQUEST_URI'] =~ /^\/state\/.*/) != nil
-					return self.set_state(req, res)
+					return self.http_set_state(req, res)
 				elsif req.params['REQUEST_URI'] == '/goal' or
 					(req.params['REQUEST_URI'] =~ /^\/goal\/.*/) != nil
-					return self.set_goal(req, res)
+					return self.http_set_goal(req, res)
 				end
 			end
 			res.start(404) do |head, out| out.write(''); end
@@ -123,7 +154,7 @@ module Nuri
 			return @root.get_state(path)
 		end
 
-		def set_state(req, res)
+		def http_set_state(req, res)
 			if not self.lock
 				res.start(403) do |head,out| out.write(''); end
 			else
@@ -135,6 +166,7 @@ module Nuri
 					res.start(200) do |head,out| out.write(''); end
 					# applying the goal state
 					self.apply
+					res.start(200) do |head,out| out.write(''); end
 				rescue Exception => e
 					self.send_error(res, e.to_s)
 				end
@@ -150,22 +182,56 @@ module Nuri
 		end
 
 		# apply the goal state
-		def apply
-			Thread.new() {
+		def apply(wait=false)
+
+			t = Thread.new() {
 				puts 'Implement changes.'
-				sleep 5
+
 				# TODO -- put planning stuffs here
-				self.lock(false)
+				hostname = Nuri::Util.hostname
+				@main['system'].each_pair { |key,value|
+					next if key[0,1] == '_' or 
+						!value.is_a?(Hash) or
+						!value.has_key?('hostname') or
+						value['hostname'] != hostname
+
+					# collect desired state for this key
+					node = key
+					desired = @main['goal'].select { |k,v| k[2,node.length] == node }
+					satisfied = true
+					if desired.length > 0
+						# get current state
+						current = self.get_state
+						desired.each { |v|
+							ref, cons = v
+							if cons['_type'] == 'equals' and
+									current.at(ref) != cons['_value']
+								satisfied = false
+								puts ref + ": " + current.at(ref).to_s + " => " + cons['_value'].to_s
+								@root.set_goal(desired)
+							end
+						}
+					end
+
+					if not satisfied
+						#@root.set_goal(
+					end
+
+					break	
+				}
+
 				puts 'The changes has been applied'
-				res.start(200) do |head,out| out.write(''); end
+				self.lock(false)
 			}
+
+			t.join if wait
 		end
 
-		def set_goal(req, res)
+		def http_set_goal(req, res)
 			# TODO -- put your BSig execution here
 		end
 
-		def get_goal(req, res)
+		def http_get_goal(req, res)
 			begin
 				goal = JSON.generate(@root.get_goal)
 				res.start(200) do |head,out| out.write(goal); end
