@@ -31,7 +31,12 @@ module Nuri
 				else
 					@state["port"] = 0
 				end
-				@state["root_password"] = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'')
+
+				if File.file?('/etc/mysql/nuri.cnf')
+					@state["root_password"] = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'')
+				else
+					@state['root_password'] = ''
+				end
 	
 				return @state
 			end
