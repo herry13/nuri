@@ -1,0 +1,9 @@
+class Service {
+	running is no
+}
+
+class WebService extends Service
+
+class DBService extends Service
+
+class AppService extends Service

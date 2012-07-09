@@ -7,7 +7,6 @@ Hash.send(:define_method, "ref") {
 
 # accept method as implementation of Visitor pattern
 Hash.send(:define_method, "accept") { |visitor|
-	return if visitor == nil or not visitor.respond_to(:visit)
 	self.each_pair { |key,value|
 		next if key == '_parent'
 		go_next = visitor.visit(key, value, self.ref)

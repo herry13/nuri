@@ -27,6 +27,8 @@ TODO:
 }
 
 @members {
+	attr_accessor :rootdir
+
 	def next_id
 		++@id
 		return "c" + @id.to_s
@@ -45,13 +47,22 @@ TODO:
 	end
 
 	def process_file(file)
-		# TODO
-		@parser.parseFile(file)
-		@parser.to_context.each_pair { |key,val|
-			if val['_context'] == 'class' or val['_context'] == 'state' or
-				val['_context'] == 'composite' or val['_context'] == 'constraint'
+		file = @rootdir + "/" + file if @rootdir != nil and file[0,1] != '/'
+		data = Nuri::Sfp::Parser.file_to_json(file)
+		data.each_pair { |key,val|
+			if val['_context'] == 'class' or val['_context'] == 'composite'
 				@root[key] = val
-			end	
+			elsif val['_context'] == 'state' or val['_context'] == 'constraint'
+				if @root.has_key?(key)
+					if @root[key]['_context'] != val['_context']
+						@root[key] = val
+					else
+						val['_context'].each_pair { |k2,v2| @root[key][k2] = v2 }
+					end
+				else
+					@root[key] = val
+				end
+			end
 		}
 	end
 
@@ -68,7 +79,7 @@ sfp
 			@root = Hash.new
 			@now = @root
 			@id = 0
-			@parser = Nuri::Sfp::Parser.new
+			#@parser = Nuri::Sfp::Parser.new
 			@root['Object'] = { '_self' => 'Object', '_context' => 'class', '_parent' => @root }
 		}
 		NL* include* header* (state | composite | constraint)*

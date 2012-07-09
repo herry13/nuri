@@ -22,9 +22,17 @@ end
 
 def cli
 	return if ARGV.length <= 1
+	
+	nuri = Nuri::Main.new
+	
 	if ARGV[1] == 'current'
-		nuri = Nuri::Main.new
 		puts JSON.pretty_generate(nuri.get_state)
+	elsif ARGV[1] == 'main'
+		cfile = Nuri::Util.rootdir + "/etc/main.sfp"
+		#puts JSON.pretty_generate(Nuri::Sfp::Parser.file_to_json(cfile))
+		root = Nuri::Sfp::Parser.file_to_json(cfile)
+		root.accept(Nuri::Sfp::ParentEliminator.new)
+		puts JSON.pretty_generate root
 	end
 end
 

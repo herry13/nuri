@@ -12,11 +12,11 @@ require 'lib/nuri/util'
 require 'lib/nuri/resource'
 require 'lib/nuri/undefined'
 require 'modules/node/node'
-require 'lib/sfp/sfp'
+require 'lib/sfp/parser'
 
 module Nuri
 	class Main < Mongrel::HttpHandler
-		attr_accessor :config
+		attr_reader :config
 
 		def initialize
 			self.read_config
@@ -28,8 +28,8 @@ module Nuri
 		# Reads configuration file in '/etc/nuri/config.json'. If it does not
 		# exist then it tries to read '<HOME>/etc/config.json'.
 		def read_config
-			cfile = '/etc/nuri/config.sfp'
-			cfile = Nuri::Util.rootdir + "/etc/config.sfp" if not File.file?(cfile)
+			cfile = '/etc/nuri/conf/nuri.sfp'
+			cfile = Nuri::Util.rootdir + "/etc/conf/nuri.sfp" if not File.file?(cfile)
 			@config = Nuri::Sfp::Parser.file_to_json(cfile)['nuri']
 		end
 

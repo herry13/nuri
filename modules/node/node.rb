@@ -45,8 +45,8 @@ module Nuri
 	
 				# get platform, architecture, kernel version
 				@state["os"] = Nuri::Util.os
-				@state["platform"] = Nuri::Util.platform()
-				@state["hostname"] = `uname -n`.strip
+				@state["platform"] = Nuri::Util.platform
+				@state["hostname"] = Nuri::Util.hostname #`uname -n`.strip
 				@state["version"] = `uname -r`.strip
 				@state["arch"] = `uname -p`.strip
 				@state["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i

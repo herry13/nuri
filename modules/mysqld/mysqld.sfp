@@ -1,3 +1,5 @@
+include "lib/nuri/resource.sfp"
+
 class Mysqld extends DBService {
 	version is ""
 	installed is no
@@ -43,7 +45,7 @@ class Mysqld extends DBService {
 		}
 	}
 
-	procedure set_port(p isa integer) {
+	procedure set_port(p isref integer) {
 		conditions {
 			self.installed is yes
 			self.running is no
@@ -53,7 +55,7 @@ class Mysqld extends DBService {
 		}
 	}
 
-	procedure set_root_pwd(passwd is string) {
+	procedure set_root_pwd(passwd isref string) {
 		conditions {
 			self.installed is yes
 			self.running is yes

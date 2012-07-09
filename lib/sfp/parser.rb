@@ -26,6 +26,7 @@ module Nuri
 				lexer = SFP::Lexer.new(f)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
 				@parser = SFP::Parser.new(tokens)
+				@parser.rootdir = Nuri::Util.rootdir
 				@parser.sfp
 			end
 
@@ -34,12 +35,20 @@ module Nuri
 				lexer = SFP::Lexer.new(text)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
 				@parser = SFP::Parser.new(tokens)
+				@parser.rootdir = Nuri::Util.rootdir
 				@parser.sfp
 			end
 	
 			# return JSON representation of SFP description
 			def to_json
 				return @parser.to_json
+			end
+		end
+
+		class ParentEliminator
+			def visit(name, value, ref)
+				value.delete('_parent') if value.is_a?(Hash) and value.has_key?('_parent')
+				return true
 			end
 		end
 	end

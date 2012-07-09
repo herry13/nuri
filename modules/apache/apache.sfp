@@ -1,3 +1,5 @@
+include "lib/nuri/resource.sfp"
+
 class Apache extends WebService {
 	version is ""
 	installed is no
@@ -6,7 +8,7 @@ class Apache extends WebService {
 	docroot is "/var/www/html"
 	refer isref DBService
 
-	procedure refer_to(s isa DBService) {
+	procedure refer_to (s isref DBService) {
 		conditions {
 			s.running is yes
 		}
@@ -53,7 +55,7 @@ class Apache extends WebService {
 		}
 	}
 
-	procedure set_port(p isa integer) {
+	procedure set_port(p isref integer) {
 		conditions {
 			this.installed is yes
 			this.running is no
@@ -63,7 +65,7 @@ class Apache extends WebService {
 		}
 	}
 
-	procedure set_docroot(dir isa string) {
+	procedure set_docroot(dir isref string) {
 		conditions {
 			this.installed is yes
 			this.running is no
