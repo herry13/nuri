@@ -28,7 +28,7 @@ module Nuri
 				return state if path == nil or path == ''
 				return Nuri::Undefined.new if not state.is_a?(Hash)
 				first, nextpath = path.split('/', 2)
-				if state.has_key?(first) # defined?(state[first])
+				if state.has_key?(first)
 					return self.path_value(state[first], nextpath)
 				else
 					# not found
@@ -56,7 +56,8 @@ module Nuri
 					@state[name] = mod.get_state
 				}
 
-				return { @name => @state }
+				#return { @name => @state }
+				return @state
 			end
 		end
 	end

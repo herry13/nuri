@@ -28,7 +28,10 @@ def cli
 	if ARGV[1] == 'current'
 		puts JSON.pretty_generate(nuri.get_state)
 	elsif ARGV[1] == 'apply'
-		nuri.apply(true)
+		if nuri.lock
+			nuri.apply(true)
+			nuri.lock(false)
+		end
 	elsif ARGV[1] == 'main'
 		cfile = Nuri::Util.rootdir + "/etc/main.sfp"
 		#puts JSON.pretty_generate(Nuri::Sfp::Parser.file_to_json(cfile))

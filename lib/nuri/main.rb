@@ -70,8 +70,14 @@ module Nuri
 			Nuri::Util.log "Load modules..."
 			modules_dir = Nuri::Util.rootdir + "/modules"
 
+			# create dummy root
+			@root = Nuri::Resource.new('root')
+
 			# load module 'Node'
-			@root = Nuri::Module::Node.new
+			node = Nuri::Module::Node.new
+			@root.add(node)
+
+			# load other modules and put them as node's children
 			Dir.foreach(modules_dir) { |mod|
 				next if mod == 'node'
 				path = modules_dir + "/" + mod
@@ -80,7 +86,7 @@ module Nuri
 					begin
 						m = eval("Nuri::Module::" + mod.capitalize + ".new")
 						m.name = mod if m.name == nil
-						@root.children[m.name] = m
+						node.add(m)
 						Nuri::Util.log "Successfully load module " + mod
 					rescue Exception => e
 						Nuri::Util.log.error "Cannot load module " + mod + " -- " + e.to_s
@@ -155,6 +161,7 @@ module Nuri
 		end
 
 		def http_set_state(req, res)
+=begin
 			if not self.lock
 				res.start(403) do |head,out| out.write(''); end
 			else
@@ -170,6 +177,19 @@ module Nuri
 				rescue Exception => e
 					self.send_error(res, e.to_s)
 				end
+			end
+=end
+		end
+
+		def http_set_goal(req, res)
+			begin
+				data = JSON[req.body.read]
+				data.each { |k,v|
+					@root.set_goal(k,v)
+				}
+				res.start(200) { |head,out| out.write('') }
+			rescue Exception => e
+				self.send_error(res, e.to_s)
 			end
 		end
 
@@ -188,6 +208,13 @@ module Nuri
 				puts 'Implement changes.'
 
 				# TODO -- put planning stuffs here
+				@root.reset_goal
+				@main['goal'].each { |k,v|
+					next if k[0,1] == '_'
+					Nuri::Util.log 'Invalid goal: ' + k if not @root.set_goal(k, v)
+				}
+
+=begin
 				hostname = Nuri::Util.hostname
 				@main['system'].each_pair { |key,value|
 					next if key[0,1] == '_' or 
@@ -195,10 +222,13 @@ module Nuri
 						!value.has_key?('hostname') or
 						value['hostname'] != hostname
 
+					@main['goal'].each { |k,v|
+						next if k[0,1] == '_'
+						puts k + ': ' + @root.get_state(k).class.to_s
+					}
 					# collect desired state for this key
 					node = key
 					desired = @main['goal'].select { |k,v| k[2,node.length] == node }
-					satisfied = true
 					if desired.length > 0
 						# get current state
 						current = self.get_state
@@ -206,29 +236,21 @@ module Nuri
 							ref, cons = v
 							if cons['_type'] == 'equals' and
 									current.at(ref) != cons['_value']
-								satisfied = false
 								puts ref + ": " + current.at(ref).to_s + " => " + cons['_value'].to_s
 								@root.set_goal(desired)
+								break
 							end
 						}
 					end
-
-					if not satisfied
-						#@root.set_goal(
-					end
-
 					break	
 				}
+=end
 
 				puts 'The changes has been applied'
 				self.lock(false)
 			}
 
 			t.join if wait
-		end
-
-		def http_set_goal(req, res)
-			# TODO -- put your BSig execution here
 		end
 
 		def http_get_goal(req, res)
