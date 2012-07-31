@@ -503,9 +503,9 @@ value returns [val]
 primitive_value returns [val]
 	:	BOOLEAN
 		{
-			if $BOOLEAN.text == 'true' or $BOOLEAN.text == 'on' or $BOOLEAN.text == 'yes'
+			if $BOOLEAN.text == 'true' or $BOOLEAN.text == 'yes'
 				$val = true
-			else  # 'false', 'no', 'off'
+			else  # 'false', 'no'
 				$val = false
 			end
 		}
@@ -566,8 +566,6 @@ NULL
 BOOLEAN
 	:	'true'
 	|	'false'
-	|	'off'
-	|	'on'
 	|	'yes'
 	|	'no'
 	;

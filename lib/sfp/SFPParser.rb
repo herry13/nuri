@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-07-05 03:59:39
+# Generated at: 2012-07-31 11:07:34
 # 
 
 # ~~~> start load path setup
@@ -4949,9 +4949,9 @@ module SFP
 
           # --> action
 
-          			if __BOOLEAN224__.text == 'true' or __BOOLEAN224__.text == 'on' or __BOOLEAN224__.text == 'yes'
+          			if __BOOLEAN224__.text == 'true' or __BOOLEAN224__.text == 'yes'
           				return_value.val = true
-          			else  # 'false', 'no', 'off'
+          			else  # 'false', 'no'
           				return_value.val = false
           			end
           		

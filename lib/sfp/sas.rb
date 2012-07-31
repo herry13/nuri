@@ -31,16 +31,16 @@ module Nuri
 				# foreach subclass, inherits superclass
 				root.accept(ClassExpander.new(root))
 				# foreach object, inherits class
-				root['current'].accept(ObjectExpander.new(root))
+				root['init'].accept(ObjectExpander.new(root))
 
 				# collect classes
 				root.accept(Nuri::Sfp::ClassCollector.new(@types))
 
 				# collect variables
-				root['current'].accept(Nuri::Sfp::VariableCollector.new(root, @variables, @types))
+				root['init'].accept(Nuri::Sfp::VariableCollector.new(root, @variables, @types))
 				# set goal value
-				root['desired'].delete('_parent')
-				root['desired'].accept(GoalSetter.new(root, @variables, @types))
+				root['goal'].delete('_parent')
+				root['goal'].accept(GoalSetter.new(root, @variables, @types))
 
 				# collect all values
 				root.accept(Nuri::Sfp::ValueCollector.new(@types))
@@ -54,7 +54,7 @@ module Nuri
 				self.setGlobalConstraint if root.has_key?('global')
 
 				# search procedures and generate grounded-operators
-				#root['current'].accept(Nuri::Sfp::ProcedureVisitor.new(root, @variables, @types))
+				#root['init'].accept(Nuri::Sfp::ProcedureVisitor.new(root, @variables, @types))
 
 				self.dump_types
 				self.dump_vars
@@ -219,7 +219,7 @@ module Nuri
 			def visit(name, value, ref)
 				return false if name[0,1] == '_' or not value.isvalue?
 				isfinal = (not value.ref? and not value.null? and value.isobject?)
-				value = value.resolve(@root['current']) if value.ref?
+				value = value.resolve(@root['init']) if value.ref?
 				var = Variable.new(ref.push(name), value.isa?, -1, value, nil, isfinal)
 				@bucket[var.name] = var
 				@types[value.isa?].push(value) if value.isa? != nil and not value.ref? and not value.null?

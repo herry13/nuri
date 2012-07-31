@@ -1,0 +1,313 @@
+//--- start of classes ---//
+class Machine {
+	name = ""
+	running = false
+}
+
+class PM extends Machine {
+	is_private = true
+}
+
+class VM extends Machine {
+	hasService isref Service
+	ison isref PM
+
+	procedure start {
+		cost = 200
+		conditions {
+			this.on.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		cost = 200
+		conditions {
+			this.hasService.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+
+	procedure migrate(from isref PM, to isref PM) {
+		cost = 500
+		conditions {
+			from.running = true
+			to.running = true
+			this.on = from
+			this.running = false
+		}
+		effects {
+			this.on = to
+		}
+	}
+}
+
+class Port {
+	opened = false
+}
+
+class Firewall {
+	port8080 isa Port
+
+	procedure openPort {
+		cost = 50
+		conditions { }
+		effects {
+			this.port8080.opened = true
+		}
+	}
+
+	procedure closePort {
+		cost = 50
+		conditions { }
+		effects {
+			this.port8080.opened = false
+		}
+	}
+}
+
+class Client extends Machine {
+	refer isref Service
+
+	procedure redirectToPublicWebService (s isref WebService, p isref Port) {
+		cost = 5
+		conditions {
+			s.running = true
+			s.on.on.is_private = false
+			p.opened = true
+		}
+		effects {
+			this.refer = s
+		}
+	}
+
+	procedure redirectToPrivateWebService (s isref WebService) {
+		cost = 5
+		conditions {
+			s.running = true
+			s.on.on.is_private = true
+		}
+		effects {
+			this.refer = s
+		}
+	}
+}
+
+class Service {
+	name = ""
+	running = false
+	on isref Machine
+}
+
+class WebService extends Service {
+	name = "Web Service"
+	appservice isref ApplicationService
+
+	procedure start {
+		cost = 25
+		conditions {
+			this.on.running = true
+			this.appserver.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		cost = 25
+		conditions { }
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class DatabaseService extends Service {
+	name = "Database Service"
+	appservice isref ApplicationService
+
+	procedure start {
+		cost = 25
+		conditions {
+			this.on.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		cost = 25
+		conditions {
+			this.appservice.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class ApplicationService extends Service {
+	name = "Application Service"
+	database isref DatabaseService
+	webservice isref WebService
+
+	procedure start {
+		cost = 25
+		conditions {
+			this.on.running = true
+			this.database.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		cost = 25
+		conditions {
+			this.webservice.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+}
+//--- end of classes ---//
+
+
+//--- start of initial state ---//
+init state {
+	private_cloud isa PM {
+		name is "Private PM"
+		running is yes
+	}
+	public_cloud isa PM {
+		name is "Public PM"
+		running is yes
+		is_private is no
+	}
+		
+	ws_a isa WebService {
+		name is "HTTP Server A"
+		running is yes
+		on is vm1
+		appservice is app_a
+	}
+	vm1 isa VM {
+		name is "vm1"
+		running is yes
+		on is private_cloud
+		hasService is ws_a
+	}
+	app_a isa ApplicationService {
+		name is "Application Service A"
+		running is yes
+		on is vm2
+		webservice is ws_a
+		database is db_a
+	}
+	vm2 isa VM {
+		name is "vm2"
+		running is yes
+		on is private_cloud
+		hasService is app_a
+	}
+	db_a isa DatabaseService {
+		name is "Database A"
+		running is yes
+		on is vm3
+		appservice is app_a
+	}
+	vm3 isa VM {
+		name is "vm3"
+		running is yes
+		on is private_cloud
+		hasService is db_a
+	}
+	
+	ws_b isa WebService {
+		name is "HTTP Server B"
+		running is no
+		on is vm4
+		appservice is app_b
+	}
+	vm4 isa VM {
+		name is "vm4"
+		running is no
+		on is private_cloud
+		hasService is ws_b
+	}
+	app_b isa ApplicationService {
+		name is "Application Service B"
+		running is no
+		on is vm5
+		webservice is ws_b
+		database is db_b
+	}
+	vm5 isa VM {
+		name is "vm5"
+		running is no
+		on is private_cloud
+		hasService is app_b
+	}
+	db_b isa DatabaseService {
+		name is "Database B"
+		running is no
+		on is vm6
+		appservice is app_b
+	}
+	vm6 isa VM {
+		name is "vm6"
+		running is no
+		on is private_cloud
+		hasService is db_b
+	}
+	
+	pc1 isa Client {
+		refer is ws_a
+	}
+	pc2 isa Client {
+		refer is ws_a
+	}
+	pc3 isa Client {
+		refer is ws_a
+	}
+	
+	fw isa Firewall {
+		port8080 {
+			opened is no
+		}
+	}
+}
+//--- end of initial state ---//
+
+//--- goal constraint ---//
+goal constraint {
+	vm1.on is public_cloud
+	vm2.on is public_cloud
+	vm3.on is public_cloud
+	vm4.on is private_cloud
+	vm5.on is private_cloud
+	vm6.on is private_cloud
+	vm4.running is no
+	vm5.running is no
+	vm6.running is no
+	pc1.refer is ws_a
+	pc2.refer is ws_a
+	pc3.refer is ws_a
+	fw.port8080.opened is yes
+}
+
+//--- global constraint ---//
+global constraint {
+	pc1.refer.running is yes // 'pc1', 'pc2', 'pc3' must always refer to a running server
+	pc2.refer.running is yes
+	pc3.refer.running is yes
+}
+
