@@ -18,8 +18,10 @@ module Nuri
 			GLOBAL_OPERATOR = '#global_op'
 			GLOBAL_VARIABLE = '#global_var'
 
+			attr_accessor :root, :variables, :types, :operators, :axioms
+
 			def to_sas
-				root = self.to_context
+				@root = self.to_context
 				@variables = Hash.new
 				@types = { 'boolean' => [true, false],
 					'number' => Array.new,
@@ -29,21 +31,32 @@ module Nuri
 				@axioms = Array.new
 
 				# foreach subclass, inherits superclass
-				root.accept(ClassExpander.new(root))
+				@root.accept(ClassExpander.new(self))
 				# foreach object, inherits class
+<<<<<<< HEAD:lib/sfp/sas.rb
 				root['init'].accept(ObjectExpander.new(root))
+=======
+				@root['current'].accept(ObjectExpander.new(self))
+>>>>>>> 76647397c91d887e38288448bf9bfab374085674:lib/sfp/dev/sas.rb
 
 				# collect classes
-				root.accept(Nuri::Sfp::ClassCollector.new(@types))
+				@root.accept(ClassCollector.new(@types))
 
 				# collect variables
+<<<<<<< HEAD:lib/sfp/sas.rb
 				root['init'].accept(Nuri::Sfp::VariableCollector.new(root, @variables, @types))
 				# set goal value
 				root['goal'].delete('_parent')
 				root['goal'].accept(GoalSetter.new(root, @variables, @types))
+=======
+				@root['current'].accept(VariableCollector.new(@root, @variables, @types))
+				# set goal value
+				@root['desired'].delete('_parent')
+				@root['desired'].accept(GoalVisitor.new(self))
+>>>>>>> 76647397c91d887e38288448bf9bfab374085674:lib/sfp/dev/sas.rb
 
 				# collect all values
-				root.accept(Nuri::Sfp::ValueCollector.new(@types))
+				@root.accept(Nuri::Sfp::ValueCollector.new(@types))
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
 
@@ -51,26 +64,186 @@ module Nuri
 				self.setVariableValues
 
 				# generate operator and axioms for global constraints
+<<<<<<< HEAD:lib/sfp/sas.rb
 				self.setGlobalConstraint if root.has_key?('global')
 
 				# search procedures and generate grounded-operators
 				#root['init'].accept(Nuri::Sfp::ProcedureVisitor.new(root, @variables, @types))
+=======
+				self.process_global_constraints(@root) if @root.has_key?('global')
+>>>>>>> 76647397c91d887e38288448bf9bfab374085674:lib/sfp/dev/sas.rb
 
 				self.dump_types
 				self.dump_vars
 				self.dump_operators
+				self.dump_axioms
 
-				#root.accept(ParentEliminator.new)
-				#puts JSON.pretty_generate(root)
+				# search procedures and generate grounded-operators
+				@root['current'].accept(ProcedureVisitor.new(self))
 			end
 
-			def setGlobalConstraint
-				var = Variable.new(GLOBAL_VARIABLE, 'boolean', -1, true, true, false)
-				@variables[var.name] = var
+			def dump_json(root=@root)
+				root.accept(ParentEliminator.new)
+				puts JSON.pretty_generate root
+			end
+
+			# Generate Grounded Operator for given procedure
+			# TODO
+			def process_procedure(proc)
+				puts '--- procedures'
+				puts '- ' + proc.ref #+ ' -- ' + proc.keys.inspect
+				# fill-in parameter's value
+				pvs = self.get_parameters_values(proc)
+				sets = self.keys_values_combinator(pvs.keys, pvs.values)
+				sets.each { |params| self.grounded_operator(proc, params) }
+			end
+
+			def subs_param(ref, params)
+				first, rest = ref.no_root.explode
+				return params[first].ref.push(rest)
+			end
+
+			def subs_params(context, params)
+				context.each_pair { |key,value|
+					next if key[0,1] == '_'
+					ref = self.subs_param(key, params)
+					if value.is_a?(String) and value.ref?
+						value = self.subs_param(value, params)
+					#elsif value.is_a?(Array) and
+					#	(value['_type'] == 'in' and value['_type'] == 'not-in')
+					#	value.each_index { |x|
+					#		value[x] = self.subs_param(value[x], params) if value[x].ref?
+					#	}
+					end
+					context[ref] = value
+					context.delete(key)
+				}
+				return context
+			end
+
+			def grounded_operator(proc, params)
+				cond = proc['_conditions'].sfp_clone
 				
-				op = Operator.new(GLOBAL_OPERATOR)
-				op[var] = Parameter.new(var, true, true)
-				@operators[op.name] = op
+				#cond = self.subs_params(proc['_conditions'].sfp_clone, params)
+=begin
+				op = Operator.new(proc.ref)
+				proc['_conditions'].each_pair { |ref,val|
+					next if ref[0,1] == '_'
+					first, ref = ref.no_root.explode
+					ref = params[first].ref.push(ref)
+					if @variables.has_key?(ref)
+						if val['_type'] == 'equals'
+							
+						else
+						end
+						puts ref + ' -- ' + val['_type']
+					else
+						if val['_type'] == 'equals'
+						else
+						end
+					end
+				}
+=end
+			end
+
+			def get_parameters_values(proc)
+				params = { 'this' => [proc['_parent']] }
+				proc.each_pair { |name,val|
+					next if name[0,1] == '_'
+					params[name] = @types[val.isa?] if val.isa? != nil
+				}
+				return params
+			end
+
+			def keys_values_combinator(keys, values, pair=Hash.new, bucket=Array.new, index=0)
+				if index >= keys.length
+					bucket << pair.clone
+					return
+				end
+				values[index].each { |val|
+					next if val.null?
+					pair[keys[index]] = val
+					self.keys_values_combinator(keys, values, pair, bucket, index+1)
+				}
+				return bucket
+			end
+
+			# Process each statement in global constraint.
+			# - create a pair of global constraint variable and operator
+			# - generate positive and negative axioms for each hard constraint
+			def process_global_constraints(root)
+				puts '--- global constraint'
+				var_global = Variable.new(GLOBAL_VARIABLE, 'boolean', -1, true, true, false)
+				@variables[var_global.name] = var_global
+				
+				op_global = Operator.new(GLOBAL_OPERATOR)
+				op_global[var_global.name] = Parameter.new(var_global, false, true)
+				@operators[op_global.name] = op_global
+
+				# keep generated axioms' variables
+				all_var_axiom = Array.new
+
+				# generate positive axioms
+				root['global'].each_pair { |ref,val|
+					next if ref[0,1] == '_'
+					axioms = self.ref_to_axioms(ref.no_root, root['current'], Hash.new)
+					self.solve_axioms_constraints(axioms, val, root)
+					# create an axiom variable for this statement
+					var_axiom = Variable.new('@' + Variable.nextId.to_s + '_' + ref,
+						'boolean', 1, false, true, false)
+					@variables[var_axiom.name] = var_axiom
+					all_var_axiom << var_axiom # save the variable
+					param = Parameter.new(var_axiom, false, true)
+					# add the variable to each axiom
+					axioms.each { |axiom|
+						axiom[var_axiom.name] = param
+						@axioms << axiom
+					}
+					# set this axiom variable as prevail condition of global constraint operator
+					op_global[var_axiom.name] = Parameter.new(var_axiom, true)
+				}
+
+				# generate negative axioms
+				all_var_axiom.each { |var|
+					axiom = Axiom.new
+					axiom[var.name] = Parameter.new(var, true, false)
+					axiom[var_global.name] = Parameter.new(var_global, true)
+					@axioms << axiom
+				}
+			end
+
+			# Solve constraint value (right side of constraint statement) of axioms by
+			# either assigning the value on :target variable or generate other axioms
+			# to be combined with existing ones.
+			# 
+			def solve_axioms_constraints(axioms, const, root)
+				if const['_type'] == 'equals'
+					axioms.each { |axiom| axiom[axiom.target] = const['_value'] }
+				end
+			end
+
+			# Generate a set of axioms for a given reference (left side of statement).
+			def ref_to_axioms(ref, value, params, bucket=nil)
+				return if ref == nil or ref == ''
+				bucket = Array.new if bucket == nil
+				first, nextref = ref.explode
+				varname = value.ref.push(first)
+				raise InvalidReferenceException if not @variables.has_key?(varname)
+				if nextref != nil and nextref != ''
+					@variables[varname].each { |val|
+						params[varname] = val
+						self.ref_to_axioms(nextref, val, params, bucket) if not val.null?
+					}
+				else
+					params[varname] = nil
+					axiom = Axiom.new
+					params.each_pair { |varname,val|
+						axiom[varname] = Parameter.new(@variables[varname], val)
+					}
+					axiom.target = varname
+					bucket.push(axiom)
+				end
+				return bucket
 			end
 
 			# set possible values for each variable
@@ -114,6 +287,11 @@ module Nuri
 				puts '--- operators'
 				@operators.each_value { |op| puts op.to_s }
 			end
+
+			def dump_axioms
+				puts '--- axioms'
+				@axioms.each { |ax| puts ax.to_s }
+			end
 		end
 
 		# remove '_parent' attribute (mainly to avoid cyclic in JSON)
@@ -124,8 +302,12 @@ module Nuri
 			end
 		end
 
-		# this exception is thrown if a variable is not exist
+		# This exception is thrown if a variable is not exist
 		class VariableNotFoundException < Exception
+		end
+
+		# This exception is thrown if there is an invalid reference
+		class InvalidReferenceException < Exception
 		end
 
 		# generate Visitor class which has 3 attributes
@@ -133,25 +315,41 @@ module Nuri
 		# - variables: Hash instance that holds all Variable instances
 		# - types: Hash instance that holds all types (primitive or non-primitive)
 		class Visitor
-			def initialize(root, variables=nil, types=nil)
-				@root = root
-				@vars = variables
-				@types = types
+			def initialize(main) #, root, variables=nil, types=nil)
+				@main = main
+				@root = main.root
+				@vars = main.variables
+				@types = main.types
+			end
+		end
+
+		class GroundedVisitor
+			def initialize(context, params)
+				@context = context
+				@params = params
+			end
+
+			def visit(name, value, ref)
+				puts '=> ' + name if name.ref?
+				puts '=> ' + value.str if value.ref?
+				return true
 			end
 		end
 
 		# Visitor that process all procedure contexts
 		class ProcedureVisitor < Visitor
 			def visit(name, value, ref)
-				return if name[0,1] == '_'
-				puts 'procedure: ' + ref.push(name) if value.isprocedure?
-				# TODO
+				return false if name[0,1] == '_'
+				if value.isprocedure?
+					@main.process_procedure(value)
+					return false
+				end
 				return true
 			end
 		end
 
 		# Visitor that set goal value of each variable
-		class GoalSetter < Visitor
+		class GoalVisitor < Visitor
 			def equals(name, value)
 				value['_isa'] = @vars[name].type if value.null?
 				@vars[name].goal = value if @vars.has_key?(name)
@@ -241,6 +439,13 @@ module Nuri
 		# SAS Variable is a finite-domain variable
 		# It has a finite set of possible values
 		class Variable < Array
+			@@id = 0
+
+			def self.nextId
+				@@id += 1
+				return @@id
+			end
+
 			# @name -- name of variable
 			# @type -- type of variable ('string','boolean','number', or fullpath of a class)
 			# @layer -- axiom layer ( '-1' if this is not axiom variable, otherwise >0)
@@ -276,16 +481,22 @@ module Nuri
 			end
 		end
 
+		# A class for Grounded Operator
 		class Operator < Hash
 			@@id = 0
 
-			def self.nextId; return ++@@id; end
+			# return the next operator #id
+			def self.nextId
+				@@id += 1
+				return @@id
+			end
 
-			attr_accessor :id, :name
+			attr_accessor :id, :name, :cost
 
-			def initialize(name)
+			def initialize(name, cost=1)
 				@id = Nuri::Sfp::Operator.nextId
 				@name = name
+				@cost = cost
 			end
 
 			def to_s; return @name + ': ' + self.length.to_s ; end
@@ -295,15 +506,23 @@ module Nuri
 			end
 		end
 
+		# A class for Grounded Axiom
 		class Axiom < Hash
 			@@id = 0
 
-			def self.nextId; return ++@@id; end
+			def self.nextId
+				@@id += 1
+				return @@id
+			end
 
-			attr_accessor :id
+			attr_accessor :id, :target
 
 			def initialize
 				@id = Nuri::Sfp::Axiom.nextId
+			end
+
+			def to_s
+				return 'axiom#' + @id.to_s
 			end
 
 			def to_sas
@@ -311,6 +530,7 @@ module Nuri
 			end
 		end
 
+		# A class for operator/axiom parameter (prevail or effect condition)
 		class Parameter
 			attr_accessor :var, :pre, :post
 
@@ -320,9 +540,13 @@ module Nuri
 				@post = post
 			end
 
-			def prevail?; return (@post == nil); end
+			def prevail?
+				return (@post == nil)
+			end
 
-			def effect?; return (@post != nil); end
+			def effect?
+				return (@post != nil)
+			end
 		end
 	end
 end

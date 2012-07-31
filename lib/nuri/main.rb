@@ -8,10 +8,11 @@ require 'logger'
 require 'thread'
 require 'uri'
 require 'net/http'
-require 'nuri/util'
-require 'nuri/resource'
-require 'nuri/undefined'
+require 'lib/nuri/util'
+require 'lib/nuri/resource'
+require 'lib/nuri/undefined'
 require 'modules/node/node'
+require 'lib/sfp/main'
 
 module Nuri
 	class Main < Mongrel::HttpHandler

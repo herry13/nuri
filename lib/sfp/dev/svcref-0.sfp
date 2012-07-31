@@ -41,11 +41,11 @@ init state {
 		refer is a
 	}
 	pc2 isa Client
-	x {
+	/*x {
 		y {
 			z isa Client
 		}
-	}
+	}*/
 }
 goal constraint {
 	a.running is false
