@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-$: << File.expand_path(File.dirname(__FILE__) + "/..")
+$: << File.expand_path(File.dirname(__FILE__) + "/../lib")
+#$: << File.expand_path(File.dirname(__FILE__) + "/..")
 #$: << File.expand_path(File.dirname(__FILE__) + "/../modules")
 
 require "nuri/main"
