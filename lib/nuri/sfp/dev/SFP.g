@@ -27,7 +27,7 @@ TODO:
 }
 
 @members {
-	attr_accessor :rootdir
+	attr_accessor :rootdir, :root
 
 	def next_id
 		++@id

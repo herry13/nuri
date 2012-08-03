@@ -1,5 +1,3 @@
-include "c.sfp"
-
 class Machine {
 	running is no
 	procedure start {

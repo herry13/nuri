@@ -1,6 +1,4 @@
-require 'lib/sfp/ext'
-require 'lib/sfp/SFPParser'
-require 'lib/sfp/SFPLexer'
+require 'json'
 
 module Nuri
 	module Sfp
@@ -9,15 +7,13 @@ module Nuri
 		class Parser
 			# Parse SFP file and return its JSON representation
 			def self.file_to_json(file)
-				sfp = Parser.new
-				sfp.parse_file(file)
-				return sfp.to_json
+				parser = Parser.new
+				parser.parse_file(file)
+				return parser.to_json
 			end
 
-			# enable this class to process SFP into FDR (SAS+)
-			#include Nuri::Sfp::Sas
-
 			def initialize
+				@parser = nil
 			end
 
 			# parse SFP file
@@ -38,18 +34,24 @@ module Nuri
 				@parser.rootdir = Nuri::Util.rootdir
 				@parser.sfp
 			end
-	
+
+			# dump the parsed specification into standard output
+			def dump(root=nil)
+				return if root == nil and @parser == nil
+				root = @parser.root.clone if root == nil
+				root.accept(ParentEliminator.new)
+				puts JSON.pretty_generate root
+			end
+
 			# return JSON representation of SFP description
 			def to_json
+				return nil if @parser == nil
 				return @parser.to_json
 			end
-		end
 
-		class ParentEliminator
-			def visit(name, value, ref)
-				value.delete('_parent') if value.is_a?(Hash) and value.has_key?('_parent')
-				return true
-			end
+			# enable this class to process SFP into FDR (SAS+)
+			include Nuri::Sfp::Sas
+
 		end
 	end
 end
