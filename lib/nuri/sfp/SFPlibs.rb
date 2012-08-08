@@ -1,12 +1,16 @@
 module Nuri
 	module Sfp
 		module Sfplibs
+			attr_accessor :rootdir
+			attr_reader :root, :used_classes
+
 			def init
 				@root = Hash.new
 				@now = @root
 				@id = 0
 				@root['Object'] = { '_self' => 'Object', '_context' => 'class', '_parent' => @root }
 				@unexpanded_classes = Array.new
+				@used_classes = Array.new
 			end
 
 			def next_id
@@ -55,8 +59,10 @@ module Nuri
 
 			def expand_classes
 				@unexpanded_classes.each { |c|
-					superclass = @root.at?(c['_extends'])
-					c.inherits( superclass )
+					sclass = @root.at?(c['_extends'])
+					c.inherits( sclass )
+					c['_super'] = (sclass.has_key?('_super') ? sclass['_super'].clone : Array.new)
+					c['_super'] << c['_extends']
 				}
 			end
 
@@ -64,6 +70,9 @@ module Nuri
 				return if not obj.has_key?('_isa') or obj['_isa'] == nil
 				objclass = @root.at?(obj['_isa'])
 				obj.inherits( objclass )
+				obj['_classes'] = (objclass.has_key?('_super') ? objclass['_super'].clone : Array.new)
+				obj['_classes'] << obj['_isa']
+				@used_classes = @used_classes.concat(obj['_classes']).uniq
 			end
 		end
 	end

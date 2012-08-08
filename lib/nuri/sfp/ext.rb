@@ -14,7 +14,7 @@ Hash.send(:define_method, "accept") { |visitor|
 	}
 }
 
-# resolve a reference, return nil if there's no value with such path
+# resolve a reference, return nil if there's no value with given address
 Hash.send(:define_method, "at?") { |addr|
 	return nil if not addr.is_a?(String)
 	addrs = addr.split('.', 2)
@@ -91,6 +91,10 @@ Hash.send(:define_method, 'isnull') {
 	return (self.has_key?('_context') and self['_context'] == 'null')
 }
 
+Hash.send(:define_method, 'tostring') {
+	return 'null' if self.isnull
+	return self.ref
+}
 
 # add path to the end of a reference 
 String.send(:define_method, "push") { |value|

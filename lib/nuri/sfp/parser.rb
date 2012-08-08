@@ -40,7 +40,8 @@ module Nuri
 				return if root == nil and @parser == nil
 				root = @parser.root.clone if root == nil
 				root.accept(ParentEliminator.new)
-				puts JSON.pretty_generate root
+				puts JSON.pretty_generate(root)
+				puts @parser.used_classes.inspect
 			end
 
 			# return JSON representation of SFP description

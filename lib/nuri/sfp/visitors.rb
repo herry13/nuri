@@ -1,4 +1,5 @@
 require 'nuri/sfp/ext'
+
 module Nuri
 	module Sfp
 		class ParentEliminator
@@ -7,5 +8,7 @@ module Nuri
 				return true
 			end
 		end
+
+		
 	end
 end

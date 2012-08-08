@@ -31,9 +31,6 @@ TODO:
 }
 
 @members {
-	attr_accessor :rootdir
-	attr_reader :root
-
 	include Nuri::Sfp::Sfplibs
 }
 

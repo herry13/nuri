@@ -25,44 +25,87 @@ module Nuri
 
 				@root = @parser.root 
 				@variables = Hash.new
-				@types = { 'boolean' => [true, false],
-					'number' => Array.new,
-					'string' => Array.new
+				@types = { 'Boolean' => [true, false],
+					'Number' => Array.new,
+					'String' => Array.new
 				}
 				@operators = Hash.new
 				@axioms = Array.new
-
+				
 				# collect classes
-				@root.accept(ClassCollector.new(@types))
+				self.collect_classes
 
 				# collect variables
-				@root['current'].accept(VariableCollector.new(@root, @variables, @types))
+				@root['initial'].accept(VariableCollector.new(@root['initial'], @variables, @types))
+
 				# set goal value
-				@root['desired'].delete('_parent')
-				@root['desired'].accept(GoalVisitor.new(self))
+				@root['goal'].delete('_parent')
+				@root['goal'].accept(GoalVisitor.new(self))
 
 				# collect all values
-				@root.accept(Nuri::Sfp::ValueCollector.new(@types))
+				@root['goal'].accept(Nuri::Sfp::ValueCollector.new(@types))
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
 
 				# set domain values for each variable
 				self.setVariableValues
 
+				self.dump_types
+				self.dump_vars
+
+=begin
 				# generate operator and axioms for global constraints
 				self.process_global_constraints(@root) if @root.has_key?('global')
 
-				self.dump_types
-				self.dump_vars
 				self.dump_operators
 				self.dump_axioms
 
 				# search procedures and generate grounded-operators
 				@root['current'].accept(ProcedureVisitor.new(self))
+=end
 			end
 
 			# below methods are private
-			private
+			#private
+			def collect_classes
+				@parser.used_classes.each { |c|
+					@types[c] = Array.new
+					@types[c] << Nuri::Sfp.null_of(c)
+				}
+			end
+
+			def dump_types
+				puts '--- types'
+				@types.each_pair { |name,values|
+					next if values == nil
+					print name + ": "
+					values.each { |val|
+						if val.is_a?(Hash)
+							print (val.isnull ? 'null ' : val.ref + " ")
+						else
+							print val.to_s + " "
+						end
+					}
+					puts '| ' + values.length.to_s
+				}
+			end
+
+			def dump_vars
+				puts '--- variables'
+				@variables.each_value { |value| puts value.to_s }
+			end
+
+			def dump_operators
+				puts '--- operators'
+				@operators.each_value { |op| puts op.to_s }
+			end
+
+			def dump_axioms
+				puts '--- axioms'
+				@axioms.each { |ax| puts ax.to_s }
+			end
+
+### incompatible methods ####
 
 			# Generate Grounded Operator for given procedure
 			# TODO
@@ -226,68 +269,76 @@ module Nuri
 			# set possible values for each variable
 			def setVariableValues
 				@variables.each_value { |var|
-					var.goal = var.init if var.final # init = goal if this is a final variable
-					var << var.init if var.init != nil and not var.init.ref and not var.init.null?
-					var << var.goal if var.goal != nil and not var.goal.ref and not var.goal.null?
 					if not var.final
-						# if not a final variable, add all its type's values
-						@types[var.type].each { |item| var << item if not item.ref }
+						@types[var.type].each { |v| var << v }
+						var.uniq!
 					end
-					var.uniq!
 				}
 			end
 
-			def dump_types
-				puts '--- types'
-				@types.each_pair { |name,values|
-					next if values == nil
-					print name + ": "
-					values.each { |val|
-						if val.null?
-							print 'null '
-						elsif val.isobject
-							print val.name + " "
-						else
-							print val.to_s + " "
-						end
-					}
-					puts ''
-				}
+		end
+
+### compatible classes ###
+		# collecting all variables and put them into @bucket
+		class VariableCollector
+			def initialize(root, var_bucket, type_bucket)
+				@root = root
+				@bucket = var_bucket
+				@types = type_bucket
 			end
 
-			def dump_vars
-				puts '--- variables'
-				@variables.each_value { |value| puts value.to_s }
+			def visit(name, value, ref)
+				return false if name[0,1] == '_' or (value.is_a?(Hash) and not (value.isobject or value.isnull))
+				isfinal = self.is_final(value)
+				isref = (value.is_a?(String) and value.isref)
+				value = @root.at?(value) if value.is_a?(String) and value.isref
+				type = self.is_a(value)
+				var = Variable.new(ref.push(name), type, -1, value, nil, isfinal)
+				@bucket[var.name] = var
+				if isfinal and value.is_a?(Hash)
+					value['_classes'].each { |c| @types[c] << value }
+				elsif not isref
+					@types[ type ] << value
+				end
+				return true
 			end
 
-			def dump_operators
-				puts '--- operators'
-				@operators.each_value { |op| puts op.to_s }
+			def is_a(value)
+				return 'Boolean' if value.is_a?(TrueClass) or value.is_a?(FalseClass)
+				return 'Number' if value.is_a?(Numeric)
+				return 'String' if value.is_a?(String) and not value.isref
+				return value['_isa'] if value.is_a?(Hash) and value.has_key?('_isa')
+				return nil
 			end
 
-			def dump_axioms
-				puts '--- axioms'
-				@axioms.each { |ax| puts ax.to_s }
+			def is_final(value)
+				return true if value.is_a?(Hash) and not value.isnull
+				return false
 			end
 		end
 
-		# remove '_parent' attribute (mainly to avoid cyclic in JSON)
-		class ParentEliminator
+		# Collects all values (primitive or non-primitive)
+		class ValueCollector
+			def initialize(bucket)
+				@bucket = bucket
+			end
+
 			def visit(name, value, ref)
-				value.delete('_parent') if value.is_a?(Hash) and value.has_key?('_parent')
+				if name[0,1] == '_' and name != '_value'
+				elsif value.is_a?(String) and not value.isref
+					@bucket['String'] << value
+				elsif value.is_a?(Numeric)
+					@bucket['Number'] << value
+				elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
+					@bucket['Boolean'] << value
+				elsif value.is_a?(Hash) and value.isobject
+					value['_classes'].each { |c| @bucket[c] << value }
+				end
 				return true
 			end
 		end
 
-		# This exception is thrown if a variable is not exist
-		class VariableNotFoundException < Exception
-		end
-
-		# This exception is thrown if there is an invalid reference
-		class InvalidReferenceException < Exception
-		end
-
-		# generate Visitor class which has 3 attributes
+		# Visitor class has 3 attributes
 		# - root : Hash instance of root Context
 		# - variables: Hash instance that holds all Variable instances
 		# - types: Hash instance that holds all types (primitive or non-primitive)
@@ -298,6 +349,32 @@ module Nuri
 				@vars = main.variables
 				@types = main.types
 			end
+		end
+
+		# Visitor that set goal value of each variable
+		class GoalVisitor < Visitor
+			def set_equals(name, value)
+				value['_isa'] = @vars[name].type if value.is_a?(Hash) and value.isnull
+				@vars[name].goal = value
+			end
+
+			def visit(name, value, ref)
+				return if name[0,1] == '_'
+				raise VariableNotFoundException, name if not @vars.has_key?(name)
+				if value.isconstraint
+					self.set_equals(name, value['_value']) if value['_type'] == 'equals'
+				end
+				return true
+			end
+		end
+
+### incompatible classes ###
+		# This exception is thrown if a variable is not exist
+		class VariableNotFoundException < Exception
+		end
+
+		# This exception is thrown if there is an invalid reference
+		class InvalidReferenceException < Exception
 		end
 
 		class GroundedVisitor
@@ -325,46 +402,6 @@ module Nuri
 			end
 		end
 
-		# Visitor that set goal value of each variable
-		class GoalVisitor < Visitor
-			def equals(name, value)
-				value['_isa'] = @vars[name].type if value.null?
-				@vars[name].goal = value if @vars.has_key?(name)
-			end
-
-			def visit(name, value, ref)
-				return if name[0,1] == '_'
-				raise VariableNotFoundException, name if not @vars.has_key?(name)
-				if value.isconstraint
-					self.equals(name, value['_value']) if value['_type'] == 'equals'
-				end
-				return true
-			end
-		end
-
-		# visit all subclasses, and foreach subclass call method 'inherits'
-		# to copy non-exist attributes and procedures into itself
-		class ClassExpander < Visitor
-			def visit(name, value, ref)
-				return if not value.is_a?(Hash) or not value.isclass or value.extends == nil
-				parent = @root.at?(value.extends)
-				parent.accept(self) if not parent.expanded
-				value.inherits(parent)
-				return true
-			end
-		end
-
-		# visit all objects, foreach object call method 'inherits'
-		# to copy non-exist attributes and procedures into itself
-		class ObjectExpander < Visitor
-			def visit(name, value, ref)
-				return if not value.is_a?(Hash) or not value.isobject or value.isa == nil
-				parent = @root.at?(value.isa)
-				value.inherits(parent)
-				return true
-			end
-		end
-
 		# superclass of collector class of 'Hash' (based on Visitor pattern)
 		class Collector
 			def initialize(bucket)
@@ -372,46 +409,6 @@ module Nuri
 			end
 		end
 
-		# collecting all classes and put them into @bucket
-		class ClassCollector < Collector
-			def visit(name, value, ref)
-				if value.respond_to?('isclass') and value.isclass
-					varname = ref.push(name)
-					@bucket[varname] = Array.new
-					@bucket[varname] << Nuri::Sfp.null_of(varname)
-				end
-			end
-		end
-
-		# collecting all variables and put them into @bucket
-		class VariableCollector < Collector
-			def initialize(root, var_bucket, type_bucket)
-				super(var_bucket)
-				@root = root
-				@types = type_bucket
-			end
-
-			def visit(name, value, ref)
-				return false if name[0,1] == '_' or not value.isvalue
-				isfinal = (not value.ref and not value.null? and value.isobject)
-				value = value.resolve(@root['current']) if value.ref
-				var = Variable.new(ref.push(name), value.isa, -1, value, nil, isfinal)
-				@bucket[var.name] = var
-				@types[value.isa].push(value) if value.isa != nil and not value.ref and not value.null?
-				return true
-			end
-		end
-
-		# Collects all values (primitive or non-primitive)
-		class ValueCollector < Collector
-			def visit(name, value, ref)
-				@bucket[value.isa] << value if not 
-					((name[0,1] == '_' and name != '_value') or not value.isvalue or
-						value.ref or value.is_a?(TrueClass) or value.is_a?(FalseClass) or
-						value.null?) and value.isa != nil
-				return true
-			end
-		end
 
 		# SAS Variable is a finite-domain variable
 		# It has a finite set of possible values
@@ -440,13 +437,13 @@ module Nuri
 			end
 
 			def to_s
-				s = @name + ', ' + @type 
-				s += ', ' + (@init == nil ? '' : (@init.null? ? 'null' : (@init.isobject ? @init.name.to_s : @init.to_s)))
-				s += ', ' + (@goal == nil ? '' : (@goal.null? ? 'null' : (@goal.isobject ? @goal.name.to_s : @goal.to_s)))
-				s += ', ' + (@final ? 'final' : 'notfinal') + "\n"
+				s = @name + '|' + @type 
+				s += '|' + (@init == nil ? '-' : (@init.is_a?(Hash) ? @init.tostring : @init.to_s))
+				s += '|' + (@goal == nil ? '-' : (@goal.is_a?(Hash) ? @goal.tostring : @goal.to_s))
+				s += '|' + (@final ? 'final' : 'notfinal') + "\n"
 				s += "["
-				self.each { |value| s += (value.null? ? 'null' : (value.isobject ? value.name.to_s : value.to_s)) + ',' }
-				s = s.chop + "]"
+				self.each { |v| s += (v.is_a?(Hash) ? v.tostring : v.to_s) + ',' }
+				s = (self.length > 0 ? s.chop : s) + "]"
 				return s
 			end
 
