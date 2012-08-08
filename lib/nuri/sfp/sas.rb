@@ -9,8 +9,8 @@ module Nuri
 	module Sfp
 
 		def self.null_of(class_ref=nil)
-			return nil if not class_ref.is_a?(String) or not class_ref.ref?
-			return { '_context' => 'null', '_isa' => class_ref } if class_ref != nil and class_ref != ''
+			return { '_context' => 'null', '_isa' => class_ref } if class_ref.is_a?(String) and class_ref != '' and class_ref.isref
+			return nil
 		end
 
 		# include 'Sas' module to enable processing Sfp into Finite-Domain Representation (FDR)
@@ -66,13 +66,6 @@ module Nuri
 				@root['current'].accept(ProcedureVisitor.new(self))
 			end
 
-=begin
-			def dump_json(root=@root)
-				root.accept(ParentEliminator.new)
-				puts JSON.pretty_generate root
-			end
-=end
-
 			# below methods are private
 			private
 
@@ -96,7 +89,7 @@ module Nuri
 				context.each_pair { |key,value|
 					next if key[0,1] == '_'
 					ref = self.subs_param(key, params)
-					if value.is_a?(String) and value.ref?
+					if value.is_a?(String) and value.ref
 						value = self.subs_param(value, params)
 					#elsif value.is_a?(Array) and
 					#	(value['_type'] == 'in' and value['_type'] == 'not-in')
@@ -139,7 +132,7 @@ module Nuri
 				params = { 'this' => [proc['_parent']] }
 				proc.each_pair { |name,val|
 					next if name[0,1] == '_'
-					params[name] = @types[val.isa?] if val.isa? != nil
+					params[name] = @types[val.isa] if val.isa != nil
 				}
 				return params
 			end
@@ -239,11 +232,11 @@ module Nuri
 			def setVariableValues
 				@variables.each_value { |var|
 					var.goal = var.init if var.final # init = goal if this is a final variable
-					var << var.init if var.init != nil and not var.init.ref? and not var.init.null?
-					var << var.goal if var.goal != nil and not var.goal.ref? and not var.goal.null?
+					var << var.init if var.init != nil and not var.init.ref and not var.init.null?
+					var << var.goal if var.goal != nil and not var.goal.ref and not var.goal.null?
 					if not var.final
 						# if not a final variable, add all its type's values
-						@types[var.type].each { |item| var << item if not item.ref? }
+						@types[var.type].each { |item| var << item if not item.ref }
 					end
 					var.uniq!
 				}
@@ -257,7 +250,7 @@ module Nuri
 					values.each { |val|
 						if val.null?
 							print 'null '
-						elsif val.isobject?
+						elsif val.isobject
 							print val.name + " "
 						else
 							print val.to_s + " "
@@ -319,8 +312,8 @@ module Nuri
 			end
 
 			def visit(name, value, ref)
-				puts '=> ' + name if name.ref?
-				puts '=> ' + value.str if value.ref?
+				puts '=> ' + name if name.ref
+				puts '=> ' + value.str if value.ref
 				return true
 			end
 		end
@@ -347,7 +340,7 @@ module Nuri
 			def visit(name, value, ref)
 				return if name[0,1] == '_'
 				raise VariableNotFoundException, name if not @vars.has_key?(name)
-				if value.isconstraint?
+				if value.isconstraint
 					self.equals(name, value['_value']) if value['_type'] == 'equals'
 				end
 				return true
@@ -358,9 +351,9 @@ module Nuri
 		# to copy non-exist attributes and procedures into itself
 		class ClassExpander < Visitor
 			def visit(name, value, ref)
-				return if not value.is_a?(Hash) or not value.isclass? or value.extends? == nil
-				parent = @root.at?(value.extends?)
-				parent.accept(self) if not parent.expanded?
+				return if not value.is_a?(Hash) or not value.isclass or value.extends == nil
+				parent = @root.at?(value.extends)
+				parent.accept(self) if not parent.expanded
 				value.inherits(parent)
 				return true
 			end
@@ -370,8 +363,8 @@ module Nuri
 		# to copy non-exist attributes and procedures into itself
 		class ObjectExpander < Visitor
 			def visit(name, value, ref)
-				return if not value.is_a?(Hash) or not value.isobject? or value.isa? == nil
-				parent = @root.at?(value.isa?)
+				return if not value.is_a?(Hash) or not value.isobject or value.isa == nil
+				parent = @root.at?(value.isa)
 				value.inherits(parent)
 				return true
 			end
@@ -387,7 +380,7 @@ module Nuri
 		# collecting all classes and put them into @bucket
 		class ClassCollector < Collector
 			def visit(name, value, ref)
-				if value.respond_to?('isclass?') and value.isclass?
+				if value.respond_to?('isclass') and value.isclass
 					varname = ref.push(name)
 					@bucket[varname] = Array.new
 					@bucket[varname] << Nuri::Sfp.null_of(varname)
@@ -404,12 +397,12 @@ module Nuri
 			end
 
 			def visit(name, value, ref)
-				return false if name[0,1] == '_' or not value.isvalue?
-				isfinal = (not value.ref? and not value.null? and value.isobject?)
-				value = value.resolve(@root['current']) if value.ref?
-				var = Variable.new(ref.push(name), value.isa?, -1, value, nil, isfinal)
+				return false if name[0,1] == '_' or not value.isvalue
+				isfinal = (not value.ref and not value.null? and value.isobject)
+				value = value.resolve(@root['current']) if value.ref
+				var = Variable.new(ref.push(name), value.isa, -1, value, nil, isfinal)
 				@bucket[var.name] = var
-				@types[value.isa?].push(value) if value.isa? != nil and not value.ref? and not value.null?
+				@types[value.isa].push(value) if value.isa != nil and not value.ref and not value.null?
 				return true
 			end
 		end
@@ -417,10 +410,10 @@ module Nuri
 		# Collects all values (primitive or non-primitive)
 		class ValueCollector < Collector
 			def visit(name, value, ref)
-				@bucket[value.isa?] << value if not 
-					((name[0,1] == '_' and name != '_value') or not value.isvalue? or
-						value.ref? or value.is_a?(TrueClass) or value.is_a?(FalseClass) or
-						value.null?) and value.isa? != nil
+				@bucket[value.isa] << value if not 
+					((name[0,1] == '_' and name != '_value') or not value.isvalue or
+						value.ref or value.is_a?(TrueClass) or value.is_a?(FalseClass) or
+						value.null?) and value.isa != nil
 				return true
 			end
 		end
@@ -453,11 +446,11 @@ module Nuri
 
 			def to_s
 				s = @name + ', ' + @type 
-				s += ', ' + (@init == nil ? '' : (@init.null? ? 'null' : (@init.isobject? ? @init.name.to_s : @init.to_s)))
-				s += ', ' + (@goal == nil ? '' : (@goal.null? ? 'null' : (@goal.isobject? ? @goal.name.to_s : @goal.to_s)))
+				s += ', ' + (@init == nil ? '' : (@init.null? ? 'null' : (@init.isobject ? @init.name.to_s : @init.to_s)))
+				s += ', ' + (@goal == nil ? '' : (@goal.null? ? 'null' : (@goal.isobject ? @goal.name.to_s : @goal.to_s)))
 				s += ', ' + (@final ? 'final' : 'notfinal') + "\n"
 				s += "["
-				self.each { |value| s += (value.null? ? 'null' : (value.isobject? ? value.name.to_s : value.to_s)) + ',' }
+				self.each { |value| s += (value.null? ? 'null' : (value.isobject ? value.name.to_s : value.to_s)) + ',' }
 				s = s.chop + "]"
 				return s
 			end

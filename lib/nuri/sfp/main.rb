@@ -3,6 +3,7 @@ require 'nuri/util'
 
 # internal dependencies
 require 'nuri/sfp/ext'
+require 'nuri/sfp/SFPlibs'
 require 'nuri/sfp/SFPParser'
 require 'nuri/sfp/SFPLexer'
 
