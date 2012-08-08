@@ -23,7 +23,7 @@ module Nuri
 			def to_sas
 				return false if @parser == nil
 
-				@root = @parser.root # self.to_context
+				@root = @parser.root 
 				@variables = Hash.new
 				@types = { 'boolean' => [true, false],
 					'number' => Array.new,
@@ -31,11 +31,6 @@ module Nuri
 				}
 				@operators = Hash.new
 				@axioms = Array.new
-
-				# foreach subclass, inherits superclass
-				@root.accept(ClassExpander.new(self))
-				# foreach object, inherits class
-				@root['current'].accept(ObjectExpander.new(self))
 
 				# collect classes
 				@root.accept(ClassCollector.new(@types))

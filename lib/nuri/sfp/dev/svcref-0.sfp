@@ -29,7 +29,7 @@ class Client {
 		}
 	}
 }
-current state {
+initial state {
 	a isa Server {
 		name is "A"
 		running is true
@@ -41,13 +41,8 @@ current state {
 		refer is a
 	}
 	pc2 isa Client
-	/*x {
-		y {
-			z isa Client
-		}
-	}*/
 }
-desired constraint {
+goal constraint {
 	a.running is false
 	pc1.refer is b
 	pc2.refer is b

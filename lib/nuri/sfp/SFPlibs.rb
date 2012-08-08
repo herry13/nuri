@@ -1,6 +1,14 @@
 module Nuri
 	module Sfp
 		module Sfplibs
+			def init
+				@root = Hash.new
+				@now = @root
+				@id = 0
+				@root['Object'] = { '_self' => 'Object', '_context' => 'class', '_parent' => @root }
+				@unexpanded_classes = Array.new
+			end
+
 			def next_id
 				++@id
 				return "c" + @id.to_s
@@ -43,6 +51,19 @@ module Nuri
 				@now = @now['_parent']
 				n.delete('_parent') if remove_parent
 				return n
+			end
+
+			def expand_classes
+				@unexpanded_classes.each { |c|
+					superclass = @root.at?(c['_extends'])
+					c.inherits( superclass )
+				}
+			end
+
+			def expand_object(obj)
+				return if not obj.has_key?('_isa') or obj['_isa'] == nil
+				objclass = @root.at?(obj['_isa'])
+				obj.inherits( objclass )
 			end
 		end
 	end

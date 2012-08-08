@@ -9,6 +9,7 @@ options {
 =begin
 Depends:
 - SFPlibs.rb
+- ext.rb
 
 Features:
 - reference
@@ -37,14 +38,10 @@ TODO:
 }
 
 sfp 
-	:	{
-			@root = Hash.new
-			@now = @root
-			@id = 0
-			#@parser = Nuri::Sfp::Parser.new
-			@root['Object'] = { '_self' => 'Object', '_context' => 'class', '_parent' => @root }
-		}
-		NL* include* header* (state | composite | constraint)*
+	:	{	self.init	}
+		NL* include* header*
+		{	self.expand_classes	}
+		(state | composite | constraint)*
 	;
 
 include
@@ -59,9 +56,6 @@ include_file
 header
 	:	class_definition
 	|	procedure
-		{
-			self.expand_classes
-		}
 	;
 
 state
@@ -112,7 +106,10 @@ class_definition
 	
 extends_class returns [val]
 	:	'extends' path
-		{	$val = self.to_ref($path.text)	}
+		{
+			$val = self.to_ref($path.text)
+			@unexpanded_classes.push(@now)
+		}
 	;
 
 attribute
@@ -136,6 +133,7 @@ object_def
 		('isa' path
 		{
 			@now['_isa'] = self.to_ref($path.text)
+			self.expand_object(@now)
 		}
 		)?
 		object_body?

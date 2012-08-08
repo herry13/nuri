@@ -6,7 +6,7 @@ $: << File.expand_path(cdir + "/../../..")
 
 require 'nuri/sfp/main'
 
-infile = cdir + '/svcref-0.sfp'
+infile = cdir + '/svcref-00.sfp'
 
 sfp = Nuri::Sfp::Parser.new
 sfp.parse_file(infile)
