@@ -11,4 +11,4 @@ infile = cdir + '/svcref-0.sfp'
 sfp = Nuri::Sfp::Parser.new
 sfp.parse_file(infile)
 sfp.to_sas
-sfp.dump
+#sfp.dump

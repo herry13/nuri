@@ -74,6 +74,7 @@ module Nuri
 				obj['_classes'] << obj['_isa']
 				@used_classes = @used_classes.concat(obj['_classes']).uniq
 			end
+
 		end
 	end
 end

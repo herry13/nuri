@@ -38,14 +38,40 @@ module Nuri
 				# collect variables
 				@root['initial'].accept(VariableCollector.new(@root['initial'], @variables, @types))
 
-				# set goal value
-				@root['goal'].delete('_parent')
-				@root['goal'].accept(GoalVisitor.new(self))
+				# process goal constraint
+				if @root.has_key?('goal') and @root['goal'].isconstraint
+					@root['goal'].delete('_parent')
+					# set goal value
+					@root['goal'].accept(GoalVisitor.new(self))
 
-				# collect all values
-				@root['goal'].accept(Nuri::Sfp::ValueCollector.new(@types))
+					# collect all value in goal constraint
+					@root['goal'].accept(Nuri::Sfp::ValueCollector.new(@types))
+				end
+
+				# process global constraint
+				if @root.has_key?('global') and @root['global'].isconstraint
+					@root['global'].delete('_parent')
+
+					# collect all value in global constraint
+					@root['global'].accept(Nuri::Sfp::ValueCollector.new(@types))
+
+					# TODO
+					# - add the global constraint in goal constraint
+					# - generate additional axioms/operators
+					# - compile using Patrik's approach
+				end
+
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
+
+				# process all procedures
+				@variables.each_value { |var|
+					if var.is_final
+						var.init.each_pair { |k,v|
+							process_procedure(v) if v.is_a?(Hash) and v.isprocedure
+						}
+					end
+				}
 
 				# set domain values for each variable
 				self.setVariableValues
@@ -65,8 +91,44 @@ module Nuri
 =end
 			end
 
-			# below methods are private
-			#private
+			def process_procedure(procedure)
+				procedures = ground_procedure_parameters(procedure)
+				if procedures != nil
+					puts procedure.ref + ' -- ' + procedures.length.to_s
+				end
+			end
+
+			def ground_procedure_parameters(procedure)
+				params = Hash.new
+				procedure.each_pair { |k,v|
+					next if k[0,1] == '_'
+					# if the specified parameter does not any value, then it's invalid procedure
+					return nil if not @types.has_key?( v['_isa'] )
+					params[k] = Array.new
+					@types[ v['_isa'] ].each { |val|
+						params[k] << val if not (val.is_a?(Hash) and val.isnull)
+					}
+				}
+
+				def combinator(bucket, procedure, names, params, selected, index)
+					if index >= names.length
+						p = procedure.clone
+						# TODO -- grounding all references
+						selected.each_pair { |k,v| p[k] = v }
+						bucket << p
+					else
+						params[ names[index] ].each { |val|
+							selected[ names[index] ] = val
+							combinator(bucket, procedure, names, params, selected, index+1)
+						}
+					end
+				end
+				bucket = Array.new
+				combinator(bucket, procedure, params.keys, params, Hash.new, 0)
+				return bucket
+			end
+
+			# collect all classes that are used by the objects
 			def collect_classes
 				@parser.used_classes.each { |c|
 					@types[c] = Array.new
@@ -109,7 +171,7 @@ module Nuri
 
 			# Generate Grounded Operator for given procedure
 			# TODO
-			def process_procedure(proc)
+			def process_procedure2(proc)
 				puts '--- procedures'
 				puts '- ' + proc.ref #+ ' -- ' + proc.keys.inspect
 				# fill-in parameter's value
@@ -269,7 +331,7 @@ module Nuri
 			# set possible values for each variable
 			def setVariableValues
 				@variables.each_value { |var|
-					if not var.final
+					if not var.is_final
 						@types[var.type].each { |v| var << v }
 						var.uniq!
 					end
@@ -425,23 +487,23 @@ module Nuri
 			# @layer -- axiom layer ( '-1' if this is not axiom variable, otherwise >0)
 			# @init -- initial value
 			# @goal -- goal value (desired value)
-			attr_accessor :name, :type, :layer, :init, :goal, :final
+			attr_accessor :name, :type, :layer, :init, :goal, :is_final
 
-			def initialize(name, type, layer=-1, init=nil, goal=nil, final=false)
+			def initialize(name, type, layer=-1, init=nil, goal=nil, is_final=false)
 				@name = name
 				@type = type
 				@layer = layer
 				@init = init
 				@goal = goal
-				@final = final
+				@is_final = is_final
 			end
 
 			def to_s
 				s = @name + '|' + @type 
 				s += '|' + (@init == nil ? '-' : (@init.is_a?(Hash) ? @init.tostring : @init.to_s))
 				s += '|' + (@goal == nil ? '-' : (@goal.is_a?(Hash) ? @goal.tostring : @goal.to_s))
-				s += '|' + (@final ? 'final' : 'notfinal') + "\n"
-				s += "["
+				s += '|' + (@is_final ? 'final' : 'notfinal') + "\n"
+				s += "\t["
 				self.each { |v| s += (v.is_a?(Hash) ? v.tostring : v.to_s) + ',' }
 				s = (self.length > 0 ? s.chop : s) + "]"
 				return s

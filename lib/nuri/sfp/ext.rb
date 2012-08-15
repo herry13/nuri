@@ -41,6 +41,10 @@ Hash.send(:define_method, "isconstraint") {
 	return (self.has_key?('_context') and self['_context'] == 'constraint')
 }
 
+Hash.send(:define_method, "isprocedure") {
+	return (self.has_key?('_context') and self['_context'] == 'procedure')
+}
+
 # return true if this context is a class, otherwise false
 Hash.send(:define_method, "isclass") {
 	return (self.has_key?('_context') and self['_context'] == 'class')
