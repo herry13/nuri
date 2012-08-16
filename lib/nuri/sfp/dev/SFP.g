@@ -171,6 +171,7 @@ operator
 			@now[$ID.text] = { '_self' => $ID.text,
 				'_context' => 'operator',
 				'_parent' => @now,
+				'_cost' => 1,
 				'_conditions' => { '_context' => 'constraint' },
 				'_effects' => { '_context' => 'mutation' }
 			}
@@ -179,7 +180,7 @@ operator
 		(	'cost' equals_op NUMBER NL+
 			{	@now['_cost'] = $NUMBER.text.to_i	}
 		)?
-		op_param*
+		/*op_param**/
 		op_conditions? op_effects
 		'}' NL+
 		{	self.goto_parent()	}
@@ -223,6 +224,7 @@ procedure
 			@now[$ID.text] = { '_self' => $ID.text,
 				'_context' => 'procedure',
 				'_parent' => @now,
+				'_cost' => 1,
 				'_conditions' => { '_context' => 'constraint', '_type' => 'and' },
 				'_effects' => { '_context' => 'mutation', '_type' => 'and' }
 			}

@@ -9,7 +9,7 @@ Hash.send(:define_method, "ref") {
 Hash.send(:define_method, "accept") { |visitor|
 	self.each_pair { |key,value|
 		next if key == '_parent'
-		go_next = visitor.visit(key, value, self.ref)
+		go_next = visitor.visit(key, value, self)
 		value.accept(visitor) if value.is_a?(Hash) and go_next == true
 	}
 }
