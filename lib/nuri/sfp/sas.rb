@@ -56,13 +56,15 @@ module Nuri
 					@root['global'].accept(Nuri::Sfp::ValueCollector.new(@types))
 
 					# TODO
-					# - add the global constraint in goal constraint
-					# - generate additional axioms/operators
-					# - compile using Patrik's approach
+					# 1) - add the global constraint in goal constraint
+					#    - generate additional axioms/operators
+					# 2) compile using Patrik's approach
 				end
-
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
+
+				@root['global'].accept(FormulaNormalizer.new(self)) if
+					@root.has_key?('global') and @root['global'].isconstraint
 
 				# process all procedures
 				@variables.each_value { |var|
@@ -141,11 +143,6 @@ module Nuri
 					sas_op[@variables[k].name] = Parameter.new(@variables[k], pre, post)
 				}
 				@operators[sas_op.name] = sas_op if apply_global_constraint(sas_op)
-			end
-
-			# return true if global constraint could be applied, otherwise false
-			def apply_global_constraint(op)
-				return true
 			end
 
 			# process all object procedures in order to get
@@ -267,9 +264,70 @@ module Nuri
 				}
 			end
 
+			# return true if global constraint could be applied, otherwise false
+			def apply_global_constraint(op)
+				return true if not @root.has_key?('global') or not @root['global'].isconstraint
+
+				@root['global'].each { |k,v|
+					next if k[0,1] == '_'
+					# 1) x = y
+					if v['_type'] == 'equals' and op.has_key?(k) and op[k].post != nil
+						return false if v['_value'] != op[k].post
+						#puts '==>> ' + v['_value'].to_s + ' == ' + op[k].post.to_s
+					end
+
+					# 2) x in (y1, y2, y3) := x = y1 | y2 | y3
+
+					# 3) if x1 = y1 then x2 = y2 := not (x1=y1) or x2=y2
+				}
+
+				return true
+			end
+
 		end
 
-### compatible classes ###
+		# Visitor class has 3 attributes
+		# - root : Hash instance of root Context
+		# - variables: Hash instance that holds all Variable instances
+		# - types: Hash instance that holds all types (primitive or non-primitive)
+		class Visitor
+			def initialize(main) #, root, variables=nil, types=nil)
+				@main = main
+				@root = main.root
+				@vars = main.variables
+				@types = main.types
+			end
+		end
+
+		class FormulaNormalizer < Visitor
+			def visit(name, value, obj)
+				# TODO
+				# 1) not (x=y1), x in (y1, y2, y3) := x=y2 or x=y3
+				# 2) if x1=y1 then x2=y2 := not (x1=y1) or (x2=y2)
+				# 3) x in (y1, y2, y3) := (x=y1) or (x=y2) or (x=y3)
+
+				return true
+			end
+		end
+
+		# Visitor that set goal value of each variable
+		class GoalVisitor < Visitor
+			def set_equals(name, value)
+				value['_isa'] = @vars[name].type if value.is_a?(Hash) and value.isnull
+				@vars[name].goal = value
+			end
+
+			def visit(name, value, obj)
+				return if name[0,1] == '_'
+				raise VariableNotFoundException, name if not @vars.has_key?(name)
+				if value.isconstraint
+					self.set_equals(name, value['_value']) if value['_type'] == 'equals'
+				end
+				return true
+			end
+		end
+
+
 		# collecting all variables and put them into @bucket
 		class VariableCollector
 			def initialize(root, var_bucket, type_bucket)
@@ -324,36 +382,6 @@ module Nuri
 					@bucket['Boolean'] << value
 				elsif value.is_a?(Hash) and value.isobject
 					value['_classes'].each { |c| @bucket[c] << value }
-				end
-				return true
-			end
-		end
-
-		# Visitor class has 3 attributes
-		# - root : Hash instance of root Context
-		# - variables: Hash instance that holds all Variable instances
-		# - types: Hash instance that holds all types (primitive or non-primitive)
-		class Visitor
-			def initialize(main) #, root, variables=nil, types=nil)
-				@main = main
-				@root = main.root
-				@vars = main.variables
-				@types = main.types
-			end
-		end
-
-		# Visitor that set goal value of each variable
-		class GoalVisitor < Visitor
-			def set_equals(name, value)
-				value['_isa'] = @vars[name].type if value.is_a?(Hash) and value.isnull
-				@vars[name].goal = value
-			end
-
-			def visit(name, value, obj)
-				return if name[0,1] == '_'
-				raise VariableNotFoundException, name if not @vars.has_key?(name)
-				if value.isconstraint
-					self.set_equals(name, value['_value']) if value['_type'] == 'equals'
 				end
 				return true
 			end
