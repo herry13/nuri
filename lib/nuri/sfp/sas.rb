@@ -60,11 +60,18 @@ module Nuri
 					#    - generate additional axioms/operators
 					# 2) compile using Patrik's approach
 				end
+
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
+				# set domain values for each variable
+				self.set_variable_values
 
-				@root['global'].accept(FormulaNormalizer.new(self)) if
-					@root.has_key?('global') and @root['global'].isconstraint
+				#@root['global'].accept(FormulaNormalizer.new(self)) if
+				#	@root.has_key?('global') and @root['global'].isconstraint
+				
+				if @root.has_key?('global') and @root['global'].isconstraint
+					normalize_formula(@root['global'])
+				end
 
 				# process all procedures
 				@variables.each_value { |var|
@@ -74,9 +81,6 @@ module Nuri
 						}
 					end
 				}
-
-				# set domain values for each variable
-				self.set_variable_values
 
 				self.dump_types
 				self.dump_vars
@@ -273,7 +277,6 @@ module Nuri
 					# 1) x = y
 					if v['_type'] == 'equals' and op.has_key?(k) and op[k].post != nil
 						return false if v['_value'] != op[k].post
-						#puts '==>> ' + v['_value'].to_s + ' == ' + op[k].post.to_s
 					end
 
 					# 2) x in (y1, y2, y3) := x = y1 | y2 | y3
@@ -282,6 +285,63 @@ module Nuri
 				}
 
 				return true
+			end
+
+			def normalize_formula(formula)
+				def get_equals_constraint(value)
+					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
+				end
+
+				def array_to_or_constraint(arr)
+					c = {'_context'=>'constraint', '_type'=>'or'}
+					index = 0
+					arr.each { |v| c[ ('cons_' + index.to_s) ] = v; index += 1; }
+					return c
+				end
+
+				# combinatorial method for all possible values of nested reference
+				# using recursive method
+				def ref_combinator(bucket, parent, names, last_value, index=0, selected=Hash.new)
+					var_name = parent + '.' + names[index]
+					if index >= names.length-1
+						selected[var_name] = last_value
+						result = selected.clone
+						result['_context'] = 'constraint'
+						result['_type'] = 'and'
+						bucket << result
+					else
+						@variables[var_name].each { |v|
+							next if v.is_a?(Hash) and v.isnull
+							selected[var_name] = get_equals_constraint(v.ref)
+							ref_combinator(bucket, v.ref, names, last_value, index+1, selected)
+						}
+					end
+					selected.delete(var_name)
+				end
+
+				def nested_left(left, right, obj)
+					rest, last = left.pop_ref
+					names = [last]
+					while rest != '$' and not @variables.has_key?(rest)
+						rest, last = rest.pop_ref
+						names.unshift(last)
+					end
+					rest, last = rest.pop_ref
+					names.unshift(last)
+					bucket = Array.new
+					ref_combinator(bucket, rest, names, right)
+					return array_to_or_constraint(bucket)
+				end
+
+				index = 0
+				formula.each { |k,v|
+					next if k[0,1] == '_'
+					if k.isref and not @variables.has_key?(k)
+						formula[ 'cons_' + index.to_s ] = nested_left(k, v, formula)
+						index += 1
+						formula.delete(k)
+					end
+				}
 			end
 
 		end
@@ -302,9 +362,10 @@ module Nuri
 		class FormulaNormalizer < Visitor
 			def visit(name, value, obj)
 				# TODO
-				# 1) not (x=y1), x in (y1, y2, y3) := x=y2 or x=y3
-				# 2) if x1=y1 then x2=y2 := not (x1=y1) or (x2=y2)
-				# 3) x in (y1, y2, y3) := (x=y1) or (x=y2) or (x=y3)
+				# 1) nested reference
+				# 2) not (x=y1), x in (y1, y2, y3) := x=y2 or x=y3
+				# 3) if x1=y1 then x2=y2 := not (x1=y1) or (x2=y2)
+				# 4) x in (y1, y2, y3) := (x=y1) or (x=y2) or (x=y3)
 
 				return true
 			end
@@ -432,6 +493,7 @@ module Nuri
 			# @init -- initial value
 			# @goal -- goal value (desired value)
 			attr_accessor :name, :type, :layer, :init, :goal, :is_final
+			attr_reader :is_primitive
 
 			def initialize(name, type, layer=-1, init=nil, goal=nil, is_final=false)
 				@name = name
@@ -440,6 +502,7 @@ module Nuri
 				@init = init
 				@goal = goal
 				@is_final = is_final
+				@is_primitive = (type == 'String' or type == 'Number' or type == 'Boolean')
 			end
 
 			def to_s
