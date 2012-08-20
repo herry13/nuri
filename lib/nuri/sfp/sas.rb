@@ -94,12 +94,38 @@ module Nuri
 =end
 			end
 
-			# return the next operator id
-			def next_operator_id
-				return (@op_id += 1) if defined?(@op_id) != nil
-				@op_id = 0
-				return @op_id
+			# return the next operator's id
+			def self.next_operator_id
+				return (@@op_id += 1) if defined?(@@op_id) != nil
+				@@op_id = 0
+				return @@op_id
 			end
+
+			# return the next constraint's id
+			def self.next_constraint_id
+				return (@@constraint_id += 1) if defined?(@@constraint_id) != nil
+				@@constraint_id = 0
+				return @@constraint_id
+			end
+
+			def self.next_constraint_key
+				return 'constraint_' + next_constraint_id.to_s
+			end
+
+			# return the next variable's id
+			def self.next_variable_id
+				return (@@variable_id += 1) if defined?(@@variable_id) != nil
+				@@variable_id = 0
+				return @@variable_id
+			end
+		
+			# return the next axiom's id
+			def self.next_axiom_id
+				return (@@axiom_id += 1) if defined?(@@axiom_id) != nil
+				@@axiom_id = 0
+				return @@axiom_id
+			end
+
 
 			# process the conditions of an operator and return all possible set
 			# of conditions
@@ -134,7 +160,7 @@ module Nuri
 
 				# combine map_cond & map_eff if any of them has >1 items
 
-				op_id = next_operator_id
+				op_id = Nuri::Sfp::Sas.next_operator_id
 				op_name = 'op' + op_id.to_s + '_' + op['_parent'].ref + '.' + op['_self']
 				sas_op = Operator.new(op_name, op['_cost'], op_id)
 				keys = map_cond.keys.concat(map_eff.keys)
@@ -287,6 +313,12 @@ module Nuri
 				return true
 			end
 
+			#def next_id
+			#	return (@index_next_id += 1) if defined?(@index_next_id)
+			#	@index_next_id = 0
+			#	return @index_next_id
+			#end
+
 			def normalize_formula(formula)
 				def get_equals_constraint(value)
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
@@ -294,8 +326,8 @@ module Nuri
 
 				def array_to_or_constraint(arr)
 					c = {'_context'=>'constraint', '_type'=>'or'}
-					index = 0
-					arr.each { |v| c[ ('cons_' + index.to_s) ] = v; index += 1; }
+					#arr.each { |v| c[ ('cons_' + Nuri::Sfp::Sas.next_constraint_id.to_s) ] = v }
+					arr.each { |v| c[Nuri::Sfp::Sas.next_constraint_key] = v }
 					return c
 				end
 
@@ -333,15 +365,39 @@ module Nuri
 					return array_to_or_constraint(bucket)
 				end
 
-				index = 0
-				formula.each { |k,v|
-					next if k[0,1] == '_'
-					if k.isref and not @variables.has_key?(k)
-						formula[ 'cons_' + index.to_s ] = nested_left(k, v, formula)
-						index += 1
-						formula.delete(k)
-					end
-				}
+				def to_and_or_graph(formula)
+					index = 0
+					formula.each { |k,v|
+						next if k[0,1] == '_'
+						if k.isref and not @variables.has_key?(k)
+							formula[Nuri::Sfp::Sas.next_constraint_key] = nested_left(k, v, formula)
+							index += 1
+							formula.delete(k)
+						end
+					}
+				end
+
+				def flatten_and_or_graph(formula)
+					# TODO -- transform formula into a format:
+					#         (x1 and x2) or (y1 and y2 and y3) or z1
+					formula.each { |k,v|
+						if v.is_a?(Hash) and v['_context'] == '_constraint'
+							if v['_type'] == 'or' or v['_type'] == 'and'
+								flatten_and_or_graph(v)
+								if formula['_type'] == v['_type']
+									# pull-out all node's elements
+									v.each { |k1,v1| formula[k1] = v1 }
+									formula.delete(k)
+								end
+							end
+						end
+					}
+					# dot-product the nodes
+					# -- TODO
+				end
+
+				to_and_or_graph(formula)
+				flatten_and_or_graph(formula)
 			end
 
 		end
@@ -480,12 +536,12 @@ module Nuri
 		# SAS Variable is a finite-domain variable
 		# It has a finite set of possible values
 		class Variable < Array
-			@@id = 0
+			#@@id = 0
 
-			def self.nextId
-				@@id += 1
-				return @@id
-			end
+			#def self.next_id
+			#	@@id += 1
+			#	return @@id
+			#end
 
 			# @name -- name of variable
 			# @type -- type of variable ('string','boolean','number', or fullpath of a class)
@@ -526,18 +582,10 @@ module Nuri
 
 		# A class for Grounded Operator
 		class Operator < Hash
-			@@id = 0
-
-			# return the next operator #id
-			def self.nextId
-				@@id += 1
-				return @@id
-			end
-
 			attr_accessor :id, :name, :cost
 
 			def initialize(name, cost=1, id=nil)
-				@id = (id == nil ? Nuri::Sfp::Operator.nextId : id)
+				@id = (id == nil ? Nuri::Sfp::Sas.next_operator_id : id)
 				@name = name
 				@cost = cost
 			end
@@ -551,17 +599,10 @@ module Nuri
 
 		# A class for Grounded Axiom
 		class Axiom < Hash
-			@@id = 0
-
-			def self.nextId
-				@@id += 1
-				return @@id
-			end
-
 			attr_accessor :id, :target
 
 			def initialize
-				@id = Nuri::Sfp::Axiom.nextId
+				@id = Nuri::Sfp::Sas.next_axiom_id
 			end
 
 			def to_s
