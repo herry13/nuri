@@ -61,7 +61,7 @@ module Nuri
 			return true
 		end
 
-		def get_state
+		def get_state(path='')
 			@state = Hash.new
 			@children.each_value { |m| @state[m.name] = m.get_state }
 			return @state

@@ -320,8 +320,12 @@ module Nuri
 			#end
 
 			def normalize_formula(formula)
-				def get_equals_constraint(value)
+				def create_equals_constraint(value)
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
+				end
+
+				def create_and_constraint(parent, key)
+					return {'_context'=>'constraint', '_type'=>'and', '_parent'=>parent, '_self'=>key}
 				end
 
 				def array_to_or_constraint(arr)
@@ -343,7 +347,7 @@ module Nuri
 					else
 						@variables[var_name].each { |v|
 							next if v.is_a?(Hash) and v.isnull
-							selected[var_name] = get_equals_constraint(v.ref)
+							selected[var_name] = create_equals_constraint(v.ref)
 							ref_combinator(bucket, v.ref, names, last_value, index+1, selected)
 						}
 					end
@@ -382,24 +386,56 @@ module Nuri
 				def flatten_and_or_graph(formula)
 					# TODO -- transform formula into a format:
 					#         (x1 and x2) or (y1 and y2 and y3) or z1
-					all_same = true
+					has_and_or_tree = false
 					formula.each { |k,v|
-						if v.is_a?(Hash) and v['_context'] == '_constraint'
+						next if k[0,1] == '_'
+						if v.is_a?(Hash) and v.isconstraint
 							if v['_type'] == 'or' or v['_type'] == 'and'
 								flatten_and_or_graph(v)
 								if formula['_type'] == v['_type']
 									# pull-out all node's elements
-									v.each { |k1,v1| formula[k1] = v1 }
+									v.each { |k1,v1|
+										formula[k1] = v1
+									}
 									formula.delete(k)
 								end
+								has_and_or_tree = true if formula['_type'] == 'and' and v['_type'] == 'or'
 							end
 						end
 					}
 					# dot-product the nodes
-					# -- TODO
-					if not all_same
-						names = formula.keys
+					def dot_product_and(bucket, names, formula, values=Hash.new, index=0)
+						if index >= names.length
+							key = Nuri::Sfp::Sas.next_constraint_key
+							c = create_and_constraint(formula, key)
+							values.each { |k,v| c[k] = v }
+							formula[key] = c
+							flatten_and_or_graph(c)
+						else
+							key = names[index]
+							val = formula[ key ]
+							if val.is_a?(Hash) and val.isconstraint and val['_type'] == 'or'
+								val.each { |k,v|
+									next if k[0,1] == '_'
+									values[k] = v
+									dot_product_and(bucket, names, formula, values, index+1)
+									values.delete(k)
+								}
+							else
+								values[key] = val
+								dot_product_and(bucket, names, formula, values, index+1)
+							end
+						end
 					end
+					if has_and_or_tree
+						names = Array.new
+						formula.keys.each { |k| names << k if k[0,1] != '_' }
+						bucket = Array.new
+						dot_product_and(bucket, names, formula)
+						names.each { |k| formula.delete(k) }
+					end
+
+					return true
 				end
 
 				to_and_or_graph(formula)
