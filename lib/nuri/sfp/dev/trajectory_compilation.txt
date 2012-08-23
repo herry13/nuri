@@ -1,5 +1,3 @@
-sas_op[@variables[k].name] = Parameter.new(@variables[k], pre, post)
-
 State Trajectory Constraints
 
 1) global constraint = p1

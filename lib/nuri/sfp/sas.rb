@@ -91,6 +91,20 @@ module Nuri
 				self.dump_types
 				self.dump_vars
 				self.dump_operators
+
+				return create_output
+			end
+
+			def create_output
+				# version
+				out = "begin_version\n3\nend_version\n"
+				# metric
+				out += "begin_metric\n1\nend_metric\n"
+				# variables
+				out += @variables.length.to_s + "\n"
+				@variables.each_value { |var| out += var.to_sas + "\n" }
+
+				return out
 			end
 
 			def reset_operators_name
@@ -674,7 +688,7 @@ module Nuri
 
 			# return variable representation in SAS+ format
 			def to_sas
-				sas = "begin_variable\n#{@name}\n" + @layer.to_s + "\n" + self.length + "\n"
+				sas = "begin_variable\n#{@name}\n" + @layer.to_s + "\n" + self.length.to_s + "\n"
 				self.each { |value| sas += value.to_s + "\n" }
 				return sas + "end_variable"
 			end
