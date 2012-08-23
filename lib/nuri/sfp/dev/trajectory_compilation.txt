@@ -1,3 +1,5 @@
+sas_op[@variables[k].name] = Parameter.new(@variables[k], pre, post)
+
 State Trajectory Constraints
 
 1) global constraint = p1
@@ -5,8 +7,8 @@ remove all actions that falsifies p1
 
 2) global constraint = p1 OR p2 OR p3
 foreach action a
-- keep a if makes true p1, p2, or p3
-- keep a if has p1, p2, or p3 as precondition and doesn't falsify
+- keep a if makes true p1, p2, or p3 (pre-post)
+- keep a if it has p1, p2, or p3 as precondition and doesn't falsify (prevail)
 - if a falsify p1, then create two copies a1 & a2
 then add p2 as precondition of a1, add p3 as precondition of a2
 then remove a

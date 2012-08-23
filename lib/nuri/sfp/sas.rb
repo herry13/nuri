@@ -1,3 +1,7 @@
+# 23-08-2012
+# - grounding procedure's parameters to produce operator
+# - normalize and apply global constraint to all operators
+#
 # 01-07-2012
 # - collecting classes and variables
 # - foreach subclasses, inherits attributes and procedures from superclass
@@ -9,11 +13,14 @@ module Nuri
 	module Sfp
 
 		def self.null_of(class_ref=nil)
-			return { '_context' => 'null', '_isa' => class_ref } if class_ref.is_a?(String) and class_ref != '' and class_ref.isref
+			return { '_context' => 'null', '_isa' => class_ref } if class_ref.is_a?(String) and
+				class_ref != '' and class_ref.isref
 			return nil
 		end
 
 		# include 'Sas' module to enable processing Sfp into Finite-Domain Representation (FDR)
+		# TODO
+		# - generate SAS+ output
 		module Sas
 			GLOBAL_OPERATOR = '#global_op'
 			GLOBAL_VARIABLE = '#global_var'
@@ -57,8 +64,8 @@ module Nuri
 
 					# TODO
 					# 1) - add the global constraint in goal constraint
-					#    - generate additional axioms/operators
-					# 2) compile using Patrik's approach
+					#    - generate additional axioms/operator
+					# 2) compile using Patrik's approach ...DONE!
 				end
 
 				# remove duplicates from type's set of value
@@ -79,17 +86,26 @@ module Nuri
 						}
 					end
 				}
+				self.reset_operators_name
 
 				self.dump_types
 				self.dump_vars
 				self.dump_operators
+			end
 
-=begin
-				# generate operator and axioms for global constraints
-				self.process_global_constraints(@root) if @root.has_key?('global')
+			def reset_operators_name
+				ops = Hash.new
+				Nuri::Sfp::Sas.reset_operator_id
+				@operators.each_value { |op|
+					op.id = Nuri::Sfp::Sas.next_operator_id
+					op.update_name
+					ops[op.name] = op
+				}
+				@operators = ops
+			end
 
-				self.dump_axioms
-=end
+			def self.reset_operator_id
+				@@op_id = -1
 			end
 
 			# return the next operator's id
@@ -157,10 +173,12 @@ module Nuri
 				map_eff = process_effects(op['_effects'])
 
 				# combine map_cond & map_eff if any of them has >1 items
-
 				op_id = Nuri::Sfp::Sas.next_operator_id
-				op_name = 'op' + op_id.to_s + '_' + op['_parent'].ref + '.' + op['_self']
-				sas_op = Operator.new(op_name, op['_cost'], op_id)
+				sas_op = Operator.new(op.ref, op['_cost'])
+
+				#op_name = 'op' + op_id.to_s + '_' + op['_parent'].ref + '.' + op['_self']
+				#sas_op = Operator.new(op_name, op['_cost'], op_id)
+
 				keys = map_cond.keys.concat(map_eff.keys)
 				keys.each { |k|
 					return if not @variables.has_key?(k)
@@ -170,6 +188,7 @@ module Nuri
 					#post = @root['initial'].at?(post) if post.is_a?(String) and post.isref
 					sas_op[@variables[k].name] = Parameter.new(@variables[k], pre, post)
 				}
+
 				@operators[sas_op.name] = sas_op if apply_global_constraint(sas_op)
 			end
 
@@ -293,22 +312,56 @@ module Nuri
 			end
 
 			# return true if global constraint could be applied, otherwise false
-			def apply_global_constraint(op)
+			def apply_global_constraint(operator)
 				return true if not @root.has_key?('global') or not @root['global'].isconstraint
 
-				if @root['global']['_type'] == 'or'
-				else
-					@root['global'].each { |k,v|
+				def satisfy_equals(left, right, operator)
+					return false if operator.has_key?(left) and operator[left].post != nil and
+						operator[left].post != right['_value']
+					return true
+				end
+
+
+				def satisfy_and(constraint, operator)
+					constraint.each { |k,v|
 						next if k[0,1] == '_'
 						# 1) x = y
-						if v['_type'] == 'equals' and op.has_key?(k) and op[k].post != nil
-							return false if v['_value'] != op[k].post
-						end
-	
-						# 2) x in (y1, y2, y3) := x = y1 | y2 | y3
-	
-						# 3) if x1 = y1 then x2 = y2 := not (x1=y1) or x2=y2
+						return false if not satisfy_equals(k, v, operator)
+						# 2) x in (y1, y2, y3) := x = y1 | y2 | y3 -- TODO
+						# 3) if x1 = y1 then x2 = y2 := not (x1=y1) or x2=y2 -- TODO
 					}
+					return true
+				end
+
+				# global constraint is AND formula
+				return satisfy_and(@root['global'], operator) if @root['global']['_type'] == 'and'
+				
+				# global constraint is OR formula
+				total = 0
+				satisfied = Array.new
+				@root['global'].each { |k,v|
+					next if k[0,1] == '_'
+					total += 1
+					satisfied << k if satisfy_and(v, operator)
+				}
+				if satisfied.length < total
+					# partial satisfaction or OR formula
+					satisfied.each { |key|
+						# create an operator for each satisfied sub-formula
+						op = operator.clone
+						map_cond = process_conditions(@root['global'][key])
+						map_cond.each { |k,v|
+							raise VariableNotFoundException, k if not @variables.has_key?(k)
+							if not op.has_key?(@variables[k].name)
+								op[@variables[k].name] = Parameter.new(@variables[k], v, nil)
+							else
+								op[@variables[k].name].pre = v
+							end
+						}
+						@operators[op.name] = op
+					}
+					# the original operator is not required
+					return false
 				end
 
 				return true
@@ -325,8 +378,8 @@ module Nuri
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
 				end
 
-				def create_and_constraint(parent, key)
-					return {'_context'=>'constraint', '_type'=>'and', '_parent'=>parent, '_self'=>key}
+				def create_and_constraint(key)
+					return {'_context'=>'constraint', '_type'=>'and', '_self'=>key}
 				end
 
 				def array_to_or_constraint(arr)
@@ -393,7 +446,12 @@ module Nuri
 						next if k[0,1] == '_'
 						if v.is_a?(Hash) and v.isconstraint
 							if v['_type'] == 'or' or v['_type'] == 'and'
-								flatten_and_or_graph(v)
+								if not flatten_and_or_graph(v)
+									# remove it because it's not consistent
+									formula.delete(k)
+									v['_parent'] = nil
+								end
+
 								if formula['_type'] == v['_type']
 									# pull-out all node's elements
 									v.each { |k1,v1|
@@ -415,10 +473,13 @@ module Nuri
 					def dot_product_and(bucket, names, formula, values=Hash.new, index=0)
 						if index >= names.length
 							key = Nuri::Sfp::Sas.next_constraint_key
-							c = create_and_constraint(formula, key)
+							c = create_and_constraint(key)
 							values.each { |k,v| c[k] = v }
-							formula[key] = c
-							flatten_and_or_graph(c)
+							if flatten_and_or_graph(c)
+								# add the constraint because it's consistent
+								formula[key] = c
+								c['_parent'] = formula
+							end
 						else
 							key = names[index]
 							val = formula[ key ]
@@ -449,7 +510,7 @@ module Nuri
 				end
 
 				to_and_or_graph(formula)
-				flatten_and_or_graph(formula)
+				result = flatten_and_or_graph(formula)
 			end
 
 		end
@@ -622,11 +683,23 @@ module Nuri
 		# A class for Grounded Operator
 		class Operator < Hash
 			attr_accessor :id, :name, :cost
+			attr_reader :ref
 
-			def initialize(name, cost=1, id=nil)
+			def initialize(ref, cost=1, id=nil)
 				@id = (id == nil ? Nuri::Sfp::Sas.next_operator_id : id)
-				@name = name
 				@cost = cost
+				@ref = ref
+				self.update_name
+			end
+
+			def clone
+				op = Operator.new(@ref, @cost)
+				self.each { |key,param| op[key] = param.clone }
+				return op
+			end
+
+			def update_name
+				@name = 'op_' + @id.to_s + @ref
 			end
 
 			def to_s; return @name + ': ' + self.length.to_s ; end
@@ -669,6 +742,10 @@ module Nuri
 
 			def effect?
 				return (@post != nil)
+			end
+
+			def clone
+				return Parameter.new(@var, @pre, @post)
 			end
 
 			def to_s

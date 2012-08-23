@@ -52,8 +52,8 @@ goal constraint {
 	b.name is "BB"
 }
 global constraint {
-	//a.running is true
-	//pc1.refer is a
+	//a.running is false
+	//pc1.refer is b
 	pc1.refer.running is true
 	pc2.refer.running is true
 }
