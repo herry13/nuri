@@ -326,7 +326,6 @@ module Nuri
 
 				def array_to_or_constraint(arr)
 					c = {'_context'=>'constraint', '_type'=>'or'}
-					#arr.each { |v| c[ ('cons_' + Nuri::Sfp::Sas.next_constraint_id.to_s) ] = v }
 					arr.each { |v| c[Nuri::Sfp::Sas.next_constraint_key] = v }
 					return c
 				end
@@ -351,6 +350,7 @@ module Nuri
 					selected.delete(var_name)
 				end
 
+				# break nested reference of left-part statement into a set of OR constraint
 				def nested_left(left, right, obj)
 					rest, last = left.pop_ref
 					names = [last]
@@ -365,6 +365,7 @@ module Nuri
 					return array_to_or_constraint(bucket)
 				end
 
+				# transform a first-order formula into AND/OR graph
 				def to_and_or_graph(formula)
 					index = 0
 					formula.each { |k,v|
@@ -377,9 +378,11 @@ module Nuri
 					}
 				end
 
+				# recursively pull statements that has the same AND/OR operator
 				def flatten_and_or_graph(formula)
 					# TODO -- transform formula into a format:
 					#         (x1 and x2) or (y1 and y2 and y3) or z1
+					all_same = true
 					formula.each { |k,v|
 						if v.is_a?(Hash) and v['_context'] == '_constraint'
 							if v['_type'] == 'or' or v['_type'] == 'and'
@@ -394,6 +397,9 @@ module Nuri
 					}
 					# dot-product the nodes
 					# -- TODO
+					if not all_same
+						names = formula.keys
+					end
 				end
 
 				to_and_or_graph(formula)
