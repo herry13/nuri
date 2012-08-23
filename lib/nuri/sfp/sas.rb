@@ -66,9 +66,7 @@ module Nuri
 				# set domain values for each variable
 				self.set_variable_values
 
-				#@root['global'].accept(FormulaNormalizer.new(self)) if
-				#	@root.has_key?('global') and @root['global'].isconstraint
-				
+				# normalize formula
 				if @root.has_key?('global') and @root['global'].isconstraint
 					normalize_formula(@root['global'])
 				end
@@ -298,17 +296,20 @@ module Nuri
 			def apply_global_constraint(op)
 				return true if not @root.has_key?('global') or not @root['global'].isconstraint
 
-				@root['global'].each { |k,v|
-					next if k[0,1] == '_'
-					# 1) x = y
-					if v['_type'] == 'equals' and op.has_key?(k) and op[k].post != nil
-						return false if v['_value'] != op[k].post
-					end
-
-					# 2) x in (y1, y2, y3) := x = y1 | y2 | y3
-
-					# 3) if x1 = y1 then x2 = y2 := not (x1=y1) or x2=y2
-				}
+				if @root['global']['_type'] == 'or'
+				else
+					@root['global'].each { |k,v|
+						next if k[0,1] == '_'
+						# 1) x = y
+						if v['_type'] == 'equals' and op.has_key?(k) and op[k].post != nil
+							return false if v['_value'] != op[k].post
+						end
+	
+						# 2) x in (y1, y2, y3) := x = y1 | y2 | y3
+	
+						# 3) if x1 = y1 then x2 = y2 := not (x1=y1) or x2=y2
+					}
+				end
 
 				return true
 			end
@@ -383,10 +384,11 @@ module Nuri
 				end
 
 				# recursively pull statements that has the same AND/OR operator
+				# return false if there is any contradiction of facts, otherwise true
 				def flatten_and_or_graph(formula)
-					# TODO -- transform formula into a format:
-					#         (x1 and x2) or (y1 and y2 and y3) or z1
-					has_and_or_tree = false
+					# transform formula into a format:
+					#   (x1 and x2) or (y1 and y2 and y3) or z1
+					is_and_or_tree = false
 					formula.each { |k,v|
 						next if k[0,1] == '_'
 						if v.is_a?(Hash) and v.isconstraint
@@ -395,11 +397,17 @@ module Nuri
 								if formula['_type'] == v['_type']
 									# pull-out all node's elements
 									v.each { |k1,v1|
-										formula[k1] = v1
+										# check contradiction facts
+										if formula.has_key?(k1)
+											return false if formula[k1]['_type'] != v1['_type']
+											return false if formula[k1]['_value'] != v1['_value']
+										else
+											formula[k1] = v1
+										end
 									}
 									formula.delete(k)
 								end
-								has_and_or_tree = true if formula['_type'] == 'and' and v['_type'] == 'or'
+								is_and_or_tree = true if formula['_type'] == 'and' and v['_type'] == 'or'
 							end
 						end
 					}
@@ -427,12 +435,14 @@ module Nuri
 							end
 						end
 					end
-					if has_and_or_tree
+					if is_and_or_tree
+						# change it into OR->AND tree
 						names = Array.new
 						formula.keys.each { |k| names << k if k[0,1] != '_' }
 						bucket = Array.new
 						dot_product_and(bucket, names, formula)
 						names.each { |k| formula.delete(k) }
+						formula['_type'] = 'or'
 					end
 
 					return true
@@ -457,18 +467,6 @@ module Nuri
 			end
 		end
 
-		class FormulaNormalizer < Visitor
-			def visit(name, value, obj)
-				# TODO
-				# 1) nested reference
-				# 2) not (x=y1), x in (y1, y2, y3) := x=y2 or x=y3
-				# 3) if x1=y1 then x2=y2 := not (x1=y1) or (x2=y2)
-				# 4) x in (y1, y2, y3) := (x=y1) or (x=y2) or (x=y3)
-
-				return true
-			end
-		end
-
 		# Visitor that set goal value of each variable
 		class GoalVisitor < Visitor
 			def set_equals(name, value)
@@ -485,7 +483,6 @@ module Nuri
 				return true
 			end
 		end
-
 
 		# collecting all variables and put them into @bucket
 		class VariableCollector
