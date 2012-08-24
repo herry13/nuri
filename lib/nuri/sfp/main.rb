@@ -1,4 +1,6 @@
 # external dependencies
+require 'rubygems'
+require 'json'
 require 'nuri/util'
 
 # internal dependencies

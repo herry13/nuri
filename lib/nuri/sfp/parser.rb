@@ -1,5 +1,3 @@
-require 'json'
-
 module Nuri
 	module Sfp
 		# main class which processes configuration description in SFP language either

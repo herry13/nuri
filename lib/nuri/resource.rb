@@ -1,6 +1,3 @@
-require 'rubygems'
-require 'json'
-
 module Nuri
 	class Resource
 		attr_accessor :name, :parent

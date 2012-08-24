@@ -47,3 +47,6 @@ To build:
     $ cd doc
     $ ./build.sh
 
+Issues
+------
+- In Ubuntu 12.04, antlr3(1.8.12) conflicts with libxml-ruby(2.3.3). Each time SFPParser parses a file, it always generates 'segmentation fault'. This issue is not arised when libxml-ruby not being used.

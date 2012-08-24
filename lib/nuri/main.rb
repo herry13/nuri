@@ -6,12 +6,14 @@ require 'json'
 require 'pp'
 require 'logger'
 require 'thread'
+require 'socket'
 require 'uri'
 require 'net/http'
 require 'nuri/util'
 require 'nuri/resource'
 require 'nuri/undefined'
 require 'nuri/sfp/main'
+require 'nuri/planner/main'
 require 'modules/node/node'
 
 module Nuri
@@ -36,7 +38,7 @@ module Nuri
 				@bsig = Nuri::Sfp::Parser.file_to_json(sfpfile)
 				Nuri::Util.log 'Successfully load ' + sfpfile
 			rescue Exception => exp
-				Nuri::Util.log.error "Cannot load " + sfpfile + " -- " + e.to_s
+				Nuri::Util.log.error "Cannot load " + sfpfile + " -- " + exp.to_s
 			rescue StandardError => stderr
 				Nuri::Util.log.error "Cannot load " + sfpfile
 			end
@@ -45,24 +47,30 @@ module Nuri
 		def read_main
 			Nuri::Util.log 'Read main description...'
 			begin
-				sfpfile = '/etc/nuri/system.sfp'
-				sfpfile = Nuri::Util.rootdir + '/etc/system.sfp' if not File.file?(sfpfile)
-				@main = Nuri::Sfp::Parser.file_to_json(sfpfile)
-				Nuri::Util.log 'Successfully load ' + sfpfile
+				mainfile = Nuri::Util.rootdir + '/etc/main.sfp'
+				@main = Nuri::Sfp::Parser.file_to_json(mainfile)
+				Nuri::Util.log 'Successfully load ' + mainfile
 			rescue Exception => exp
-				Nuri::Util.log.error "Cannot load " + sfpfile + " -- " + e.to_s
+				Nuri::Util.log.error "Cannot load " + mainfile.to_s + " -- " + exp.to_s
 			rescue StandardError => stderr
-				Nuri::Util.log.error "Cannot load " + sfpfile
+				Nuri::Util.log.error "Cannot load " + mainfile.to_s
 			end
-Nuri::Sfp::Parser.dump(@main)
 		end
 
 		# Reads configuration file in '/etc/nuri/config.sfp'. If it does not
 		# exist then it tries to read '<HOME>/etc/config.sfp'.
 		def read_config
-			cfile = '/etc/nuri/config.sfp'
-			cfile = Nuri::Util.rootdir + "/etc/config.sfp" if not File.file?(cfile)
-			@config = Nuri::Sfp::Parser.file_to_json(cfile)['nuri']
+			begin
+				Nuri::Util.log 'Read configuration file...'
+				cfile = '/etc/nuri/nuri.sfp'
+				cfile = Nuri::Util.rootdir + "/etc/nuri.sfp" if not File.file?(cfile)
+				@config = Nuri::Sfp::Parser.file_to_json(cfile)['nuri']
+				Nuri::Util.log 'Successfully load configuration file ' + cfile
+			rescue Exception => exp
+				Nuri::Util.log.error "Cannot load configuration file " + cfile + ' -- ' + exp.to_s
+			rescue StandardError => stderr
+				Nuri::Util.log.error "Cannot load configuration file " + cfile
+			end
 		end
 
 		# Load all installed modules.
@@ -89,8 +97,8 @@ Nuri::Sfp::Parser.dump(@main)
 						m.name = mod if m.name == nil
 						node.add(m)
 						Nuri::Util.log "Successfully load module " + mod
-					rescue Exception => e
-						Nuri::Util.log.error "Cannot load module " + mod + " -- " + e.to_s
+					rescue Exception => exp
+						Nuri::Util.log.error "Cannot load module " + mod + " -- " + exp.to_s
 					end
 				end
 			}
@@ -152,8 +160,8 @@ Nuri::Sfp::Parser.dump(@main)
 						out.write(JSON.generate(data))
 					end
 				end
-			rescue Exception => e
-				self.send_error(res, e.to_s)
+			rescue Exception => exp
+				self.send_error(res, exp.to_s)
 			end
 		end
 

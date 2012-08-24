@@ -1,7 +1,3 @@
-require 'rubygems'
-require 'logger'
-require 'socket'
-
 module Nuri
 	class Util
 		@@rootdir = File.expand_path(File.dirname(__FILE__) + "/../..")

@@ -6,5 +6,5 @@ nuri {
 	ssl_cert is "cert.pem"
 	ssl_key is "key.pem"
 
-	bsig is yes
+	//bsig is yes
 }

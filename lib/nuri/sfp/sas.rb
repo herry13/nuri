@@ -7,8 +7,6 @@
 # - foreach subclasses, inherits attributes and procedures from superclass
 # - foreach objects, inherits attributes and procedures from class
 
-require 'json'
-
 module Nuri
 	module Sfp
 

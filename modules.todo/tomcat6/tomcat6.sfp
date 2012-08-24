@@ -1,3 +1,5 @@
+include "lib/nuri/resource.sfp"
+
 class Tomcat6 extends AppService {
 	version is ""
 	installed is false
@@ -43,10 +45,10 @@ class Tomcat6 extends AppService {
 		}
 	}
 
-	procedure set_port(p is integer) {
+	/*procedure set_port(p is integer) {
 		conditions { }
 		effects {
 			self.port is p
 		}
-	}
+	}*/
 }
