@@ -4,6 +4,10 @@ author: Herry (herry13@gmail.com)
  
 Dynamic Workflow Configuration Tool.
 
+Important files:
+- <HOME>/etc/nuri.sfp -- Nuri service configuration file.
+- <HOME>/etc/main.sfp -- Main specification file to be deployed.
+- <HOME>/etc/bsig.sfp -- Specification of Behavioural Signature model.
 
 Ubuntu
 ------
