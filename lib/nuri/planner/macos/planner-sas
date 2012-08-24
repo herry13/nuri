@@ -1,0 +1,44 @@
+#!/bin/bash
+
+BASEDIR=$(cd "$(dirname "$0")"; pwd)
+
+INPUT=$1   # .sas file
+OUTPUT=$2  # .plan file
+
+PREPROCESS="$BASEDIR/preprocess"
+PLANNER="$BASEDIR/downward"
+
+REMOVED_OPERATOR="\(verifyGlobal\)"
+#TEMP_DIR="$BASEDIR/sfp_$RANDOM"
+TEMP_DIR="/tmp/sfp_$RANDOM"
+CURRENT_DIR=`PWD`
+
+# generate absolute path for the input file
+if [ ${INPUT:0:1} != "/" ]; then
+	INPUT="$CURRENT_DIR/$INPUT"
+fi
+
+# generate working directory
+mkdir $TEMP_DIR
+cd $TEMP_DIR
+
+# run preprocess
+echo "$PREPROCESS < $INPUT"
+$PREPROCESS < $INPUT
+
+# search the plan
+$PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output
+#$PLANNER --search "astar(lmcut())" < $TEMP_DIR/output
+#$PLANNER --search "astar(blind())" < $TEMP_DIR/output
+#$PLANNER --search "astar(cg())" < $TEMP_DIR/output
+#$PLANNER --search "astar(ff())" < $TEMP_DIR/output
+
+cd $CURRENT_DIR
+
+# remove unused operator and generate the final output
+SED_ARGS="/$REMOVED_OPERATOR/d"
+sed $SED_ARGS $TEMP_DIR/sas_plan > $OUTPUT
+
+# remove unused file
+rm -f plan_numbers_and_cost
+rm -rf $TEMP_DIR

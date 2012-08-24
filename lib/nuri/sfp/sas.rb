@@ -101,8 +101,36 @@ module Nuri
 				# metric
 				out += "begin_metric\n1\nend_metric\n"
 				# variables
-				out += @variables.length.to_s + "\n"
-				@variables.each_value { |var| out += var.to_sas + "\n" }
+				variable_index = @variables.keys
+				variable_index.sort!
+				out += "#{variable_index.length}\n"
+				variable_index.each { |i|
+					@variables[i].id = variable_index.index(i) # set variable's index
+					out += @variables[i].to_sas(@root['initial']) + "\n"
+				}
+				# mutex
+				out += "0\n"
+				# initial state
+				out += "begin_state\n"
+				variable_index.each { |i| out += @variables[i].index(@variables[i].init).to_s + "\n" }
+				out += "end_state\n"
+				# goal
+				out += "begin_goal\n"
+				count = 0
+				goal = ''
+				variable_index.each { |i|
+					if @variables[i].goal != nil
+						goal += variable_index.index(i).to_s + ' ' +
+							@variables[i].index(@variables[i].goal).to_s + "\n"
+						count += 1
+					end
+				}
+				out += "#{count}\n#{goal}end_goal\n"
+				# operators
+				out += "#{@operators.length}\n"
+				@operators.each_value { |op| out += op.to_sas(@root['initial']) + "\n" }
+				# axioms
+				out += "0"
 
 				return out
 			end
@@ -321,6 +349,8 @@ module Nuri
 					if not var.is_final
 						@types[var.type].each { |v| var << v }
 						var.uniq!
+					else
+						var << var.init
 					end
 				}
 			end
@@ -369,7 +399,7 @@ module Nuri
 							if not op.has_key?(@variables[k].name)
 								op[@variables[k].name] = Parameter.new(@variables[k], v, nil)
 							else
-								op[@variables[k].name].pre = v
+								#op[@variables[k].name].pre = v
 							end
 						}
 						@operators[op.name] = op
@@ -545,7 +575,9 @@ module Nuri
 		# Visitor that set goal value of each variable
 		class GoalVisitor < Visitor
 			def set_equals(name, value)
-				value['_isa'] = @vars[name].type if value.is_a?(Hash) and value.isnull
+				#value['_isa'] = @vars[name].type if value.is_a?(Hash) and value.isnull
+				value = @types[@vars[name].type][0] if value.is_a?(Hash) and value.isnull
+				value = @root['initial'].at?(value) if value.is_a?(String) and value.isref
 				@vars[name].goal = value
 			end
 
@@ -662,7 +694,7 @@ module Nuri
 			# @layer -- axiom layer ( '-1' if this is not axiom variable, otherwise >0)
 			# @init -- initial value
 			# @goal -- goal value (desired value)
-			attr_accessor :name, :type, :layer, :init, :goal, :is_final
+			attr_accessor :name, :type, :layer, :init, :goal, :is_final, :id
 			attr_reader :is_primitive
 
 			def initialize(name, type, layer=-1, init=nil, goal=nil, is_final=false)
@@ -687,10 +719,13 @@ module Nuri
 			end
 
 			# return variable representation in SAS+ format
-			def to_sas
-				sas = "begin_variable\n#{@name}\n" + @layer.to_s + "\n" + self.length.to_s + "\n"
-				self.each { |value| sas += value.to_s + "\n" }
-				return sas + "end_variable"
+			def to_sas(root)
+				sas = "begin_variable\nvar_#{@id}#{@name}\n#{@layer}\n#{self.length}\n"
+				self.each { |v|
+					v = root.at?(v) if v.is_a?(String) and v.isref
+					sas += (v.is_a?(Hash) ? (v.isnull ? "null\n" : "#{v.ref}\n") : "#{v}\n")
+				}
+				return sas += "end_variable"
 			end
 		end
 
@@ -718,8 +753,23 @@ module Nuri
 
 			def to_s; return @name + ': ' + self.length.to_s ; end
 
-			def to_sas
+			def to_sas(root)
 				# TODO
+				prevail = Array.new
+				prepost = Array.new
+				self.each_value { |p|
+					if p.post == nil
+						prevail << p
+					else
+						prepost << p
+					end
+				}
+				sas = "begin_operator\n#{@name}\n#{prevail.length}\n"
+				prevail.each { |p| sas += p.to_sas(root) + "\n" }
+				sas += "#{prepost.length}\n"
+				prepost.each { |p| sas += p.to_sas(root) + "\n" }
+				sas += "#{@cost}\nend_operator"
+				return sas
 			end
 		end
 
@@ -760,6 +810,20 @@ module Nuri
 
 			def clone
 				return Parameter.new(@var, @pre, @post)
+			end
+
+			def to_sas(root)
+				# resolve the reference
+				pre = ( (@pre.is_a?(String) and @pre.isref) ? root.at?(@pre) : @pre )
+				post = ( (@post.is_a?(String) and @post.isref) ? root.at?(@post) : @post )
+puts @var.id.to_s + ' ' + (pre.is_a?(Hash) ? pre.ref : pre.to_s) + ' ' + (post.is_a?(Hash) ? post.ref : post.to_s) if
+	pre != nil and post != nil
+				# calculate the index
+				pre = ( (pre.is_a?(Hash) and pre.isnull) ? 0 : (pre == nil ? -1 : @var.index(pre)) )
+				post = ( (post.is_a?(Hash) and post.isnull) ? 0 : @var.index(post) )
+
+				return "#{@var.id} #{pre}" if post == nil
+				return "0 #{@var.id} #{pre} #{post}"
 			end
 
 			def to_s

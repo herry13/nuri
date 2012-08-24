@@ -1,0 +1,22 @@
+#!/bin/sh
+
+HOME=$(dirname $(readlink -f $0))
+
+INPUT=$1   # .sas file
+OUTPUT=$2  # .plan file
+
+PREPROCESS="$HOME/preprocess" 
+PLANNER="$HOME/downward" 
+
+REMOVED_OPERATOR="\(verifyGlobal\)"
+TEMP_FILE="/tmp/$RANDOM"
+
+# generate the plan from .sas file
+$PREPROCESS < $INPUT | $PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" --plan-file $TEMP_FILE
+
+# remove unused operator
+SED_ARGS="/$REMOVED_OPERATOR/d"
+sed $SED_ARGS $TEMP_FILE > $OUTPUT
+
+# remove temporary files
+rm $TEMP_FILE
