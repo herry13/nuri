@@ -8,11 +8,11 @@ require 'logger'
 require 'thread'
 require 'uri'
 require 'net/http'
-require 'lib/nuri/util'
-require 'lib/nuri/resource'
-require 'lib/nuri/undefined'
+require 'nuri/util'
+require 'nuri/resource'
+require 'nuri/undefined'
+require 'nuri/sfp/main'
 require 'modules/node/node'
-require 'lib/sfp/parser'
 
 module Nuri
 	class Main < Mongrel::HttpHandler
@@ -45,8 +45,8 @@ module Nuri
 		def read_main
 			Nuri::Util.log 'Read main description...'
 			begin
-				sfpfile = '/etc/nuri/main.sfp'
-				sfpfile = Nuri::Util.rootdir + '/etc/main.sfp' if not File.file?(sfpfile)
+				sfpfile = '/etc/nuri/system.sfp'
+				sfpfile = Nuri::Util.rootdir + '/etc/system.sfp' if not File.file?(sfpfile)
 				@main = Nuri::Sfp::Parser.file_to_json(sfpfile)
 				Nuri::Util.log 'Successfully load ' + sfpfile
 			rescue Exception => exp
@@ -54,13 +54,14 @@ module Nuri
 			rescue StandardError => stderr
 				Nuri::Util.log.error "Cannot load " + sfpfile
 			end
+Nuri::Sfp::Parser.dump(@main)
 		end
 
-		# Reads configuration file in '/etc/nuri/config.json'. If it does not
-		# exist then it tries to read '<HOME>/etc/config.json'.
+		# Reads configuration file in '/etc/nuri/config.sfp'. If it does not
+		# exist then it tries to read '<HOME>/etc/config.sfp'.
 		def read_config
-			cfile = '/etc/nuri/conf/nuri.sfp'
-			cfile = Nuri::Util.rootdir + "/etc/conf/nuri.sfp" if not File.file?(cfile)
+			cfile = '/etc/nuri/config.sfp'
+			cfile = Nuri::Util.rootdir + "/etc/config.sfp" if not File.file?(cfile)
 			@config = Nuri::Sfp::Parser.file_to_json(cfile)['nuri']
 		end
 
@@ -97,10 +98,10 @@ module Nuri
 
 		# Start nuri service.
 		def start
-			@http = Mongrel::HttpServer.new(@config.at('host'), @config.at('port').to_i)
+			@http = Mongrel::HttpServer.new(@config.at?('host'), @config.at?('port').to_i)
 			@http.register("/", self)
-			Nuri::Util.log "Start server on " + @config.at('host') + ":" +
-				@config.at('port').to_i.to_s + " with PID #{Process.pid}"
+			Nuri::Util.log "Start server on " + @config.at?('host') + ":" +
+				@config.at?('port').to_i.to_s + " with PID #{Process.pid}"
 			@http.run.join
 		end
 	

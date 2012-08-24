@@ -44,6 +44,12 @@ module Nuri
 				puts @parser.used_classes.inspect
 			end
 
+			def self.dump(root)
+				return if root == nil
+				root.accept(ParentEliminator.new)
+				puts JSON.pretty_generate(root)
+			end
+
 			# return JSON representation of SFP description
 			def to_json
 				return nil if @parser == nil

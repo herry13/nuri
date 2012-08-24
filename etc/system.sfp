@@ -1,5 +1,6 @@
-include "modules/apache/apache.sfp"
+include "modules/node/node.sfp"
 include "modules/mysqld/mysqld.sfp"
+include "modules/apache/apache.sfp"
 
 system {
 	hpvm16 isa Node {
