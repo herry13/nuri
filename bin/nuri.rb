@@ -22,6 +22,10 @@ def cli
 			nuri.apply(true)
 			nuri.lock(false)
 		end
+	elsif ARGV[1] == 'plan' and ARGV.length >= 3
+		planner = Nuri::Planner::Solver.new
+		plan = planner.solve_file(ARGV[2])
+		puts (plan != nil ? plan : 'no solution!')
 	end
 end
 

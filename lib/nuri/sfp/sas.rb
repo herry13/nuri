@@ -86,9 +86,9 @@ module Nuri
 				}
 				self.reset_operators_name
 
-				self.dump_types
-				self.dump_vars
-				self.dump_operators
+				#self.dump_types
+				#self.dump_vars
+				#self.dump_operators
 
 				return create_output
 			end
