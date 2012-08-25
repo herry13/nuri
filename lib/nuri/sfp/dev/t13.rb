@@ -2,7 +2,7 @@
 
 cdir = File.dirname(__FILE__)
 
-$: << File.expand_path(cdir + "/../../..")
+$: << File.expand_path(cdir + "/../../../../lib")
 
 require 'nuri/sfp/main'
 
