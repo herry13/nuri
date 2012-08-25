@@ -17,7 +17,10 @@ module Nuri
 		end
 
 		def self.os
-			@@os = (`uname -o`).strip if @@os == nil
+			return @@os if defined?(@@os) != nil and @@os != nil
+			#@@os = (`uname -o`).strip if @@os == nil
+			@@os = (`uname -s`).strip if @@os == nil
+			@@os = (@@os == 'Darwin' ? 'macos' : @@os.downcase)
 			return @@os
 		end
 
@@ -38,13 +41,42 @@ module Nuri
 				nil, Socket::AI_CANONNAME)[0][2]
 		end
 
+		def self.temp_dir
+			case os
+				when 'linux'
+					return '/tmp'
+				when 'macos'
+					return '/tmp'
+				else
+					return nil
+			end
+		end
+
 		def self.platform
 			return @@platform if @@platform != nil
+			case self.os
+				when 'linux'
+					type = `cat /etc/issue`
+					if (data =~ /Ubuntu/) != nil
+						@@platform = 'ubuntu'
+					elsif (data =~ /Scientific Linux/) != nil
+						@@platform = 'sl'
+					else
+						@@platform = 'unknown'
+					end
+				when 'macos'
+					@@platform = 'macos'
+				else
+					@@platform = 'unknown'
+			end
+=begin
 			if (self.os =~ /Linux/) != nil
 				data = `cat /etc/issue`
 				@@platform = "ubuntu" if (data =~ /Ubuntu/) != nil
 				@@platform = "sl" if (data =~ /Scientific Linux/) != nil
+			
 			end
+=end
 			return @@platform
 		end
 	end

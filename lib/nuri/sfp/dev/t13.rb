@@ -3,8 +3,9 @@
 cdir = File.dirname(__FILE__)
 
 $: << File.expand_path(cdir + "/../../../../lib")
+$: << File.expand_path(cdir + "/../../../..")
 
-require 'nuri/sfp/main'
+require 'nuri/main'
 
 infile = cdir + '/svcref-1.sfp'
 outfile = cdir + '/svcref-1.sas'
@@ -15,3 +16,6 @@ sas = sfp.to_sas
 File.open(outfile, 'w') { |f|
 	f.write(sas)
 }
+puts Nuri::Util.os
+puts Nuri::Util.platform
+puts Nuri::Util.temp_dir

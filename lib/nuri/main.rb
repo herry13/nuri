@@ -1,19 +1,22 @@
 #!/usr/bin/env ruby
 
+# Ruby libraries
 require 'rubygems'
+require 'logger'
 require 'mongrel'
 require 'json'
 require 'pp'
-require 'logger'
 require 'thread'
 require 'socket'
 require 'uri'
 require 'net/http'
+# Nuri libraries
 require 'nuri/util'
 require 'nuri/resource'
 require 'nuri/undefined'
 require 'nuri/sfp/main'
 require 'nuri/planner/main'
+# Nuri modules
 require 'modules/node/node'
 
 module Nuri

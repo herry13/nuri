@@ -56,7 +56,6 @@ module Nuri
 
 			# enable this class to process SFP into FDR (SAS+)
 			include Nuri::Sfp::Sas
-
 		end
 	end
 end

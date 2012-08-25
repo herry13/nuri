@@ -95,88 +95,62 @@ begin_goal
 end_goal
 12
 begin_operator
-op_7$.pc2.change
+op_11$.b.stop
 3
-7 1
-5 0
 2 0
-1
-0 9 -1 2
-1
-end_operator
-begin_operator
-op_1$.pc1.change
-3
 9 2
-5 0
-2 0
-1
-0 7 -1 1
-1
-end_operator
-begin_operator
-op_5$.pc2.change
-2
-7 1
-5 0
-1
-0 9 -1 1
-1
-end_operator
-begin_operator
-op_0$.b.start
-0
-1
-0 5 -1 0
-5
-end_operator
-begin_operator
-op_4$.pc2.change
-2
 7 2
-2 0
-1
-0 9 -1 2
-1
-end_operator
-begin_operator
-op_8$.b.stop
-3
-7 2
-9 2
-2 0
 1
 0 5 -1 1
 10
 end_operator
 begin_operator
-op_10$.pc1.change
+op_0$.a.stop
 3
-9 1
 5 0
+9 1
+7 1
+1
+0 2 -1 1
+10
+end_operator
+begin_operator
+op_8$.pc2.change
+2
 2 0
+7 2
+1
+0 9 -1 2
+1
+end_operator
+begin_operator
+op_5$.pc1.change
+3
+2 0
+5 0
+9 1
 1
 0 7 -1 2
 1
 end_operator
 begin_operator
-op_2$.pc1.change
+op_10$.pc1.change
 2
-9 1
-5 0
+2 0
+9 2
 1
-0 7 -1 1
+0 7 -1 2
 1
 end_operator
 begin_operator
-op_9$.a.stop
+op_9$.pc2.change
 3
-7 1
-9 1
+2 0
 5 0
+7 1
 1
-0 2 -1 1
-10
+0 9 -1 2
+1
 end_operator
 begin_operator
 op_3$.a.start
@@ -186,22 +160,48 @@ op_3$.a.start
 5
 end_operator
 begin_operator
-op_11$.pc2.change
-3
-7 2
+op_2$.b.start
+0
+1
+0 5 -1 0
+5
+end_operator
+begin_operator
+op_4$.pc2.change
+2
 5 0
-2 0
+7 1
 1
 0 9 -1 1
 1
 end_operator
 begin_operator
-op_6$.pc1.change
-2
-9 2
+op_7$.pc1.change
+3
 2 0
+9 2
+5 0
 1
-0 7 -1 2
+0 7 -1 1
+1
+end_operator
+begin_operator
+op_6$.pc2.change
+3
+2 0
+5 0
+7 2
+1
+0 9 -1 1
+1
+end_operator
+begin_operator
+op_1$.pc1.change
+2
+9 1
+5 0
+1
+0 7 -1 1
 1
 end_operator
 0

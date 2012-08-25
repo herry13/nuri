@@ -557,6 +557,9 @@ module Nuri
 
 		end
 
+		class VariableNotFoundException < Exception
+		end
+
 		# Visitor class has 3 attributes
 		# - root : Hash instance of root Context
 		# - variables: Hash instance that holds all Variable instances
