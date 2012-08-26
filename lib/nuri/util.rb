@@ -57,9 +57,9 @@ module Nuri
 			case self.os
 				when 'linux'
 					type = `cat /etc/issue`
-					if (data =~ /Ubuntu/) != nil
+					if (type =~ /Ubuntu/) != nil
 						@@platform = 'ubuntu'
-					elsif (data =~ /Scientific Linux/) != nil
+					elsif (type =~ /Scientific Linux/) != nil
 						@@platform = 'sl'
 					else
 						@@platform = 'unknown'
@@ -69,14 +69,6 @@ module Nuri
 				else
 					@@platform = 'unknown'
 			end
-=begin
-			if (self.os =~ /Linux/) != nil
-				data = `cat /etc/issue`
-				@@platform = "ubuntu" if (data =~ /Ubuntu/) != nil
-				@@platform = "sl" if (data =~ /Scientific Linux/) != nil
-			
-			end
-=end
 			return @@platform
 		end
 	end

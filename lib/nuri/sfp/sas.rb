@@ -17,8 +17,6 @@ module Nuri
 		end
 
 		# include 'Sas' module to enable processing Sfp into Finite-Domain Representation (FDR)
-		# TODO
-		# - generate SAS+ output
 		module Sas
 			GLOBAL_OPERATOR = '#global_op'
 			GLOBAL_VARIABLE = '#global_var'
@@ -134,14 +132,13 @@ module Nuri
 			end
 
 			def reset_operators_name
-				ops = Hash.new
 				Nuri::Sfp::Sas.reset_operator_id
 				@operators.each_value { |op|
 					op.id = Nuri::Sfp::Sas.next_operator_id
+					@operators.delete(op.name)
 					op.update_name
-					ops[op.name] = op
+					@operators[op.name] = op
 				}
-				@operators = ops
 			end
 
 			def self.reset_operator_id
@@ -215,9 +212,7 @@ module Nuri
 				# combine map_cond & map_eff if any of them has >1 items
 				op_id = Nuri::Sfp::Sas.next_operator_id
 				sas_op = Operator.new(op.ref, op['_cost'])
-
-				#op_name = 'op' + op_id.to_s + '_' + op['_parent'].ref + '.' + op['_self']
-				#sas_op = Operator.new(op_name, op['_cost'], op_id)
+				sas_op.params = op['_parameters']
 
 				keys = map_cond.keys.concat(map_eff.keys)
 				keys.each { |k|
@@ -269,6 +264,7 @@ module Nuri
 						p['_conditions'].accept(grounder)
 						p['_effects'].accept(grounder)
 						p['_context'] = 'operator'
+						p['_parameters'] = selected.clone
 						# remove parameters because it's already grounded
 						p.each { |k,v| p.delete(k) if k[0,1] != '_' }
 						bucket << p
@@ -316,7 +312,7 @@ module Nuri
 
 			def dump_operators
 				puts '--- operators'
-				@operators.each_value { |op| puts op.to_s }
+				@operators.each_value { |op| puts op.to_s + ' -- ' + op.params.inspect }
 			end
 
 			def dump_axioms
@@ -732,7 +728,7 @@ module Nuri
 
 		# A class for Grounded Operator
 		class Operator < Hash
-			attr_accessor :id, :name, :cost
+			attr_accessor :id, :name, :cost, :params
 			attr_reader :ref
 
 			def initialize(ref, cost=1, id=nil)
@@ -744,6 +740,7 @@ module Nuri
 
 			def clone
 				op = Operator.new(@ref, @cost)
+				op.params = @params
 				self.each { |key,param| op[key] = param.clone }
 				return op
 			end
@@ -755,7 +752,6 @@ module Nuri
 			def to_s; return @name + ': ' + self.length.to_s ; end
 
 			def to_sas(root)
-				# TODO
 				prevail = Array.new
 				prepost = Array.new
 				self.each_value { |p|
@@ -765,7 +761,9 @@ module Nuri
 						prepost << p
 					end
 				}
-				sas = "begin_operator\n#{@name}\n#{prevail.length}\n"
+				sas = "begin_operator\n#{@name}"
+				@params.each { |k,v| sas += " #{k}=#{v}" if k != '$.this' }
+				sas += "\n#{prevail.length}\n"
 				prevail.each { |p| sas += p.to_sas(root) + "\n" }
 				sas += "#{prepost.length}\n"
 				prepost.each { |p| sas += p.to_sas(root) + "\n" }

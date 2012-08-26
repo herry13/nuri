@@ -9,7 +9,6 @@ PREPROCESS="$BASEDIR/preprocess"
 PLANNER="$BASEDIR/downward"
 
 REMOVED_OPERATOR="\(verifyGlobal\)"
-#TEMP_DIR="$BASEDIR/sfp_$RANDOM"
 TEMP_DIR="/tmp/sfp_$RANDOM"
 CURRENT_DIR=`PWD`
 
@@ -27,11 +26,7 @@ echo "$PREPROCESS < $INPUT"
 $PREPROCESS < $INPUT
 
 # search the plan
-$PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output
-#$PLANNER --search "astar(lmcut())" < $TEMP_DIR/output
-#$PLANNER --search "astar(blind())" < $TEMP_DIR/output
-#$PLANNER --search "astar(cg())" < $TEMP_DIR/output
-#$PLANNER --search "astar(ff())" < $TEMP_DIR/output
+$PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output &> /dev/null
 
 cd $CURRENT_DIR
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 HOME=$(dirname $(readlink -f $0))
 
@@ -9,14 +9,29 @@ PREPROCESS="$HOME/preprocess"
 PLANNER="$HOME/downward" 
 
 REMOVED_OPERATOR="\(verifyGlobal\)"
-TEMP_FILE="/tmp/$RANDOM"
+TEMP_DIR="/tmp/sfp_$RANDOM"
+CURRENT_DIR=`pwd`
 
-# generate the plan from .sas file
-$PREPROCESS < $INPUT | $PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" --plan-file $TEMP_FILE
+# generate absolute path for the input file
+if [ ${INPUT:0:1} != "/" ]; then
+	INPUT="$CURRENT_DIR/$INPUT"
+fi
+
+# create working directory
+mkdir $TEMP_DIR
+cd $TEMP_DIR
+
+# run preprocess
+$PREPROCESS < $INPUT > output
+
+# search the plan
+$PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output &> /dev/null
+
+cd $CURRENT_DIR
 
 # remove unused operator
 SED_ARGS="/$REMOVED_OPERATOR/d"
-sed $SED_ARGS $TEMP_FILE > $OUTPUT
+/bin/sed $SED_ARGS $TEMP_DIR/sas_plan > $OUTPUT
 
 # remove temporary files
-rm $TEMP_FILE
+rm -rf $TEMP_DIR
