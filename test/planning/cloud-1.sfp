@@ -1,0 +1,134 @@
+class Machine {
+	running = no
+	procedure start {
+		cost = 5
+		conditions { }
+		effects {
+			this.running = yes
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions { }
+		effects {
+			this.running = no
+		}
+	}
+}
+
+class PM extends Machine {
+	has_vm isref VM
+
+	procedure stop {
+		cost = 10
+		conditions {
+			this.has_vm.running = false
+		}
+		effects {
+			this.running = no
+		}
+	}
+}
+
+class VM extends Machine {
+	pm isref PM
+	has_service isref Service
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.pm.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions {
+			this.has_service.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class Service {
+	vm isref VM
+	running = false
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.vm.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions { }
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class Client {
+	refer isref Service
+	procedure change(s isref Service) {
+		conditions {
+			s.running = yes
+		}
+		effects {
+			this.refer = s
+		}
+	}
+}
+
+initial state {
+	pm1 isa PM {
+		running = true
+		has_vm = vm1
+	}
+	pm2 isa PM {
+		running = true
+		has_vm = vm2
+	}
+	vm1 isa VM {
+		pm = pm1
+		has_service = web1
+		running = true
+	}
+	vm2 isa VM {
+		pm = pm2
+		has_service = web2
+		running = false
+	}
+	web1 isa Service {
+		vm = vm1
+		running = true
+	}
+	web2 isa Service {
+		vm = vm2
+		running = false
+	}	
+
+	pc1 isa Client {
+		refer = web1
+	}
+	pc2 isa Client {
+		refer = web1
+	}
+}
+goal constraint {
+	//web1.running = false
+	//vm1.running = false
+	pm1.running = false
+}
+global constraint {
+	pc1.refer.running = true
+	pc2.refer.running = true
+}

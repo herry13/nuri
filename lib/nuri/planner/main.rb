@@ -43,7 +43,7 @@ module Nuri
 						cmd = planner + ' ' + sas_file + ' ' + plan_file
 					when 'macos'
 						planner = File.dirname(__FILE__) + '/macos/planner'
-						cmd = planner + ' ' + sas_file + ' ' + plan_file
+						cmd = planner + ' ' + sas_file + ' ' + plan_file + ' &> /dev/null'
 					else
 						raise UnsupportedPlatformException, 'Platform ' + os + ' is not supported'
 				end

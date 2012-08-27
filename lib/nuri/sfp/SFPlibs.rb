@@ -1,7 +1,7 @@
 module Nuri
 	module Sfp
 		module Sfplibs
-			attr_accessor :rootdir
+			attr_accessor :root_dir, :home_dir
 			attr_reader :root, :used_classes
 
 			def init
@@ -31,8 +31,10 @@ module Nuri
 			end
 		
 			def process_file(file)
-				file = @rootdir + "/" + file if @rootdir != nil and file[0,1] != '/'
-				data = Nuri::Sfp::Parser.file_to_json(file)
+				filepath = @root_dir + "/" + file if @root_dir != nil and file[0,1] != '/'
+				filepath = @home_dir + "/" + file if not File.exist?(filepath)
+				#return if not File.exist?(filepath)
+				data = Nuri::Sfp::Parser.file_to_json(filepath)
 				data.each_pair { |key,val|
 					if val['_context'] == 'class' or val['_context'] == 'composite'
 						@root[key] = val

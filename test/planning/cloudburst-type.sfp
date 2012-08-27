@@ -1,0 +1,84 @@
+class Machine {
+	running = no
+	procedure start {
+		cost = 5
+		conditions { }
+		effects {
+			this.running = yes
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions { }
+		effects {
+			this.running = no
+		}
+	}
+}
+
+class Cloud
+
+class VM extends Machine {
+	on_cloud isref Cloud
+	has_service isref Service
+
+	procedure start {
+		cost = 5
+		conditions { }
+		effects {
+			this.running = true
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions {
+			this.has_service.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+	procedure migrate(c isref Cloud) {
+		cost = 100
+		conditions {
+			this.running = false
+		}
+		effects {
+			this.on_cloud = c
+		}
+	}
+}
+
+class Service {
+	vm isref VM
+	running = false
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.vm.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions { }
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class Client {
+	refer isref Service
+	procedure change(s isref Service) {
+		conditions {
+			s.running = yes
+		}
+		effects {
+			this.refer = s
+		}
+	}
+}

@@ -20,7 +20,8 @@ module Nuri
 				lexer = SFP::Lexer.new(f)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
 				@parser = SFP::Parser.new(tokens)
-				@parser.rootdir = Nuri::Util.rootdir
+				@parser.root_dir = Nuri::Util.rootdir
+				@parser.home_dir = File.dirname(f.path)
 				@parser.sfp
 			end
 
@@ -29,7 +30,8 @@ module Nuri
 				lexer = SFP::Lexer.new(text)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
 				@parser = SFP::Parser.new(tokens)
-				@parser.rootdir = Nuri::Util.rootdir
+				@parser.root_dir = Nuri::Util.rootdir
+				@parser.home_dir = @parser.root_dir
 				@parser.sfp
 			end
 

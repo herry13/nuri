@@ -26,7 +26,7 @@ echo "$PREPROCESS < $INPUT"
 $PREPROCESS < $INPUT
 
 # search the plan
-$PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output &> /dev/null
+$PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output #&> /dev/null
 
 cd $CURRENT_DIR
 

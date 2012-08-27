@@ -191,6 +191,15 @@ module Nuri
 				return map
 			end
 
+			def and_equals_constraint_to_map(constraint)
+				map = Hash.new
+				constraint.each { |k,v|
+					next if k[0,1] == '_'
+					map[k] = v['_value'] if v['_type'] == 'equals'
+				}
+				return map
+			end
+
 			# process the effects of operator and return all possible sets
 			# of effects
 			def process_effects(eff)
@@ -204,17 +213,34 @@ module Nuri
 				return map
 			end
 
+			# process given operator
+			def process_operator(op)
+				# return if given operator is not valid
+				return if not normalize_formula(op['_conditions'])
+				# at this step, the conditions formula has been normalized (AND/OR tree)
+
+				# AND conditions
+				if op['_conditions']['_type'] == 'and'
+					process_grounded_operator(op, op['_conditions'], op['_effects'])
+				else
+					op['_conditions'].each { |k,v|
+						next if k[0,1] == '_'
+						process_grounded_operator(op, v, op['_effects'])
+					}
+				end
+			end
+
 			# process grounded operator (no parameter exists)
-			def process_operator(op, object)
-				map_cond = process_conditions(op['_conditions'])
-				map_eff = process_effects(op['_effects'])
+			def process_grounded_operator(op, conditions, effects)
+				map_cond = and_equals_constraint_to_map(conditions)
+				map_eff = and_equals_constraint_to_map(effects)
+				keys = map_cond.keys.concat(map_eff.keys)
 
 				# combine map_cond & map_eff if any of them has >1 items
 				op_id = Nuri::Sfp::Sas.next_operator_id
 				sas_op = Operator.new(op.ref, op['_cost'])
 				sas_op.params = op['_parameters']
 
-				keys = map_cond.keys.concat(map_eff.keys)
 				keys.each { |k|
 					return if not @variables.has_key?(k)
 					pre = (!map_cond.has_key?(k) ? nil : map_cond[k])
@@ -224,6 +250,7 @@ module Nuri
 					sas_op[@variables[k].name] = Parameter.new(@variables[k], pre, post)
 				}
 
+
 				@operators[sas_op.name] = sas_op if apply_global_constraint(sas_op)
 			end
 
@@ -232,7 +259,7 @@ module Nuri
 			def process_procedure(procedure, object)
 				operators = ground_procedure_parameters(procedure)
 				if operators != nil
-					operators.each { |op| process_operator(op, object) }
+					operators.each { |op| process_operator(op) }
 				end
 				# remove the procedure because we don't need it anymore
 				object.delete(procedure['_self'])
@@ -387,8 +414,9 @@ module Nuri
 					satisfied.each { |key|
 						# create an operator for each satisfied sub-formula
 						op = operator.clone
-						map_cond = process_conditions(@root['global'][key])
+						map_cond = and_equals_constraint_to_map(@root['global'][key])
 						map_cond.each { |k,v|
+							next if k[0,1] == '_'
 							raise VariableNotFoundException, k if not @variables.has_key?(k)
 							if not op.has_key?(@variables[k].name)
 								op[@variables[k].name] = Parameter.new(@variables[k], v, nil)
@@ -405,12 +433,8 @@ module Nuri
 				return true
 			end
 
-			#def next_id
-			#	return (@index_next_id += 1) if defined?(@index_next_id)
-			#	@index_next_id = 0
-			#	return @index_next_id
-			#end
-
+			# normalize the given first-order formula by transforming it into
+			# AND/OR clauses
 			def normalize_formula(formula)
 				def create_equals_constraint(value)
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
@@ -815,8 +839,6 @@ module Nuri
 				# resolve the reference
 				pre = ( (@pre.is_a?(String) and @pre.isref) ? root.at?(@pre) : @pre )
 				post = ( (@post.is_a?(String) and @post.isref) ? root.at?(@post) : @post )
-puts @var.id.to_s + ' ' + (pre.is_a?(Hash) ? pre.ref : pre.to_s) + ' ' + (post.is_a?(Hash) ? post.ref : post.to_s) if
-	pre != nil and post != nil
 				# calculate the index
 				pre = ( (pre.is_a?(Hash) and pre.isnull) ? 0 : (pre == nil ? -1 : @var.index(pre)) )
 				post = ( (post.is_a?(Hash) and post.isnull) ? 0 : @var.index(post) )
