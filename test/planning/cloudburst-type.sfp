@@ -16,7 +16,9 @@ class Machine {
 	}
 }
 
-class Cloud
+class Cloud {
+	is_private = true
+}
 
 class VM extends Machine {
 	on_cloud isref Cloud
@@ -52,6 +54,7 @@ class VM extends Machine {
 class Service {
 	vm isref VM
 	running = false
+	firewall_port isref Port
 
 	procedure start {
 		cost = 5
@@ -67,6 +70,25 @@ class Service {
 		conditions { }
 		effects {
 			this.running = false
+		}
+	}
+}
+
+class Firewall extends Machine
+
+class Port {
+	opened = false
+
+	procedure open {
+		conditions { }
+		effects {
+			this.opened = true
+		}
+	}
+	procedure close {
+		conditions { }
+		effects {
+			this.opened = false
 		}
 	}
 }

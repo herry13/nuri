@@ -41,33 +41,27 @@ module Nuri
 				# collect variables
 				@root['initial'].accept(VariableCollector.new(@root['initial'], @variables, @types))
 
-				# process goal constraint
-				if @root.has_key?('goal') and @root['goal'].isconstraint
-					@root['goal'].delete('_parent')
-					# set goal value
-					@root['goal'].accept(GoalVisitor.new(self))
-
-					# collect all value in goal constraint
-					@root['goal'].accept(Nuri::Sfp::ValueCollector.new(@types))
-				end
-
-				# process global constraint
-				if @root.has_key?('global') and @root['global'].isconstraint
-					@root['global'].delete('_parent')
-
-					# collect all value in global constraint
-					@root['global'].accept(Nuri::Sfp::ValueCollector.new(@types))
-
-					# TODO
-					# 1) - add the global constraint in goal constraint
-					#    - generate additional axioms/operator
-					# 2) compile using Patrik's approach ...DONE!
-				end
+				# collect values from goal and global constraint
+				value_collector = Nuri::Sfp::ValueCollector.new(@types)
+				@root['goal'].accept(value_collector) if @root.has_key?('goal') and @root['goal'].isconstraint
+				@root['global'].accept(value_collector) if @root.has_key?('global') and @root['global'].isconstraint
 
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
 				# set domain values for each variable
 				self.set_variable_values
+
+				# process goal constraint
+				process_goal(@root['goal']) if @root.has_key?('goal') and @root['goal'].isconstraint
+
+				# process global constraint
+				#if @root.has_key?('global') and @root['global'].isconstraint
+				#	@root['global'].delete('_parent')
+					# TODO
+					# 1) - add the global constraint in goal constraint
+					#    - generate additional axioms/operator
+					# 2) compile using Patrik's approach ...DONE!
+				#end
 
 				# normalize formula
 				if @root.has_key?('global') and @root['global'].isconstraint
@@ -89,6 +83,36 @@ module Nuri
 				#self.dump_operators
 
 				return create_output
+			end
+
+			def process_goal(goal)
+				raise Exception, 'invalid goal constraint' if not normalize_formula(goal)
+				if goal['_type'] == 'and'
+					map = and_equals_constraint_to_map(goal)
+					map.each { |name,value|
+						value = @types[@variables[name].type][0] if value.is_a?(Hash) and value.isnull
+						value = @root['initial'].at?(value) if value.is_a?(String) and value.isref
+						@variables[name].goal = value
+					}
+				elsif goal['_type'] == 'or'
+					count = 0
+					var = Variable.new("goal", 'Boolean', -1, false, true)
+					var << true
+					var << false
+					@variables[var.name] = var
+					eff = Parameter.new(var, false, true)
+
+					goal.each { |k,g|
+						next if k[0,1] == '_'
+						op = Operator.new("-goal_#{count}", 0)
+						op[var.name] = eff
+						map = and_equals_constraint_to_map(g)
+						map.each { |k1,v1|
+							op[@variables[k1].name] = Parameter.new(@variables[k1], v1, nil)
+						}
+						@operators[op.name] = op
+					}
+				end
 			end
 
 			def create_output
@@ -596,7 +620,6 @@ module Nuri
 		# Visitor that set goal value of each variable
 		class GoalVisitor < Visitor
 			def set_equals(name, value)
-				#value['_isa'] = @vars[name].type if value.is_a?(Hash) and value.isnull
 				value = @types[@vars[name].type][0] if value.is_a?(Hash) and value.isnull
 				value = @root['initial'].at?(value) if value.is_a?(String) and value.isref
 				@vars[name].goal = value
@@ -629,11 +652,19 @@ module Nuri
 				var = Variable.new(obj.ref.push(name), type, -1, value, nil, isfinal)
 				@bucket[var.name] = var
 				if isfinal and value.is_a?(Hash)
-					value['_classes'].each { |c| @types[c] << value }
+					value['_classes'].each { |c| add_value(c, value) }
 				elsif not isref
-					@types[ type ] << value
+					add_value(type, value)
 				end
 				return true
+			end
+
+			def add_value(type, value)
+				if not @types.has_key?(type)
+					@types[type] = Array.new
+					@types[type] << Nuri::Sfp.null_of(type)
+				end
+				@types[type] << value
 			end
 
 			def is_a(value)
@@ -786,7 +817,7 @@ module Nuri
 					end
 				}
 				sas = "begin_operator\n#{@name}"
-				@params.each { |k,v| sas += " #{k}=#{v}" if k != '$.this' }
+				@params.each { |k,v| sas += " #{k}=#{v}" if k != '$.this' } if @param != nil
 				sas += "\n#{prevail.length}\n"
 				prevail.each { |p| sas += p.to_sas(root) + "\n" }
 				sas += "#{prepost.length}\n"

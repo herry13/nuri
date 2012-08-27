@@ -39,7 +39,7 @@ module Nuri
 				cmd = ''
 				case os
 					when 'linux'
-						planner = File.dirname(__FILE__) + '/linux/planner'
+						planner = File.dirname(__FILE__) + '/linux/planner &> /dev/null'
 						cmd = planner + ' ' + sas_file + ' ' + plan_file
 					when 'macos'
 						planner = File.dirname(__FILE__) + '/macos/planner'

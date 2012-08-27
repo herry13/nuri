@@ -1,34 +1,5 @@
-class Machine {
-	running is no
-	procedure start {
-		cost is 5
-		conditions { }
-		effects {
-			this.running is yes
-		}
-	}
-	procedure stop {
-		cost is 10
-		conditions { }
-		effects {
-			this.running is no
-		}
-	}
-}
-class Server extends Machine {
-	name is ""
-}
-class Client {
-	refer isref Server
-	procedure change(s isref Server) {
-		conditions {
-			s.running is yes
-		}
-		effects {
-			this.refer is s
-		}
-	}
-}
+include "svcref-type.sfp"
+
 initial state {
 	a isa Server {
 		name is "A"

@@ -7,6 +7,7 @@ OUTPUT=$2  # .plan file
 
 PREPROCESS="$HOME/preprocess" 
 PLANNER="$HOME/downward" 
+ENGINE="blind"
 
 REMOVED_OPERATOR="\(verifyGlobal\)"
 TEMP_DIR="/tmp/sfp_$RANDOM"
@@ -25,7 +26,27 @@ cd $TEMP_DIR
 $PREPROCESS < $INPUT > output
 
 # search the plan
-$PLANNER --heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output &> /dev/null
+if [[ "$ENGINE" == "ff" ]]; then
+	$PLANNER \
+		--heuristic "hff=ff()" \
+		--search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output
+elif [[ "$ENGINE" == "lama2011" ]]; then
+	$PLANNER \
+		--heuristic "hlm,hff=lm_ff_syn(lm_rhw(
+			reasonable_orders=true,lm_cost_type=2,cost_type=2))" \
+		--search "iterated([
+			lazy_greedy([hff,hlm],preferred=[hff,hlm]),
+			lazy_wastar([hff,hlm],preferred=[hff,hlm],w=5),
+			lazy_wastar([hff,hlm],preferred=[hff,hlm],w=3),
+			lazy_wastar([hff,hlm],preferred=[hff,hlm],w=2),
+			lazy_wastar([hff,hlm],preferred=[hff,hlm],w=1)],
+			repeat_last=true,continue_on_fail=true)" \
+		< $TEMP_DIR/output
+elif [[ "$ENGINE" == "lmcut" ]]; then
+	$PLANNER --search "astar(lmcut())" < $TEMP_DIR/output
+elif [[ "$ENGINE" == "blind" ]]; then
+	$PLANNER --search "astar(blind())" < $TEMP_DIR/output
+fi
 
 cd $CURRENT_DIR
 
