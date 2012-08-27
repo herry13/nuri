@@ -65,7 +65,11 @@ module Nuri
 
 				# normalize formula
 				if @root.has_key?('global') and @root['global'].isconstraint
-					normalize_formula(@root['global'])
+					raise Exception, 'Invalid global constraint' if 
+						not normalize_formula(@root['global'])
+
+#r = deep_clone(@root['global'])
+#r.accept(ParentEliminator.new)
 				end
 
 				# process all procedures
