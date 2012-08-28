@@ -65,11 +65,7 @@ module Nuri
 
 				# normalize formula
 				if @root.has_key?('global') and @root['global'].isconstraint
-					raise Exception, 'Invalid global constraint' if 
-						not normalize_formula(@root['global'])
-
-#r = deep_clone(@root['global'])
-#r.accept(ParentEliminator.new)
+					raise Exception, 'Invalid global constraint' if not normalize_formula(@root['global'])
 				end
 
 				# process all procedures
@@ -472,6 +468,10 @@ module Nuri
 					return {'_context'=>'constraint', '_type'=>'and', '_self'=>key}
 				end
 
+				def create_or_constraint(key)
+					return {'_context'=>'constraint', '_type'=>'or', '_self'=>key}
+				end
+
 				def array_to_or_constraint(arr)
 					c = {'_context'=>'constraint', '_type'=>'or'}
 					arr.each { |v| c[Nuri::Sfp::Sas.next_constraint_key] = v }
@@ -599,7 +599,45 @@ module Nuri
 					return true
 				end
 
+				def not_value_of(var_name, value)
+					raise VariableNotFoundException, var_name + ' cannot be found' if
+						not @variables.has_key?(var_name)
+					if value.is_a?(String) and value.isref
+						value = @root['initial'].at?(value)
+					elsif value.is_a?(Hash) and value.isnull
+						value = @variables[var_name][0]
+					end
+					return (@variables[var_name] - [value])
+				end
+
+				def not_equals_statement_to_or_constraint(formula)
+					formula.each { |k,v|
+						next if k[0,1] == '_'
+						if v.is_a?(Hash) and v.isconstraint
+							if v['_type'] == 'or' or v['_type'] == 'and'
+								not_equals_statement_to_or_constraint(v)
+							elsif v['_type'] == 'not-equals'
+								key1 = Nuri::Sfp::Sas.next_constraint_key
+								c_or = create_or_constraint(key1)
+								not_value_of(k, v['_value']).each { |val1|
+									val1 = val1.ref if val1.is_a?(Hash) and val1.isobject
+									key2 = Nuri::Sfp::Sas.next_constraint_key
+									c_and = create_and_constraint(key2)
+									c_and[k] = create_equals_constraint(val1)
+									c_or[key2] = c_and
+								}
+								formula.delete(k)
+								formula[key1] = c_or
+							end
+						end
+					}
+				end
+
+				def not_to_or_constraint(formula)
+				end
+
 				to_and_or_graph(formula)
+				not_equals_statement_to_or_constraint(formula)
 				result = flatten_and_or_graph(formula)
 			end
 

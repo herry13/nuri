@@ -39,11 +39,11 @@ module Nuri
 				cmd = ''
 				case os
 					when 'linux'
-						planner = File.dirname(__FILE__) + '/linux/planner &> /dev/null'
+						planner = File.dirname(__FILE__) + '/linux/planner'
 						cmd = planner + ' ' + sas_file + ' ' + plan_file
 					when 'macos'
 						planner = File.dirname(__FILE__) + '/macos/planner'
-						cmd = planner + ' ' + sas_file + ' ' + plan_file + ' &> /dev/null'
+						cmd = planner + ' ' + sas_file + ' ' + plan_file
 					else
 						raise UnsupportedPlatformException, 'Platform ' + os + ' is not supported'
 				end
@@ -52,15 +52,14 @@ module Nuri
 					# create temporary directory
 					Dir.mkdir(dir) if not File.exist?(dir)
 					# dump SAS+ problem
-					File.open(sas_file, 'w') { |f|
+					File.open(sas_file, 'w') do |f|
 						f.write(sas)
-					}
-					system cmd
+					end
+					Kernel.system(cmd)
 					plan = File.read(plan_file) if File.exist?(plan_file)
 					File.delete(sas_file)
 					File.delete(plan_file) if File.exist?(plan_file)
 					Dir.delete(dir)
-
 					plan = to_partial_order(plan) if plan != nil
 					return plan
 				rescue Exception => exp

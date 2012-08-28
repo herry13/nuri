@@ -30,7 +30,7 @@ $PREPROCESS < $INPUT
 if [[ "$ENGINE" == "ff" ]]; then
 	$PLANNER \
 		--heuristic "hff=ff()" \
-		--search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output
+		--search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output &> /dev/null
 elif [[ "$ENGINE" == "lama2011" ]]; then
 	$PLANNER \
 		--heuristic "hlm,hff=lm_ff_syn(lm_rhw(
@@ -42,18 +42,20 @@ elif [[ "$ENGINE" == "lama2011" ]]; then
 			lazy_wastar([hff,hlm],preferred=[hff,hlm],w=2),
 			lazy_wastar([hff,hlm],preferred=[hff,hlm],w=1)],
 			repeat_last=true,continue_on_fail=true)" \
-		< $TEMP_DIR/output
+		< $TEMP_DIR/output &> /dev/null
 elif [[ "$ENGINE" == "lmcut" ]]; then
-	$PLANNER --search "astar(lmcut())" < $TEMP_DIR/output
+	$PLANNER --search "astar(lmcut())" < $TEMP_DIR/output &> /dev/null
 elif [[ "$ENGINE" == "blind" ]]; then
-	$PLANNER --search "astar(blind())" < $TEMP_DIR/output
+	$PLANNER --search "astar(blind())" < $TEMP_DIR/output &> /dev/null
 fi
 
 cd $CURRENT_DIR
 
 # remove unused operator and generate the final output
-SED_ARGS="/$REMOVED_OPERATOR/d"
-sed $SED_ARGS $TEMP_DIR/sas_plan > $OUTPUT
+if [ -e $TEMP_DIR/sas_plan ]; then
+	SED_ARGS="/$REMOVED_OPERATOR/d"
+	sed $SED_ARGS $TEMP_DIR/sas_plan 1> $OUTPUT
+fi
 
 # remove unused file
 rm -f plan_numbers_and_cost
