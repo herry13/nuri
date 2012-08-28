@@ -1,0 +1,89 @@
+class Machine {
+	running = no
+	procedure start {
+		cost = 5
+		conditions { }
+		effects {
+			this.running = yes
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions { }
+		effects {
+			this.running = no
+		}
+	}
+}
+
+class PM extends Machine {
+	has_vm isref VM
+
+	procedure stop {
+		cost = 10
+		conditions {
+			this.has_vm.running = false
+		}
+		effects {
+			this.running = no
+		}
+	}
+}
+
+class VM extends Machine {
+	pm isref PM
+	has_service isref Service
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.pm.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions {
+			this.has_service.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class Service {
+	vm isref VM
+	running = false
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.vm.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions { }
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class Client {
+	refer isref Service
+	procedure change(s isref Service) {
+		conditions {
+			s.running = yes
+		}
+		effects {
+			this.refer = s
+		}
+	}
+}

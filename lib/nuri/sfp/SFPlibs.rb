@@ -14,8 +14,9 @@ module Nuri
 			end
 
 			def next_id
-				++@id
-				return "c" + @id.to_s
+				nid = "c" + @id.to_s
+				@id += 1
+				return nid
 			end
 		
 			def null_value(isa=nil)

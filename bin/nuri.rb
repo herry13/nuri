@@ -28,6 +28,7 @@ def cli
 		puts (plan != nil ? plan : 'no solution!')
 	elsif ARGV[1] == 'sfp' and ARGV.length >= 3
 		Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_json(ARGV[2]) )
+		#Nuri::Sfp::Parser.file_to_json(ARGV[2])
 	end
 end
 

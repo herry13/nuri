@@ -634,6 +634,7 @@ module Nuri
 				end
 
 				def not_to_or_constraint(formula)
+					# TODO
 				end
 
 				to_and_or_graph(formula)

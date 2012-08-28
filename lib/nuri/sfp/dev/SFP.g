@@ -295,7 +295,9 @@ constraint
 constraint_body
 	:	(
 			(	constraint_statement
-				{	@now[$constraint_statement.key] = $constraint_statement.val	}
+				{
+					@now[$constraint_statement.key] = $constraint_statement.val
+				}
 			|	constraint_namespace
 			|	constraint_iterator
 			)
@@ -363,6 +365,10 @@ constraint_statement returns [key, val]
 			$val = { '_context' => 'constraint', '_type' => 'not-in', '_value' => $set_value.val }
 		}
 	|	conditional_constraint
+		{
+			$key = $conditional_constraint.key
+			$val = $conditional_constraint.val
+		}
 	|	reference binary_comp comp_value
 		{
 			$key = $reference.val
@@ -377,33 +383,38 @@ comp_value returns [val]
 		{	$val = $reference.val	}
 	;
 
-conditional_constraint
+conditional_constraint returns [key, val]
 	:	'if'
 		{
-			id = self.next_id
+			$key = id = self.next_id.to_s
 			@now[id] = { '_parent' => @now,
-				'_context' => 'ifthen',
-				'_if' => nil,
-				'_then' => nil
+				'_context' => 'constraint',
+				'_type' => 'or'
 			}
 			@now = @now[id]
 		}
 		constraint_statement NL*
 		{
-			@now['_if'] = { '_left' => $constraint_statement.key,
-				'_right' => $constraint_statement.val
+			id = self.next_id
+			@now[id] = { '_parent' => @now,
+				'_context' => 'constraint',
+				'_type' => 'not'
 			}
+			@now[id][$constraint_statement.key] = $constraint_statement.val
 		}
 		conditional_constraint_then
-		{	self.goto_parent()	}
+		{	$val = self.goto_parent()	}
 	;
 
 conditional_constraint_then
 	:	'then' constraint_statement
 		{
-			@now['_then'] = { '_left' => $constraint_statement.key,
-				'_right' => $constraint_statement.val
+			id = self.next_id
+			@now[id] = { '_parent' => @now,
+				'_context' => 'constraint',
+				'_type' => 'and'
 			}
+			@now[id][$constraint_statement.key] = $constraint_statement.val
 		}
 	;
 

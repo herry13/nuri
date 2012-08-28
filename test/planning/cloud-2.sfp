@@ -39,6 +39,6 @@ goal constraint {
 	pm1.running = false
 }
 global constraint {
-	pc1.refer.running = true
-	pc2.refer.running = true
+	pc1.refer.running isnt false
+	pc2.refer.running isnt false
 }
