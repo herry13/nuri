@@ -23,8 +23,7 @@ mkdir $TEMP_DIR
 cd $TEMP_DIR
 
 # run preprocess
-echo "$PREPROCESS < $INPUT"
-$PREPROCESS < $INPUT
+$PREPROCESS < $INPUT &> /dev/null
 
 # search the plan
 if [[ "$ENGINE" == "ff" ]]; then
