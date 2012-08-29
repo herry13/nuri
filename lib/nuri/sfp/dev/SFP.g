@@ -14,18 +14,19 @@ Depends:
 Features:
 - reference
 - object namespace
-- set membership operators (in, not in, add, remove)
+- SET abstract data-type and membership operators (in, not in, add, remove)
 - numeric comparators (>, >=, <, <=) and mutation operators (+, -, *, /)
 - new object
 - procedure's cost
 - constraint/mutation iterator for Set of values or objects of particular class
 - Set of all-objects of particular class as procedure's parameter
 - include file
+- constraint namespace
 
 TODO:
+- ARRAY abstract data-type, enumerator operator, index operator
 - provenance
 - state-dependency (supports multiple conditions using 'or' keyword)
-- constraint namespace
 =end
 
 }
@@ -354,6 +355,11 @@ constraint_statement returns [key, val]
 			$key = $reference.val
 			$val = { '_context' => 'constraint', '_type' => 'not-equals', '_value' => self.null_value }
 		}
+	|	conditional_constraint
+		{
+			$key = $conditional_constraint.key
+			$val = $conditional_constraint.val
+		}
 	|	reference 'is'? 'in' set_value
 		{
 			$key = $reference.val
@@ -363,11 +369,6 @@ constraint_statement returns [key, val]
 		{
 			$key = $reference.val
 			$val = { '_context' => 'constraint', '_type' => 'not-in', '_value' => $set_value.val }
-		}
-	|	conditional_constraint
-		{
-			$key = $conditional_constraint.key
-			$val = $conditional_constraint.val
 		}
 	|	reference binary_comp comp_value
 		{

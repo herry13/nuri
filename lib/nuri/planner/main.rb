@@ -61,6 +61,7 @@ module Nuri
 					File.delete(plan_file) if File.exist?(plan_file)
 					Dir.delete(dir)
 					plan = to_partial_order(plan) if plan != nil
+#@parser.dump
 					return plan
 				rescue Exception => exp
 					puts 'Planner error: ' + exp.to_s

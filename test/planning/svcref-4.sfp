@@ -20,5 +20,7 @@ goal constraint {
 }
 global constraint {
 	if pc1.refer = a then a.running = true
+	if pc1.refer = b then b.running = true
 	if pc2.refer = a then a.running = true
+	if pc2.refer = b then b.running = true
 }

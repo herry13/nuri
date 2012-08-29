@@ -7,9 +7,10 @@ OUTPUT=$2  # .plan file
 
 PREPROCESS="$BASEDIR/preprocess"
 PLANNER="$BASEDIR/downward"
-ENGINE="blind"
+ENGINE="lmcut"
 
-REMOVED_OPERATOR="\(verifyGlobal\)"
+#REMOVED_OPERATOR="\(verifyGlobal\)"
+REMOVED_OPERATOR="-goal_"
 TEMP_DIR="/tmp/sfp_$RANDOM"
 CURRENT_DIR=`PWD`
 

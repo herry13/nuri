@@ -12,7 +12,8 @@ if [[ "$ENGINE" == "" ]]; then
 	ENGINE="lmcut"
 fi
 
-REMOVED_OPERATOR="\(verifyGlobal\)"
+#REMOVED_OPERATOR="\(verifyGlobal\)"
+REMOVED_OPERATOR="\(-goal_\)"
 TEMP_DIR="/tmp/sfp_$RANDOM"
 CURRENT_DIR=`pwd`
 

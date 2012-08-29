@@ -1,3 +1,6 @@
+# 29-08-2012
+# - support EQUALS, NOT-EQUALS, AND, OR, IF-THEN constraints
+#
 # 23-08-2012
 # - grounding procedure's parameters to produce operator
 # - normalize and apply global constraint to all operators
@@ -17,6 +20,10 @@ module Nuri
 		end
 
 		# include 'Sas' module to enable processing Sfp into Finite-Domain Representation (FDR)
+		#
+		# TODO:
+		# - enumeration of values of particular type
+		# - SET abstract data-type, membership operators
 		module Sas
 			GLOBAL_OPERATOR = '#global_op'
 			GLOBAL_VARIABLE = '#global_var'
@@ -464,12 +471,16 @@ module Nuri
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
 				end
 
-				def create_and_constraint(key)
-					return {'_context'=>'constraint', '_type'=>'and', '_self'=>key}
+				def create_not_constraint(key, parent)
+					return {'_context'=>'constraint', '_type'=>'not', '_self'=>key, '_parent'=>parent}
 				end
 
-				def create_or_constraint(key)
-					return {'_context'=>'constraint', '_type'=>'or', '_self'=>key}
+				def create_and_constraint(key, parent)
+					return {'_context'=>'constraint', '_type'=>'and', '_self'=>key, '_parent'=>parent}
+				end
+
+				def create_or_constraint(key, parent)
+					return {'_context'=>'constraint', '_type'=>'or', '_self'=>key, '_parent'=>parent}
 				end
 
 				def array_to_or_constraint(arr)
@@ -526,7 +537,9 @@ module Nuri
 					}
 				end
 
-				# recursively pull statements that has the same AND/OR operator
+				# Recursively pull statements that has the same AND/OR operator.
+				# Only receive a formula with AND, OR, EQUALS constraints.
+				#
 				# return false if there is any contradiction of facts, otherwise true
 				def flatten_and_or_graph(formula)
 					# transform formula into a format:
@@ -545,6 +558,7 @@ module Nuri
 								if formula['_type'] == v['_type']
 									# pull-out all node's elements
 									v.each { |k1,v1|
+										next if k1[0,1] == '_'
 										# check contradiction facts
 										if formula.has_key?(k1)
 											return false if formula[k1]['_type'] != v1['_type']
@@ -563,12 +577,11 @@ module Nuri
 					def dot_product_and(bucket, names, formula, values=Hash.new, index=0)
 						if index >= names.length
 							key = Nuri::Sfp::Sas.next_constraint_key
-							c = create_and_constraint(key)
+							c = create_and_constraint(key, formula)
 							values.each { |k,v| c[k] = v }
 							if flatten_and_or_graph(c)
 								# add the constraint because it's consistent
 								formula[key] = c
-								c['_parent'] = formula
 							end
 						else
 							key = names[index]
@@ -599,7 +612,10 @@ module Nuri
 					return true
 				end
 
-				def not_value_of(var_name, value)
+				# 'var_name' := x, value := p1
+				# variable x := p1 | p2 | p3
+				# return an array (p2, p3)
+				def get_list_not_value_of(var_name, value)
 					raise VariableNotFoundException, var_name + ' cannot be found' if
 						not @variables.has_key?(var_name)
 					if value.is_a?(String) and value.isref
@@ -610,6 +626,9 @@ module Nuri
 					return (@variables[var_name] - [value])
 				end
 
+				# variable x := p1 | p2 | p3
+				# then formula := x not-equals p1 is transformed into
+				# formula := (x equals p2) or (x equals p3)
 				def not_equals_statement_to_or_constraint(formula)
 					formula.each { |k,v|
 						next if k[0,1] == '_'
@@ -618,11 +637,11 @@ module Nuri
 								not_equals_statement_to_or_constraint(v)
 							elsif v['_type'] == 'not-equals'
 								key1 = Nuri::Sfp::Sas.next_constraint_key
-								c_or = create_or_constraint(key1)
-								not_value_of(k, v['_value']).each { |val1|
+								c_or = create_or_constraint(key1, formula)
+								get_list_not_value_of(k, v['_value']).each { |val1|
 									val1 = val1.ref if val1.is_a?(Hash) and val1.isobject
 									key2 = Nuri::Sfp::Sas.next_constraint_key
-									c_and = create_and_constraint(key2)
+									c_and = create_and_constraint(key2, c_or)
 									c_and[k] = create_equals_constraint(val1)
 									c_or[key2] = c_and
 								}
@@ -633,11 +652,55 @@ module Nuri
 					}
 				end
 
-				def not_to_or_constraint(formula)
-					# TODO
+				# remove all NOT constraints in the given formula by transforming them
+				# into EQUALS, NOT-EQUALS, AND, OR constraints
+				def remove_not_constraint(formula)
+					# TODO: (not (equals) (not-equals) (and) (or))
+					if formula.isconstraint and formula['_type'] == 'not'
+						formula['_type'] = 'and'
+						formula.each { |k,v|
+							next if k[0,1] == '_'
+							if v.is_a?(Hash) and v.isconstraint
+								case v['_type']
+								when 'equals'
+									v['_type'] = 'not-equals'
+								when 'not-equals'
+									v['_type'] = 'equals'
+								when 'and'
+									v['_type'] = 'or'
+									v.each { |k1,v1|
+										k2 = Nuri::Sfp::Sas.next_constraint_key
+										c_not = create_not_constraint(k2, v)
+										c_not[k1] = v1
+										v1['_parent'] = c_not
+										v.delete(k1)
+										remove_not_constraint(c_not)
+									}
+								when 'or'
+									v['_type'] = 'and'
+									v.each { |k1,v1|
+										k2 = Nuri::Sfp::Sas.next_constraint_key
+										c_not = create_not_constraint(k2, v)
+										c_not[k1] = v1
+										v1['_parent'] = c_not
+										v.delete(k1)
+										remove_not_constraint(c_not)
+									}
+								else
+									raise Exception, 'unknown rules: ' + v['_type']
+								end
+							end
+						}
+					else
+						formula.each { |k,v|
+							next if k[0,1] == '_'
+							remove_not_constraint(v) if v.is_a?(Hash) and v.isconstraint
+						}
+					end
 				end
 
 				to_and_or_graph(formula)
+				remove_not_constraint(formula)
 				not_equals_statement_to_or_constraint(formula)
 				result = flatten_and_or_graph(formula)
 			end

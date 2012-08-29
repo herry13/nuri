@@ -24,9 +24,7 @@ class Server extends Machine {
 class Client {
 	refer isref Server
 	procedure change(s isref Server) {
-		conditions {
-			s.running is yes
-		}
+		conditions { }
 		effects {
 			this.refer is s
 		}
