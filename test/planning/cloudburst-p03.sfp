@@ -80,26 +80,25 @@ initial state {
 		app_service = app2
 	}
 
-	pc1 isa Client {
+	pc1 isa WebClient {
 		refer = web1
 	}
-	pc2 isa Client {
+	pc2 isa WebClient {
 		refer = web1
 	}
 }
 goal constraint {
-	vm1.running = false
-	vm2.running = false
-	vm3.running = false
-	web2.running = true
-
-	/*vm1.on_cloud = public_cloud
-	vm2.running = false
+	vm1.on_cloud = public_cloud
+	vm2.on_cloud = public_cloud
+	vm3.on_cloud = public_cloud
+	vm4.running = false
+	vm5.running = false
+	vm6.running = false
 	pc1.refer = web1
 	pc2.refer = web1
-	web1.firewall_port.opened = true*/
+	web1.firewall_port.opened = true
 }
 global constraint {
-	/*pc1.refer.running = true
-	pc2.refer.running = true*/
+	pc1.refer.running = true
+	pc2.refer.running = true
 }

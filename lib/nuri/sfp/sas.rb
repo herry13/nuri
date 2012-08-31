@@ -47,7 +47,7 @@ module Nuri
 				self.collect_classes
 
 				# collect variables
-				@root['initial'].accept(VariableCollector.new(@root['initial'], @variables, @types))
+				@root['initial'].accept(VariableCollector.new(self)) #@root, @variables, @types))
 
 				# collect values from goal and global constraint
 				value_collector = Nuri::Sfp::ValueCollector.new(@types)
@@ -62,21 +62,11 @@ module Nuri
 				# process goal constraint
 				process_goal(@root['goal']) if @root.has_key?('goal') and @root['goal'].isconstraint
 
-				# process global constraint
-				#if @root.has_key?('global') and @root['global'].isconstraint
-				#	@root['global'].delete('_parent')
-					# TODO
-					# 1) - add the global constraint in goal constraint
-					#    - generate additional axioms/operator
-					# 2) compile using Patrik's approach ...DONE!
-				#end
-
 				# normalize global constraint formula
 				if @root.has_key?('global') and @root['global'].isconstraint
 					raise Exception, 'Invalid global constraint' if not normalize_formula(@root['global'])
 				end
 
-#self.dump
 				# process all procedures
 				@variables.each_value { |var|
 					if var.is_final
@@ -251,7 +241,6 @@ module Nuri
 				# return if given operator is not valid
 				return if not normalize_formula(op['_conditions'])
 				# at this step, the conditions formula has been normalized (AND/OR tree)
-
 				# AND conditions
 				if op['_conditions']['_type'] == 'and'
 					process_grounded_operator(op, op['_conditions'], op['_effects'])
@@ -550,8 +539,9 @@ module Nuri
 					return key1
 				end
 
-				def normalize_nested_right_statement(left, right, formula)
-puts 'nested right: ' + left + ' = ' + right['_value']
+				def normalize_nested_right_values(left, right, formula)
+					# TODO
+#puts 'nested right: ' + left + ' = ' + right['_value']
 				end
 
 				def normalize_nested_right_only(left, right, formula)
@@ -566,15 +556,17 @@ puts 'nested right: ' + left + ' = ' + right['_value']
 				end
 
 				def normalize_nested_left_right(left, right, formula)
-puts 'nested left-right'
-					names, rest = break_nested_reference(left)
-					bucket1 = Array.new
-					last_names1 = Array.new
-					ref_combinator(bucket1, rest, names, nil, last_names1)
+					# TODO
+#puts 'nested left-right'
+					#names, rest = break_nested_reference(left)
+					#bucket1 = Array.new
+					#last_names1 = Array.new
+					#ref_combinator(bucket1, rest, names, nil, last_names1)
 
 				end
 
 				def normalize_nested_left_only(left, right, formula)
+#puts 'nested-left-only: ' + left
 					names, rest = break_nested_reference(left)
 					bucket = Array.new
 					ref_combinator(bucket, rest, names, right)
@@ -583,39 +575,6 @@ puts 'nested left-right'
 					formula.delete(left)
 					to_and_or_graph(formula[key])
 					return key
-				end
-
-				def nested_right(left, right, obj)
-=begin
-						names, rest = break_nested_reference(left)
-						bucket = Array.new
-						last_names = Array.new
-						ref_combinator(bucket, rest, names, nil, last_names)
-						bucket.each_index { |i|
-							key1 = Nuri::Sfp::Sas.next_constraint_key
-							c_or = create_or_constraint(key1, bucket[i])
-							@variables[ last_names[i] ].each { |v|
-								key2 = Nuri::Sfp::Sas.next_constraint_key
-								c_and = create_and_constraint(key2, c_or)
-								value = (v.is_a?(Hash) and v.isobject ? v.ref : v)
-								c_and[ last_names[i] ] = create_equals_constraint(value)
-
-								key3 = Nuri::Sfp::Sas.next_constraint_key
-								c3 = create_and_constraint(key3, c_and)
-								c3[left] = create_equals_constraint(value)
-								c_and[key3] = c3
-
-								c_or[key2] = c_and
-								#to_and_or_graph(c_and)
-							}
-							bucket[i].delete( last_names[i] )
-							bucket[i][key1] = c_or
-						}
-						c_all = array_to_or_constraint(bucket)
-						key3 = Nuri::Sfp::Sas.next_constraint_key
-						obj.delete(left)
-						obj[key3] = c_all
-=end
 				end
 
 				# transform a first-order formula into AND/OR graph
@@ -647,18 +606,6 @@ puts 'nested left-right'
 							end
 						end
 					}
-
-=begin
-					formula.each { |k,v|
-						next if k[0,1] == '_'
-						if (v['_type'] == 'equals' or v['_type'] == 'not-equals') and
-								v['_value'].is_a?(String) and v['_value'].isref
-							nested_right(k, v['_value'], formula)
-						elsif v['_type'] == 'and' or v['_type'] == 'or'
-							to_and_or_graph(v)
-						end
-					}
-=end
 				end
 
 
@@ -824,8 +771,8 @@ puts 'nested left-right'
 					end
 				end
 
-				to_and_or_graph(formula)
 				remove_not_constraint(formula)
+				to_and_or_graph(formula)
 				not_equals_statement_to_or_constraint(formula)
 				return flatten_and_or_graph(formula)
 			end
@@ -840,7 +787,7 @@ puts 'nested left-right'
 		# - variables: Hash instance that holds all Variable instances
 		# - types: Hash instance that holds all types (primitive or non-primitive)
 		class Visitor
-			def initialize(main) #, root, variables=nil, types=nil)
+			def initialize(main)
 				@main = main
 				@root = main.root
 				@vars = main.variables
@@ -867,27 +814,36 @@ puts 'nested left-right'
 		end
 
 		# collecting all variables and put them into @bucket
-		class VariableCollector
-			def initialize(root, var_bucket, type_bucket)
-				@root = root
-				@bucket = var_bucket
-				@types = type_bucket
+		class VariableCollector < Visitor
+			def initialize(main)
+				super(main)
+				@init = main.root['initial']
 			end
 
 			def visit(name, value, obj)
 				return false if name[0,1] == '_' or (value.is_a?(Hash) and not (value.isobject or value.isnull))
+				var_name = obj.ref.push(name)
 				isfinal = self.is_final(value)
 				isref = (value.is_a?(String) and value.isref)
-				value = @root.at?(value) if value.is_a?(String) and value.isref
-				type = self.is_a(value)
-				var = Variable.new(obj.ref.push(name), type, -1, value, nil, isfinal)
-				@bucket[var.name] = var
+				value = @init.at?(value) if value.is_a?(String) and value.isref
+				type = (isfinal ? self.isa?(value) : self.get_type(name, value, obj))
+				var = Variable.new(var_name, type, -1, value, nil, isfinal)
+				@vars[var.name] = var
 				if isfinal and value.is_a?(Hash)
 					value['_classes'].each { |c| add_value(c, value) }
 				elsif not isref
 					add_value(type, value)
 				end
 				return true
+			end
+
+			def get_type(name, value, parent)
+				# TODO -- re-evaluate this method
+				type = self.isa?(value)
+				return type if type == 'Boolean' or type == 'Number' or type == 'String'
+
+				parent_class = @root.at?( @vars[parent.ref].type )
+				return parent_class[name]['_isa']
 			end
 
 			def add_value(type, value)
@@ -898,7 +854,7 @@ puts 'nested left-right'
 				@types[type] << value
 			end
 
-			def is_a(value)
+			def isa?(value)
 				return 'Boolean' if value.is_a?(TrueClass) or value.is_a?(FalseClass)
 				return 'Number' if value.is_a?(Numeric)
 				return 'String' if value.is_a?(String) and not value.isref
@@ -965,13 +921,6 @@ puts 'nested left-right'
 		# SAS Variable is a finite-domain variable
 		# It has a finite set of possible values
 		class Variable < Array
-			#@@id = 0
-
-			#def self.next_id
-			#	@@id += 1
-			#	return @@id
-			#end
-
 			# @name -- name of variable
 			# @type -- type of variable ('string','boolean','number', or fullpath of a class)
 			# @layer -- axiom layer ( '-1' if this is not axiom variable, otherwise >0)

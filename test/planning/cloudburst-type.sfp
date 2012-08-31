@@ -159,3 +159,17 @@ class Client {
 		}
 	}
 }
+
+class WebClient {
+	refer isref WebService
+
+	procedure change(s isref WebService) {
+		conditions {
+			s.running = yes
+			if s.vm.on_cloud.is_private = false then s.firewall_port.opened = true
+		}
+		effects {
+			this.refer = s
+		}
+	}
+}

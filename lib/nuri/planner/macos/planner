@@ -7,7 +7,9 @@ OUTPUT=$2  # .plan file
 
 PREPROCESS="$BASEDIR/preprocess"
 PLANNER="$BASEDIR/downward"
-ENGINE="lmcut"
+if [ "$ENGINE" == "" ]; then
+	ENGINE="blind"
+fi
 
 #REMOVED_OPERATOR="\(verifyGlobal\)"
 REMOVED_OPERATOR="-goal_"
@@ -24,7 +26,7 @@ mkdir $TEMP_DIR
 cd $TEMP_DIR
 
 # run preprocess
-$PREPROCESS < $INPUT #&> /dev/null
+$PREPROCESS < $INPUT &> /dev/null
 
 if [ -e $TEMP_DIR/output ]; then
 	# search the plan
