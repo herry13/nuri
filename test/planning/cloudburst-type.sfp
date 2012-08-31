@@ -74,6 +74,61 @@ class Service {
 	}
 }
 
+class WebService extends Service {
+	app_service isref ApplicationService
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.vm.running = true
+			this.app_service.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+}
+
+class ApplicationService extends Service {
+	db_service isref DatabaseService
+	web_service isref WebService
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.vm.running = true
+			this.db_service.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		cost = 10
+		conditions {
+			this.web_service.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}		
+}
+
+class DatabaseService extends Service {
+	app_service isref ApplicationService
+
+	procedure stop {
+		cost = 10
+		conditions {
+			this.app_service.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+}
+
 class Firewall extends Machine
 
 class Port {

@@ -1,11 +1,5 @@
 include "svcref-type.sfp"
 
-/**
- * This problem can only be solved using Partial-Order Planner.
- * It could be solved if actions that should occur in the same time are merged
- * into one action.
- * Actions can be merged iff their preconditions and effects are mutually exclusive.
- */
 initial state {
 	a isa Server {
 		name is "A"
@@ -22,9 +16,9 @@ initial state {
 	}
 }
 goal constraint {
-	pc1.refer = b
+	pc2.refer != pc1.refer
 }
 global constraint {
 	pc1.refer.running = true
-	pc2.refer = pc1.refer
+	pc2.refer.running = true
 }

@@ -1,0 +1,105 @@
+include "cloudburst-type.sfp"
+
+initial state {
+	private_cloud isa Cloud
+	public_cloud isa Cloud {
+		is_private = false
+	}
+	fw isa Firewall {
+		running = true
+		port8080 isa Port {
+			opened = false
+		}
+		port8081 isa Port {
+			opened = false
+		}
+	}
+	vm1 isa VM {
+		on_cloud = private_cloud
+		has_service = web1
+		running = true
+	}
+	vm2 isa VM {
+		on_cloud = private_cloud
+		has_service = app1
+		running = true
+	}
+	vm3 isa VM {
+		on_cloud = private_cloud
+		has_service = db1
+		running = true
+	}
+	web1 isa WebService {
+		vm = vm1
+		running = true
+		firewall_port = fw.port8080
+		app_service = app1
+	}
+	app1 isa ApplicationService {
+		vm = vm2
+		running = true
+		web_service = web1
+		db_service = db1
+	}
+	db1 isa DatabaseService {
+		vm = vm3
+		running = true
+		app_service = app1
+	}
+
+	vm4 isa VM {
+		on_cloud = private_cloud
+		has_service = web2
+		running = false
+	}
+	vm5 isa VM {
+		on_cloud = private_cloud
+		has_service = app2
+		running = false
+	}
+	vm6 isa VM {
+		on_cloud = private_cloud
+		has_service = db2
+		running = false
+	}
+	web2 isa WebService {
+		vm = vm4
+		running = false
+		firewall_port = fw.port8081
+		app_service = app2
+	}
+	app2 isa ApplicationService {
+		vm = vm5
+		running = false
+		web_service = web2
+		db_service = db2
+	}
+	db2 isa DatabaseService {
+		vm = vm6
+		running = false
+		app_service = app2
+	}
+
+	pc1 isa Client {
+		refer = web1
+	}
+	pc2 isa Client {
+		refer = web1
+	}
+}
+goal constraint {
+	vm1.running = false
+	vm2.running = false
+	vm3.running = false
+	web2.running = true
+
+	/*vm1.on_cloud = public_cloud
+	vm2.running = false
+	pc1.refer = web1
+	pc2.refer = web1
+	web1.firewall_port.opened = true*/
+}
+global constraint {
+	/*pc1.refer.running = true
+	pc2.refer.running = true*/
+}

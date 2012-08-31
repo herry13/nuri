@@ -1,0 +1,60 @@
+include "cloudburst-type.sfp"
+
+initial state {
+	private_cloud isa Cloud
+	public_cloud isa Cloud {
+		is_private = false
+	}
+	fw isa Firewall {
+		running = true
+		port8080 isa Port {
+			opened = false
+		}
+		port8081 isa Port {
+			opened = false
+		}
+	}
+	vm1 isa VM {
+		on_cloud = private_cloud
+		has_service = web1
+		running = true
+	}
+	vm2 isa VM {
+		on_cloud = private_cloud
+		has_service = web2
+		running = true
+	}
+	vm3 isa VM {
+		on_cloud = private_cloud
+		has_service = web3
+		running = true
+	}
+	web1 isa WebService {
+		vm = vm1
+		running = true
+		firewall_port = fw.port8080
+	}
+	web2 isa WebService {
+		vm = vm2
+		running = false
+		firewall_port = fw.port8081
+	}	
+
+	pc1 isa Client {
+		refer = web1
+	}
+	pc2 isa Client {
+		refer = web1
+	}
+}
+goal constraint {
+	vm1.on_cloud = public_cloud
+	vm2.running = false
+	pc1.refer = web1
+	pc2.refer = web1
+	web1.firewall_port.opened = true
+}
+global constraint {
+	pc1.refer.running = true
+	pc2.refer.running = true
+}

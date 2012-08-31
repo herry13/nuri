@@ -87,8 +87,6 @@ module Nuri
 				}
 				self.reset_operators_name
 
-
-
 				#self.dump_types
 				#self.dump_vars
 				#self.dump_operators
@@ -475,6 +473,10 @@ module Nuri
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
 				end
 
+				def create_not_equals_constraint(value)
+					return {'_context'=>'constraint', '_type'=>'not-equals', '_value'=>value}
+				end
+
 				def create_not_constraint(key, parent)
 					return {'_context'=>'constraint', '_type'=>'not', '_self'=>key, '_parent'=>parent}
 				end
@@ -498,18 +500,21 @@ module Nuri
 				def ref_combinator(bucket, parent, names, last_value, last_names=nil,
 						index=0, selected=Hash.new)
 					var_name = parent + '.' + names[index]
-					if index >= names.length-1
-						selected[var_name] = last_value
+					if index >= names.length or (index >= names.length-1 and last_value != nil)
+						selected[var_name] = last_value if last_value != nil
 						last_names << var_name if last_names != nil
 						result = selected.clone
 						result['_context'] = 'constraint'
 						result['_type'] = 'and'
 						bucket << result
+					elsif not @variables.has_key?(var_name)
+						raise VariableNotFoundException, var_name + ' is not exist!'
 					else
 						@variables[var_name].each { |v|
-							next if v.is_a?(Hash) and v.isnull
-							selected[var_name] = create_equals_constraint(v.ref)
-							ref_combinator(bucket, v.ref, names, last_value, last_names, index+1, selected)
+							next if v.is_a?(Hash) and v.isnull and index < (names.length-1)
+							v = v.ref if v.is_a?(Hash) and v.isobject
+							selected[var_name] = create_equals_constraint(v)
+							ref_combinator(bucket, v, names, last_value, last_names, index+1, selected)
 						}
 					end
 					selected.delete(var_name)
@@ -527,31 +532,60 @@ module Nuri
 					return [names, rest]
 				end
 
-				# break nested reference of left-part statement into a set of OR constraint
-				def nested_left(left, right, obj)
+				def normalize_multiple_right_values(left, right, formula)
+					ref = right['_value']
+					key1 = Nuri::Sfp::Sas.next_constraint_key
+					c_or = create_or_constraint(key1, formula)
+					@variables[ref].each do |v|
+						key2 = Nuri::Sfp::Sas.next_constraint_key
+						c_and = create_and_constraint(key2, c_or)
+						value = (v.is_a?(Hash) and v.isobject ? v.ref : v)
+						c_and[left] = create_equals_constraint(value)
+						c_and[ref] = create_equals_constraint(value) if right['_type'] == 'equals'
+						c_and[ref] = create_not_equals_constraint(value) if right['_type'] == 'not-equals'
+						c_or[key2] = c_and
+					end
+					formula.delete(left)
+					formula[key1] = c_or
+					return key1
+				end
+
+				def normalize_nested_right_statement(left, right, formula)
+puts 'nested right: ' + left + ' = ' + right['_value']
+				end
+
+				def normalize_nested_right_only(left, right, formula)
+					value = right['_value']
+					return if @variables.has_key?(value) and @variables[value].is_final
+
+					if @variables.has_key?(value)
+						normalize_multiple_right_values(left, right, formula)
+					else
+						normalize_nested_right_values(left, right, formula)
+					end
+				end
+
+				def normalize_nested_left_right(left, right, formula)
+puts 'nested left-right'
+					names, rest = break_nested_reference(left)
+					bucket1 = Array.new
+					last_names1 = Array.new
+					ref_combinator(bucket1, rest, names, nil, last_names1)
+
+				end
+
+				def normalize_nested_left_only(left, right, formula)
 					names, rest = break_nested_reference(left)
 					bucket = Array.new
 					ref_combinator(bucket, rest, names, right)
-					return array_to_or_constraint(bucket)
+					key = Nuri::Sfp::Sas.next_constraint_key
+					formula[key] = array_to_or_constraint(bucket)
+					formula.delete(left)
+					to_and_or_graph(formula[key])
+					return key
 				end
 
 				def nested_right(left, right, obj)
-					if @variables.has_key?(right)
-						return if @variables[right].is_final
-						# there are multiple possible values
-						key1 = Nuri::Sfp::Sas.next_constraint_key
-						c_or = create_or_constraint(key1, obj)
-						@variables[right].each { |v|
-							key2 = Nuri::Sfp::Sas.next_constraint_key
-							c_and = create_and_constraint(key2, c_or)
-							value = (v.is_a?(Hash) and v.isobject ? v.ref : v)
-							c_and[left] = create_equals_constraint(value)
-							c_and[right] = create_equals_constraint(value)
-							c_or[key2] = c_and
-						}
-						obj.delete(left)
-						obj[key1] = c_or
-					else
 =begin
 						names, rest = break_nested_reference(left)
 						bucket = Array.new
@@ -582,12 +616,39 @@ module Nuri
 						obj.delete(left)
 						obj[key3] = c_all
 =end
-					end
-#puts 'nested-right: ' + left + '=' + right #+ ' -- ' + @variables[right].is_final.to_s
 				end
 
 				# transform a first-order formula into AND/OR graph
 				def to_and_or_graph(formula)
+					formula.each { |k,v|
+						next if k[0,1] == '_'
+						if k.isref and not @variables.has_key?(k)
+							if v.is_a?(Hash) and v.isconstraint
+								if (v['_type'] == 'equals' or v['_type'] == 'not-equals') and
+										v['_value'].is_a?(String) and v['_value'].isref
+									# nested left & right
+									normalize_nested_left_right(k, v, formula)
+								elsif (v['_type'] == 'or' or v['_type'] == 'and')
+									to_and_or_graph(v)
+								else
+									# nested left only
+									normalize_nested_left_only(k, v, formula)
+								end
+							end
+						else
+							if v.is_a?(Hash) and v.isconstraint
+								if (v['_type'] == 'equals' or v['_type'] == 'not-equals') and
+										v['_value'].is_a?(String) and v['_value'].isref 
+									# nested right only
+									normalize_nested_right_only(k, v, formula)
+								elsif (v['_type'] == 'or' or v['_type'] == 'and')
+									to_and_or_graph(v)
+								end
+							end
+						end
+					}
+
+=begin
 					formula.each { |k,v|
 						next if k[0,1] == '_'
 						if (v['_type'] == 'equals' or v['_type'] == 'not-equals') and
@@ -597,17 +658,9 @@ module Nuri
 							to_and_or_graph(v)
 						end
 					}
-
-					formula.each { |k,v|
-						next if k[0,1] == '_'
-						if k.isref and not @variables.has_key?(k)
-							key = Nuri::Sfp::Sas.next_constraint_key
-							formula[key] = nested_left(k, v, formula)
-							formula.delete(k)
-							to_and_or_graph(formula[key])
-						end
-					}
+=end
 				end
+
 
 				# Recursively pull statements that has the same AND/OR operator.
 				# Only receive a formula with AND, OR, EQUALS constraints.
@@ -775,7 +828,6 @@ module Nuri
 				remove_not_constraint(formula)
 				not_equals_statement_to_or_constraint(formula)
 				return flatten_and_or_graph(formula)
-#puts self.dump if formula['_self'] == 'global'
 			end
 
 		end

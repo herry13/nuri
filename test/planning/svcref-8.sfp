@@ -23,8 +23,9 @@ initial state {
 }
 goal constraint {
 	pc1.refer = b
+	pc2.refer = b //pc1.refer
 }
 global constraint {
 	pc1.refer.running = true
-	pc2.refer = pc1.refer
+	pc2.refer.running = pc1.refer.running
 }
