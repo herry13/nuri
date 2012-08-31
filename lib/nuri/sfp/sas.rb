@@ -23,6 +23,7 @@ module Nuri
 		#
 		# TODO:
 		# - nested reference on right-side statement (value of EQUALS/NOT-EQUALS)
+		# - a first-order logic formula
 		# - enumeration of values of particular type
 		# - SET abstract data-type, membership operators
 		module Sas

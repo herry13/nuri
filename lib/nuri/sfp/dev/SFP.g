@@ -27,6 +27,7 @@ TODO:
 - ARRAY abstract data-type, enumerator operator, index operator
 - provenance
 - state-dependency (supports multiple conditions using 'or' keyword)
+- total-constraint
 =end
 
 }
@@ -375,6 +376,15 @@ constraint_statement returns [key, val]
 			$key = $reference.val
 			$val = { '_context' => 'constraint', '_type' => $binary_comp.text, '_value' => $comp_value.val }
 		}
+	|	total_constraint
+	;
+
+total_constraint
+	:	'total(' total_statement ')' binary_comp NUMBER
+	;
+
+total_statement
+	:	reference equals_op value
 	;
 
 comp_value returns [val]
@@ -598,6 +608,7 @@ binary_comp
 
 NULL 
 	:	'null'
+	|	'nil'
 	;
 
 BOOLEAN
@@ -620,8 +631,9 @@ NUMBER
 	;
 
 COMMENT
-	:   '//' ~('\n'|'\r')* {$channel=HIDDEN;}
-	|   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
+	:	'//' ~('\n'|'\r')* {$channel=HIDDEN;}
+	|	'#' ~('\n'|'\r')* {$channel=HIDDEN;}
+	|	'/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
 	;
 
 MULTILINE_STRING
