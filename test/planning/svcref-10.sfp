@@ -1,0 +1,15 @@
+include "svcref-type.sfp"
+
+initial state {
+	servers isa Server[2] {
+		running is false
+	}
+	pc2 isa Client {
+		refer = null
+	}
+}
+goal constraint {
+	pc2.refer = servers[0]
+}
+global constraint {
+}

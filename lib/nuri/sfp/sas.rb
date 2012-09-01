@@ -81,9 +81,9 @@ module Nuri
 				}
 				self.reset_operators_name
 
-				#self.dump_types
-				#self.dump_vars
-				#self.dump_operators
+				self.dump_types
+				self.dump_vars
+				self.dump_operators
 
 				return create_output
 			end
@@ -135,7 +135,14 @@ module Nuri
 				out += "0\n"
 				# initial state
 				out += "begin_state\n"
-				variable_index.each { |i| out += @variables[i].index(@variables[i].init).to_s + "\n" }
+				#pre = ( (pre.is_a?(Hash) and pre.isnull) ? 0 : (pre == nil ? -1 : @var.index(pre)) )
+				variable_index.each { |i|
+					if @variables[i].init.is_a?(Hash) and @variables[i].init.isnull
+						out += "0\n"
+					else
+						out += @variables[i].index(@variables[i].init).to_s + "\n"
+					end
+				}
 				out += "end_state\n"
 				# goal
 				out += "begin_goal\n"
@@ -313,6 +320,7 @@ module Nuri
 						# grounding all references
 						selected['$.this'] = procedure['_parent'].ref
 						selected.each { |k,v| selected[k] = (v.is_a?(Hash) ? v.ref : v) }
+puts selected.inspect
 						grounder.map = selected
 						p['_conditions'].accept(grounder)
 						p['_effects'].accept(grounder)
@@ -338,7 +346,7 @@ module Nuri
 			def collect_classes
 				@parser.used_classes.each { |c|
 					@types[c] = Array.new
-					@types[c] << Nuri::Sfp.null_of(c)
+					@types[c] << Nuri::Sfp.null_of(c) if @types[c].length <= 0
 				}
 			end
 
@@ -378,7 +386,13 @@ module Nuri
 			def deep_clone(value)
 				if value.is_a?(Hash)
 					result = value.clone
-					value.each { |k,v| result[k] = deep_clone(v) if k != '_parent' }
+					value.each { |k,v|
+						if k != '_parent'
+							result[k] = deep_clone(v)
+							result[k]['_parent'] = result if result[k].is_a?(Hash) and
+								result[k].has_key?('_parent')
+						end
+					}
 					result
 				elsif value.is_a?(Array)
 					result = value.clone
@@ -853,9 +867,9 @@ module Nuri
 			def add_value(type, value)
 				if not @types.has_key?(type)
 					@types[type] = Array.new
-					@types[type] << Nuri::Sfp.null_of(type)
+					@types[type] << Nuri::Sfp.null_of(type) if @types[type].length <= 0
 				end
-				@types[type] << value
+				@types[type] << value if not (value.is_a?(Hash) and value.isnull)
 			end
 
 			def isa?(value)
@@ -1052,11 +1066,14 @@ module Nuri
 
 			def to_sas(root)
 				# resolve the reference
+puts @pre.to_s + ' => ' + @post.to_s
 				pre = ( (@pre.is_a?(String) and @pre.isref) ? root.at?(@pre) : @pre )
 				post = ( (@post.is_a?(String) and @post.isref) ? root.at?(@post) : @post )
 				# calculate the index
+puts "\t" + pre.class.to_s + ' => ' + post.class.to_s + (post.is_a?(Hash) ? post.ref : '')
 				pre = ( (pre.is_a?(Hash) and pre.isnull) ? 0 : (pre == nil ? -1 : @var.index(pre)) )
 				post = ( (post.is_a?(Hash) and post.isnull) ? 0 : @var.index(post) )
+puts "\t" + pre.to_s + ' => ' + post.to_s
 
 				return "#{@var.id} #{pre}" if post == nil
 				return "0 #{@var.id} #{pre} #{post}"

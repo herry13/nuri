@@ -128,15 +128,29 @@ object_def
 				'_isa' => '$.Object'
 			}
 			@now = @now[$ID.text]
+			@is_array = false
 		}
-		('isa' path
+		('isa' path('[' NUMBER { @is_array = true } ']')?
 		{
 			@now['_isa'] = self.to_ref($path.text)
 			self.expand_object(@now)
 		}
 		)?
 		object_body?
-		{	self.goto_parent();	}
+		{
+			obj = self.goto_parent()
+			if @is_array
+				total = $NUMBER.to_s.to_i
+				for i in 0..(total-1)
+					id = obj['_self'] + "[#{i}]"
+					@now[id] = deep_clone(obj)
+					@now[id]['_self'] = id
+					@now[id]['_classes'] = obj['_classes']
+					#puts 'is_array: ' + $ID.text + '[' + i.to_s + ']'
+				end
+				@now.delete(obj['_self'])
+			end
+		}
 	;
 
 object_body
@@ -585,9 +599,17 @@ path
 	:	ID('.'ID)*
 	;
 
+path_with_index
+	:	id_ref('.'id_ref)*
+	;
+
+id_ref
+	:	ID('[' NUMBER ']')?
+	;
+
 reference returns [val]
-	:	path
-		{	$val = self.to_ref($path.text)	}
+	:	path_with_index
+		{	$val = self.to_ref($path_with_index.text)	}
 	;
 
 reference_type returns [val]

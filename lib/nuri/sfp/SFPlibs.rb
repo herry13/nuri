@@ -78,6 +78,26 @@ module Nuri
 				@used_classes = @used_classes.concat(obj['_classes']).uniq
 			end
 
+			def deep_clone(value)
+				if value.is_a?(Hash)
+					result = value.clone
+					value.each { |k,v|
+						if k != '_parent'
+							result[k] = deep_clone(v)
+							result[k]['_parent'] = result if result[k].is_a?(Hash) and result[k].has_key?('_parent')
+						end
+					}
+					result
+				elsif value.is_a?(Array)
+					result = value.clone
+					result.clear
+					result.each { |v| result << deep_clone(v) }
+					result
+				else
+					value
+				end
+			end
+
 		end
 	end
 end
