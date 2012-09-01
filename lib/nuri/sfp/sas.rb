@@ -54,6 +54,14 @@ module Nuri
 				# collect variables
 				@root['initial'].accept(VariableCollector.new(self)) #@root, @variables, @types))
 
+				# remove "$.initial" for arrays map
+				@parser.arrays.each { |k,v|
+					first, rest = k.explode[1].explode
+					next if rest == nil
+					@parser.arrays['$.'+rest.to_s] = v
+					@parser.arrays.delete(k)
+				}
+
 				# collect values from goal and global constraint
 				value_collector = Nuri::Sfp::ValueCollector.new(@types)
 				@root['goal'].accept(value_collector) if @root.has_key?('goal') and @root['goal'].isconstraint
@@ -781,6 +789,17 @@ module Nuri
 								end
 							end
 						}
+					elsif formula.isconstraint and formula['_type'] == 'iterator'
+						puts @parser.arrays.inspect
+						ref = '$.' + formula['_value']
+						var = '$.' + formula['_variable']
+						total = @parser.arrays[ref]
+						names = formula.keys.select { |k| k[0,1] != '_' }
+						for i in 0..(total-1)
+							puts ref + "[#{i}]"
+							names.each { |n|
+							}
+						end
 					else
 						formula.each { |k,v|
 							next if k[0,1] == '_'

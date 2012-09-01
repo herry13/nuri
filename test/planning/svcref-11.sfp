@@ -1,0 +1,24 @@
+include "svcref-type.sfp"
+
+initial state {
+	servers isa Server[2] {
+		running is true
+	}
+	a isa Server
+	pc1 isa Client {
+		refer = servers[0]
+	}
+	pc2 isa Client {
+		refer = servers[0]
+	}
+}
+goal constraint {
+	servers[0].running = false
+	foreach (servers as s) {
+		s.running = false
+	}
+}
+global constraint {
+	pc1.refer.running = true
+	pc2.refer.running = true
+}

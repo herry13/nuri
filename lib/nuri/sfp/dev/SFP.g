@@ -142,6 +142,7 @@ object_def
 			obj = self.goto_parent()
 			if @is_array
 				total = $NUMBER.to_s.to_i
+				@arrays[obj.ref] = total
 				for i in 0..(total-1)
 					id = obj['_self'] + "[#{i}]"
 					@now[id] = deep_clone(obj)
@@ -331,12 +332,14 @@ constraint_namespace
 	;
 
 constraint_iterator
-	:	'foreach' path 'as' ID NL* '{' NL+
+	:	'foreach' '(' path 'as' ID ')' NL* '{' NL+
 		{
-			id = self.to_ref($path.text)
+			id = self.next_id.to_s # to_ref($path.text)
 			@now[id] = { '_parent' => @now,
-				'_context' => 'iterator',
+				'_context' => 'constraint', #'iterator',
+				'_type' => 'iterator',
 				'_self' => id,
+				'_value' => $path.text,
 				'_variable' => $ID.text
 			}
 			@now = @now[id]
