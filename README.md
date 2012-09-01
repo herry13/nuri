@@ -55,7 +55,7 @@ SFp Language
 ------------
 Procedure:
 - support cost-value
-- support the following mutation statements
+- support the following mutation statements:
 
 	x = y
 	x = null
