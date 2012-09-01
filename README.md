@@ -53,6 +53,10 @@ Issues
 
 SFp Language
 ------------
+- primitive types: Boolean, String, Number
+- non-primitive type (user-defined Class)
+- abstract data-structure: Array (1-dimension)
+
 **Procedure**
 - support cost-value
 - support the following *effects* statements:
