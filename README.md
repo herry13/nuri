@@ -57,10 +57,11 @@ Procedure:
 - support cost-value
 - support the following mutation statements
 
-		x = y
-		x = null
+	x = y
+	x = null
 
 Support the following constraint statements (either in procedure's conditions, goal, or global constraint):
+
 	x = y
 	x = null
 	x != y
