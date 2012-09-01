@@ -8,7 +8,7 @@ OUTPUT=$2  # .plan file
 PREPROCESS="$BASEDIR/preprocess"
 PLANNER="$BASEDIR/downward"
 if [ "$ENGINE" == "" ]; then
-	ENGINE="blind"
+	ENGINE="lmcut"
 fi
 
 #REMOVED_OPERATOR="\(verifyGlobal\)"

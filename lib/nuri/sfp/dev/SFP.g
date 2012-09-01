@@ -23,9 +23,10 @@ Features:
 - include file
 - constraint namespace
 - total-constraint
+- ARRAY abstract data-type, index operator
 
 TODO:
-- ARRAY abstract data-type, enumerator operator, index operator
+- ARRAY enumerator operator
 - provenance
 - state-dependency (supports multiple conditions using 'or' keyword)
 =end

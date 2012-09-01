@@ -2,14 +2,19 @@ include "svcref-type.sfp"
 
 initial state {
 	servers isa Server[2] {
-		running is false
+		running is true
+	}
+	pc1 isa Client {
+		refer = servers[0]
 	}
 	pc2 isa Client {
-		refer = null
+		refer = servers[0]
 	}
 }
 goal constraint {
-	pc2.refer = servers[0]
+	servers[0].running = false
 }
 global constraint {
+	pc1.refer.running = true
+	pc2.refer.running = true
 }

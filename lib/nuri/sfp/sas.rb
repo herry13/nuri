@@ -1,5 +1,6 @@
 # 01-09-2012
 # - support IN/NOT-IN SET constraint
+# - support ARRAY data-structure, index operator
 #
 # 29-08-2012
 # - support EQUALS, NOT-EQUALS, AND, OR, IF-THEN constraints
@@ -81,9 +82,9 @@ module Nuri
 				}
 				self.reset_operators_name
 
-				self.dump_types
-				self.dump_vars
-				self.dump_operators
+				#self.dump_types
+				#self.dump_vars
+				#self.dump_operators
 
 				return create_output
 			end
@@ -320,7 +321,6 @@ module Nuri
 						# grounding all references
 						selected['$.this'] = procedure['_parent'].ref
 						selected.each { |k,v| selected[k] = (v.is_a?(Hash) ? v.ref : v) }
-puts selected.inspect
 						grounder.map = selected
 						p['_conditions'].accept(grounder)
 						p['_effects'].accept(grounder)
@@ -914,8 +914,10 @@ puts selected.inspect
 				return if name[0,1] == '_' and name != '_value'
 				if name[0,1] != '_'
 					map.each { |k,v|
+						next if k.length > name.length
 						if name[0,k.length] == k
-							grounded = v + name[k.length, (name.length-k.length)]
+							grounded = v
+							grounded += name[k.length, (name.length-k.length)] if name.length > k.length
 							obj[grounded] = value
 							obj.delete(name)
 							name = grounded
@@ -925,9 +927,11 @@ puts selected.inspect
 				end
 				if value.is_a?(String) and value.isref
 					map.each { |k,v|
-						if value[0, k.length] == k
-							grounded = v + value[k.length, (value.length-k.length)]
-							obj[name] = grounded
+						if value == k
+							obj[name] = v
+							break
+						elsif value.length > k.length and value[0, k.length] == k and value[k.length] == '.'
+							obj[name] = v + value[k.length, (value.length-k.length)]
 							break
 						end
 					}
@@ -973,6 +977,7 @@ puts selected.inspect
 				sas = "begin_variable\nvar_#{@id}#{@name}\n#{@layer}\n#{self.length}\n"
 				self.each { |v|
 					v = root.at?(v) if v.is_a?(String) and v.isref
+					v = '"' + v + '"' if v.is_a?(String)
 					sas += (v.is_a?(Hash) ? (v.isnull ? "null\n" : "#{v.ref}\n") : "#{v}\n")
 				}
 				return sas += "end_variable"
@@ -1066,14 +1071,11 @@ puts selected.inspect
 
 			def to_sas(root)
 				# resolve the reference
-puts @pre.to_s + ' => ' + @post.to_s
 				pre = ( (@pre.is_a?(String) and @pre.isref) ? root.at?(@pre) : @pre )
 				post = ( (@post.is_a?(String) and @post.isref) ? root.at?(@post) : @post )
 				# calculate the index
-puts "\t" + pre.class.to_s + ' => ' + post.class.to_s + (post.is_a?(Hash) ? post.ref : '')
 				pre = ( (pre.is_a?(Hash) and pre.isnull) ? 0 : (pre == nil ? -1 : @var.index(pre)) )
 				post = ( (post.is_a?(Hash) and post.isnull) ? 0 : @var.index(post) )
-puts "\t" + pre.to_s + ' => ' + post.to_s
 
 				return "#{@var.id} #{pre}" if post == nil
 				return "0 #{@var.id} #{pre} #{post}"
