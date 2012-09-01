@@ -53,20 +53,32 @@ Issues
 
 SFp Language
 ------------
-Procedure:
+**Procedure**
 - support cost-value
-- support the following mutation statements:
+- support the following *effects* statements:
 
 		x = y
 		x = null
 
-Support the following constraint statements (either in procedure's conditions, goal, or global constraint):
+- support the following *conditions* statements:
 
-	x = y
-	x = null
-	x != y
-	x != null
-	if x1 = y1 then x2 = y2
-	if x1 != y2 then x2 != y2
-	x is in (y1, y2, y3)
-	x isnt in (y1, y2, y3)
+		x = y
+		x = null
+		x != y
+		x != null
+		if x1 = y1 then x2 = y2
+		if x1 != y2 then x2 != y2
+		x is in (y1, y2, y3)
+		x isnt in (y1, y2, y3)
+
+**Goal & Global Constraints**
+- support the following the following constraint statements:
+
+		x = y
+		x = null
+		x != y
+		x != null
+		if x1 = y1 then x2 = y2
+		if x1 != y2 then x2 != y2
+		x is in (y1, y2, y3)
+		x isnt in (y1, y2, y3)
