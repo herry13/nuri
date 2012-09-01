@@ -1,3 +1,6 @@
+# 01-09-2012
+# - support IN/NOT-IN SET constraint
+#
 # 29-08-2012
 # - support EQUALS, NOT-EQUALS, AND, OR, IF-THEN constraints
 #
@@ -998,7 +1001,7 @@ module Nuri
 					end
 				}
 				sas = "begin_operator\n#{@name}"
-				@params.each { |k,v| sas += " #{k}=#{v}" if k != '$.this' } if @param != nil
+				@params.each { |k,v| sas += " #{k}=#{v}" if k != '$.this' } if @params != nil
 				sas += "\n#{prevail.length}\n"
 				prevail.each { |p| sas += p.to_sas(root) + "\n" }
 				sas += "#{prepost.length}\n"

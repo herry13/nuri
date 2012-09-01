@@ -22,12 +22,12 @@ Features:
 - Set of all-objects of particular class as procedure's parameter
 - include file
 - constraint namespace
+- total-constraint
 
 TODO:
 - ARRAY abstract data-type, enumerator operator, index operator
 - provenance
 - state-dependency (supports multiple conditions using 'or' keyword)
-- total-constraint
 =end
 
 }
@@ -363,13 +363,30 @@ constraint_statement returns [key, val]
 		}
 	|	reference 'is'? 'in' set_value
 		{
-			$key = $reference.val
-			$val = { '_context' => 'constraint', '_type' => 'in', '_value' => $set_value.val }
+			c_or = { '_context' => 'constraint', '_type' => 'or', '_parent' => @now }
+			$set_value.val.each { |v|
+				id = self.next_id.to_s
+				item = { '_context' => 'constraint', '_type' => 'and', '_parent' => c_or }
+				item[$reference.val] = { '_context' => 'constraint', '_type' => 'equals', '_value' => v }
+				c_or[id] = item
+			}
+			$key = self.next_id.to_s
+			$val = c_or
 		}
 	|	reference ('isnt'|'not') 'in' set_value
 		{
-			$key = $reference.val
-			$val = { '_context' => 'constraint', '_type' => 'not-in', '_value' => $set_value.val }
+			c_and = { '_context'=>'constraint', '_type'=>'and', '_parent'=>@now }
+			$set_value.val.each { |v|
+				id = self.next_id.to_s
+				item = { '_context'=>'constraint', '_type'=>'and'}
+				item[$reference.val] = { '_context'=>'constraint', '_type'=>'not-equals', '_value'=>v }
+				c_and[id] = item
+			}
+			$key = self.next_id.to_s
+			$val = c_and
+
+			#$key = $reference.val
+			#$val = { '_context' => 'constraint', '_type' => 'not-in', '_value' => $set_value.val }
 		}
 	|	reference binary_comp comp_value
 		{

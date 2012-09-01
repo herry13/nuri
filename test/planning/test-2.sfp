@@ -1,0 +1,30 @@
+class Service
+
+class Client {
+	refer isref Service
+	procedure change(s isref Service) {
+		conditions { }
+		effects {
+			this.refer = s
+		}
+	}
+}
+
+initial state {
+	a isa Service
+	b isa Service
+	c isa Service
+	d isa Service
+
+	pc1 isa Client {
+		refer = a
+	}
+}
+
+goal constraint {
+	pc1.refer = b
+}
+
+global constraint {
+	pc1.refer in (a, b)
+}
