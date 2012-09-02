@@ -1,0 +1,27 @@
+class Service {
+	running is no
+	procedure start {
+		cost is 5
+		conditions { }
+		effects {
+			this.running is yes
+		}
+	}
+	procedure stop {
+		cost is 10
+		conditions { }
+		effects {
+			this.running is no
+		}
+	}
+}
+
+class Client {
+	refer isref Service
+	procedure change(s isref Service) {
+		conditions { }
+		effects {
+			this.refer is s
+		}
+	}
+}

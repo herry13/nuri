@@ -36,9 +36,9 @@ module Nuri
 
 		def self.hostname
 			ip = self.local_ip
-			return `uname -n` if ip == nil or ip == ''
+			return `uname -n`.split('.')[0] if ip == nil or ip == ''
 			return Socket.getaddrinfo(ip, 0, Socket::AF_UNSPEC, Socket::SOCK_STREAM,
-				nil, Socket::AI_CANONNAME)[0][2]
+				nil, Socket::AI_CANONNAME)[0][2].split('.')[0]
 		end
 
 		def self.temp_dir
