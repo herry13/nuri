@@ -1,29 +1,41 @@
-class Apache
+include "lib/nuri/resource.sfp"
+
+class Apache extends WebService {
 	version is ""
 	installed is no
 	running is no
 	port is 80
-	document_root is "/var/www/html"
+	docroot is "/var/www/html"
+	refer isref DBService
 
-	procedure install
+	procedure refer_to (s isref DBService) {
+		conditions {
+			s.running is yes
+		}
+		effects {
+			this.refer = s
+		}
+	}
+
+	procedure install {
 		conditions {
 			this.installed is no
 		}
 		effects {
 			this.installed is yes
 		}
-	end
+	}
 
-	procedure uninstall
+	procedure uninstall {
 		conditions {
 			this.running is no
 		}
 		effects {
 			this.installed is no
 		}
-	end
+	}
 
-	procedure start
+	procedure start {
 		conditions {
 			this.installed is yes
 			this.running is no
@@ -31,9 +43,9 @@ class Apache
 		effects {
 			this.running is yes
 		}
-	end
+	}
 
-	procedure stop
+	procedure stop {
 		conditions {
 			this.installed is yes
 			this.running is yes
@@ -41,9 +53,9 @@ class Apache
 		effects {
 			this.running is no
 		}
-	end
+	}
 
-	procedure setPort(p isa integer)
+	procedure set_port(p isref integer) {
 		conditions {
 			this.installed is yes
 			this.running is no
@@ -51,15 +63,15 @@ class Apache
 		effects {
 			this.port is p
 		}
-	end
+	}
 
-	procedure setDocumentRoot(dir isa string)
+	procedure set_docroot(dir isref string) {
 		conditions {
 			this.installed is yes
 			this.running is no
 		}
 		effects {
-			this.document_root is dir
+			this.docroot is dir
 		}
-	end
-end
+	}
+}

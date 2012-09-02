@@ -1,0 +1,25 @@
+include "svcref-type.sfp"
+
+initial state {
+	a isa Server {
+		name is "A"
+		running is true
+	}
+	b isa Server {
+		name is "B"
+	}
+	pc1 isa Client {
+		refer is a
+	}
+	pc2 isa Client {
+		refer is a
+	}
+}
+goal constraint {
+	pc1.refer = b
+	pc2.refer = pc1.refer
+}
+global constraint {
+	pc1.refer.running = true
+	pc2.refer.running != false
+}

@@ -1,0 +1,175 @@
+class Machine {
+	running = no
+	procedure start {
+		cost = 5
+		conditions { }
+		effects {
+			this.running = yes
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions { }
+		effects {
+			this.running = no
+		}
+	}
+}
+
+class Cloud {
+	is_private = true
+}
+
+class VM extends Machine {
+	on_cloud isref Cloud
+	has_service isref Service
+
+	procedure start {
+		cost = 5
+		conditions { }
+		effects {
+			this.running = true
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions {
+			this.has_service.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+	procedure migrate(c isref Cloud) {
+		cost = 100
+		conditions {
+			this.running = false
+		}
+		effects {
+			this.on_cloud = c
+		}
+	}
+}
+
+class Service {
+	vm isref VM
+	running = false
+	firewall_port isref Port
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.vm.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+	procedure stop {
+		cost = 10
+		conditions { }
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class WebService extends Service {
+	app_service isref ApplicationService
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.vm.running = true
+			this.app_service.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+}
+
+class ApplicationService extends Service {
+	db_service isref DatabaseService
+	web_service isref WebService
+
+	procedure start {
+		cost = 5
+		conditions {
+			this.vm.running = true
+			this.db_service.running = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		cost = 10
+		conditions {
+			this.web_service.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}		
+}
+
+class DatabaseService extends Service {
+	app_service isref ApplicationService
+
+	procedure stop {
+		cost = 10
+		conditions {
+			this.app_service.running = false
+		}
+		effects {
+			this.running = false
+		}
+	}
+}
+
+class Firewall extends Machine
+
+class Port {
+	opened = false
+
+	procedure open {
+		conditions { }
+		effects {
+			this.opened = true
+		}
+	}
+	procedure close {
+		conditions { }
+		effects {
+			this.opened = false
+		}
+	}
+}
+
+class Client {
+	refer isref Service
+	procedure change(s isref Service) {
+		conditions {
+			s.running = yes
+		}
+		effects {
+			this.refer = s
+		}
+	}
+}
+
+class WebClient {
+	refer isref WebService
+
+	procedure change(s isref WebService) {
+		conditions {
+			s.running = yes
+			if s.vm.on_cloud.is_private = false then s.firewall_port.opened = true
+		}
+		effects {
+			this.refer = s
+		}
+	}
+}

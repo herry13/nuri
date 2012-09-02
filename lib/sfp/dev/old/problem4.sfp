@@ -1,8 +1,0 @@
-class X {
-	action a {
-		precondition { }
-		postcondition { }
-	}
-}
-
-class Y extends X

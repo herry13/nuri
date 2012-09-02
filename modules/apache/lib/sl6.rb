@@ -11,7 +11,7 @@ module Nuri
 			end
 	
 			# get state of this component in JSON
-			def getState
+			def get_state
 				# installed & running
 				data = `/bin/rpm -qa httpd`
 				@state["installed"] = ( (data =~ /httpd/) != nil )
@@ -61,7 +61,7 @@ module Nuri
 				return (system('/sbin/service httpd stop') == true)
 			end
 		
-			def setPort(p)
+			def set_port(p)
 				Augeas::open do |aug|
 					aug.set("/files/etc/httpd/conf/httpd.conf/*[self::directive='Listen']/arg", p.to_s)
 					return true if aug.save
@@ -69,7 +69,7 @@ module Nuri
 				return false
 			end
 		
-			def setDocumentRoot(dir)
+			def set_docroot(dir)
 				Augeas::open do |aug|
 					aug.set("/files/etc/httpd/conf/httpd.conf/*[self::directive='DocumentRoot']/arg",
 						"\"" + dir + "\"")

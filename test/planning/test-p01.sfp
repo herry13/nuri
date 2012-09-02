@@ -1,0 +1,28 @@
+class Service
+
+class WebService extends Service
+
+class Client {
+	refer isref Service
+	procedure change(s isref Service) {
+		conditions { }
+		effects {
+			this.refer = s
+		}
+	}
+}
+
+initial state {
+	a isa Service
+	b isa Service
+	web1 isa WebService
+	web2 isa WebService
+
+	pc1 isa Client {
+		refer = web1
+	}
+}
+
+goal constraint {
+	pc1.refer = a
+}
