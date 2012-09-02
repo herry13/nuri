@@ -1,4 +1,9 @@
 TODO
+- create methods to generate "BSig-Grounded Operators"
+- distribute the "BSig-Grounded Operators" to all affected nodes
+- send the "goal-state" to each nodes
+- send "deploy" command to all nodes to achieve the "goal-state"
+
 - update module tomcat6
 - implement module VM
 - implement module PM
