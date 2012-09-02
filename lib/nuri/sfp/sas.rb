@@ -89,7 +89,7 @@ module Nuri
 					end
 				}
 				self.reset_operators_name
-
+self.dump
 				#self.dump_types
 				#self.dump_vars
 				#self.dump_operators
@@ -795,11 +795,21 @@ module Nuri
 						var = '$.' + formula['_variable']
 						total = @parser.arrays[ref]
 						names = formula.keys.select { |k| k[0,1] != '_' }
+						grounder = ParameterGrounder.new(Hash.new)
 						for i in 0..(total-1)
-							puts ref + "[#{i}]"
-							names.each { |n|
-							}
+							grounder.map.clear
+							grounder.map[var] = ref + "[#{i}]"
+							puts grounder.map.inspect # ref + "[#{i}]"
+							id = Nuri::Sfp::Sas.next_constraint_key
+							c_and = deep_clone(formula['_template'])
+							c_and['_self'] = id
+							c_and.accept(grounder)
+							formula[id] = c_and
 						end
+						formula['_type'] = 'and'
+						formula.delete('_value')
+						formula.delete('_variable')
+						formula.delete('_template')
 					else
 						formula.each { |k,v|
 							next if k[0,1] == '_'
@@ -929,14 +939,21 @@ module Nuri
 		class ParameterGrounder
 			attr_accessor :map
 
+			def initialize(map=nil)
+				@map = map
+			end
+
 			def visit(name, value, obj)
 				return if name[0,1] == '_' and name != '_value'
 				if name[0,1] != '_'
 					map.each { |k,v|
-						next if k.length > name.length
-						if name[0,k.length] == k
-							grounded = v
-							grounded += name[k.length, (name.length-k.length)] if name.length > k.length
+						if name == k
+							obj[v] = value
+							obj.delete(name)
+							name = v
+							break
+						elsif name.length > k.length and name[k.length,1] == '.' and name[0, k.length] == k
+							grounded = v + name[k.length, (name.length-k.length)]
 							obj[grounded] = value
 							obj.delete(name)
 							name = grounded
@@ -949,7 +966,7 @@ module Nuri
 						if value == k
 							obj[name] = v
 							break
-						elsif value.length > k.length and value[0, k.length] == k and value[k.length] == '.'
+						elsif value.length > k.length and value[k.length,1] == '.' and value[0,k.length] == k
 							obj[name] = v + value[k.length, (value.length-k.length)]
 							break
 						end

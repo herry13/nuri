@@ -5,20 +5,17 @@ initial state {
 		running is true
 	}
 	a isa Server
-	pc1 isa Client {
-		refer = servers[0]
-	}
-	pc2 isa Client {
+	clients isa Client[2] {
 		refer = servers[0]
 	}
 }
 goal constraint {
-	servers[0].running = false
-	foreach (servers as s) {
-		s.running = false
+	foreach (servers as x) {
+		x.running = false
 	}
 }
 global constraint {
-	pc1.refer.running = true
-	pc2.refer.running = true
+	foreach (clients as c) {
+		c.refer.running = true
+	}
 }

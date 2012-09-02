@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-09-01 14:27:57
+# Generated at: 2012-09-02 01:05:41
 # 
 
 # ~~~> start load path setup
@@ -1242,7 +1242,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 653:2: ( 'null' | 'nil' )
+      # at line 664:2: ( 'null' | 'nil' )
       alt_1 = 2
       look_1_0 = @input.peek( 1 )
 
@@ -1261,11 +1261,11 @@ module SFP
       end
       case alt_1
       when 1
-        # at line 653:4: 'null'
+        # at line 664:4: 'null'
         match( "null" )
 
       when 2
-        # at line 654:4: 'nil'
+        # at line 665:4: 'nil'
         match( "nil" )
 
       end
@@ -1290,7 +1290,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 658:2: ( 'true' | 'false' | 'off' | 'on' | 'yes' | 'no' )
+      # at line 669:2: ( 'true' | 'false' | 'off' | 'on' | 'yes' | 'no' )
       alt_2 = 6
       case look_2 = @input.peek( 1 )
       when 0x74 then alt_2 = 1
@@ -1311,27 +1311,27 @@ module SFP
       end
       case alt_2
       when 1
-        # at line 658:4: 'true'
+        # at line 669:4: 'true'
         match( "true" )
 
       when 2
-        # at line 659:4: 'false'
+        # at line 670:4: 'false'
         match( "false" )
 
       when 3
-        # at line 660:4: 'off'
+        # at line 671:4: 'off'
         match( "off" )
 
       when 4
-        # at line 661:4: 'on'
+        # at line 672:4: 'on'
         match( "on" )
 
       when 5
-        # at line 662:4: 'yes'
+        # at line 673:4: 'yes'
         match( "yes" )
 
       when 6
-        # at line 663:4: 'no'
+        # at line 674:4: 'no'
         match( "no" )
 
       end
@@ -1356,7 +1356,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 666:6: ( 'a' .. 'z' | 'A' .. 'Z' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' )*
+      # at line 677:6: ( 'a' .. 'z' | 'A' .. 'Z' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' )*
       if @input.peek( 1 ).between?( 0x41, 0x5a ) || @input.peek( 1 ).between?( 0x61, 0x7a )
         @input.consume
       else
@@ -1366,7 +1366,7 @@ module SFP
       end
 
 
-      # at line 666:26: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' )*
+      # at line 677:26: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' )*
       while true # decision 3
         alt_3 = 2
         look_3_0 = @input.peek( 1 )
@@ -1414,13 +1414,13 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 670:2: ( ( '-' )? ( '0' .. '9' )+ | ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT )
+      # at line 681:2: ( ( '-' )? ( '0' .. '9' )+ | ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT )
       alt_15 = 4
       alt_15 = @dfa15.predict( @input )
       case alt_15
       when 1
-        # at line 670:4: ( '-' )? ( '0' .. '9' )+
-        # at line 670:4: ( '-' )?
+        # at line 681:4: ( '-' )? ( '0' .. '9' )+
+        # at line 681:4: ( '-' )?
         alt_4 = 2
         look_4_0 = @input.peek( 1 )
 
@@ -1429,11 +1429,11 @@ module SFP
         end
         case alt_4
         when 1
-          # at line 670:4: '-'
+          # at line 681:4: '-'
           match( 0x2d )
 
         end
-        # at file 670:8: ( '0' .. '9' )+
+        # at file 681:8: ( '0' .. '9' )+
         match_count_5 = 0
         while true
           alt_5 = 2
@@ -1445,7 +1445,7 @@ module SFP
           end
           case alt_5
           when 1
-            # at line 670:9: '0' .. '9'
+            # at line 681:9: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
@@ -1460,8 +1460,8 @@ module SFP
 
 
       when 2
-        # at line 671:4: ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )?
-        # at line 671:4: ( '-' )?
+        # at line 682:4: ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )?
+        # at line 682:4: ( '-' )?
         alt_6 = 2
         look_6_0 = @input.peek( 1 )
 
@@ -1470,11 +1470,11 @@ module SFP
         end
         case alt_6
         when 1
-          # at line 671:4: '-'
+          # at line 682:4: '-'
           match( 0x2d )
 
         end
-        # at file 671:8: ( '0' .. '9' )+
+        # at file 682:8: ( '0' .. '9' )+
         match_count_7 = 0
         while true
           alt_7 = 2
@@ -1486,7 +1486,7 @@ module SFP
           end
           case alt_7
           when 1
-            # at line 671:9: '0' .. '9'
+            # at line 682:9: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
@@ -1500,7 +1500,7 @@ module SFP
         end
 
         match( 0x2e )
-        # at line 671:22: ( '0' .. '9' )*
+        # at line 682:22: ( '0' .. '9' )*
         while true # decision 8
           alt_8 = 2
           look_8_0 = @input.peek( 1 )
@@ -1511,14 +1511,14 @@ module SFP
           end
           case alt_8
           when 1
-            # at line 671:23: '0' .. '9'
+            # at line 682:23: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
             break # out of loop for decision 8
           end
         end # loop for decision 8
-        # at line 671:34: ( EXPONENT )?
+        # at line 682:34: ( EXPONENT )?
         alt_9 = 2
         look_9_0 = @input.peek( 1 )
 
@@ -1527,14 +1527,14 @@ module SFP
         end
         case alt_9
         when 1
-          # at line 671:34: EXPONENT
+          # at line 682:34: EXPONENT
           exponent!
 
         end
 
       when 3
-        # at line 672:4: ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )?
-        # at line 672:4: ( '-' )?
+        # at line 683:4: ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )?
+        # at line 683:4: ( '-' )?
         alt_10 = 2
         look_10_0 = @input.peek( 1 )
 
@@ -1543,12 +1543,12 @@ module SFP
         end
         case alt_10
         when 1
-          # at line 672:4: '-'
+          # at line 683:4: '-'
           match( 0x2d )
 
         end
         match( 0x2e )
-        # at file 672:11: ( '0' .. '9' )+
+        # at file 683:11: ( '0' .. '9' )+
         match_count_11 = 0
         while true
           alt_11 = 2
@@ -1560,7 +1560,7 @@ module SFP
           end
           case alt_11
           when 1
-            # at line 672:12: '0' .. '9'
+            # at line 683:12: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
@@ -1573,7 +1573,7 @@ module SFP
           match_count_11 += 1
         end
 
-        # at line 672:23: ( EXPONENT )?
+        # at line 683:23: ( EXPONENT )?
         alt_12 = 2
         look_12_0 = @input.peek( 1 )
 
@@ -1582,14 +1582,14 @@ module SFP
         end
         case alt_12
         when 1
-          # at line 672:23: EXPONENT
+          # at line 683:23: EXPONENT
           exponent!
 
         end
 
       when 4
-        # at line 673:4: ( '-' )? ( '0' .. '9' )+ EXPONENT
-        # at line 673:4: ( '-' )?
+        # at line 684:4: ( '-' )? ( '0' .. '9' )+ EXPONENT
+        # at line 684:4: ( '-' )?
         alt_13 = 2
         look_13_0 = @input.peek( 1 )
 
@@ -1598,11 +1598,11 @@ module SFP
         end
         case alt_13
         when 1
-          # at line 673:4: '-'
+          # at line 684:4: '-'
           match( 0x2d )
 
         end
-        # at file 673:8: ( '0' .. '9' )+
+        # at file 684:8: ( '0' .. '9' )+
         match_count_14 = 0
         while true
           alt_14 = 2
@@ -1614,7 +1614,7 @@ module SFP
           end
           case alt_14
           when 1
-            # at line 673:9: '0' .. '9'
+            # at line 684:9: '0' .. '9'
             match_range( 0x30, 0x39 )
 
           else
@@ -1651,7 +1651,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 677:2: ( '//' (~ ( '\\n' | '\\r' ) )* | '#' (~ ( '\\n' | '\\r' ) )* | '/*' ( options {greedy=false; } : . )* '*/' )
+      # at line 688:2: ( '//' (~ ( '\\n' | '\\r' ) )* | '#' (~ ( '\\n' | '\\r' ) )* | '/*' ( options {greedy=false; } : . )* '*/' )
       alt_19 = 3
       look_19_0 = @input.peek( 1 )
 
@@ -1672,9 +1672,9 @@ module SFP
       end
       case alt_19
       when 1
-        # at line 677:4: '//' (~ ( '\\n' | '\\r' ) )*
+        # at line 688:4: '//' (~ ( '\\n' | '\\r' ) )*
         match( "//" )
-        # at line 677:9: (~ ( '\\n' | '\\r' ) )*
+        # at line 688:9: (~ ( '\\n' | '\\r' ) )*
         while true # decision 16
           alt_16 = 2
           look_16_0 = @input.peek( 1 )
@@ -1685,7 +1685,7 @@ module SFP
           end
           case alt_16
           when 1
-            # at line 677:9: ~ ( '\\n' | '\\r' )
+            # at line 688:9: ~ ( '\\n' | '\\r' )
             if @input.peek( 1 ).between?( 0x0, 0x9 ) || @input.peek( 1 ).between?( 0xb, 0xc ) || @input.peek( 1 ).between?( 0xe, 0xff )
               @input.consume
             else
@@ -1705,9 +1705,9 @@ module SFP
         # <-- action
 
       when 2
-        # at line 678:4: '#' (~ ( '\\n' | '\\r' ) )*
+        # at line 689:4: '#' (~ ( '\\n' | '\\r' ) )*
         match( 0x23 )
-        # at line 678:8: (~ ( '\\n' | '\\r' ) )*
+        # at line 689:8: (~ ( '\\n' | '\\r' ) )*
         while true # decision 17
           alt_17 = 2
           look_17_0 = @input.peek( 1 )
@@ -1718,7 +1718,7 @@ module SFP
           end
           case alt_17
           when 1
-            # at line 678:8: ~ ( '\\n' | '\\r' )
+            # at line 689:8: ~ ( '\\n' | '\\r' )
             if @input.peek( 1 ).between?( 0x0, 0x9 ) || @input.peek( 1 ).between?( 0xb, 0xc ) || @input.peek( 1 ).between?( 0xe, 0xff )
               @input.consume
             else
@@ -1738,9 +1738,9 @@ module SFP
         # <-- action
 
       when 3
-        # at line 679:4: '/*' ( options {greedy=false; } : . )* '*/'
+        # at line 690:4: '/*' ( options {greedy=false; } : . )* '*/'
         match( "/*" )
-        # at line 679:9: ( options {greedy=false; } : . )*
+        # at line 690:9: ( options {greedy=false; } : . )*
         while true # decision 18
           alt_18 = 2
           look_18_0 = @input.peek( 1 )
@@ -1760,7 +1760,7 @@ module SFP
           end
           case alt_18
           when 1
-            # at line 679:37: .
+            # at line 690:37: .
             match_any
 
           else
@@ -1794,9 +1794,9 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 683:4: 'r\"' ( options {greedy=false; } : . )* '\"'
+      # at line 694:4: 'r\"' ( options {greedy=false; } : . )* '\"'
       match( "r\"" )
-      # at line 683:9: ( options {greedy=false; } : . )*
+      # at line 694:9: ( options {greedy=false; } : . )*
       while true # decision 20
         alt_20 = 2
         look_20_0 = @input.peek( 1 )
@@ -1809,7 +1809,7 @@ module SFP
         end
         case alt_20
         when 1
-          # at line 683:37: .
+          # at line 694:37: .
           match_any
 
         else
@@ -1839,8 +1839,8 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 686:6: ( '\\r' )? '\\n'
-      # at line 686:6: ( '\\r' )?
+      # at line 697:6: ( '\\r' )? '\\n'
+      # at line 697:6: ( '\\r' )?
       alt_21 = 2
       look_21_0 = @input.peek( 1 )
 
@@ -1849,7 +1849,7 @@ module SFP
       end
       case alt_21
       when 1
-        # at line 686:6: '\\r'
+        # at line 697:6: '\\r'
         match( 0xd )
 
       end
@@ -1876,7 +1876,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 689:8: ( ' ' | '\\t' )
+      # at line 700:8: ( ' ' | '\\t' )
       if @input.peek(1) == 0x9 || @input.peek(1) == 0x20
         @input.consume
       else
@@ -1911,9 +1911,9 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 693:5: '\"' ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )* '\"'
+      # at line 704:5: '\"' ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )* '\"'
       match( 0x22 )
-      # at line 693:9: ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )*
+      # at line 704:9: ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )*
       while true # decision 22
         alt_22 = 3
         look_22_0 = @input.peek( 1 )
@@ -1926,11 +1926,11 @@ module SFP
         end
         case alt_22
         when 1
-          # at line 693:11: ESC_SEQ
+          # at line 704:11: ESC_SEQ
           esc_seq!
 
         when 2
-          # at line 693:21: ~ ( '\\\\' | '\"' )
+          # at line 704:21: ~ ( '\\\\' | '\"' )
           if @input.peek( 1 ).between?( 0x0, 0x21 ) || @input.peek( 1 ).between?( 0x23, 0x5b ) || @input.peek( 1 ).between?( 0x5d, 0xff )
             @input.consume
           else
@@ -1965,7 +1965,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 697:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
+      # at line 708:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
       if @input.peek(1) == 0x45 || @input.peek(1) == 0x65
         @input.consume
       else
@@ -1975,7 +1975,7 @@ module SFP
       end
 
 
-      # at line 697:22: ( '+' | '-' )?
+      # at line 708:22: ( '+' | '-' )?
       alt_23 = 2
       look_23_0 = @input.peek( 1 )
 
@@ -1996,7 +1996,7 @@ module SFP
 
 
       end
-      # at file 697:33: ( '0' .. '9' )+
+      # at file 708:33: ( '0' .. '9' )+
       match_count_24 = 0
       while true
         alt_24 = 2
@@ -2008,7 +2008,7 @@ module SFP
         end
         case alt_24
         when 1
-          # at line 697:34: '0' .. '9'
+          # at line 708:34: '0' .. '9'
           match_range( 0x30, 0x39 )
 
         else
@@ -2036,7 +2036,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 700:13: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
+      # at line 711:13: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
       if @input.peek( 1 ).between?( 0x30, 0x39 ) || @input.peek( 1 ).between?( 0x41, 0x46 ) || @input.peek( 1 ).between?( 0x61, 0x66 )
         @input.consume
       else
@@ -2061,7 +2061,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 704:2: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
+      # at line 715:2: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
       alt_25 = 3
       look_25_0 = @input.peek( 1 )
 
@@ -2078,7 +2078,7 @@ module SFP
       end
       case alt_25
       when 1
-        # at line 704:6: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
+        # at line 715:6: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
         match( 0x5c )
         if @input.peek(1) == 0x22 || @input.peek(1) == 0x27 || @input.peek(1) == 0x5c || @input.peek(1) == 0x62 || @input.peek(1) == 0x66 || @input.peek(1) == 0x6e || @input.peek(1) == 0x72 || @input.peek(1) == 0x74
           @input.consume
@@ -2091,11 +2091,11 @@ module SFP
 
 
       when 2
-        # at line 705:6: UNICODE_ESC
+        # at line 716:6: UNICODE_ESC
         unicode_esc!
 
       when 3
-        # at line 706:6: OCTAL_ESC
+        # at line 717:6: OCTAL_ESC
         octal_esc!
 
       end
@@ -2113,7 +2113,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 711:2: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+      # at line 722:2: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
       alt_26 = 3
       look_26_0 = @input.peek( 1 )
 
@@ -2150,38 +2150,38 @@ module SFP
       end
       case alt_26
       when 1
-        # at line 711:6: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+        # at line 722:6: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
         match( 0x5c )
-        # at line 711:11: ( '0' .. '3' )
-        # at line 711:12: '0' .. '3'
+        # at line 722:11: ( '0' .. '3' )
+        # at line 722:12: '0' .. '3'
         match_range( 0x30, 0x33 )
 
-        # at line 711:22: ( '0' .. '7' )
-        # at line 711:23: '0' .. '7'
+        # at line 722:22: ( '0' .. '7' )
+        # at line 722:23: '0' .. '7'
         match_range( 0x30, 0x37 )
 
-        # at line 711:33: ( '0' .. '7' )
-        # at line 711:34: '0' .. '7'
+        # at line 722:33: ( '0' .. '7' )
+        # at line 722:34: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
       when 2
-        # at line 712:6: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
+        # at line 723:6: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
         match( 0x5c )
-        # at line 712:11: ( '0' .. '7' )
-        # at line 712:12: '0' .. '7'
+        # at line 723:11: ( '0' .. '7' )
+        # at line 723:12: '0' .. '7'
         match_range( 0x30, 0x37 )
 
-        # at line 712:22: ( '0' .. '7' )
-        # at line 712:23: '0' .. '7'
+        # at line 723:22: ( '0' .. '7' )
+        # at line 723:23: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
       when 3
-        # at line 713:6: '\\\\' ( '0' .. '7' )
+        # at line 724:6: '\\\\' ( '0' .. '7' )
         match( 0x5c )
-        # at line 713:11: ( '0' .. '7' )
-        # at line 713:12: '0' .. '7'
+        # at line 724:11: ( '0' .. '7' )
+        # at line 724:12: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
@@ -2200,7 +2200,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 718:6: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
+      # at line 729:6: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
       match( 0x5c )
       match( 0x75 )
       hex_digit!
@@ -2479,7 +2479,7 @@ module SFP
 
       def description
         <<-'__dfa_description__'.strip!
-          669:1: NUMBER : ( ( '-' )? ( '0' .. '9' )+ | ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT );
+          680:1: NUMBER : ( ( '-' )? ( '0' .. '9' )+ | ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT );
         __dfa_description__
       end
     end

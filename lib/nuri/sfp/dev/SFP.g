@@ -334,13 +334,21 @@ constraint_namespace
 constraint_iterator
 	:	'foreach' '(' path 'as' ID ')' NL* '{' NL+
 		{
-			id = self.next_id.to_s # to_ref($path.text)
+			id = self.next_id.to_s
 			@now[id] = { '_parent' => @now,
-				'_context' => 'constraint', #'iterator',
+				'_context' => 'constraint',
 				'_type' => 'iterator',
 				'_self' => id,
 				'_value' => $path.text,
 				'_variable' => $ID.text
+			}
+			@now = @now[id]
+			
+			id = '_template'
+			@now[id] = { '_parent' => @now,
+				'_context' => 'constraint',
+				'_type' => 'and',
+				'_self' => id,
 			}
 			@now = @now[id]
 		}
@@ -350,7 +358,10 @@ constraint_iterator
 		}
 		NL+)*
 		'}'
-		{	self.goto_parent()	}
+		{
+			self.goto_parent()
+			self.goto_parent()
+		}
 	;
 
 constraint_statement returns [key, val]
