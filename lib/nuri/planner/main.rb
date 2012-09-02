@@ -1,6 +1,8 @@
 module Nuri
 	module Planner
 		class Solver
+			attr_reader :parser
+
 			def initialize
 			end
 	
@@ -26,7 +28,6 @@ module Nuri
 				actions = Array.new
 				sas_plan.split("\n").each { |a|
 					op_name = a[1,a.length-2].split(' ')[0]
-					#puts @parser.operators[op_name].id
 					actions << Action.new(@parser.operators[op_name])
 				}
 			end
@@ -57,10 +58,11 @@ module Nuri
 					end
 					Kernel.system(cmd)
 					plan = File.read(plan_file) if File.exist?(plan_file)
+					plan = to_partial_order(plan) if plan != nil
+
 					File.delete(sas_file)
 					File.delete(plan_file) if File.exist?(plan_file)
 					Dir.delete(dir)
-					plan = to_partial_order(plan) if plan != nil
 
 					return plan
 				rescue Exception => exp

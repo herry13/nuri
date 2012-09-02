@@ -29,28 +29,38 @@ cd $TEMP_DIR
 $PREPROCESS < $INPUT &> /dev/null
 
 if [ -e $TEMP_DIR/output ]; then
-	# search the plan
-	if [[ "$ENGINE" == "ff" ]]; then
-		$PLANNER \
-			--heuristic "hff=ff()" \
-			--search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output &> /dev/null
-	elif [[ "$ENGINE" == "lama2011" ]]; then
-		$PLANNER \
-			--heuristic "hlm,hff=lm_ff_syn(lm_rhw(
-				reasonable_orders=true,lm_cost_type=2,cost_type=2))" \
-			--search "iterated([
-				lazy_greedy([hff,hlm],preferred=[hff,hlm]),
-				lazy_wastar([hff,hlm],preferred=[hff,hlm],w=5),
-				lazy_wastar([hff,hlm],preferred=[hff,hlm],w=3),
-				lazy_wastar([hff,hlm],preferred=[hff,hlm],w=2),
-				lazy_wastar([hff,hlm],preferred=[hff,hlm],w=1)],
-				repeat_last=true,continue_on_fail=true)" \
-			< $TEMP_DIR/output &> /dev/null
-	elif [[ "$ENGINE" == "lmcut" ]]; then
-		$PLANNER --search "astar(lmcut())" < $TEMP_DIR/output &> /dev/null
-	elif [[ "$ENGINE" == "blind" ]]; then
-		$PLANNER --search "astar(blind())" < $TEMP_DIR/output &> /dev/null
-	fi
+	ENGINES=("lmcut" "lmcut" "ff" "blind")
+	#	echo $ENGINE
+	#done
+	#for ENGINE in $ENGINES; do
+	for ENGINE in ${ENGINES[@]}; do
+		# search the plan
+		if [[ "$ENGINE" == "ff" ]]; then
+			$PLANNER \
+				--heuristic "hff=ff()" \
+				--search "lazy_greedy(hff, preferred=hff)" < $TEMP_DIR/output &> /dev/null
+		elif [[ "$ENGINE" == "lama2011" ]]; then
+			$PLANNER \
+				--heuristic "hlm,hff=lm_ff_syn(lm_rhw(
+					reasonable_orders=true,lm_cost_type=2,cost_type=2))" \
+				--search "iterated([
+					lazy_greedy([hff,hlm],preferred=[hff,hlm]),
+					lazy_wastar([hff,hlm],preferred=[hff,hlm],w=5),
+					lazy_wastar([hff,hlm],preferred=[hff,hlm],w=3),
+					lazy_wastar([hff,hlm],preferred=[hff,hlm],w=2),
+					lazy_wastar([hff,hlm],preferred=[hff,hlm],w=1)],
+					repeat_last=true,continue_on_fail=true)" \
+				< $TEMP_DIR/output &> /dev/null
+		elif [[ "$ENGINE" == "lmcut" ]]; then
+			$PLANNER --search "astar(lmcut())" < $TEMP_DIR/output &> /dev/null
+		elif [[ "$ENGINE" == "blind" ]]; then
+			$PLANNER --search "astar(blind())" < $TEMP_DIR/output &> /dev/null
+		fi
+
+		if [ -e $TEMP_DIR/sas_plan ]; then
+			break
+		fi
+	done
 fi
 
 cd $CURRENT_DIR
@@ -59,6 +69,8 @@ cd $CURRENT_DIR
 if [ -e $TEMP_DIR/sas_plan ]; then
 	SED_ARGS="/$REMOVED_OPERATOR/d"
 	sed $SED_ARGS $TEMP_DIR/sas_plan 1> $OUTPUT
+else
+	cp $INPUT /tmp/unsolved.sas
 fi
 
 # remove unused file

@@ -89,7 +89,7 @@ module Nuri
 					end
 				}
 				self.reset_operators_name
-self.dump
+
 				#self.dump_types
 				#self.dump_vars
 				#self.dump_operators
@@ -176,12 +176,14 @@ self.dump
 
 			def reset_operators_name
 				Nuri::Sfp::Sas.reset_operator_id
+				ops = Hash.new
 				@operators.each_value { |op|
 					op.id = Nuri::Sfp::Sas.next_operator_id
 					@operators.delete(op.name)
 					op.update_name
-					@operators[op.name] = op
+					ops[op.name] = op
 				}
+				@operators = ops
 			end
 
 			def self.reset_operator_id
@@ -292,7 +294,6 @@ self.dump
 					sas_op[@variables[k].name] = Parameter.new(@variables[k], pre, post)
 				}
 
-
 				@operators[sas_op.name] = sas_op if apply_global_constraint(sas_op)
 			end
 
@@ -339,8 +340,10 @@ self.dump
 						bucket << p
 					else
 						params[ names[index] ].each { |val|
-							selected[ '$.' + names[index] ] = val
+							ref = '$.' + names[index]
+							selected[ref] = val
 							combinator(bucket, grounder, procedure, names, params, selected, index+1)
+							selected.delete(ref)
 						}
 					end
 				end
@@ -790,7 +793,6 @@ self.dump
 							end
 						}
 					elsif formula.isconstraint and formula['_type'] == 'iterator'
-						puts @parser.arrays.inspect
 						ref = '$.' + formula['_value']
 						var = '$.' + formula['_variable']
 						total = @parser.arrays[ref]
@@ -799,7 +801,6 @@ self.dump
 						for i in 0..(total-1)
 							grounder.map.clear
 							grounder.map[var] = ref + "[#{i}]"
-							puts grounder.map.inspect # ref + "[#{i}]"
 							id = Nuri::Sfp::Sas.next_constraint_key
 							c_and = deep_clone(formula['_template'])
 							c_and['_self'] = id
