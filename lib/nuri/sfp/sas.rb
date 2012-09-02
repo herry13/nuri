@@ -90,11 +90,43 @@ module Nuri
 				}
 				self.reset_operators_name
 
+				# detect and merge mutually inclusive operators
+				#self.solve_mutually_inclusive_operators
+
 				#self.dump_types
 				#self.dump_vars
 				#self.dump_operators
 
 				return create_output
+			end
+
+			def solve_mutually_inclusive_operators
+				merged = Array.new
+				new_operators = Array.new
+				begin
+puts 'checking ' + @operators.length.to_s + ' operators'
+					new_operators.clear
+					@operators.each_value do |op1|
+						@operators.each_value do |op2|
+							next if op1 == op2
+							name1 = op1.name + '+' + op2.name
+							name2 = op2.name + '+' + op1.name
+							next if merged.index(name1) != nil or merged.index(name2) != nil
+
+							if mutually_inclusive_operators?(op1, op2)
+								new_operators << op1.merge(op2)
+								merged << name1
+								merged << name2
+							end
+						end
+					end
+					new_operators.each { |op| @operators[op.name] = op }
+puts new_operators.length.to_s + ' new merged-operators'
+				end while new_operators.length > 0
+			end
+
+			def mutually_inclusive_operators?(operator1, operator2)
+				return ( (operator1.requires?(operator2)) and (operator2.requires?(operator1)) )
 			end
 
 			def process_goal(goal)
@@ -1045,6 +1077,33 @@ module Nuri
 
 			def update_name
 				@name = 'op_' + @id.to_s + @ref
+			end
+
+			# return true if this requires an effect of given operator
+			# otherwise return false
+			def requires?(operator)
+				self.each_value do |p1|
+					next if p1.pre == nil # can be any value
+					p2 = operator[p1.var.name]
+					if p2 != nil and p2.post != nil and p1.pre == p2.post and p2.pre == nil
+						return true
+					end
+				end
+				return false
+			end
+
+			def merge(operator)
+				cost = (@cost > operator.cost ? @cost : operator.cost)
+				op = Operator.new('#' + @name + '+' + operator.name, cost)
+				self.each_value { |p| op[p.var.name] = p.clone }
+				operator.each_value do |p|
+					if not op.has_key?(p.var.name)
+						op[p.var.name] = p.clone
+					elsif p.post != nil
+						op[p.var.name] = p.clone
+					end
+				end
+				return op
 			end
 
 			def to_s; return @name + ': ' + self.length.to_s ; end
