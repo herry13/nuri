@@ -753,9 +753,11 @@ module Nuri
 					}
 				end
 
-				# remove all NOT constraints in the given formula by transforming them
-				# into EQUALS, NOT-EQUALS, AND, OR constraints
-				def remove_not_constraint(formula)
+				# Remove the following type of constraint in the given formula:
+				# - NOT constraints by transforming them into EQUALS, NOT-EQUALS, AND, OR constraints
+				# - ARRAY-Iterator constraint by extracting all possible values of given ARRAY
+				#
+				def remove_not_iterator_constraint(formula)
 					# TODO: (not (equals) (not-equals) (and) (or))
 					if formula.isconstraint and formula['_type'] == 'not'
 						formula['_type'] = 'and'
@@ -775,7 +777,7 @@ module Nuri
 										c_not[k1] = v1
 										v1['_parent'] = c_not
 										v.delete(k1)
-										remove_not_constraint(c_not)
+										remove_not_iterator_constraint(c_not)
 									}
 								when 'or'
 									v['_type'] = 'and'
@@ -785,7 +787,7 @@ module Nuri
 										c_not[k1] = v1
 										v1['_parent'] = c_not
 										v.delete(k1)
-										remove_not_constraint(c_not)
+										remove_not_iterator_constraint(c_not)
 									}
 								else
 									raise Exception, 'unknown rules: ' + v['_type']
@@ -806,6 +808,7 @@ module Nuri
 							c_and['_self'] = id
 							c_and.accept(grounder)
 							formula[id] = c_and
+							remove_not_iterator_constraint(c_and)
 						end
 						formula['_type'] = 'and'
 						formula.delete('_value')
@@ -814,12 +817,12 @@ module Nuri
 					else
 						formula.each { |k,v|
 							next if k[0,1] == '_'
-							remove_not_constraint(v) if v.is_a?(Hash) and v.isconstraint
+							remove_not_iterator_constraint(v) if v.is_a?(Hash) and v.isconstraint
 						}
 					end
 				end
 
-				remove_not_constraint(formula)
+				remove_not_iterator_constraint(formula)
 				to_and_or_graph(formula)
 				not_equals_statement_to_or_constraint(formula)
 				return flatten_and_or_graph(formula)

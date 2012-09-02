@@ -74,6 +74,9 @@ SFp Language
 		if x1 != y2 then x2 != y2
 		x is in (y1, y2, y3)
 		x isnt in (y1, y2, y3)
+		for (my_array as x) {
+			x.attribute = y
+		}
 
 **Goal & Global Constraints**
 - support the following the following constraint statements:
@@ -86,3 +89,6 @@ SFp Language
 		if x1 != y2 then x2 != y2
 		x is in (y1, y2, y3)
 		x isnt in (y1, y2, y3)
+		for (my_array as x) {
+			x.attribute = y
+		}
