@@ -500,7 +500,8 @@ puts new_operators.length.to_s + ' new merged-operators'
 						map_cond = and_equals_constraint_to_map(@root['global'][key])
 						map_cond.each { |k,v|
 							next if k[0,1] == '_'
-							raise VariableNotFoundException, k if not @variables.has_key?(k)
+							raise VariableNotFoundException, 'Variable not found: ' + k if
+								not @variables.has_key?(k)
 							if not op.has_key?(@variables[k].name)
 								op[@variables[k].name] = Parameter.new(@variables[k], v, nil)
 							else
@@ -558,7 +559,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 						result['_type'] = 'and'
 						bucket << result
 					elsif not @variables.has_key?(var_name)
-						raise VariableNotFoundException, var_name + ' is not exist!'
+						raise VariableNotFoundException, 'Variable not found: ' + var_name
 					else
 						@variables[var_name].each { |v|
 							next if v.is_a?(Hash) and v.isnull and index < (names.length-1)
@@ -749,7 +750,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 				# variable x := p1 | p2 | p3
 				# return an array (p2, p3)
 				def get_list_not_value_of(var_name, value)
-					raise VariableNotFoundException, var_name + ' cannot be found' if
+					raise VariableNotFoundException, 'Variable not found: ' + var_name if
 						not @variables.has_key?(var_name)
 					if value.is_a?(String) and value.isref
 						value = @root['initial'].at?(value)
@@ -888,7 +889,8 @@ puts new_operators.length.to_s + ' new merged-operators'
 
 			def visit(name, value, obj)
 				return if name[0,1] == '_'
-				raise VariableNotFoundException, name if not @vars.has_key?(name)
+				raise VariableNotFoundException, 'Variable not found: ' + name if
+					not @vars.has_key?(name)
 				if value.isconstraint
 					self.set_equals(name, value['_value']) if value['_type'] == 'equals'
 				end

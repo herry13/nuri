@@ -17,9 +17,14 @@ module Nuri
 			# solve the configuration problem in given file
 			# return JSON representation of plan if solution is found, otherwise nil
 			def solve_file(file)
-				@parser = Nuri::Sfp::Parser.new
-				@parser.parse_file(file)
-				return solve_sas(@parser.to_sas)
+				begin
+					@parser = Nuri::Sfp::Parser.new
+					@parser.parse_file(file)
+					return solve_sas(@parser.to_sas)
+				rescue Exception => e
+					$stderr.puts e.to_s
+					return nil
+				end
 			end
 
 			private
