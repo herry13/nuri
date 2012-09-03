@@ -47,6 +47,7 @@ module Nuri
 				@state["os"] = Nuri::Util.os
 				@state["platform"] = Nuri::Util.platform
 				@state["hostname"] = Nuri::Util.hostname #`uname -n`.strip
+				@state["domainname"] = Socket.gethostbyname(Socket.gethostname).first
 				@state["version"] = `uname -r`.strip
 				@state["arch"] = `uname -p`.strip
 				@state["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i

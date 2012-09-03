@@ -1,5 +1,6 @@
 class Node {
 	hostname is ""
+	domainname is ""
 	os is ""
 	platform is ""
 	arch is ""
@@ -9,8 +10,3 @@ class Node {
 	cpus is 0
 
 }
-
-/*class VM {
-	image_file is ""
-	on isref PM
-}*/

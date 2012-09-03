@@ -130,6 +130,9 @@ module Nuri
 				elsif req.params['REQUEST_URI'] == '/goal' or
 					(req.params['REQUEST_URI'] =~ /^\/goal\/.*/) != nil
 					return self.http_get_goal(req, res)
+				elsif req.params['REQUEST_URI'] == '/dashboard' or
+					(req.params['REQUEST_URI'] =~ /^\/dashboard\/.*/) != nil
+					return self.get_dashboard(req, res)
 				end
 			elsif req.params['REQUEST_METHOD'] == 'POST'
 				if req.params['REQUEST_URI'] == '/state' or
@@ -147,7 +150,27 @@ module Nuri
 			res.start(500) do |head, out| out.write(msg); end
 			Nuri::Util.log.error msg
 		end
-	
+
+		def get_dashboard(req, res)
+			params = req.params['REQUEST_URI'].split('/', 3)
+			if params[2] == nil or params[2] == ''
+				send_file(Nuri::Util.rootdir + '/lib/dashboard/index.html', res)
+			else
+				send_file(Nuri::Util.rootdir + '/lib' + req.params['REQUEST_URI'], res)
+			end
+		end
+
+		def send_file(file, res)
+			# TODO -- security should be evaluated
+			if not File.exist?(file)
+				res.start(404) { |head, out| out.write('Resource not found!') }
+			else
+				res.start(200) do |head, out|
+					out.write(File.read(file))
+				end
+			end
+		end
+
 		# get state
 		def http_get_state(req, res)
 			begin
