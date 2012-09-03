@@ -9,6 +9,6 @@ nuri {
 	as_child is yes
 	as_parent is no
 	
+	dashboard_enabled is no 
 	//bsig is yes
-	//dashboard_enabled is yes
 }
