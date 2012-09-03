@@ -11,21 +11,23 @@ def cli
 	if ARGV[1] == 'main'
 		nuri = Nuri::Main.new
 		Nuri::Sfp::Parser.dump(nuri.main)
-	elsif ARGV[1] == 'current'
+	elsif ARGV[1] == 'state'
 		nuri = Nuri::Main.new
 		state = nuri.get_state
 		Nuri::Sfp::Parser.dump(state)
+	elsif ARGV[1] == 'plan'
+		nuri = Nuri::Main.new
+		puts nuri.get_plan
 	elsif ARGV[1] == 'apply'
 		nuri = Nuri::Main.new
 		if nuri.lock
 			nuri.apply(true)
 			nuri.lock(false)
 		end
-	elsif ARGV[1] == 'plan' and ARGV.length >= 3
+	elsif ARGV[1] == 'planner' and ARGV.length >= 3
 		planner = Nuri::Planner::Solver.new
 		plan = planner.solve_file(ARGV[2])
 		puts (plan != nil ? plan : 'no solution!')
-		#planner.parser.dump if plan == nil
 	elsif ARGV[1] == 'sfp' and ARGV.length >= 3
 		Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_json(ARGV[2]) )
 	elsif ARGV[1] == 'sas' and ARGV.length >= 3

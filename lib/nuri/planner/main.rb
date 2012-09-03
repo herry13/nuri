@@ -13,7 +13,12 @@ module Nuri
 				@parser.parse(problem)
 				return solve_sas(@parser.to_sas)
 			end
-	
+
+			def solve_json(root)
+				@parser = Nuri::Sfp::Parser.new(root)
+				return solve_sas(@parser.to_sas)
+			end
+
 			# solve the configuration problem in given file
 			# return JSON representation of plan if solution is found, otherwise nil
 			def solve_file(file)
@@ -71,7 +76,7 @@ module Nuri
 
 					return plan
 				rescue Exception => exp
-					puts 'Planner error: ' + exp.to_s
+					$stderr.puts 'Planner error: ' + exp.to_s
 					system 'rm -rf ' + dir
 				end
 				return nil

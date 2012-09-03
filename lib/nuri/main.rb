@@ -92,13 +92,28 @@ module Nuri
 			}
 		end
 
+		def get_plan
+			state = self.get_state
+			state.accept(Nuri::Sfp::ParentGenerator.new)
+			planner = Nuri::Planner::Solver.new
+			puts planner.solve_json(state)
+			Nuri::Sfp::Parser.dump(state)
+			return nil
+		end
+
 		def get_state(path='')
 			return nil if not @main.has_key?('system')
 			if @config['as_parent']
 				main = Nuri::Sfp.deep_clone(@main)
+				main['initial'] = main['system']
+				main.delete('system')
+				main['initial']['_self'] = 'initial'
 				@main['system'].each do |key,node|
 					next if key[0,1] == '_' or not node['_isa'] == '$.Node'
-					main['system'][key] = self.get_child_state(node['domainname'])
+					#main['initial'][key] = self.get_child_state(node['domainname'])
+					main['initial'].delete(key)
+					state = self.get_child_state(node['domainname'])
+					state.each { |k,v| main['initial'][k] = v } if state != nil
 				end
 				return main
 			else
@@ -112,7 +127,8 @@ module Nuri
 				url = URI.parse('http://' + address + ':' + port.to_s + '/state')
 				req = Net::HTTP::Get.new(url.path)
 				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
-				return JSON.parse(res.body)
+				json = JSON.parse(res.body)
+				return json['value'] if json != nil
 			rescue Exception => e
 				Nuri::Util.log 'Cannot get state of node ' + address + ': ' + e.to_s
 			end
@@ -194,7 +210,7 @@ module Nuri
 				else
 					res.start(200) do |head, out|
 						head["Content-Type"] = "application/json"
-						data['value'] = JSON[ Nuri::Sfp.to_json(state) ]
+						data['value'] = Nuri::Sfp.to_json(state)
 						out.write(JSON.generate(data))
 					end
 				end

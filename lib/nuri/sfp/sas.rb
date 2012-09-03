@@ -37,9 +37,19 @@ module Nuri
 			attr_accessor :root, :variables, :types, :operators, :axioms
 
 			def to_sas
-				return false if @parser == nil
+				@arrays = Hash.new
+				if @parser != nil
+					@root = @parser.root
 
-				@root = @parser.root 
+					# remove "$.initial" for arrays map
+					@parser.arrays.each do |k,v|
+						first, rest = k.explode[1].explode
+						next if rest == nil
+						@arrays['$.' + rest.to_s] = v
+					end
+				end
+				return nil if @root == nil
+
 				@variables = Hash.new
 				@types = { 'Boolean' => [true, false],
 					'Number' => Array.new,
@@ -47,25 +57,19 @@ module Nuri
 				}
 				@operators = Hash.new
 				@axioms = Array.new
-				
+
 				# collect classes
-				self.collect_classes
+				#self.collect_classes
 
 				# collect variables
-				@root['initial'].accept(VariableCollector.new(self)) #@root, @variables, @types))
-
-				# remove "$.initial" for arrays map
-				@parser.arrays.each { |k,v|
-					first, rest = k.explode[1].explode
-					next if rest == nil
-					@parser.arrays['$.'+rest.to_s] = v
-					@parser.arrays.delete(k)
-				}
+				@root['initial'].accept(VariableCollector.new(self))
 
 				# collect values from goal and global constraint
 				value_collector = Nuri::Sfp::ValueCollector.new(@types)
-				@root['goal'].accept(value_collector) if @root.has_key?('goal') and @root['goal'].isconstraint
-				@root['global'].accept(value_collector) if @root.has_key?('global') and @root['global'].isconstraint
+				@root['goal'].accept(value_collector) if @root.has_key?('goal') and
+						@root['goal'].isconstraint
+				@root['global'].accept(value_collector) if @root.has_key?('global') and
+						@root['global'].isconstraint
 
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
@@ -77,7 +81,8 @@ module Nuri
 
 				# normalize global constraint formula
 				if @root.has_key?('global') and @root['global'].isconstraint
-					raise Exception, 'Invalid global constraint' if not normalize_formula(@root['global'])
+					raise Exception, 'Invalid global constraint' if 
+							not normalize_formula(@root['global'])
 				end
 
 				# process all procedures
@@ -386,12 +391,14 @@ puts new_operators.length.to_s + ' new merged-operators'
 			end
 
 			# collect all classes that are used by the objects
+=begin
 			def collect_classes
 				@parser.used_classes.each { |c|
 					@types[c] = Array.new
 					@types[c] << Nuri::Sfp.null_of(c) if @types[c].length <= 0
 				}
 			end
+=end
 
 			def dump_types
 				puts '--- types'
@@ -449,14 +456,17 @@ puts new_operators.length.to_s + ' new merged-operators'
 
 			# set possible values for each variable
 			def set_variable_values
+#$stderr.puts @variables.keys.inspect + "\n"
 				@variables.each_value { |var|
 					if not var.is_final
+$stderr.puts var.name + ' == ' + @types.keys.inspect if not @types.has_key?(var.type)
 						@types[var.type].each { |v| var << v }
 						var.uniq!
 					else
 						var << var.init
 					end
 				}
+#$stderr.puts "\tset variable value"
 			end
 
 			# return true if global constraint could be applied, otherwise false
@@ -550,6 +560,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 				# using recursive method
 				def ref_combinator(bucket, parent, names, last_value, last_names=nil,
 						index=0, selected=Hash.new)
+#$stderr.puts index.to_s + ': ' + names.inspect
 					var_name = parent + '.' + names[index]
 					if index >= names.length or (index >= names.length-1 and last_value != nil)
 						selected[var_name] = last_value if last_value != nil
@@ -830,7 +841,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 					elsif formula.isconstraint and formula['_type'] == 'iterator'
 						ref = '$.' + formula['_value']
 						var = '$.' + formula['_variable']
-						total = @parser.arrays[ref]
+						total = @arrays[ref] if @arrays.has_key?(ref)
 						names = formula.keys.select { |k| k[0,1] != '_' }
 						grounder = ParameterGrounder.new(Hash.new)
 						for i in 0..(total-1)

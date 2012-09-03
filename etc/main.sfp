@@ -1,19 +1,21 @@
 include "modules/node/node.sfp"
-#include "modules/apache/apache.sfp"
+include "modules/network/network.sfp"
+include "modules/apache/apache.sfp"
 
 system {
 	hpvm11 isa Node {
 		domainname is "hpvm11.diy.inf.ed.ac.uk"
 	}
-	hpvm12 isa Node {
+/*	hpvm12 isa Node {
 		domainname is "hpvm12.diy.inf.ed.ac.uk"
 	}
 	hpvm13 isa Node {
 		domainname is "hpvm13.diy.inf.ed.ac.uk"
-	}
+	}*/
 }
 
 goal constraint {
+	hpvm11.apache.running = false
 }
 
 global constraint {

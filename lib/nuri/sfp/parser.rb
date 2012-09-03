@@ -10,7 +10,8 @@ module Nuri
 				return parser.to_sfp
 			end
 
-			def initialize
+			def initialize(root=nil)
+				@root = root
 				@parser = nil
 			end
 
@@ -62,7 +63,7 @@ module Nuri
 		def self.to_json(sfp)
 			root = Nuri::Sfp.deep_clone(sfp)
 			root.accept(Nuri::Sfp::ParentEliminator.new)
-			return JSON.generate(root)
+			return root # JSON.generate(root)
 		end
 
 		def self.deep_clone(value)
