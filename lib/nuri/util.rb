@@ -2,20 +2,24 @@ module Nuri
 	class Util
 		@@rootdir = File.expand_path(File.dirname(__FILE__) + "/../..")
 		@@logger = Logger.new(@@rootdir + "/log/message.log")
-		@@os = nil
-		@@platform = nil
 
 		def self.rootdir
 			return @@rootdir
 		end
 
+		def self.create_object(class_path)
+			return if not class_path.is_a?(String)
+			class_path = '$.' + class_path if not class_path.isref
+			obj = { '_isa'=>class_path, '_context'=>'object' }
+			Nuri::Sfp::Sfplibs.expand_object(obj, self.get_main)
+			return obj
+		end
+
 		def self.get_main
+			return @@main if defined?(@@main) != nil
 			mainfile = self.rootdir + '/etc/main.sfp'
-			#sfp = File.read(mainfile)
-			#parser = Nuri::Sfp::Parser.new
-			#parser.parse(sfp)
-			#return parser.to_json
-			return Nuri::Sfp::Parser.file_to_json(mainfile)
+			@@main = Nuri::Sfp::Parser.file_to_json(mainfile)
+			return @@main
 		end
 
 		def self.log(msg=nil)
@@ -28,7 +32,7 @@ module Nuri
 		def self.os
 			return @@os if defined?(@@os) != nil and @@os != nil
 			#@@os = (`uname -o`).strip if @@os == nil
-			@@os = (`uname -s`).strip if @@os == nil
+			@@os = (`uname -s`).strip #if @@os == nil
 			@@os = (@@os == 'Darwin' ? 'macos' : @@os.downcase)
 			return @@os
 		end
@@ -62,7 +66,7 @@ module Nuri
 		end
 
 		def self.platform
-			return @@platform if @@platform != nil
+			return @@platform if defined?(@@platform) != nil and @@platform != nil
 			case self.os
 				when 'linux'
 					type = `cat /etc/issue`

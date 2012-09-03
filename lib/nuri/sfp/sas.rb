@@ -60,7 +60,7 @@ module Nuri
 
 				# collect classes
 				#self.collect_classes
-
+				
 				# collect variables
 				@root['initial'].accept(VariableCollector.new(self))
 
@@ -75,6 +75,9 @@ module Nuri
 				@types.each_value { |type| type.uniq! }
 				# set domain values for each variable
 				self.set_variable_values
+
+				#self.dump_types
+				#self.dump_vars
 
 				# process goal constraint
 				process_goal(@root['goal']) if @root.has_key?('goal') and @root['goal'].isconstraint
@@ -98,8 +101,6 @@ module Nuri
 				# detect and merge mutually inclusive operators
 				#self.solve_mutually_inclusive_operators
 
-				#self.dump_types
-				#self.dump_vars
 				#self.dump_operators
 
 				return create_output
@@ -109,7 +110,7 @@ module Nuri
 				merged = Array.new
 				new_operators = Array.new
 				begin
-puts 'checking ' + @operators.length.to_s + ' operators'
+$stderr.puts 'checking ' + @operators.length.to_s + ' operators'
 					new_operators.clear
 					@operators.each_value do |op1|
 						@operators.each_value do |op2|
@@ -126,7 +127,7 @@ puts 'checking ' + @operators.length.to_s + ' operators'
 						end
 					end
 					new_operators.each { |op| @operators[op.name] = op }
-puts new_operators.length.to_s + ' new merged-operators'
+$stderr.puts new_operators.length.to_s + ' new merged-operators'
 				end while new_operators.length > 0
 			end
 
@@ -401,7 +402,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 =end
 
 			def dump_types
-				puts '--- types'
+				$stderr.puts '--- types'
 				@types.each { |name,values|
 					next if values == nil
 					print name + ": "
@@ -412,23 +413,23 @@ puts new_operators.length.to_s + ' new merged-operators'
 							print val.to_s + " "
 						end
 					}
-					puts '| ' + values.length.to_s
+					$stderr.puts '| ' + values.length.to_s
 				}
 			end
 
 			def dump_vars
-				puts '--- variables'
-				@variables.each_value { |value| puts value.to_s }
+				$stderr.puts '--- variables'
+				@variables.each_value { |value| $stderr.puts value.to_s }
 			end
 
 			def dump_operators
-				puts '--- operators'
-				@operators.each_value { |op| puts op.to_s + ' -- ' + op.params.inspect }
+				$stderr.puts '--- operators'
+				@operators.each_value { |op| $stderr.puts op.to_s + ' -- ' + op.params.inspect }
 			end
 
 			def dump_axioms
-				puts '--- axioms'
-				@axioms.each { |ax| puts ax.to_s }
+				$stderr.puts '--- axioms'
+				@axioms.each { |ax| $stderr.puts ax.to_s }
 			end
 
 			# set possible values for each variable
@@ -890,13 +891,15 @@ puts new_operators.length.to_s + ' new merged-operators'
 				@init = main.root['initial']
 			end
 
-			def visit(name, value, obj)
-				return false if name[0,1] == '_' or (value.is_a?(Hash) and not (value.isobject or value.isnull))
-				var_name = obj.ref.push(name)
+			def visit(name, value, parent)
+				return false if name[0,1] == '_' or (value.is_a?(Hash) and
+						not (value.isobject or value.isnull))
+
+				var_name = parent.ref.push(name)
 				isfinal = self.is_final(value)
 				isref = (value.is_a?(String) and value.isref)
 				value = @init.at?(value) if value.is_a?(String) and value.isref
-				type = (isfinal ? self.isa?(value) : self.get_type(name, value, obj))
+				type = (isfinal ? self.isa?(value) : self.get_type(name, value, parent))
 				var = Variable.new(var_name, type, -1, value, nil, isfinal)
 				@vars[var.name] = var
 				if isfinal and value.is_a?(Hash)

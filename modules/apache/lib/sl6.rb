@@ -4,10 +4,12 @@ require 'augeas'
 
 module Nuri
 	module Module
-		class Apache < Nuri::Resource
+		class Apache
+			include Nuri::Resource
+
 			def initialize
-				super
-				@state['_isa'] = 'Apache'
+				self.load
+				@state = self.create_object('Apache')
 			end
 	
 			# get state of this component in JSON

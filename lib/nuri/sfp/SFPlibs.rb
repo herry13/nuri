@@ -70,12 +70,17 @@ module Nuri
 				}
 			end
 
-			def expand_object(obj)
-				return if not obj.has_key?('_isa') or obj['_isa'] == nil
-				objclass = @root.at?(obj['_isa'])
+			def self.expand_object(obj, root)
+				return false if not obj.has_key?('_isa') or obj['_isa'] == nil
+				objclass = root.at?(obj['_isa'])
 				obj.inherits( objclass )
 				obj['_classes'] = (objclass.has_key?('_super') ? objclass['_super'].clone : Array.new)
 				obj['_classes'] << obj['_isa']
+				return true
+			end
+
+			def expand_object(obj)
+				return false if not Nuri::Sfp::Sfplibs.expand_object(obj, @root)
 				@used_classes = @used_classes.concat(obj['_classes']).uniq
 			end
 

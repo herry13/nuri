@@ -68,7 +68,7 @@ module Nuri
 			modules_dir = Nuri::Util.rootdir + "/modules"
 
 			# create dummy root
-			@root = Nuri::Resource.new('root')
+			@root = Nuri::Root.new #Nuri::Resource.new('root')
 
 			# load module 'Node'
 			node = Nuri::Module::Node.new
@@ -94,9 +94,9 @@ module Nuri
 
 		def get_plan
 			state = self.get_state
-			state.accept(Nuri::Sfp::ParentGenerator.new)
-			planner = Nuri::Planner::Solver.new
-			puts planner.solve_json(state)
+			state.accept(Nuri::Sfp::SfpGenerator.new(state))
+			#planner = Nuri::Planner::Solver.new
+			#puts planner.solve_json(state)
 			Nuri::Sfp::Parser.dump(state)
 			return nil
 		end
@@ -104,6 +104,7 @@ module Nuri
 		def get_state(path='')
 			return nil if not @main.has_key?('system')
 			if @config['as_parent']
+				# retrieve all children's current state
 				main = Nuri::Sfp.deep_clone(@main)
 				main['initial'] = main['system']
 				main.delete('system')
@@ -114,7 +115,7 @@ module Nuri
 					state = self.get_child_state(node['domainname'])
 					state.each { |k,v| main['initial'][k] = v } if state != nil
 				end
-				return main
+				main
 			else
 				@root.get_state(path)
 			end

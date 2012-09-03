@@ -34,6 +34,8 @@ def cli
 		parser = Nuri::Sfp::Parser.new
 		parser.parse_file(ARGV[2])
 		puts parser.to_sas
+	else
+		puts 'wrong arguments!'
 	end
 end
 

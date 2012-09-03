@@ -14,14 +14,16 @@ end
 
 module Nuri
 	module Module
-		class Network < Nuri::Resource
+		class Network
 			@@IPV4 = 2
 			@@IPV6 = 10
 			@@MAC = 17
+
+			include Nuri::Resource
 	
 			def initialize
-				super
-				@state['_isa'] = 'Network'
+				self.load
+				@state = self.create_object('Network')
 			end
 	
 			def mask(netmask)
@@ -33,7 +35,7 @@ module Nuri
 			# get state of this component in JSON
 			def get_state
 				Netifaces.interfaces.sort.each do |dev|
-					@state[dev] = JSON'{"_isa": "NetDevice"}'
+					@state[dev] = self.create_object('NetDevice')
 					addresses = Netifaces.addresses(dev)
 					@state[dev]['hwaddr'] = addresses[@@MAC][0]['addr']
 					@state[dev]['ip'] = (addresses[@@IPV4][0]['addr'] != nil ?

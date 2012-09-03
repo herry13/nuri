@@ -1,14 +1,18 @@
 module Nuri
-	class Resource
+	module Resource
 		attr_accessor :name, :parent
 		attr_reader :children, :state, :goal
 
-		def initialize(name=nil, parent=nil)
+		def load(name=nil, parent=nil) # initialize(name=nil, parent=nil)
 			@name = name
 			@parent = parent
 			@children = Hash.new
 			@state = JSON['{}']
 			@goal = JSON['{}']
+		end
+
+		def create_object(class_path)
+			return Nuri::Util.create_object(class_path)
 		end
 
 		def add(mod)
@@ -122,5 +126,13 @@ module Nuri
 			end
 		end
 =end
+	end
+
+	class Root
+		include Resource
+
+		def initialize
+			load('root')
+		end
 	end
 end
