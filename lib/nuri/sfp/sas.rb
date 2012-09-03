@@ -363,7 +363,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 				# using recursive method
 				def combinator(bucket, grounder, procedure, names, params, selected, index)
 					if index >= names.length
-						p = deep_clone(procedure) # procedure.clone
+						p = Nuri::Sfp.deep_clone(procedure) # procedure.clone
 						# grounding all references
 						selected['$.this'] = procedure['_parent'].ref
 						selected.each { |k,v| selected[k] = (v.is_a?(Hash) ? v.ref : v) }
@@ -431,42 +431,16 @@ puts new_operators.length.to_s + ' new merged-operators'
 				@axioms.each { |ax| puts ax.to_s }
 			end
 
-			# deep cloning of given value
-			# note: this can only be used on String, Number, Boolean, Hash, Array values
-			def deep_clone(value)
-				if value.is_a?(Hash)
-					result = value.clone
-					value.each { |k,v|
-						if k != '_parent'
-							result[k] = deep_clone(v)
-							result[k]['_parent'] = result if result[k].is_a?(Hash) and
-								result[k].has_key?('_parent')
-						end
-					}
-					result
-				elsif value.is_a?(Array)
-					result = value.clone
-					result.clear
-					result.each { |v| result << deep_clone(v) }
-					result
-				else
-					value
-				end
-			end
-
 			# set possible values for each variable
 			def set_variable_values
-#$stderr.puts @variables.keys.inspect + "\n"
 				@variables.each_value { |var|
 					if not var.is_final
-$stderr.puts var.name + ' == ' + @types.keys.inspect if not @types.has_key?(var.type)
 						@types[var.type].each { |v| var << v }
 						var.uniq!
 					else
 						var << var.init
 					end
 				}
-#$stderr.puts "\tset variable value"
 			end
 
 			# return true if global constraint could be applied, otherwise false
@@ -848,7 +822,7 @@ $stderr.puts var.name + ' == ' + @types.keys.inspect if not @types.has_key?(var.
 							grounder.map.clear
 							grounder.map[var] = ref + "[#{i}]"
 							id = Nuri::Sfp::Sas.next_constraint_key
-							c_and = deep_clone(formula['_template'])
+							c_and = Nuri::Sfp.deep_clone(formula['_template'])
 							c_and['_self'] = id
 							c_and.accept(grounder)
 							formula[id] = c_and

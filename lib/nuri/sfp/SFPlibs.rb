@@ -90,9 +90,8 @@ module Nuri
 					}
 					result
 				elsif value.is_a?(Array)
-					result = value.clone
-					result.clear
-					result.each { |v| result << deep_clone(v) }
+					result = Array.new
+					value.each { |v| result << deep_clone(v) }
 					result
 				else
 					value

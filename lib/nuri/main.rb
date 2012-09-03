@@ -110,7 +110,6 @@ module Nuri
 				main['initial']['_self'] = 'initial'
 				@main['system'].each do |key,node|
 					next if key[0,1] == '_' or not node['_isa'] == '$.Node'
-					#main['initial'][key] = self.get_child_state(node['domainname'])
 					main['initial'].delete(key)
 					state = self.get_child_state(node['domainname'])
 					state.each { |k,v| main['initial'][k] = v } if state != nil
