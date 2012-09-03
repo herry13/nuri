@@ -10,6 +10,11 @@ Important files:
 - <HOME>/etc/main.sfp -- Main specification file to be deployed.
 - <HOME>/etc/bsig.sfp -- Specification of Behavioural Signature model.
 
+Get current state:
+
+	http://<host>:9090/state
+
+
 Ubuntu
 ------
 Required Packages
