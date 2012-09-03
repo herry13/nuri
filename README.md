@@ -27,6 +27,7 @@ Scientific Linux
 ----------------
 Required Packages
 - ruby (>= 1.8.7)
+- ruby-devel
 - rubygems
 - zlib-devel
 - augeas-devel
