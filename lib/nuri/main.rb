@@ -26,25 +26,10 @@ module Nuri
 		def initialize
 			self.read_config
 			self.load_modules
-			@locked = false
-			@mutex = Mutex.new
-			self.read_bsig if @config.has_key?('bsig') and @config['bsig']
 			self.read_main
+			#@locked = false
+			#@mutex = Mutex.new
 			#self.apply
-		end
-
-		def read_bsig
-			Nuri::Util.log 'Read BSig description...'
-			begin
-				sfpfile = '/etc/nuri/bsig.sfp'
-				sfpfile = Nuri::Util.rootdir + '/etc/bsig.sfp' if not File.file?(sfpfile)
-				@bsig = Nuri::Sfp::Parser.file_to_json(sfpfile)
-				Nuri::Util.log 'Successfully load ' + sfpfile
-			rescue Exception => exp
-				Nuri::Util.log.error "Cannot load " + sfpfile + " -- " + exp.to_s
-			rescue StandardError => stderr
-				Nuri::Util.log.error "Cannot load " + sfpfile
-			end
 		end
 
 		def read_main
@@ -105,6 +90,33 @@ module Nuri
 					end
 				end
 			}
+		end
+
+		def get_state(path='')
+			return nil if not @main.has_key?('system')
+			if @config['as_parent']
+				main = Nuri::Sfp.deep_clone(@main)
+				@main['system'].each do |key,node|
+					next if key[0,1] == '_' or not node['_isa'] == '$.Node'
+					main['system'][key] = self.get_child_state(node['domainname'])
+				end
+				return main
+			else
+				@root.get_state(path)
+			end
+		end
+
+		def get_child_state(address)
+			begin
+				port = 9090
+				url = URI.parse('http://' + address + ':' + port.to_s + '/state')
+				req = Net::HTTP::Get.new(url.path)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
+				return JSON.parse(res.body)
+			rescue Exception => e
+				Nuri::Util.log 'Cannot get state of node ' + address + ': ' + e.to_s
+			end
+			nil
 		end
 
 		# Start nuri service.
@@ -182,17 +194,13 @@ module Nuri
 				else
 					res.start(200) do |head, out|
 						head["Content-Type"] = "application/json"
-						data['value'] = state
+						data['value'] = JSON[ Nuri::Sfp.to_json(state) ]
 						out.write(JSON.generate(data))
 					end
 				end
 			rescue Exception => exp
 				self.send_error(res, exp.to_s)
 			end
-		end
-
-		def get_state(path='')
-			return @root.get_state(path)
 		end
 
 		def http_set_state(req, res)

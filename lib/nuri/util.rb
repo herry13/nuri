@@ -9,6 +9,15 @@ module Nuri
 			return @@rootdir
 		end
 
+		def self.get_main
+			mainfile = self.rootdir + '/etc/main.sfp'
+			#sfp = File.read(mainfile)
+			#parser = Nuri::Sfp::Parser.new
+			#parser.parse(sfp)
+			#return parser.to_json
+			return Nuri::Sfp::Parser.file_to_json(mainfile)
+		end
+
 		def self.log(msg=nil)
 			if msg != nil
 				@@logger.info msg

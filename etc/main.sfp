@@ -1,15 +1,15 @@
 include "modules/node/node.sfp"
-include "modules/apache/apache.sfp"
+#include "modules/apache/apache.sfp"
 
 system {
 	hpvm11 isa Node {
-		hostname is "hpvm16.diy.inf.ed.ac.uk"
+		domainname is "hpvm11.diy.inf.ed.ac.uk"
 	}
 	hpvm12 isa Node {
-		hostname is "hpvm17.diy.inf.ed.ac.uk"
+		domainname is "hpvm12.diy.inf.ed.ac.uk"
 	}
 	hpvm13 isa Node {
-		hostname is "hpvm18.diy.inf.ed.ac.uk"
+		domainname is "hpvm13.diy.inf.ed.ac.uk"
 	}
 }
 

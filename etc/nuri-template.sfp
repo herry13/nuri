@@ -6,9 +6,7 @@ nuri {
 	ssl_cert is "cert.pem"
 	ssl_key is "key.pem"
 
-	as_child is yes
 	as_parent is no
 	
-	dashboard_enabled is no 
 	//bsig is yes
 }

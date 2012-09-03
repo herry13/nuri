@@ -9,9 +9,8 @@ def cli
 	return if ARGV.length <= 1
 
 	if ARGV[1] == 'main'
-		mainfile = Nuri::Util.rootdir + '/etc/main.sfp'
-		root = Nuri::Sfp::Parser.file_to_json(mainfile)
-		Nuri::Sfp::Parser.dump(root)
+		nuri = Nuri::Main.new
+		Nuri::Sfp::Parser.dump(nuri.main)
 	elsif ARGV[1] == 'current'
 		nuri = Nuri::Main.new
 		state = nuri.get_state

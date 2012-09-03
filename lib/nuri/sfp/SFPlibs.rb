@@ -28,7 +28,7 @@ module Nuri
 				return "$." + path
 			end
 		
-			def to_json
+			def to_sfp
 				return @root
 			end
 		

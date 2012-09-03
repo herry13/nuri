@@ -7,7 +7,7 @@ module Nuri
 			def self.file_to_json(file)
 				parser = Parser.new
 				parser.parse_file(file)
-				return parser.to_json
+				return parser.to_sfp
 			end
 
 			def initialize
@@ -50,14 +50,40 @@ module Nuri
 				puts JSON.pretty_generate(root)
 			end
 
-			# return JSON representation of SFP description
-			def to_json
+			def to_sfp
 				return nil if @parser == nil
-				return @parser.to_json
+				return @parser.to_sfp
 			end
 
 			# enable this class to process SFP into FDR (SAS+)
 			include Nuri::Sfp::Sas
 		end
+
+		def self.to_json(sfp)
+			root = Nuri::Sfp.deep_clone(sfp)
+			root.accept(Nuri::Sfp::ParentEliminator.new)
+			return JSON.generate(root)
+		end
+
+		def self.deep_clone(value)
+			if value.is_a?(Hash)
+				result = value.clone
+				value.each do |k,v|
+					next if k == '_parent'
+					result[k] = Nuri::Sfp.deep_clone(v)
+					result[k]['_parent'] = result if result[k].is_a?(Hash) and
+							result[k].has_key?('_parent')
+				end
+				result
+			elsif value.is_a?(Array)
+				result = value.clone
+				result.clear
+				result.each { |v| result << Nuri::Sfp.deep_clone(v) }
+				result
+			else
+				value
+			end
+		end
+
 	end
 end
