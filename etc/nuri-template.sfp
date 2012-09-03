@@ -7,4 +7,5 @@ nuri {
 	ssl_key is "key.pem"
 
 	//bsig is yes
+	//dashboard_enabled is yes
 }
