@@ -81,12 +81,12 @@ module Nuri
 				# set domain values for each variable
 				self.set_variable_values
 
-				self.dump_types
-				self.dump_vars
+				#self.dump_types
+				#self.dump_vars
 
 				# process goal constraint
-puts "\tprocess goal"
-				process_goal(@root['goal']) if @root.has_key?('goal') and @root['goal'].isconstraint
+				process_goal(@root['goal']) if @root.has_key?('goal') and
+						@root['goal'].isconstraint
 
 				# normalize global constraint formula
 				if @root.has_key?('global') and @root['global'].isconstraint
@@ -304,9 +304,6 @@ puts new_operators.length.to_s + ' new merged-operators'
 
 			# process given operator
 			def process_operator(op)
-#f = Nuri::Sfp.deep_clone(op['_conditions'])
-#f.delete('_parent')
-#Nuri::Sfp::Parser.dump(f)
 				# return if given operator is not valid
 				return if not normalize_formula(op['_conditions'])
 				# at this step, the conditions formula has been normalized (AND/OR tree)
@@ -348,7 +345,6 @@ puts new_operators.length.to_s + ' new merged-operators'
 			# grounded SAS-operator
 			def process_procedure(procedure, object)
 				operators = ground_procedure_parameters(procedure)
-puts 'process proc: ' + procedure.ref + ' -- ' + operators.length.to_s
 				if operators != nil
 					operators.each { |op| process_operator(op) }
 				end
@@ -642,7 +638,6 @@ puts 'process proc: ' + procedure.ref + ' -- ' + operators.length.to_s
 				def to_and_or_graph(formula)
 					formula.each { |k,v|
 						next if k[0,1] == '_'
-puts "\t\t" + k
 						if k.isref and not @variables.has_key?(k)
 							if v.is_a?(Hash) and v.isconstraint
 								if (v['_type'] == 'equals' or v['_type'] == 'not-equals') and
@@ -858,7 +853,6 @@ puts "\t\t" + k
 				end
 
 				remove_not_iterator_constraint(formula)
-puts 'not-iterator'
 				to_and_or_graph(formula)
 				not_equals_statement_to_or_constraint(formula)
 				return flatten_and_or_graph(formula)

@@ -96,9 +96,9 @@ module Nuri
 			state = self.get_state
 			state.accept(Nuri::Sfp::SfpGenerator.new(state))
 			planner = Nuri::Planner::Solver.new
-			puts planner.solve_json(state)
-			Nuri::Sfp::Parser.dump(state)
-			return nil
+			return planner.solve_json(state)
+			#Nuri::Sfp::Parser.dump(state)
+			#return nil
 		end
 
 		def get_state(path='')

@@ -15,8 +15,8 @@ system {
 }
 
 goal constraint {
-	#hpvm11.apache.running = false
-	hpvm11.running = false
+	hpvm11.apache.running = false
+	#hpvm11.running = false
 }
 
 global constraint {
