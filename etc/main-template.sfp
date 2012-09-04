@@ -6,17 +6,18 @@ system {
 	hpvm11 isa Node {
 		domainname is "hpvm11.diy.inf.ed.ac.uk"
 	}
-/*	hpvm12 isa Node {
+	hpvm12 isa Node {
 		domainname is "hpvm12.diy.inf.ed.ac.uk"
 	}
 	hpvm13 isa Node {
 		domainname is "hpvm13.diy.inf.ed.ac.uk"
-	}*/
+	}
 }
 
 goal constraint {
 	hpvm11.apache.running = false
-	#hpvm11.running = false
+	hpvm12.apache.running = true
+	hpvm13.apache.running = true
 }
 
 global constraint {
