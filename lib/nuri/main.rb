@@ -105,7 +105,7 @@ module Nuri
 		end
 
 		def get_state(path='')
-			return nil if not @main.has_key?('system')
+			#return nil if not @main.has_key?('system')
 			if @config['as_master']
 				# retrieve all children's current state
 				main = Nuri::Sfp.deep_clone(@main)

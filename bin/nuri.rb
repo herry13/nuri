@@ -14,7 +14,7 @@ def cli
 	elsif ARGV[1] == 'state'
 		nuri = Nuri::Main.new
 		state = nuri.get_state
-		Nuri::Sfp::Parser.dump(state['initial'])
+		Nuri::Sfp::Parser.dump(state) #['initial'])
 	elsif ARGV[1] == 'plan'
 		nuri = Nuri::Main.new
 		puts nuri.get_plan
