@@ -35,13 +35,12 @@ module Nuri
 		def read_main
 			Nuri::Util.log 'Read main description...'
 			begin
-				mainfile = Nuri::Util.rootdir + '/etc/main.sfp'
-				@main = Nuri::Sfp::Parser.file_to_sfp(mainfile)
-				Nuri::Util.log 'Successfully load ' + mainfile
+				@main = Nuri::Util.get_main
+				Nuri::Util.log 'Successfully load main description'
 			rescue Exception => exp
-				Nuri::Util.log.error "Cannot load " + mainfile.to_s + " -- " + exp.to_s
+				Nuri::Util.log.error "Cannot load main description" + " -- " + exp.to_s
 			rescue StandardError => stderr
-				Nuri::Util.log.error "Cannot load " + mainfile.to_s
+				Nuri::Util.log.error "Cannot load main description"
 			end
 		end
 
