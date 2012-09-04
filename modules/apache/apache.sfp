@@ -8,7 +8,7 @@ class Apache extends WebService {
 	docroot is "/var/www/html"
 	refer isref DBService
 
-	/*procedure install {
+	procedure install {
 		conditions {
 			this.installed is no
 		}
@@ -34,7 +34,7 @@ class Apache extends WebService {
 		effects {
 			this.running is yes
 		}
-	}*/
+	}
 
 	procedure stop {
 		conditions {
@@ -46,7 +46,7 @@ class Apache extends WebService {
 		}
 	}
 
-	/*procedure set_port(p isref integer) {
+	procedure set_port(p isref integer) {
 		conditions {
 			this.installed is yes
 			this.running is no
@@ -73,5 +73,5 @@ class Apache extends WebService {
 		effects {
 			this.refer = s
 		}
-	}*/
+	}
 }
