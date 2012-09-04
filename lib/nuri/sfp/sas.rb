@@ -60,7 +60,12 @@ module Nuri
 
 				# collect classes
 				#self.collect_classes
-				
+			
+				# unlink 'initial', 'goal', 'global' with root
+				@root['initial'].delete('_parent')
+				@root['goal'].delete('_parent')
+				@root['global'].delete('_parent')
+	
 				# collect variables
 				@root['initial'].accept(VariableCollector.new(self))
 
@@ -76,10 +81,11 @@ module Nuri
 				# set domain values for each variable
 				self.set_variable_values
 
-				#self.dump_types
-				#self.dump_vars
+				self.dump_types
+				self.dump_vars
 
 				# process goal constraint
+puts "\tprocess goal"
 				process_goal(@root['goal']) if @root.has_key?('goal') and @root['goal'].isconstraint
 
 				# normalize global constraint formula
@@ -110,7 +116,7 @@ module Nuri
 				merged = Array.new
 				new_operators = Array.new
 				begin
-$stderr.puts 'checking ' + @operators.length.to_s + ' operators'
+puts 'checking ' + @operators.length.to_s + ' operators'
 					new_operators.clear
 					@operators.each_value do |op1|
 						@operators.each_value do |op2|
@@ -127,7 +133,7 @@ $stderr.puts 'checking ' + @operators.length.to_s + ' operators'
 						end
 					end
 					new_operators.each { |op| @operators[op.name] = op }
-$stderr.puts new_operators.length.to_s + ' new merged-operators'
+puts new_operators.length.to_s + ' new merged-operators'
 				end while new_operators.length > 0
 			end
 
@@ -298,6 +304,9 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 
 			# process given operator
 			def process_operator(op)
+#f = Nuri::Sfp.deep_clone(op['_conditions'])
+#f.delete('_parent')
+#Nuri::Sfp::Parser.dump(f)
 				# return if given operator is not valid
 				return if not normalize_formula(op['_conditions'])
 				# at this step, the conditions formula has been normalized (AND/OR tree)
@@ -339,6 +348,7 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 			# grounded SAS-operator
 			def process_procedure(procedure, object)
 				operators = ground_procedure_parameters(procedure)
+puts 'process proc: ' + procedure.ref + ' -- ' + operators.length.to_s
 				if operators != nil
 					operators.each { |op| process_operator(op) }
 				end
@@ -359,7 +369,6 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 						params[k] << val if not (val.is_a?(Hash) and val.isnull)
 					}
 				}
-
 				# combinatorial method for all possible values of parameters
 				# using recursive method
 				def combinator(bucket, grounder, procedure, names, params, selected, index)
@@ -402,7 +411,7 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 =end
 
 			def dump_types
-				$stderr.puts '--- types'
+				puts '--- types'
 				@types.each { |name,values|
 					next if values == nil
 					print name + ": "
@@ -413,23 +422,23 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 							print val.to_s + " "
 						end
 					}
-					$stderr.puts '| ' + values.length.to_s
+					puts '| ' + values.length.to_s
 				}
 			end
 
 			def dump_vars
-				$stderr.puts '--- variables'
-				@variables.each_value { |value| $stderr.puts value.to_s }
+				puts '--- variables'
+				@variables.each_value { |value| puts value.to_s }
 			end
 
 			def dump_operators
-				$stderr.puts '--- operators'
-				@operators.each_value { |op| $stderr.puts op.to_s + ' -- ' + op.params.inspect }
+				puts '--- operators'
+				@operators.each_value { |op| puts op.to_s + ' -- ' + op.params.inspect }
 			end
 
 			def dump_axioms
-				$stderr.puts '--- axioms'
-				@axioms.each { |ax| $stderr.puts ax.to_s }
+				puts '--- axioms'
+				@axioms.each { |ax| puts ax.to_s }
 			end
 
 			# set possible values for each variable
@@ -535,8 +544,11 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 				# using recursive method
 				def ref_combinator(bucket, parent, names, last_value, last_names=nil,
 						index=0, selected=Hash.new)
-#$stderr.puts index.to_s + ': ' + names.inspect
+
+					return if names[index] == nil
 					var_name = parent + '.' + names[index]
+					return if not @variables.has_key?(var_name)
+
 					if index >= names.length or (index >= names.length-1 and last_value != nil)
 						selected[var_name] = last_value if last_value != nil
 						last_names << var_name if last_names != nil
@@ -614,21 +626,23 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 				end
 
 				def normalize_nested_left_only(left, right, formula)
-#puts 'nested-left-only: ' + left
 					names, rest = break_nested_reference(left)
 					bucket = Array.new
 					ref_combinator(bucket, rest, names, right)
-					key = Nuri::Sfp::Sas.next_constraint_key
-					formula[key] = array_to_or_constraint(bucket)
 					formula.delete(left)
-					to_and_or_graph(formula[key])
-					return key
+					if bucket.length > 0
+						key = Nuri::Sfp::Sas.next_constraint_key
+						formula[key] = array_to_or_constraint(bucket)
+						to_and_or_graph(formula[key])
+						return key
+					end
 				end
 
 				# transform a first-order formula into AND/OR graph
 				def to_and_or_graph(formula)
 					formula.each { |k,v|
 						next if k[0,1] == '_'
+puts "\t\t" + k
 						if k.isref and not @variables.has_key?(k)
 							if v.is_a?(Hash) and v.isconstraint
 								if (v['_type'] == 'equals' or v['_type'] == 'not-equals') and
@@ -694,7 +708,7 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 						end
 					}
 					# dot-product the nodes
-					def dot_product_and(bucket, names, formula, values=Hash.new, index=0)
+					def cross_product_and(bucket, names, formula, values=Hash.new, index=0)
 						if index >= names.length
 							key = Nuri::Sfp::Sas.next_constraint_key
 							c = create_and_constraint(key, formula)
@@ -710,12 +724,12 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 								val.each { |k,v|
 									next if k[0,1] == '_'
 									values[k] = v
-									dot_product_and(bucket, names, formula, values, index+1)
+									cross_product_and(bucket, names, formula, values, index+1)
 									values.delete(k)
 								}
 							else
 								values[key] = val
-								dot_product_and(bucket, names, formula, values, index+1)
+								cross_product_and(bucket, names, formula, values, index+1)
 							end
 						end
 					end
@@ -724,7 +738,7 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 						names = Array.new
 						formula.keys.each { |k| names << k if k[0,1] != '_' }
 						bucket = Array.new
-						dot_product_and(bucket, names, formula)
+						cross_product_and(bucket, names, formula)
 						names.each { |k| formula.delete(k) }
 						formula['_type'] = 'or'
 					end
@@ -750,26 +764,28 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 				# then formula := x not-equals p1 is transformed into
 				# formula := (x equals p2) or (x equals p3)
 				def not_equals_statement_to_or_constraint(formula)
-					formula.each { |k,v|
+					keys = formula.keys
+					keys.each do |k|
 						next if k[0,1] == '_'
+						v = formula[k]
 						if v.is_a?(Hash) and v.isconstraint
 							if v['_type'] == 'or' or v['_type'] == 'and'
 								not_equals_statement_to_or_constraint(v)
 							elsif v['_type'] == 'not-equals'
 								key1 = Nuri::Sfp::Sas.next_constraint_key
 								c_or = create_or_constraint(key1, formula)
-								get_list_not_value_of(k, v['_value']).each { |val1|
+								get_list_not_value_of(k, v['_value']).each do |val1|
 									val1 = val1.ref if val1.is_a?(Hash) and val1.isobject
 									key2 = Nuri::Sfp::Sas.next_constraint_key
 									c_and = create_and_constraint(key2, c_or)
 									c_and[k] = create_equals_constraint(val1)
 									c_or[key2] = c_and
-								}
+								end
 								formula.delete(k)
 								formula[key1] = c_or
 							end
 						end
-					}
+					end
 				end
 
 				# Remove the following type of constraint in the given formula:
@@ -842,6 +858,7 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 				end
 
 				remove_not_iterator_constraint(formula)
+puts 'not-iterator'
 				to_and_or_graph(formula)
 				not_equals_statement_to_or_constraint(formula)
 				return flatten_and_or_graph(formula)
@@ -977,12 +994,14 @@ $stderr.puts new_operators.length.to_s + ' new merged-operators'
 							obj[v] = value
 							obj.delete(name)
 							name = v
+							value['_self'] = name if value.is_a?(Hash)
 							break
 						elsif name.length > k.length and name[k.length,1] == '.' and name[0, k.length] == k
 							grounded = v + name[k.length, (name.length-k.length)]
 							obj[grounded] = value
 							obj.delete(name)
 							name = grounded
+							value['_self'] = name if value.is_a?(Hash)
 							break
 						end
 					}

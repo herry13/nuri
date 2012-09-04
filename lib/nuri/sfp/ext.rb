@@ -68,7 +68,7 @@ Hash.send(:define_method, 'inherits') { |parent|
 	parent.each_pair { |key,value|
 		next if key[0,1] == '_' or self.has_key?(key)
 		if value.is_a?(Hash)
-			self[key] = value.clone
+			self[key] = Nuri::Sfp.deep_clone(value) #value.clone
 			self[key]['_parent'] = self
 		else
 			self[key] = value
