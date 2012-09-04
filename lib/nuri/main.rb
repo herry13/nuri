@@ -156,7 +156,7 @@ module Nuri
 		end
 
 		def start_master
-			sleep_time = 2 # in seconds
+			sleep_time = 10 # in seconds
 			@running = true
 			begin
 				puts self.get_plan
