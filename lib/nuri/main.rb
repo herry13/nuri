@@ -36,7 +36,7 @@ module Nuri
 			Nuri::Util.log 'Read main description...'
 			begin
 				mainfile = Nuri::Util.rootdir + '/etc/main.sfp'
-				@main = Nuri::Sfp::Parser.file_to_json(mainfile)
+				@main = Nuri::Sfp::Parser.file_to_sfp(mainfile)
 				Nuri::Util.log 'Successfully load ' + mainfile
 			rescue Exception => exp
 				Nuri::Util.log.error "Cannot load " + mainfile.to_s + " -- " + exp.to_s
@@ -52,7 +52,7 @@ module Nuri
 				Nuri::Util.log 'Read configuration file...'
 				cfile = '/etc/nuri/nuri.sfp'
 				cfile = Nuri::Util.rootdir + "/etc/nuri.sfp" if not File.file?(cfile)
-				@config = Nuri::Sfp::Parser.file_to_json(cfile)['nuri']
+				@config = Nuri::Sfp::Parser.file_to_sfp(cfile)['nuri']
 				Nuri::Util.log 'Successfully load configuration file ' + cfile
 			rescue Exception => exp
 				Nuri::Util.log.error "Cannot load configuration file " + cfile + ' -- ' + exp.to_s

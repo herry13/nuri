@@ -65,6 +65,7 @@ Hash.send(:define_method, "expanded") {
 # copy attributes and procedures from superclass to itself
 # TODO -- implement deep copy
 Hash.send(:define_method, 'inherits') { |parent|
+	return if not parent.is_a?(Hash)
 	parent.each_pair { |key,value|
 		next if key[0,1] == '_' or self.has_key?(key)
 		if value.is_a?(Hash)

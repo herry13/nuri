@@ -4,9 +4,15 @@ module Nuri
 		# in file or as a string
 		class Parser
 			# Parse SFP file and return its JSON representation
-			def self.file_to_json(file)
+			def self.file_to_sfp(file)
 				parser = Parser.new
 				parser.parse_file(file)
+				return parser.to_sfp
+			end
+
+			def self.to_sfp(string)
+				parser = Parser.new
+				parser.parse(string)
 				return parser.to_sfp
 			end
 

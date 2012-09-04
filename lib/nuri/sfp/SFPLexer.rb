@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-09-03 00:29:41
+# Generated at: 2012-09-04 21:08:06
 # 
 
 # ~~~> start load path setup
@@ -1839,22 +1839,39 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 697:6: ( '\\r' )? '\\n'
-      # at line 697:6: ( '\\r' )?
-      alt_21 = 2
-      look_21_0 = @input.peek( 1 )
+      # at line 697:4: ( ( '\\r' )? '\\n' | EOF )
+      alt_22 = 2
+      look_22_0 = @input.peek( 1 )
 
-      if ( look_21_0 == 0xd )
-        alt_21 = 1
+      if ( look_22_0 == 0xa || look_22_0 == 0xd )
+        alt_22 = 1
+      else
+        alt_22 = 2
       end
-      case alt_21
+      case alt_22
       when 1
-        # at line 697:6: '\\r'
-        match( 0xd )
+        # at line 697:6: ( '\\r' )? '\\n'
+        # at line 697:6: ( '\\r' )?
+        alt_21 = 2
+        look_21_0 = @input.peek( 1 )
+
+        if ( look_21_0 == 0xd )
+          alt_21 = 1
+        end
+        case alt_21
+        when 1
+          # at line 697:6: '\\r'
+          match( 0xd )
+
+        end
+        match( 0xa )
+
+      when 2
+        # at line 698:4: EOF
+        match( ANTLR3::EOF )
+
 
       end
-      match( 0xa )
-
       
       @state.type = type
       @state.channel = channel
@@ -1876,7 +1893,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 700:8: ( ' ' | '\\t' )
+      # at line 701:8: ( ' ' | '\\t' )
       if @input.peek(1) == 0x9 || @input.peek(1) == 0x20
         @input.consume
       else
@@ -1911,26 +1928,26 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 704:5: '\"' ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )* '\"'
+      # at line 705:5: '\"' ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )* '\"'
       match( 0x22 )
-      # at line 704:9: ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )*
-      while true # decision 22
-        alt_22 = 3
-        look_22_0 = @input.peek( 1 )
+      # at line 705:9: ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )*
+      while true # decision 23
+        alt_23 = 3
+        look_23_0 = @input.peek( 1 )
 
-        if ( look_22_0 == 0x5c )
-          alt_22 = 1
-        elsif ( look_22_0.between?( 0x0, 0x21 ) || look_22_0.between?( 0x23, 0x5b ) || look_22_0.between?( 0x5d, 0xffff ) )
-          alt_22 = 2
+        if ( look_23_0 == 0x5c )
+          alt_23 = 1
+        elsif ( look_23_0.between?( 0x0, 0x21 ) || look_23_0.between?( 0x23, 0x5b ) || look_23_0.between?( 0x5d, 0xffff ) )
+          alt_23 = 2
 
         end
-        case alt_22
+        case alt_23
         when 1
-          # at line 704:11: ESC_SEQ
+          # at line 705:11: ESC_SEQ
           esc_seq!
 
         when 2
-          # at line 704:21: ~ ( '\\\\' | '\"' )
+          # at line 705:21: ~ ( '\\\\' | '\"' )
           if @input.peek( 1 ).between?( 0x0, 0x21 ) || @input.peek( 1 ).between?( 0x23, 0x5b ) || @input.peek( 1 ).between?( 0x5d, 0xff )
             @input.consume
           else
@@ -1942,9 +1959,9 @@ module SFP
 
 
         else
-          break # out of loop for decision 22
+          break # out of loop for decision 23
         end
-      end # loop for decision 22
+      end # loop for decision 23
       match( 0x22 )
 
       
@@ -1965,7 +1982,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 708:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
+      # at line 709:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
       if @input.peek(1) == 0x45 || @input.peek(1) == 0x65
         @input.consume
       else
@@ -1975,14 +1992,14 @@ module SFP
       end
 
 
-      # at line 708:22: ( '+' | '-' )?
-      alt_23 = 2
-      look_23_0 = @input.peek( 1 )
+      # at line 709:22: ( '+' | '-' )?
+      alt_24 = 2
+      look_24_0 = @input.peek( 1 )
 
-      if ( look_23_0 == 0x2b || look_23_0 == 0x2d )
-        alt_23 = 1
+      if ( look_24_0 == 0x2b || look_24_0 == 0x2d )
+        alt_24 = 1
       end
-      case alt_23
+      case alt_24
       when 1
         # at line 
         if @input.peek(1) == 0x2b || @input.peek(1) == 0x2d
@@ -1996,29 +2013,29 @@ module SFP
 
 
       end
-      # at file 708:33: ( '0' .. '9' )+
-      match_count_24 = 0
+      # at file 709:33: ( '0' .. '9' )+
+      match_count_25 = 0
       while true
-        alt_24 = 2
-        look_24_0 = @input.peek( 1 )
+        alt_25 = 2
+        look_25_0 = @input.peek( 1 )
 
-        if ( look_24_0.between?( 0x30, 0x39 ) )
-          alt_24 = 1
+        if ( look_25_0.between?( 0x30, 0x39 ) )
+          alt_25 = 1
 
         end
-        case alt_24
+        case alt_25
         when 1
-          # at line 708:34: '0' .. '9'
+          # at line 709:34: '0' .. '9'
           match_range( 0x30, 0x39 )
 
         else
-          match_count_24 > 0 and break
-          eee = EarlyExit(24)
+          match_count_25 > 0 and break
+          eee = EarlyExit(25)
 
 
           raise eee
         end
-        match_count_24 += 1
+        match_count_25 += 1
       end
 
 
@@ -2036,7 +2053,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 711:13: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
+      # at line 712:13: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
       if @input.peek( 1 ).between?( 0x30, 0x39 ) || @input.peek( 1 ).between?( 0x41, 0x46 ) || @input.peek( 1 ).between?( 0x61, 0x66 )
         @input.consume
       else
@@ -2061,24 +2078,24 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 715:2: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
-      alt_25 = 3
-      look_25_0 = @input.peek( 1 )
+      # at line 716:2: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
+      alt_26 = 3
+      look_26_0 = @input.peek( 1 )
 
-      if ( look_25_0 == 0x5c )
-        case look_25 = @input.peek( 2 )
-        when 0x22, 0x27, 0x5c, 0x62, 0x66, 0x6e, 0x72, 0x74 then alt_25 = 1
-        when 0x75 then alt_25 = 2
-        when 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 then alt_25 = 3
+      if ( look_26_0 == 0x5c )
+        case look_26 = @input.peek( 2 )
+        when 0x22, 0x27, 0x5c, 0x62, 0x66, 0x6e, 0x72, 0x74 then alt_26 = 1
+        when 0x75 then alt_26 = 2
+        when 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 then alt_26 = 3
         else
-          raise NoViableAlternative( "", 25, 1 )
+          raise NoViableAlternative( "", 26, 1 )
         end
       else
-        raise NoViableAlternative( "", 25, 0 )
+        raise NoViableAlternative( "", 26, 0 )
       end
-      case alt_25
+      case alt_26
       when 1
-        # at line 715:6: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
+        # at line 716:6: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
         match( 0x5c )
         if @input.peek(1) == 0x22 || @input.peek(1) == 0x27 || @input.peek(1) == 0x5c || @input.peek(1) == 0x62 || @input.peek(1) == 0x66 || @input.peek(1) == 0x6e || @input.peek(1) == 0x72 || @input.peek(1) == 0x74
           @input.consume
@@ -2091,11 +2108,11 @@ module SFP
 
 
       when 2
-        # at line 716:6: UNICODE_ESC
+        # at line 717:6: UNICODE_ESC
         unicode_esc!
 
       when 3
-        # at line 717:6: OCTAL_ESC
+        # at line 718:6: OCTAL_ESC
         octal_esc!
 
       end
@@ -2113,75 +2130,75 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 722:2: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
-      alt_26 = 3
-      look_26_0 = @input.peek( 1 )
+      # at line 723:2: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+      alt_27 = 3
+      look_27_0 = @input.peek( 1 )
 
-      if ( look_26_0 == 0x5c )
-        look_26_1 = @input.peek( 2 )
+      if ( look_27_0 == 0x5c )
+        look_27_1 = @input.peek( 2 )
 
-        if ( look_26_1.between?( 0x30, 0x33 ) )
-          look_26_2 = @input.peek( 3 )
+        if ( look_27_1.between?( 0x30, 0x33 ) )
+          look_27_2 = @input.peek( 3 )
 
-          if ( look_26_2.between?( 0x30, 0x37 ) )
-            look_26_4 = @input.peek( 4 )
+          if ( look_27_2.between?( 0x30, 0x37 ) )
+            look_27_4 = @input.peek( 4 )
 
-            if ( look_26_4.between?( 0x30, 0x37 ) )
-              alt_26 = 1
+            if ( look_27_4.between?( 0x30, 0x37 ) )
+              alt_27 = 1
             else
-              alt_26 = 2
+              alt_27 = 2
             end
           else
-            alt_26 = 3
+            alt_27 = 3
           end
-        elsif ( look_26_1.between?( 0x34, 0x37 ) )
-          look_26_3 = @input.peek( 3 )
+        elsif ( look_27_1.between?( 0x34, 0x37 ) )
+          look_27_3 = @input.peek( 3 )
 
-          if ( look_26_3.between?( 0x30, 0x37 ) )
-            alt_26 = 2
+          if ( look_27_3.between?( 0x30, 0x37 ) )
+            alt_27 = 2
           else
-            alt_26 = 3
+            alt_27 = 3
           end
         else
-          raise NoViableAlternative( "", 26, 1 )
+          raise NoViableAlternative( "", 27, 1 )
         end
       else
-        raise NoViableAlternative( "", 26, 0 )
+        raise NoViableAlternative( "", 27, 0 )
       end
-      case alt_26
+      case alt_27
       when 1
-        # at line 722:6: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+        # at line 723:6: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
         match( 0x5c )
-        # at line 722:11: ( '0' .. '3' )
-        # at line 722:12: '0' .. '3'
+        # at line 723:11: ( '0' .. '3' )
+        # at line 723:12: '0' .. '3'
         match_range( 0x30, 0x33 )
-
-        # at line 722:22: ( '0' .. '7' )
-        # at line 722:23: '0' .. '7'
-        match_range( 0x30, 0x37 )
-
-        # at line 722:33: ( '0' .. '7' )
-        # at line 722:34: '0' .. '7'
-        match_range( 0x30, 0x37 )
-
-
-      when 2
-        # at line 723:6: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
-        match( 0x5c )
-        # at line 723:11: ( '0' .. '7' )
-        # at line 723:12: '0' .. '7'
-        match_range( 0x30, 0x37 )
 
         # at line 723:22: ( '0' .. '7' )
         # at line 723:23: '0' .. '7'
         match_range( 0x30, 0x37 )
 
+        # at line 723:33: ( '0' .. '7' )
+        # at line 723:34: '0' .. '7'
+        match_range( 0x30, 0x37 )
 
-      when 3
-        # at line 724:6: '\\\\' ( '0' .. '7' )
+
+      when 2
+        # at line 724:6: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
         match( 0x5c )
         # at line 724:11: ( '0' .. '7' )
         # at line 724:12: '0' .. '7'
+        match_range( 0x30, 0x37 )
+
+        # at line 724:22: ( '0' .. '7' )
+        # at line 724:23: '0' .. '7'
+        match_range( 0x30, 0x37 )
+
+
+      when 3
+        # at line 725:6: '\\\\' ( '0' .. '7' )
+        match( 0x5c )
+        # at line 725:11: ( '0' .. '7' )
+        # at line 725:12: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
@@ -2200,7 +2217,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 729:6: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
+      # at line 730:6: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
       match( 0x5c )
       match( 0x75 )
       hex_digit!
@@ -2223,9 +2240,9 @@ module SFP
     # build and emit the actual next token
     def token!
       # at line 1:8: ( T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | T__26 | T__27 | T__28 | T__29 | T__30 | T__31 | T__32 | T__33 | T__34 | T__35 | T__36 | T__37 | T__38 | T__39 | T__40 | T__41 | T__42 | T__43 | T__44 | T__45 | T__46 | T__47 | T__48 | T__49 | T__50 | T__51 | T__52 | T__53 | T__54 | T__55 | T__56 | T__57 | T__58 | T__59 | T__60 | T__61 | T__62 | T__63 | NULL | BOOLEAN | ID | NUMBER | COMMENT | MULTILINE_STRING | NL | WS | STRING )
-      alt_27 = 55
-      alt_27 = @dfa27.predict( @input )
-      case alt_27
+      alt_28 = 55
+      alt_28 = @dfa28.predict( @input )
+      case alt_28
       when 1
         # at line 1:10: T__18
         t__18!
@@ -2483,8 +2500,8 @@ module SFP
         __dfa_description__
       end
     end
-    class DFA27 < ANTLR3::DFA
-      EOT = unpack( 1, -1, 2, 30, 2, -1, 2, 30, 2, -1, 3, 30, 3, -1, 5, 
+    class DFA28 < ANTLR3::DFA
+      EOT = unpack( 1, 33, 2, 30, 2, -1, 2, 30, 2, -1, 3, 30, 3, -1, 5, 
                     30, 1, 64, 6, -1, 1, 68, 1, 70, 1, 30, 6, -1, 1, 73, 
                     1, 77, 1, 78, 8, 30, 1, 89, 2, 30, 1, 92, 2, 30, 1, 
                     95, 3, 30, 1, 92, 5, 30, 8, -1, 2, 30, 1, -1, 1, 107, 
@@ -2559,13 +2576,12 @@ module SFP
                        -1, 1, 5, 2, -1, 1, 18, 1, 16, 1, 23 )
       SPECIAL = unpack( 201, -1 )
       TRANSITION = [
-        unpack( 1, 34, 1, 33, 2, -1, 1, 33, 18, -1, 1, 34, 1, 22, 1, 35, 
-                1, 32, 4, -1, 1, 12, 1, 14, 1, 25, 1, 23, 1, 13, 1, 24, 
-                1, 20, 1, 26, 10, 31, 2, -1, 1, 28, 1, 21, 1, 27, 2, -1, 
-                26, 30, 1, 7, 1, -1, 1, 8, 3, -1, 1, 15, 1, 30, 1, 5, 1, 
-                18, 1, 6, 1, 16, 2, 30, 1, 1, 4, 30, 1, 17, 1, 10, 1, 11, 
-                1, 30, 1, 19, 1, 2, 1, 9, 4, 30, 1, 29, 1, 30, 1, 3, 1, 
-                -1, 1, 4 ),
+        unpack( 1, 34, 22, -1, 1, 34, 1, 22, 1, 35, 1, 32, 4, -1, 1, 12, 
+                1, 14, 1, 25, 1, 23, 1, 13, 1, 24, 1, 20, 1, 26, 10, 31, 
+                2, -1, 1, 28, 1, 21, 1, 27, 2, -1, 26, 30, 1, 7, 1, -1, 
+                1, 8, 3, -1, 1, 15, 1, 30, 1, 5, 1, 18, 1, 6, 1, 16, 2, 
+                30, 1, 1, 4, 30, 1, 17, 1, 10, 1, 11, 1, 30, 1, 19, 1, 2, 
+                1, 9, 4, 30, 1, 29, 1, 30, 1, 3, 1, -1, 1, 4 ),
         unpack( 1, 38, 7, -1, 1, 36, 4, -1, 1, 37 ),
         unpack( 1, 39 ),
         unpack(  ),
@@ -2807,7 +2823,7 @@ module SFP
         end
       end
       
-      @decision = 27
+      @decision = 28
       
 
       def description
@@ -2823,7 +2839,7 @@ module SFP
     def initialize_dfas
       super rescue nil
       @dfa15 = DFA15.new( self, 15 )
-      @dfa27 = DFA27.new( self, 27 )
+      @dfa28 = DFA28.new( self, 28 )
 
     end
   end # class Lexer < ANTLR3::Lexer

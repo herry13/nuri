@@ -32,11 +32,11 @@ module Nuri
 				return @root
 			end
 		
-			def process_file(file)
-				filepath = @root_dir + "/" + file if @root_dir != nil and file[0,1] != '/'
-				filepath = @home_dir + "/" + file if not File.exist?(filepath)
-				#return if not File.exist?(filepath)
-				data = Nuri::Sfp::Parser.file_to_json(filepath)
+			def process_file(filepath)
+				filepath = @root_dir + "/" + filepath if @root_dir != nil and filepath[0,1] != '/'
+				filepath = @home_dir + "/" + filepath if not File.exist?(filepath)
+				return if not File.exist?(filepath)
+				data = Nuri::Sfp::Parser.file_to_sfp(filepath)
 				data.each_pair { |key,val|
 					if val['_context'] == 'class' or val['_context'] == 'composite'
 						@root[key] = val
@@ -71,8 +71,10 @@ module Nuri
 			end
 
 			def self.expand_object(obj, root)
-				return false if not obj.has_key?('_isa') or obj['_isa'] == nil
+				return false if obj == nil or root == nil or
+						not obj.has_key?('_isa') or obj['_isa'] == nil
 				objclass = root.at?(obj['_isa'])
+				raise Exception, 'Super class is not found: ' + obj['_isa'] if objclass == nil
 				obj.inherits( objclass )
 				obj['_classes'] = (objclass.has_key?('_super') ? objclass['_super'].clone : Array.new)
 				obj['_classes'] << obj['_isa']
