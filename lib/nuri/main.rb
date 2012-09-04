@@ -25,11 +25,15 @@ module Nuri
 
 		def initialize
 			self.read_config
+			self.read_libraries
 			self.load_modules
 			self.read_main
 			#@locked = false
 			#@mutex = Mutex.new
 			#self.apply
+		end
+
+		def read_libraries
 		end
 
 		def read_main
@@ -102,36 +106,19 @@ module Nuri
 			sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 			planner = Nuri::Planner::Solver.new
 			return planner.solve_json(sfp)
-
-			#state = self.get_state
-			#state.accept(Nuri::Sfp::SfpGenerator.new(state))
-			#planner = Nuri::Planner::Solver.new
-			#return planner.solve_json(state)
-
-			#Nuri::Sfp::Parser.dump(state)
-			#return nil
 		end
 
 		def get_state(path='')
 			if @config['as_master']
 				return nil if not @main.has_key?('system')
-				# retrieve all children's current state
-				#main = Nuri::Sfp.deep_clone(@main)
-				#main['initial'] = main['system']
-				#main.delete('system')
-				#main['initial']['_self'] = 'initial'
 				current_state = {'_context'=>'state', '_self'=>'initial'}
 				@main['system'].each do |key,node|
 					next if key[0,1] == '_' or not node['_isa'] == '$.Node'
 					state = self.get_child_state(node['domainname'])
-					#main['initial'].delete(key)
-					#state = self.get_child_state(node['domainname'])
-					#state.each { |k,v| main['initial'][k] = v } if state != nil
 					if state != nil
 						state.each { |k,v| current_state[k] = v }
 					end
 				end
-				#main
 				current_state
 			else
 				@root.get_state(path)
@@ -152,8 +139,36 @@ module Nuri
 			nil
 		end
 
-		# Start nuri service.
 		def start
+			if @config['as_master']
+				start_master
+			else
+				start_client
+			end
+		end
+
+		def stop
+			if @config['as_master']
+				stop_master
+			else
+				stop_client
+			end
+		end
+
+		def start_master
+			sleep_time = 2 # in seconds
+			@running = true
+			begin
+				puts self.get_plan
+				Kernel.sleep(sleep_time)
+			end while @running
+		end
+
+		def stop_client
+		end
+
+		# Start nuri client service.
+		def start_client
 			@http = Mongrel::HttpServer.new(@config.at?('host'), @config.at?('port').to_i)
 			@http.register("/", self)
 			Nuri::Util.log "Start server on " + @config.at?('host') + ":" +
@@ -161,8 +176,8 @@ module Nuri
 			@http.run.join
 		end
 	
-		# Stop nuri service.
-		def stop
+		# Stop nuri client service.
+		def stop_client
 			@http.graceful_shutdown
 			Nuri::Util.log "Nuri is stopped"
 		end
