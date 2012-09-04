@@ -96,29 +96,43 @@ module Nuri
 		end
 
 		def get_plan
-			state = self.get_state
-			state.accept(Nuri::Sfp::SfpGenerator.new(state))
+			sfp = Nuri::Sfp.deep_clone(@main)
+			sfp.delete('system')
+			sfp['initial'] = self.get_state
+			sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 			planner = Nuri::Planner::Solver.new
-			return planner.solve_json(state)
+			return planner.solve_json(sfp)
+
+			#state = self.get_state
+			#state.accept(Nuri::Sfp::SfpGenerator.new(state))
+			#planner = Nuri::Planner::Solver.new
+			#return planner.solve_json(state)
+
 			#Nuri::Sfp::Parser.dump(state)
 			#return nil
 		end
 
 		def get_state(path='')
-			#return nil if not @main.has_key?('system')
 			if @config['as_master']
+				return nil if not @main.has_key?('system')
 				# retrieve all children's current state
-				main = Nuri::Sfp.deep_clone(@main)
-				main['initial'] = main['system']
-				main.delete('system')
-				main['initial']['_self'] = 'initial'
+				#main = Nuri::Sfp.deep_clone(@main)
+				#main['initial'] = main['system']
+				#main.delete('system')
+				#main['initial']['_self'] = 'initial'
+				current_state = {'_context'=>'state', '_self'=>'initial'}
 				@main['system'].each do |key,node|
 					next if key[0,1] == '_' or not node['_isa'] == '$.Node'
-					main['initial'].delete(key)
 					state = self.get_child_state(node['domainname'])
-					state.each { |k,v| main['initial'][k] = v } if state != nil
+					#main['initial'].delete(key)
+					#state = self.get_child_state(node['domainname'])
+					#state.each { |k,v| main['initial'][k] = v } if state != nil
+					if state != nil
+						state.each { |k,v| current_state[k] = v }
+					end
 				end
-				main
+				#main
+				current_state
 			else
 				@root.get_state(path)
 			end
