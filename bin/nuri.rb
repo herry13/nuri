@@ -43,8 +43,9 @@ def server
 	Nuri::Util.log 'Start Nuri...'
 	# create Nuri server
 	nuri = Nuri::Main.new
+	return if nuri == nil
 	# set as daemon if it's defined in configuration file
-	if nuri.config.has_key?('daemon') and nuri.config['daemon']
+	if  nuri.config.has_key?('daemon') and nuri.config['daemon']
 		exit if fork
 		Process.setsid
 		exit if fork
