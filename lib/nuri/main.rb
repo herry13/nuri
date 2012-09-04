@@ -55,8 +55,10 @@ module Nuri
 				@config = Nuri::Sfp::Parser.file_to_sfp(cfile)['nuri']
 				Nuri::Util.log 'Successfully load configuration file ' + cfile
 			rescue Exception => exp
+				@config = Hash.new
 				Nuri::Util.log.error "Cannot load configuration file " + cfile + ' -- ' + exp.to_s
 			rescue StandardError => stderr
+				@config = Hash.new
 				Nuri::Util.log.error "Cannot load configuration file " + cfile
 			end
 		end
