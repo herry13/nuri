@@ -105,7 +105,7 @@ module Nuri
 			sfp['initial'] = self.get_state
 			sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 			planner = Nuri::Planner::Solver.new
-			return planner.solve_json(sfp)
+			return planner.solve_sfp(sfp)
 		end
 
 		def get_state(path='')

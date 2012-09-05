@@ -14,7 +14,7 @@ module Nuri
 				return solve_sas(@parser.to_sas)
 			end
 
-			def solve_json(root)
+			def solve_sfp(root)
 				@parser = Nuri::Sfp::Parser.new(root)
 				return solve_sas(@parser.to_sas)
 			end
