@@ -1,6 +1,7 @@
 Nuri
 ====
 author: Herry (herry13@gmail.com)
+website: http://homepages.inf.ed.ac.uk/s0978621/
 last update: 03-09-2012
  
 Dynamic Workflow Configuration Tool.
