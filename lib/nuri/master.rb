@@ -7,6 +7,7 @@ module Nuri
 
 			def initialize
 				self.load
+				@main = self.get_main
 			end
 
 			def get_state(path='')

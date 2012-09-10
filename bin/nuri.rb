@@ -47,7 +47,7 @@ options:
 #puts state.inspect
 #puts "Cycle ##{i}"
 #end
-		#puts Nuri::Sfp.to_pretty_json(state) if state != nil
+		puts Nuri::Sfp.to_pretty_json(state) if state != nil
 
 	elsif ARGV[1] == 'plan'
 		nuri = Nuri::Main.new

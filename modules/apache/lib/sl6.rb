@@ -8,8 +8,8 @@ module Nuri
 			include Nuri::Resource
 
 			def initialize
-				self.load
-				@state = self.create_object('Apache')
+				self.load('Apache', 'apache')
+				#@state = self.create_object('Apache')
 			end
 	
 			# get state of this component in JSON
