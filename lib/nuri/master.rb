@@ -36,8 +36,7 @@ module Nuri
 	
 			def get_child_state(address)
 				begin
-					port = 9090
-					url = URI.parse('http://' + address + ':' + port.to_s + '/state')
+					url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state')
 					req = Net::HTTP::Get.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
 					json = JSON.parse(res.body)
@@ -50,9 +49,47 @@ module Nuri
 
 			def apply
 				state = get_state
-				plan = get_plan
+				sfp = Nuri::Sfp.deep_clone(@main)
+				sfp.delete('system')
+				sfp['initial'] = state
+				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
+				planner = Nuri::Planner::Solver.new
+				plan = planner.solve_sfp_to_json(sfp)
+
+				puts JSON.pretty_generate(plan)
 				# TODO -- execute the plan here
-				puts plan
+				if plan['workflow'] != nil
+					plan['workflow'].each do |action|
+						node = self.get_node(action['name'], @main['system'])
+						self.execute(action, node['domainname']) if node != nil
+					end
+				end
+
+			end
+
+			def execute(action, address)
+				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/exec')
+				data = JSON.generate(action)
+				puts data, url
+				begin
+					Net::HTTP.start(url.host, url.port) do |http|
+						headers = {'Content-Type' => 'application/json; charset=utf-8'}
+						response = http.send_request('PUT', uri.request_uri, data, headers)
+						puts "Response #{response.code} #{response.message}: #{response.body}"
+					end
+				rescue Exception => e
+					Nuri::Util.log 'Cannot execute action: ' + action['name']
+					return false
+				end
+				true
+			end
+
+			def get_node(path, root)
+				while path != '$'
+					path = path.to_top
+					n = root.at?(path)
+					return n if n != nil and n['_isa'] == '$.Node'
+				end
 			end
 
 		end

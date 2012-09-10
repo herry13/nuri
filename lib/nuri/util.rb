@@ -1,4 +1,6 @@
 module Nuri
+	Port = 9090
+
 	class Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
 		@@logger = Logger.new(@@home_dir + "/log/message.log")

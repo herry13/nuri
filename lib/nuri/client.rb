@@ -73,6 +73,7 @@ module Nuri
 			end
 
 			def process_request(req)
+puts 'Process request: ' + req.to_s
 				type, path, data = req.split(' ', 3)
 				if type == 'GET'
 					return self.process_get(path)

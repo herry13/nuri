@@ -23,6 +23,35 @@ module Nuri
 				return solve_sas(@parser.to_sas)
 			end
 
+			def solve_sfp_to_json(root)
+				@parser = Nuri::Sfp::Parser.new
+				@parser.root = root
+				plan = solve_sas(@parser.to_sas)
+				return sequential_plan_to_json(plan)
+			end
+
+			def sequential_plan_to_json(seq)
+				plan = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
+				return plan if seq == nil
+
+				plan['workflow'] = []
+				seq.each do |line|
+					line = line[1, line.length-2].sub(/^op_[0-9]+/, '')
+					params = line.split(' ')
+					method = params[0]
+					params = params[1..params.length]
+					plan['workflow'] << { 'name' => method,
+							'parameters' => {}
+						}
+					params.each do |p|
+						var, value = p.split('=')
+						plan['parameters'][var] = value
+					end
+				end
+				plan['total'] = plan['workflow'].length
+				return plan
+			end
+
 			# solve the configuration problem in given file
 			# return JSON representation of plan if solution is found, otherwise nil
 			def solve_file(file)

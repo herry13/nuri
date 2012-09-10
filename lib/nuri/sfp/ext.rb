@@ -134,3 +134,9 @@ String.send(:define_method, 'isref') {
 	s = self.to_s
 	return (s.length > 0 and s[0,1] == '$')
 }
+
+String.send(:define_method, 'to_top') {
+	return self if self == '$'
+	parts = self.split('.')
+	return self[0, self.length - parts[parts.length-1].length - 1]
+}
