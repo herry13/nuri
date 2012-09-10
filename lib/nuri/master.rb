@@ -14,7 +14,7 @@ module Nuri
 				sfp = Nuri::Sfp.deep_clone(@main)
 				sfp.delete('system')
 				sfp['initial'] = self.get_state
-Nuri::Sfp::Parser.dump(sfp)
+#Nuri::Sfp::Parser.dump(sfp)
 				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 				planner = Nuri::Planner::Solver.new
 				return planner.solve_sfp(sfp)

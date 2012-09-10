@@ -3,7 +3,7 @@ module Nuri
 		# main class which processes configuration description in SFP language either
 		# in file or as a string
 		class Parser
-			attr_accessor :root
+			attr_accessor :root, :root_dir
 
 			# Parse SFP file and return its JSON representation
 			def self.file_to_sfp(file)
@@ -18,9 +18,8 @@ module Nuri
 				return parser.to_sfp
 			end
 
-			def initialize(root=nil)
-				@root = root.to_s
-				@parser = nil
+			def initialize(root_dir=nil)
+				@root_dir = root_dir.to_s
 			end
 
 			# parse SFP file
@@ -28,31 +27,34 @@ module Nuri
 				f = File.open(file, 'rb')
 				lexer = SFP::Lexer.new(f)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
-				@parser = SFP::Parser.new(tokens)
-				@parser.root_dir = (@root == nil or @root == '' ?
-						File.expand_path('.') : @root)
-				@parser.home_dir = File.dirname(f.path)
-				@parser.sfp
+				parser = SFP::Parser.new(tokens)
+				parser.root_dir = (@root_dir == nil or @root_dir == '' ?
+						File.expand_path('.') : @root_dir)
+				parser.home_dir = File.dirname(f.path)
+				parser.sfp
+				@root = parser.root
+				@parser_arrays = parser.arrays
 			end
 
 			# parse SFP in a string
 			def parse(text)
 				lexer = SFP::Lexer.new(text)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
-				@parser = SFP::Parser.new(tokens)
-				@parser.root_dir = (@root == nil or @root == '' ?
-						File.expand_path(File.dirname('.')) : @root)
-				@parser.home_dir = @parser.root_dir
-				@parser.sfp
+				parser = SFP::Parser.new(tokens)
+				parser.root_dir = (@root_dir == nil or @root_dir == '' ?
+						File.expand_path(File.dirname('.')) : @root_dir)
+				parser.home_dir = parser.root_dir
+				parser.sfp
+				@root = parser.root
+				@parser_arrays = parser.arrays
 			end
 
 			# dump the parsed specification into standard output
 			def dump(root=nil)
-				return if root == nil and @parser == nil
-				root = @parser.root.clone if root == nil
+				return if root == nil
+				root = Nuri::Sfp.deep_clone(@root)
 				root.accept(ParentEliminator.new)
 				puts JSON.pretty_generate(root)
-				puts @parser.used_classes.inspect
 			end
 
 			def self.dump(root)
@@ -62,8 +64,7 @@ module Nuri
 			end
 
 			def to_sfp
-				return nil if @parser == nil
-				return @parser.to_sfp
+				@root
 			end
 
 			def to_json

@@ -17,7 +17,9 @@ module Nuri
 			end
 
 			def solve_sfp(root)
-				@parser = Nuri::Sfp::Parser.new(root)
+				@parser = Nuri::Sfp::Parser.new
+				@parser.root = root
+
 				return solve_sas(@parser.to_sas)
 			end
 

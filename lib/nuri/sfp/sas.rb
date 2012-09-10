@@ -38,16 +38,15 @@ module Nuri
 
 			def to_sas
 				@arrays = Hash.new
-				if @parser != nil
-					@root = @parser.root
 
-					# remove "$.initial" for arrays map
-					@parser.arrays.each do |k,v|
+				if @parser != nil
+					@parser_arrays.each do |k,v|
 						first, rest = k.explode[1].explode
 						next if rest == nil
 						@arrays['$.' + rest.to_s] = v
 					end
 				end
+
 				return nil if @root == nil
 				return nil if not @root.has_key?('initial') or not @root.has_key?('goal')
 
@@ -82,9 +81,6 @@ module Nuri
 				# set domain values for each variable
 				self.set_variable_values
 
-				#self.dump_types
-				#self.dump_vars
-
 				# process goal constraint
 				process_goal(@root['goal']) if @root.has_key?('goal') and
 						@root['goal'].isconstraint
@@ -108,6 +104,8 @@ module Nuri
 				# detect and merge mutually inclusive operators
 				#self.solve_mutually_inclusive_operators
 
+				#self.dump_types
+				#self.dump_vars
 				#self.dump_operators
 
 				return create_output
@@ -396,16 +394,6 @@ puts new_operators.length.to_s + ' new merged-operators'
 				combinator(bucket, grounder, procedure, params.keys, params, Hash.new, 0)
 				return bucket
 			end
-
-			# collect all classes that are used by the objects
-=begin
-			def collect_classes
-				@parser.used_classes.each { |c|
-					@types[c] = Array.new
-					@types[c] << Nuri::Sfp.null_of(c) if @types[c].length <= 0
-				}
-			end
-=end
 
 			def dump_types
 				puts '--- types'
