@@ -3,12 +3,23 @@
 $: << File.expand_path(File.dirname(__FILE__) + "/../lib")
 $: << File.expand_path(File.dirname(__FILE__) + "/..")
 
+require "nuri/planner/main"
 require "nuri/main"
 
 def cli
 	def print_help
-		puts "Usage: nuri.rb -c <options>\n\noptions:" +
-			"\n\tmain\n\tstate\n\tplan\n\tapply\n\tplanner\n\tsfp\n\tsas\n\tjson"
+		puts "Usage: nuri.rb -c <options>
+
+options:
+  main             print the content of 'main.sfp'
+  state            print the curent state of the system
+  plan             generate a workflow to achieve the goal state
+  apply            apply a workflow to achieve the goal state
+  planner <file>   solve an SFp planning problem in <file> and print the solution
+  sas <file>       generate SAS+ representation of the SFp planning problem in <file>
+  json <file>      generate JSON representation of the SFp planning problem in <file>
+
+"
 	end
 	if ARGV.length <= 1
 		print_help
@@ -16,12 +27,13 @@ def cli
 	end
 
 	if ARGV[1] == 'main'
-		nuri = Nuri::Main.new
-		Nuri::Sfp::Parser.dump(nuri.main)
+		puts Nuri::Sfp.to_pretty_json(Nuri::Util.get_main)
 	elsif ARGV[1] == 'state'
-		nuri = Nuri::Main.new
-		state = nuri.get_state
-		Nuri::Sfp::Parser.dump(state) #['initial'])
+		client = Nuri::Client::Daemon.new
+		puts Nuri::Sfp.to_pretty_json(client.get_state(ARGV[2]))
+		#nuri = Nuri::Main.new
+		#state = nuri.get_state
+		#Nuri::Sfp::Parser.dump(state)
 	elsif ARGV[1] == 'plan'
 		nuri = Nuri::Main.new
 		puts nuri.get_plan
@@ -35,24 +47,23 @@ def cli
 		planner = Nuri::Planner::Solver.new
 		plan = planner.solve_file(ARGV[2])
 		puts (plan != nil ? plan : 'no solution!')
-	elsif ARGV[1] == 'sfp' and ARGV.length >= 3
-		Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
 	elsif ARGV[1] == 'json' and ARGV.length >= 3
-		parser = Nuri::Sfp::Parser.new
-		parser.parse_file(ARGV[2])
-		puts parser.to_json
-		#puts Nuri::Sfp.to_json( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
+		Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
+	#elsif ARGV[1] == 'json' and ARGV.length >= 3
+	#	parser = Nuri::Sfp::Parser.new
+	#	parser.parse_file(ARGV[2])
+	#	puts parser.to_json
 	elsif ARGV[1] == 'sas' and ARGV.length >= 3
 		parser = Nuri::Sfp::Parser.new
 		parser.parse_file(ARGV[2])
 		puts parser.to_sas
 	else
 		print_help
-		#puts 'wrong arguments!'
 	end
 end
 
 def server
+=begin
 	Nuri::Util.log 'Start Nuri...'
 	# create Nuri server
 	nuri = Nuri::Main.new
@@ -65,6 +76,8 @@ def server
 	end
 	# start Nuri server
 	nuri.start
+=end
+	Nuri::Client.start
 end
 
 if ARGV.length > 0 and ARGV[0] == '-c'

@@ -18,15 +18,17 @@ module Nuri
 		def self.get_main
 			return @@main if defined?(@@main) != nil
 			mainfile = self.rootdir + '/etc/main.sfp'
+			parser = Nuri::Sfp::Parser.new(@@rootdir)
 			if File.exist?(mainfile)
-				@@main = Nuri::Sfp::Parser.file_to_sfp(mainfile)
+				@@main = parser.parse_file(mainfile)
 			else
 				main = 'include "modules/node/node.sfp"'
 				self.get_modules.each do |mod|
 					main += "\ninclude \"" + @@rootdir + "/modules/" + mod + '/' + mod + '.sfp"'
 				end
 				main += "\n"
-				@@main = Nuri::Sfp::Parser.to_sfp(main)
+				parser.parse(main)
+				@@main = parser.to_sfp
 			end
 			return @@main
 		end

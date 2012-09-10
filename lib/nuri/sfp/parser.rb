@@ -3,6 +3,8 @@ module Nuri
 		# main class which processes configuration description in SFP language either
 		# in file or as a string
 		class Parser
+			attr_accessor :root
+
 			# Parse SFP file and return its JSON representation
 			def self.file_to_sfp(file)
 				parser = Parser.new
@@ -27,8 +29,8 @@ module Nuri
 				lexer = SFP::Lexer.new(f)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
 				@parser = SFP::Parser.new(tokens)
-				@parser.root_dir = (@root == nil ? #Nuri::Util.rootdir
-						File.expand_path(File.dirname(file)) : @root)
+				@parser.root_dir = (@root == nil or @root == '' ?
+						File.expand_path('.') : @root)
 				@parser.home_dir = File.dirname(f.path)
 				@parser.sfp
 			end
@@ -38,7 +40,7 @@ module Nuri
 				lexer = SFP::Lexer.new(text)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
 				@parser = SFP::Parser.new(tokens)
-				@parser.root_dir = (@root == nil ? #Nuri::Util.rootdir
+				@parser.root_dir = (@root == nil or @root == '' ?
 						File.expand_path(File.dirname('.')) : @root)
 				@parser.home_dir = @parser.root_dir
 				@parser.sfp
@@ -79,6 +81,12 @@ module Nuri
 			root = Nuri::Sfp.deep_clone(sfp)
 			root.accept(Nuri::Sfp::ParentEliminator.new)
 			return JSON.generate(root)
+		end
+
+		def self.to_pretty_json(sfp)
+			root = Nuri::Sfp.deep_clone(sfp)
+			root.accept(Nuri::Sfp::ParentEliminator.new)
+			return JSON.pretty_generate(root)
 		end
 
 		def self.deep_clone(value)

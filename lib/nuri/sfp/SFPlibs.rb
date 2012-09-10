@@ -36,7 +36,7 @@ module Nuri
 				filepath = file
 				filepath = @root_dir + "/" + file if @root_dir != nil and file[0,1] != '/'
 				filepath = @home_dir + "/" + file if not File.exist?(filepath)
-				return if not File.exist?(filepath)
+				raise Exception, 'File not found: ' + file if not File.exist?(filepath)
 				data = Nuri::Sfp::Parser.file_to_sfp(filepath)
 				data.each_pair { |key,val|
 					if val['_context'] == 'class' or val['_context'] == 'composite'

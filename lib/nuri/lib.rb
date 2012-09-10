@@ -1,11 +1,9 @@
 #!/usr/bin/env ruby
 
-# Ruby libraries
+# RubyGem libraries
 require 'rubygems'
 require 'logger'
 require 'json'
-require 'socket'
-require 'net/http'
 # Nuri libraries
 require 'nuri/util'
 require 'nuri/resource'

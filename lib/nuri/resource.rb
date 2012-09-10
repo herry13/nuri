@@ -65,7 +65,13 @@ module Nuri
 		def get_state(path='')
 			@state = Hash.new
 			@children.each_value { |m| @state[m.name] = m.get_state }
-			return @state
+			if path == '' or path == nil
+				return @state
+			else
+				value = get(path)
+				return value.get_state if value.respond_to?('get_state')
+				return value
+			end
 		end
 
 		def get_goal
