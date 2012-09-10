@@ -7,9 +7,8 @@ module Nuri
 			include Nuri::Resource
 
 			def initialize
-				self.load
-				@name = Nuri::Util.hostname.strip.sub(/\..*/,'')
-				@state = self.create_object('Node')
+				name = Nuri::Util.hostname.strip.sub(/\..*/,'')
+				self.load('Node', name)
 			end
 	
 			def get_state(path=nil)
