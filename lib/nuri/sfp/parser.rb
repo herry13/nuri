@@ -17,7 +17,7 @@ module Nuri
 			end
 
 			def initialize(root=nil)
-				@root = root
+				@root = root.to_s
 				@parser = nil
 			end
 
@@ -27,7 +27,8 @@ module Nuri
 				lexer = SFP::Lexer.new(f)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
 				@parser = SFP::Parser.new(tokens)
-				@parser.root_dir = Nuri::Util.rootdir
+				@parser.root_dir = (@root == nil ? #Nuri::Util.rootdir
+						File.expand_path(File.dirname(file)) : @root)
 				@parser.home_dir = File.dirname(f.path)
 				@parser.sfp
 			end
@@ -37,7 +38,8 @@ module Nuri
 				lexer = SFP::Lexer.new(text)
 				tokens = ANTLR3::CommonTokenStream.new(lexer)
 				@parser = SFP::Parser.new(tokens)
-				@parser.root_dir = Nuri::Util.rootdir
+				@parser.root_dir = (@root == nil ? #Nuri::Util.rootdir
+						File.expand_path(File.dirname('.')) : @root)
 				@parser.home_dir = @parser.root_dir
 				@parser.sfp
 			end
@@ -62,6 +64,13 @@ module Nuri
 				return @parser.to_sfp
 			end
 
+			def to_json
+				root = self.to_sfp
+				return if root == nil
+				root = Nuri::Sfp.deep_clone(root)
+				return Nuri::Sfp.to_json(root)
+			end
+
 			# enable this class to process SFP into FDR (SAS+)
 			include Nuri::Sfp::Sas
 		end
@@ -69,7 +78,7 @@ module Nuri
 		def self.to_json(sfp)
 			root = Nuri::Sfp.deep_clone(sfp)
 			root.accept(Nuri::Sfp::ParentEliminator.new)
-			return root # JSON.generate(root)
+			return JSON.generate(root)
 		end
 
 		def self.deep_clone(value)

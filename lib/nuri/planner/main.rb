@@ -1,3 +1,5 @@
+require 'nuri/sfp/main'
+
 module Nuri
 	module Planner
 		class Solver
@@ -43,8 +45,8 @@ module Nuri
 			end
 
 			def solve_sas(sas)
-				os = Nuri::Util.os
-				dir = Nuri::Util.temp_dir + '/nuri_' + (rand * 100000).to_i.abs.to_s
+				os = `uname -s`.downcase.strip
+				dir = '/tmp/nuri_' + (rand * 100000).to_i.abs.to_s
 				sas_file = dir + '/problem.sas'
 				plan_file = dir + '/out.plan'
 				cmd = ''
@@ -52,7 +54,7 @@ module Nuri
 					when 'linux'
 						planner = File.dirname(__FILE__) + '/linux/planner'
 						cmd = planner + ' ' + sas_file + ' ' + plan_file
-					when 'macos'
+					when 'macos', 'darwin'
 						planner = File.dirname(__FILE__) + '/macos/planner'
 						cmd = planner + ' ' + sas_file + ' ' + plan_file
 					else

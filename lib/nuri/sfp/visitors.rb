@@ -1,5 +1,3 @@
-require 'nuri/sfp/ext'
-
 module Nuri
 	module Sfp
 		class ParentEliminator

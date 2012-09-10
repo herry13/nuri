@@ -49,6 +49,7 @@ module Nuri
 					end
 				end
 				return nil if @root == nil
+				return nil if not @root.has_key?('initial') or not @root.has_key?('goal')
 
 				@variables = Hash.new
 				@types = { 'Boolean' => [true, false],
@@ -64,7 +65,7 @@ module Nuri
 				# unlink 'initial', 'goal', 'global' with root
 				@root['initial'].delete('_parent')
 				@root['goal'].delete('_parent')
-				@root['global'].delete('_parent')
+				@root['global'].delete('_parent') if @root.has_key?('global')
 	
 				# collect variables
 				@root['initial'].accept(VariableCollector.new(self))

@@ -6,7 +6,14 @@ $: << File.expand_path(File.dirname(__FILE__) + "/..")
 require "nuri/main"
 
 def cli
-	return if ARGV.length <= 1
+	def print_help
+		puts "Usage: nuri.rb -c <options>\n\noptions:" +
+			"\n\tmain\n\tstate\n\tplan\n\tapply\n\tplanner\n\tsfp\n\tsas\n\tjson"
+	end
+	if ARGV.length <= 1
+		print_help
+		return
+	end
 
 	if ARGV[1] == 'main'
 		nuri = Nuri::Main.new
@@ -30,12 +37,18 @@ def cli
 		puts (plan != nil ? plan : 'no solution!')
 	elsif ARGV[1] == 'sfp' and ARGV.length >= 3
 		Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
+	elsif ARGV[1] == 'json' and ARGV.length >= 3
+		parser = Nuri::Sfp::Parser.new
+		parser.parse_file(ARGV[2])
+		puts parser.to_json
+		#puts Nuri::Sfp.to_json( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
 	elsif ARGV[1] == 'sas' and ARGV.length >= 3
 		parser = Nuri::Sfp::Parser.new
 		parser.parse_file(ARGV[2])
 		puts parser.to_sas
 	else
-		puts 'wrong arguments!'
+		print_help
+		#puts 'wrong arguments!'
 	end
 end
 
