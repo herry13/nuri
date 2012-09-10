@@ -1,80 +1,41 @@
-require 'mongrel'
+require 'socket'
 
 module Nuri
 	module Client
-		class Daemon < Mongrel::HttpHandler
+		class Daemon
 			include Nuri::Config
 
 			def initialize
 				self.load
 			end
 
+			def get_state(path='')
+				return @root.get_state(path)
+			end
+
 			def start(address=nil, port=nil)
 				if address == nil
 					address = @config['host'] if @config['host'] != '' and
 							@config['host'] != '0.0.0.0'
-					address = '0.0.0.0' if address == nil
 				end
 				port = @config['port'].to_i if port == nil
-
 				begin
-					@http = Mongrel::HttpServer.new(address, port)
-					@http.register("/", self)
-					Nuri::Util.log 'Start Nuri Client on port: ' + port.to_s
-					@http.run.join
-				rescue Exception => e
-					Nuri::Util.log 'Client Daemon error: ' + e.to_s
+					server = case address
+						when nil then TCPServer.new(port)
+						else TCPServer.new(address, port)
+					end
 				end
-			end
-
-			def process(req, res)
-				Nuri::Client::Agent.new(self, req, res).serve
-			end
-			
-			def get_state(path='')
-				return @root.get_state(path)
+	
+				Nuri::Util.log 'Starting server on port: ' + port.to_s
+				loop do
+					session = server.accept
+					Thread.start(self, session) do |daemon, session|
+						Nuri::Client::Agent.new(daemon, session).serve
+					end
+				end
 			end
 		end
 
-		class Agent
-			def initialize(daemon, request, response)
-				@daemon = daemon
-				@request = request
-				@response = response
-			end
-
-			def serve
-				if @request.params['REQUEST_METHOD'] == 'GET'
-					if @request.params['REQUEST_URI'] == '/state' or
-							(@request.params['REQUEST_URI'] =~ /^\/state\/.*/) != nil
-						self.http_get_state
-					end
-
-				elsif @request.params['REQUEST_METHOD'] == 'POST'
-
-				elsif @request.params['REQUEST_METHOD'] == 'PUT'
-
-				end
-			end
-
-			def http_get_state
-				state = @daemon.get_state
-				if state.is_a?(Nuri::Undefined)
-					res.start(404) do |head, out| out.write(''); end
-				else
-					@response.start(200) do |head, out|
-						head['Content-Type'] = 'application/json'
-						data = { 'value' => state }
-						out.write(Nuri::Sfp.to_json(data))
-					end
-				end
-				#	out.write('{"value":"nena":{}}')
-				#end
-			end
-		end
-
-
-=begin
 		class Agent
 			def initialize(daemon, session)
 				@session = session
@@ -158,13 +119,11 @@ puts 'Process request: ' + req.to_s
 				end
 			end
 		end
-=end
 
 		def self.start
 			daemon = Nuri::Client::Daemon.new
 			daemon.start
 		end
-
 
 	end
 end
