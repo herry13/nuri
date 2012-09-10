@@ -74,7 +74,7 @@ module Nuri
 				begin
 					Net::HTTP.start(url.host, url.port) do |http|
 						headers = {'Content-Type' => 'application/json; charset=utf-8'}
-						response = http.send_request('PUT', uri.request_uri, data, headers)
+						response = http.send_request('PUT', url.request_uri, data, headers)
 						puts "Response #{response.code} #{response.message}: #{response.body}"
 					end
 				rescue Exception => e
