@@ -45,7 +45,6 @@ module Nuri
 
 			def process_get(path)
 				begin
-				# TODO
 					if path == '/state' or path[0, 7] == '/state/'
 						if path == '/state' or path.length <= 7 # parts.length <= 2
 							data = @daemon.get_state
@@ -65,12 +64,22 @@ module Nuri
 			def process_post(path, data)
 			end
 
+			def process_put(path, data)
+				begin
+					puts 'Execute: ' + path
+				rescue Exception => e
+					return create_code_msg(500, 'Internal Server Error', e.to_s)
+				end
+			end
+
 			def process_request(req)
 				type, path, data = req.split(' ', 3)
 				if type == 'GET'
 					return self.process_get(path)
 				elsif type == 'POST'
 					return self.process_post(path, data)
+				elsif type == 'PUT'
+					return self.process_put(path, data)
 				end
 				return nil
 			end

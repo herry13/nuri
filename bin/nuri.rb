@@ -33,12 +33,9 @@ options:
 		puts Nuri::Sfp.to_pretty_json(main) if main != nil
 
 	elsif ARGV[1] == 'state'
-#for i in 1..100
 		client = Nuri::Client::Daemon.new
 		state = client.get_state
 		puts Nuri::Sfp.to_pretty_json(state) if state != nil
-#puts "Cycle ##{i}"
-#end
 
 	elsif ARGV[1] == 'pull'
 		state = Nuri::Master.state
@@ -52,25 +49,21 @@ options:
 		puts (plan == nil ? 'no solution' : plan)
 
 	elsif ARGV[1] == 'apply'
-		nuri = Nuri::Main.new
-		if nuri.lock
-			nuri.apply(true)
-			nuri.lock(false)
-		end
+		Nuri::Master.apply
+
 	elsif ARGV[1] == 'planner' and ARGV.length >= 3
 		planner = Nuri::Planner::Solver.new
 		plan = planner.solve_file(ARGV[2])
 		puts (plan != nil ? plan : 'no solution!')
+
 	elsif ARGV[1] == 'json' and ARGV.length >= 3
 		Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
+
 	elsif ARGV[1] == 'sas' and ARGV.length >= 3
 		parser = Nuri::Sfp::Parser.new
 		parser.parse_file(ARGV[2])
 		puts parser.to_sas
-	elsif ARGV[1] == 'test'
-		planner = Nuri::Planner::Solver.new
-		plan = planner.solve_file('test/planning/cloudburst-p04.sfp')
-		puts (plan != nil ? plan : 'no solution')
+
 	else
 		print_help
 	end

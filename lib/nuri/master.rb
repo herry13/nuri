@@ -10,11 +10,11 @@ module Nuri
 				@main = self.get_main
 			end
 
-			def get_plan
+			def get_plan(state=nil)
 				sfp = Nuri::Sfp.deep_clone(@main)
 				sfp.delete('system')
-				sfp['initial'] = self.get_state
-#Nuri::Sfp::Parser.dump(sfp)
+				sfp['initial'] = (state == nil ? self.get_state :
+						Nuri::Sfp.deep_clone(state))
 				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 				planner = Nuri::Planner::Solver.new
 				return planner.solve_sfp(sfp)
@@ -48,9 +48,22 @@ module Nuri
 				nil
 			end
 
+			def apply
+				state = get_state
+				plan = get_plan
+				# TODO -- execute the plan here
+				puts plan
+			end
+
 		end
 
 		def self.start
+			# TODO -- start Nuri master
+		end
+
+		def self.apply
+			master = Nuri::Master::Daemon.new
+			master.apply
 		end
 
 		def self.state
