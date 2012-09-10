@@ -7,6 +7,18 @@ module Nuri
 			end
 		end
 
+		class PrettyStateGenerator
+			def visit(name, value, parent)
+				if name[0,1] == '_'
+					parent.delete(name)
+				elsif value.is_a?(Hash)
+					parent.delete(name) if value['_context'] == 'procedure' or
+							value['_context'] == 'constraint'
+				end
+				true
+			end
+		end
+
 		class SfpGenerator
 			def initialize(root)
 				@root = root

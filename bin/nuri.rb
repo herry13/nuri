@@ -41,17 +41,16 @@ options:
 #end
 
 	elsif ARGV[1] == 'pull'
-#for i in 1..1000
-		master = Nuri::Master::Daemon.new
-		state = master.get_state
-#puts state.inspect
-#puts "Cycle ##{i}"
-#end
-		puts Nuri::Sfp.to_pretty_json(state) if state != nil
+		state = Nuri::Master.state
+		if state != nil
+			state.accept(Nuri::Sfp::PrettyStateGenerator.new) if ARGV[2] == 'pretty'
+			puts Nuri::Sfp.to_pretty_json(state)
+		end
 
 	elsif ARGV[1] == 'plan'
-		nuri = Nuri::Main.new
-		puts nuri.get_plan
+		plan = Nuri::Master.plan
+		puts (plan == nil ? 'no solution' : plan)
+
 	elsif ARGV[1] == 'apply'
 		nuri = Nuri::Main.new
 		if nuri.lock
@@ -77,26 +76,29 @@ options:
 	end
 end
 
-def server
-=begin
-	Nuri::Util.log 'Start Nuri...'
-	# create Nuri server
-	nuri = Nuri::Main.new
+def client
+	Nuri::Util.log 'Start Nuri Client...'
 	# set as daemon if it's defined in configuration file
-	if nuri.config != nil and nuri.config.has_key?('daemon') and nuri.config['daemon']
-		exit if fork
-		Process.setsid
-		exit if fork
-		puts "Nuri is running with PID=" + Process.pid.to_s
-	end
-	# start Nuri server
-	nuri.start
-=end
+	#if nuri.config != nil and nuri.config.has_key?('daemon') and nuri.config['daemon']
+	#	exit if fork
+	#	Process.setsid
+	#	exit if fork
+	#	puts "Nuri is running with PID=" + Process.pid.to_s
+	#end
+
+	# start Nuri Client
 	Nuri::Client.start
+end
+
+def master
+	Nuri::Util.log 'Start Nuri Master...'
+	Nuri::Master.start
 end
 
 if ARGV.length > 0 and ARGV[0] == '-c'
 	cli
+elsif ARGV.length > 0 and ARGV[0] == '-m'
+	master
 else
-	server
+	client
 end
