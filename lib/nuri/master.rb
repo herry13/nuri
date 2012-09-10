@@ -1,18 +1,47 @@
-#!/usr/bin/ruby
-
-$: << File.expand_path(File.dirname(__FILE__) + "/../../lib")
-$: << File.expand_path(File.dirname(__FILE__) + "/../..")
-
-require 'lib'
+require 'net/http'
 
 module Nuri
-	class Master
-		include Nuri::Config
+	module Master
+		class Daemon
+			include Nuri::Config
 
-		def initialize
-			self.load
+			def initialize
+				self.load
+			end
+
+			def get_state(path='')
+				return nil if not @main.has_key?('system')
+				current_state = {'_context'=>'state', '_self'=>'initial'}
+				@main['system'].each do |key,node|
+					next if key[0,1] == '_' or not node['_isa'] == '$.Node' or
+							node['domainname'] == ''
+					state = self.get_child_state(node['domainname'])
+					if state != nil
+						state.each { |k,v| current_state[k] = v }
+					end
+				end
+				current_state
+			end
+	
+			def get_child_state(address)
+				begin
+					port = 9090
+					url = URI.parse('http://' + address + ':' + port.to_s + '/state')
+					req = Net::HTTP::Get.new(url.path)
+					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
+					json = JSON.parse(res.body)
+					return json['value'] if json.is_a?(Hash) and json.has_key?('value')
+				rescue Exception => e
+					Nuri::Util.log 'Cannot get state of node ' + address + ': ' + e.to_s
+				end
+				nil
+			end
+
 		end
+	end
+end
 
+=begin
 		def get_plan
 			sfp = Nuri::Sfp.deep_clone(@main)
 			sfp.delete('system')
@@ -20,33 +49,6 @@ module Nuri
 			sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 			planner = Nuri::Planner::Solver.new
 			return planner.solve_sfp(sfp)
-		end
-
-		def get_state(path='')
-			return nil if not @main.has_key?('system')
-			current_state = {'_context'=>'state', '_self'=>'initial'}
-			@main['system'].each do |key,node|
-				next if key[0,1] == '_' or not node['_isa'] == '$.Node'
-				state = self.get_child_state(node['domainname'])
-				if state != nil
-					state.each { |k,v| current_state[k] = v }
-				end
-			end
-			current_state
-		end
-
-		def get_child_state(address)
-			begin
-				port = 9090
-				url = URI.parse('http://' + address + ':' + port.to_s + '/state')
-				req = Net::HTTP::Get.new(url.path)
-				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
-				json = JSON.parse(res.body)
-				return json['value'] if json != nil
-			rescue Exception => e
-				Nuri::Util.log 'Cannot get state of node ' + address + ': ' + e.to_s
-			end
-			nil
 		end
 
 		def start
@@ -65,3 +67,4 @@ end
 
 m = Nuri::Master.new
 m.start
+=end

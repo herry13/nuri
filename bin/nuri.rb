@@ -12,7 +12,8 @@ def cli
 
 options:
   main             print the content of 'main.sfp'
-  state            print the curent state of the system
+  state            print the current state of this node
+  pull             pull and print the current state of all managed nodes
   plan             generate a workflow to achieve the goal state
   apply            apply a workflow to achieve the goal state
   planner <file>   solve an SFp planning problem in <file> and print the solution
@@ -30,10 +31,16 @@ options:
 		puts Nuri::Sfp.to_pretty_json(Nuri::Util.get_main)
 	elsif ARGV[1] == 'state'
 		client = Nuri::Client::Daemon.new
-		puts Nuri::Sfp.to_pretty_json(client.get_state(ARGV[2]))
-		#nuri = Nuri::Main.new
-		#state = nuri.get_state
-		#Nuri::Sfp::Parser.dump(state)
+		state = client.get_state(ARGV[2])
+		puts Nuri::Sfp.to_pretty_json(state) if state != nil
+	elsif ARGV[1] == 'pull'
+for i in 1..1000
+		master = Nuri::Master::Daemon.new
+		state = master.get_state
+puts state.inspect
+puts "Cycle ##{i}"
+end
+		#puts Nuri::Sfp.to_pretty_json(state) if state != nil
 	elsif ARGV[1] == 'plan'
 		nuri = Nuri::Main.new
 		puts nuri.get_plan

@@ -7,11 +7,20 @@ Hash.send(:define_method, "ref") {
 
 # accept method as implementation of Visitor pattern
 Hash.send(:define_method, "accept") { |visitor|
-	self.each_pair { |key,value|
-		next if key == '_parent'
+	keys = self.keys
+	keys.each do |key|
+		next if key == '_parent' or not self.has_key?(key)
+		value = self[key]
 		go_next = visitor.visit(key, value, self)
 		value.accept(visitor) if value.is_a?(Hash) and go_next == true
-	}
+	end
+
+#	self.each_pair { |key,value|
+#		next if key == '_parent'
+#		go_next = visitor.visit(key, value, self)
+#puts value.class.to_s + ' >> ' + visitor.class.to_s
+#		value.accept(visitor) if value.is_a?(Hash) and go_next == true
+#	}
 }
 
 # resolve a reference, return nil if there's no value with given address
