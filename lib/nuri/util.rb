@@ -1,50 +1,10 @@
 module Nuri
 	class Util
-		@@rootdir = File.expand_path(File.dirname(__FILE__) + "/../..")
-		@@logger = Logger.new(@@rootdir + "/log/message.log")
+		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
+		@@logger = Logger.new(@@home_dir + "/log/message.log")
 
-		def self.rootdir
-			return @@rootdir
-		end
-
-		def self.create_object(class_path)
-			return if not class_path.is_a?(String)
-			class_path = '$.' + class_path if not class_path.isref
-			obj = { '_isa'=>class_path, '_context'=>'object' }
-			Nuri::Sfp::Sfplibs.expand_object(obj, self.get_main)
-			return obj
-		end
-
-		def self.get_main
-			return @@main if defined?(@@main) != nil
-			main = 'include "modules/node/node.sfp"'
-			self.get_modules.each do |mod|
-				main += "\ninclude \"" + @@rootdir + "/modules/" + mod + '/' + mod + '.sfp"'
-			end
-			main += "\n"
-
-			mainfile = self.rootdir + '/etc/main.sfp'
-			parser = Nuri::Sfp::Parser.new(@@rootdir)
-			if File.exist?(mainfile)
-				main += "\n" + File.read(mainfile)
-			end
-			parser.parse(main)
-			@@main = parser.to_sfp
-			return @@main
-		end
-
-		def self.get_modules
-			modules_dir = @@rootdir + "/modules"
-			modules = Array.new
-			Dir.foreach(modules_dir) do |mod|
-				next if mod == 'node'
-				path = modules_dir + "/" + mod
-				if File.directory?(path) and File.file?(path + "/" + mod + ".sfp") and
-						File.file?(path + "/" + mod + ".rb")
-					modules << mod
-				end
-			end
-			modules
+		def self.home_dir
+			return @@home_dir
 		end
 
 		def self.log(msg=nil)
@@ -56,8 +16,7 @@ module Nuri
 
 		def self.os
 			return @@os if defined?(@@os) != nil and @@os != nil
-			#@@os = (`uname -o`).strip if @@os == nil
-			@@os = (`uname -s`).strip #if @@os == nil
+			@@os = (`uname -s`).strip 
 			@@os = (@@os == 'Darwin' ? 'macos' : @@os.downcase)
 			return @@os
 		end

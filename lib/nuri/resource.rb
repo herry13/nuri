@@ -3,16 +3,43 @@ module Nuri
 		attr_accessor :name, :parent
 		attr_reader :children, :state, :goal
 
-		def load(name=nil, parent=nil) # initialize(name=nil, parent=nil)
+		def load(class_path, name=nil)
 			@name = name
-			@parent = parent
 			@children = Hash.new
-			@state = JSON['{}']
-			@goal = JSON['{}']
+			@state = self.create_instance(class_path)
+			@goal = {}
 		end
 
-		def create_object(class_path)
-			return Nuri::Util.create_object(class_path)
+		def create_instance(class_path)
+			return {} if class_path == nil or class_path == ''
+			# TODO
+			class_path = class_path.to_s if not class_path.is_a?(String)
+			class_path = "$.#{class_path}" if not class_path.isref
+			root = Nuri::Resource.get_root
+			if root != nil
+				object = root.at?(class_path)
+				if object != nil
+					object = Nuri::Sfp.deep_clone(object)
+					object['_self'] = @name
+					object['_context'] = 'object'
+					object['_isa'] = class_path
+					object['_classes'] = [class_path]
+					object['_classes'] = object['_classes'].concat(object['_super']) if
+							object.has_key?('_super')
+					object.delete('_super')
+					return object
+				end
+			end
+			return {}
+		end
+
+		def self.set_root(root)
+			@@root = root
+		end
+
+		def self.get_root
+			return {} if defined?(@@root) == nil
+			return @@root
 		end
 
 		def add(mod)
@@ -49,7 +76,6 @@ module Nuri
 			elsif @children.has_key?(first)
 				return false if rest == nil # modules are static
 				@children[first].set_goal(rest, value)
-			#elsif @state.has_key?(first)
 			else
 				if rest == nil
 					@goal[first] = value
@@ -138,7 +164,7 @@ module Nuri
 		include Resource
 
 		def initialize
-			load('root')
+			load('', 'root')
 		end
 	end
 end
