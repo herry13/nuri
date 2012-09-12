@@ -44,17 +44,44 @@ module Nuri
 			end
 
 			def serve
+				def check_uri(uri, value)
+					parts = uri.split('/')
+					return (parts.length >= 2 and parts[1] == value)
+				end
+
 				if @request.params['REQUEST_METHOD'] == 'GET'
-					if @request.params['REQUEST_URI'] == '/state' or
-							(@request.params['REQUEST_URI'] =~ /^\/state\/.*/) != nil
+					if check_uri(@request.params['REQUEST_URI'], 'state')
 						self.http_get_state
 					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'POST'
 
 				elsif @request.params['REQUEST_METHOD'] == 'PUT'
-
+					if check_uri(@request.params['REQUEST_URI'], 'exec')
+						self.execute(@request.body.read.to_s)
+					end
 				end
+			end
+
+			def execute(procedure)
+				cmd = JSON[procedure]
+				puts cmd.inspect
+				comp_name, cmd_name = cmd['name'].pop_ref
+				component = @daemon.root.get(comp_name)
+				success = false
+				if component != nil
+					begin
+						component.send(cmd_name)
+						success = true
+					rescue Exception => e
+						Nuri::Util.log 'Cannot execute procedure: ' + procedure
+						@response.start(500) { |head,out| out.write('') }
+					end
+				else
+					Nuri::Util.log 'Cannot find procedure: ' + procedure
+					@response.start(503) { |head,out| out.write('') }
+				end
+				@response.start(200) { |head,out| out.write('') }
 			end
 
 			def http_get_state
@@ -68,97 +95,8 @@ module Nuri
 						out.write(Nuri::Sfp.to_json(data))
 					end
 				end
-				#	out.write('{"value":"nena":{}}')
-				#end
 			end
 		end
-
-
-=begin
-		class Agent
-			def initialize(daemon, session)
-				@session = session
-				@request = session.gets
-				@daemon = daemon
-			end
-
-			def process_get(path)
-				begin
-					if path == '/state' or path[0, 7] == '/state/'
-						if path == '/state' or path.length <= 7 # parts.length <= 2
-							data = @daemon.get_state
-						else
-							path = path[7, path.length-7]
-							path = path[0, path.length-1] if path[path.length-1, 1] == '/'
-							path.gsub!(/\//, '.')
-							data = @daemon.get_state(path)
-						end
-						return sfp_value_to_json_reply(data)
-					end
-				rescue Exception => e
-					return create_code_msg(500, 'Internal Server Error', e.to_s)
-				end
-			end
-
-			def process_post(path, data)
-			end
-
-			def process_put(path, data)
-				begin
-					puts 'Execute: ' + path + ' -- ' + data
-				rescue Exception => e
-					return create_code_msg(500, 'Internal Server Error', e.to_s)
-				end
-			end
-
-			def process_request(req)
-puts 'Process request: ' + req.to_s
-				type, path, data = req.split(' ', 3)
-				if type == 'GET'
-					return self.process_get(path)
-				elsif type == 'POST'
-					return self.process_post(path, data)
-				elsif type == 'PUT'
-					return self.process_put(path, data)
-				end
-				return nil
-			end
-	
-			def serve
-				begin
-					reply = self.process_request(@request.to_s)
-					if reply != nil
-						@session.print reply
-					else
-						@session.print self.create_code_msg(404, 'Object Not Found')
-					end
-				ensure
-					@session.close
-				end
-			end
-
-			def create_code_msg(code, message, description="")
-				return "HTTP/1.1 #{code}/#{message}\r\nServer: Nuri Client\r\n\r\n" +
-						description
-			end
-
-			def sfp_value_to_json_reply(value)
-				value = { 'value' => value }
-				value = Nuri::Sfp.to_pretty_json(value)
-				return "HTTP/1.1 200/OK\r\nServer: Nuri Client\r\n" +
-						"Content-Length: " + value.length.to_s + "\r\n" +
-						"Content-Type: application/json\r\n" +
-						"\r\n" + value
-			end
-
-			def get_content_type(ext)
-				return case ext
-					when '.json' then 'application/json'
-					else 'text/plain'
-				end
-			end
-		end
-=end
 
 		def self.start
 			daemon = Nuri::Client::Daemon.new

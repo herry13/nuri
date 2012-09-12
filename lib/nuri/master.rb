@@ -58,13 +58,16 @@ module Nuri
 
 				puts JSON.pretty_generate(plan)
 				# TODO -- execute the plan here
+				succeed = true
 				if plan['workflow'] != nil
 					plan['workflow'].each do |action|
 						node = self.get_node(action['name'], @main['system'])
-						self.execute(action, node['domainname']) if node != nil
+						succeed = self.execute(action, node['domainname']) if node != nil
+						break if not succeed
 					end
 				end
-
+puts 'Success: ' + succeed.to_s
+				succeed
 			end
 
 			def execute(action, address)
@@ -74,11 +77,11 @@ module Nuri
 				begin
 					req = Net::HTTP::Put.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
+					return true if res.code == '200'
 				rescue Exception => e
 					Nuri::Util.log 'Cannot execute action: ' + action['name']
-					return false
 				end
-				true
+				false
 			end
 
 			def get_node(path, root)
@@ -111,31 +114,3 @@ module Nuri
 		end
 	end
 end
-
-=begin
-		def get_plan
-			sfp = Nuri::Sfp.deep_clone(@main)
-			sfp.delete('system')
-			sfp['initial'] = self.get_state
-			sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
-			planner = Nuri::Planner::Solver.new
-			return planner.solve_sfp(sfp)
-		end
-
-		def start
-			sleep_time = 2 # in seconds
-			@running = true
-			begin
-				Nuri::Sfp::Parser.dump(self.get_state)
-				Kernel.sleep(sleep_time)
-			end while @running
-		end
-
-		def stop
-		end
-	end
-end
-
-m = Nuri::Master.new
-m.start
-=end

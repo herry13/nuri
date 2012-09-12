@@ -135,6 +135,8 @@ String.send(:define_method, 'isref') {
 	return (s.length > 0 and s[0,1] == '$')
 }
 
+# return the parent of this path
+# e.g.: if self == 'a.b.c.d', it will return 'a.b.c'
 String.send(:define_method, 'to_top') {
 	return self if self == '$'
 	parts = self.split('.')

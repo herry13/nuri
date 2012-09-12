@@ -16,11 +16,12 @@ module Nuri
 			def get_state
 				# installed & running
 				data = `/usr/bin/dpkg-query -W apache2`
-				@state["installed"] = ((data =~ /apache2/) != nil)
+				data = data.split(' ')
+				@state["installed"] = data.length > 1 and data[0] == 'apache2'
 				if @state["installed"]
-					@state["version"] = data.split(' ')[1]
+					@state["version"] = data[1]
 					data = `/usr/bin/service apache2 status`
-					@state["running"] = ((data =~ /running/) != nil)
+					@state["running"] = ((data =~ /is running/) != nil)
 				else
 					@state["version"] = ""
 					@state["running"] = false
@@ -60,12 +61,16 @@ module Nuri
 			end
 		
 			def start
+				print 'Start apache2...'
 				result = system('/usr/bin/service apache2 start')
+				puts 'OK'
 				return (result == true)
 			end
 		
 			def stop
+				print 'Stop apache2...'
 				result = system('/usr/bin/service apache2 stop')
+				puts 'OK'
 				return (result == true)
 			end
 		

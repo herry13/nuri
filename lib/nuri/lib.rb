@@ -15,12 +15,12 @@ require 'modules/node/node'
 
 module Nuri
 	module Config
-		attr_reader :config
+		attr_reader :config, :root
 
-		def load
+		def load(client=true)
 			self.read_config
 			Nuri::Resource.set_root(self.get_main)
-			self.load_modules
+			self.load_modules if client
 		end
 
 		def get_main

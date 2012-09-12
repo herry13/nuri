@@ -111,7 +111,6 @@ module Nuri
 			@children.each_value { |mod| mod.reset_goal }
 		end
 
-		protected
 		def get(ref)
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
