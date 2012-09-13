@@ -1098,7 +1098,9 @@ puts new_operators.length.to_s + ' new merged-operators'
 				return op
 			end
 
-			def to_s; return @name + ': ' + self.length.to_s ; end
+			def to_s
+				return @name + ': ' + self.length.to_s
+			end
 
 			def to_sas(root)
 				prevail = Array.new
@@ -1118,6 +1120,19 @@ puts new_operators.length.to_s + ' new merged-operators'
 				prepost.each { |p| sas += p.to_sas(root) + "\n" }
 				sas += "#{@cost}\nend_operator"
 				return sas
+			end
+
+			def to_sfw
+				id, name = @name.split('$', 2)
+				sfw = { 'name' => '$' + name, 'parameters' => {},
+					'conditions' => {}, 'effects' => {} }
+				@params.each { |k,v|	sfw['parameters'][k.to_s] = v.to_s if k != '$.this' } if @params != nil
+				self.each_value do |param|
+					p = param.to_sfw
+					sfw['conditions'][ p['name'] ] = p['pre'] if p['pre'] != nil
+					sfw['effects'][ p['name'] ] = p['post'] if p['post'] != nil
+				end
+				return sfw
 			end
 		end
 
@@ -1176,6 +1191,14 @@ puts new_operators.length.to_s + ' new merged-operators'
 				return @var.name + ',' +
 					(@pre == nil ? '-' : (@pre.is_a?(Hash) ? @pre.tostring : @pre.to_s)) + ',' +
 					(@post == nil ? '-' : (@post.is_a?(Hash) ? @post.tostring : @post.to_s))
+			end
+
+			def to_sfw
+				return {
+						'name' => @var.name,
+						'pre' => (@pre.is_a?(Hash) ? @pre.tostring : @pre),
+						'post' => (@post.is_a?(Hash) ? @post.tostring: @post)
+					}
 			end
 		end
 	end

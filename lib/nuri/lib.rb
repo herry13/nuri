@@ -104,4 +104,8 @@ module Nuri
 			end
 		end
 	end
+
+
+	class ExecutionFailedException < Exception
+	end
 end

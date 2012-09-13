@@ -3,11 +3,14 @@ require 'net/http'
 module Nuri
 	module Master
 		class Daemon
+			attr_accessor :verify_execution
+
 			include Nuri::Config
 
 			def initialize
 				self.load
 				@main = self.get_main
+				@verify_execution = true
 			end
 
 			def get_plan(state=nil)
@@ -56,7 +59,7 @@ module Nuri
 				planner = Nuri::Planner::Solver.new
 				plan = planner.solve_sfp_to_sfw(sfp)
 
-				puts JSON.pretty_generate(plan)
+puts JSON.pretty_generate(plan)
 				# TODO -- execute the plan here
 				succeed = true
 				if plan['workflow'] != nil
@@ -66,21 +69,33 @@ module Nuri
 						break if not succeed
 					end
 				end
-puts 'Success: ' + succeed.to_s
 				succeed
 			end
 
 			def execute(action, address)
+				def verify(action)
+					state = get_state
+					action['effects'].each do |key,value|
+						raise Nuri::ExecutionFailedException, action['name'] if state.at?(key) != value
+puts '...OK'
+					end
+				end
+
 				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/exec')
 				data = JSON.generate(action)
-				puts data, url
 				begin
+print 'exec: ' + action['name']
 					req = Net::HTTP::Put.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
+					verify(action) if @verify_execution
+
 					return true if res.code == '200'
+				rescue ExecutionFailedException => efe
+					Nuri::Util.log efe.to_s
 				rescue Exception => e
 					Nuri::Util.log 'Cannot execute action: ' + action['name']
 				end
+puts '...FAILED'
 				false
 			end
 
@@ -91,7 +106,6 @@ puts 'Success: ' + succeed.to_s
 					return n if n != nil and n['_isa'] == '$.Node'
 				end
 			end
-
 		end
 
 		def self.start

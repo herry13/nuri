@@ -52,7 +52,8 @@ options:
 		puts (plan == nil ? 'no solution' : plan)
 
 	elsif ARGV[1] == 'apply'
-		Nuri::Master.apply
+		result = Nuri::Master.apply
+		puts 'Succeed: ' + result.to_s
 
 	elsif ARGV[1] == 'planner' and ARGV.length >= 3
 		planner = Nuri::Planner::Solver.new

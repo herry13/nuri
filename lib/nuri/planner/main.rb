@@ -44,17 +44,10 @@ module Nuri
 
 				plan['workflow'] = []
 				seq.each do |line|
-					line = line[1, line.length-2].sub(/^op_[0-9]+/, '')
-					params = line.split(' ')
-					method = params[0]
-					params = params[1..params.length]
-					plan['workflow'] << { 'name' => method,
-							'parameters' => {}
-						}
-					params.each do |p|
-						var, value = p.split('=')
-						plan['parameters'][var] = value
-					end
+					op_name = line[1, line.length-2]
+					operator = @parser.operators[op_name]
+					raise Exception, 'Cannot find operator: ' + op_name if operator == nil
+					plan['workflow'] << operator.to_sfw
 				end
 				plan['total'] = plan['workflow'].length
 				return plan

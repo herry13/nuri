@@ -9,7 +9,6 @@ module Nuri
 
 			def initialize
 				self.load('Apache', 'apache')
-				#@state = self.create_object('Apache')
 			end
 	
 			# get state of this component in JSON
