@@ -17,7 +17,7 @@ module Nuri
 						Nuri::Sfp.deep_clone(state))
 				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 				planner = Nuri::Planner::Solver.new
-				return planner.solve_sfp(sfp)
+				return planner.solve_sfp_to_json(sfp)
 			end
 
 			def get_state(path='')
@@ -54,7 +54,7 @@ module Nuri
 				sfp['initial'] = state
 				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 				planner = Nuri::Planner::Solver.new
-				plan = planner.solve_sfp_to_json(sfp)
+				plan = planner.solve_sfp_to_sfw(sfp)
 
 				puts JSON.pretty_generate(plan)
 				# TODO -- execute the plan here

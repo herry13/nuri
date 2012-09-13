@@ -24,13 +24,21 @@ module Nuri
 			end
 
 			def solve_sfp_to_json(root)
-				@parser = Nuri::Sfp::Parser.new
-				@parser.root = root
-				plan = solve_sas(@parser.to_sas)
+				plan = self.solve_sfp(root)
 				return sequential_plan_to_json(plan)
 			end
 
+			def solve_sfp_to_sfw(root)
+				plan = self.solve_sfp(root)
+				return sequential_plan_to_sfw(plan)
+			end
+
 			def sequential_plan_to_json(seq)
+				sfw = self.sequential_plan_to_sfw(seq)
+				return JSON.pretty_generate(sfw)
+			end
+
+			def sequential_plan_to_sfw(seq)
 				plan = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
 				return plan if seq == nil
 
