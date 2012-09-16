@@ -34,48 +34,47 @@ Scientific Linux
 
 Running Nuri client on managed node
 -----------------------------------
-1. Start client daemon.
+1. Start client daemon:
 
-	$ ./bin/nuri.rb &
+    $ ./bin/nuri.rb &
 
-2. To check whether the daemon has run, open the following URL in your browser:
-	http://localhost:9090/state
-	If you get an error, you may need to reconfigure your firewall to open port 9090. 
+2. To check whether the daemon has run, open the following URL in your browser: http://localhost:9090/state.
+   If you get an error, you may need to reconfigure your firewall to open port 9090. 
 
 Controlling Nuri clients from master node
 -----------------------------------------
 1. Create main specification file (main.sfp). This file is configuration specification to be deployed onto managed nodes:
+  - For example, if your clients' hostname and address are:
+    - hpvm11, hpvm11.diy.inf.ed.ac.uk
+    - hpvm12, hpvm12.diy.inf.ed.ac.uk
+  - Put the list of your clients in *system* block:
 
-- Put the list of your clients in *system* block. For example, if your clients' hostname and address are:
-	- hpvm11, hpvm11.diy.inf.ed.ac.uk
-	- hpvm12, hpvm12.diy.inf.ed.ac.uk
-then define the following statements in *system* block:
+    system {
+      hpvm11 isa Node {
+        domainname is "hpvm11.diy.inf.ed.ac.uk"
+      }
+      hpvm12 isa Node {
+        domainname is "hpvm11.diy.inf.ed.ac.uk"
+      }
+    }
 
-	system {
-	   hpvm11 isa Node {
-	      domainname is "hpvm11.diy.inf.ed.ac.uk"
-	   }
-	   hpvm12 isa Node {
-	      domainname is "hpvm11.diy.inf.ed.ac.uk"
-	   }
-	}
+  - Define the goal and global constraint of your system. For example, if you want both clients to have *apache* service
+    running, then *goal* and *global* blocks will contain:
 
-- Define the goal and global constraint of your system. For example, if you want both clients to have *apache* service running, then *goal* and *global* blocks will contain:
+    goal constraint {
+      hpvm11.apache.running = true
+      hpvm12.apache.running = true
+    }
+    global constraint {
+    }
 
-	goal constraint {
-	   hpvm11.apache.running = true
-	   hpvm12.apache.running = true
-	}
-	global constraint {
-	}
+2. Get current state of all nodes:
 
-2. Get current state of all nodes
+    $ ./bin/nuri.rb -c pull pretty
 
-	$ ./bin/nuri.rb -c pull pretty
+3. Applying the goal & global constraints:
 
-3. Applying the goal & global constraints
-
-	$ ./bin/nuri.rb -c apply
+    $ ./bin/nuri.rb -c apply
 
 Documentation
 -------------
