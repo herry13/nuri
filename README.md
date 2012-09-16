@@ -43,12 +43,8 @@ Running Nuri client on managed node
 
 Controlling Nuri clients from master node
 -----------------------------------------
-1. Create main specification file *etc/main.sfp*. This file is configuration specification to be deployed onto
-   managed nodes:
-   - For example, if your clients' hostname and address are:
-     - hpvm11, hpvm11.diy.inf.ed.ac.uk
-     - hpvm12, hpvm12.diy.inf.ed.ac.uk
-   - Put the list of your clients in *system* block:
+1. Create main specification file *etc/main.sfp*. The following example specifies configuration of two client nodes i.e.
+   *hpvm11* and *hpvm12* where both runs apache service.
 
 		system {
 		  hpvm11 isa Node {
@@ -59,16 +55,15 @@ Controlling Nuri clients from master node
 		  }
 		}
 
-    - Define the goal and global constraint of your system. For example, if you want both clients to have *apache* service
-      running, then *goal* and *global* blocks will contain:
-
-			goal constraint {
-			  hpvm11.apache.running = true
-			  hpvm12.apache.running = true
-			}
-			
-			global constraint {
-			}
+		goal constraint {
+		  // apache on 'hpvm11' is running
+		  hpvm11.apache.running = true
+		  // apache on 'hpvm12' is running
+		  hpvm12.apache.running = true
+		}
+		
+		global constraint {  // no global constraint
+		}
 
 2. Get current state of all nodes:
 
