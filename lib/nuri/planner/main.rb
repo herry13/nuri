@@ -63,7 +63,6 @@ module Nuri
 					@parser.parse_file(file)
 					return solve_sas(@parser.to_sas)
 				rescue Exception => e
-					$stderr.puts e.to_s
 					return nil
 				end
 			end
@@ -112,6 +111,10 @@ module Nuri
 					File.delete(plan_file) if File.exist?(plan_file)
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
 					Dir.delete(tmp_dir)
+
+					plan.each_index do |i|
+						plan.delete_at(i) if (plan[i] =~ /op_[0-9]+\-goal_[0-9]+/) != nil
+					end
 
 					return plan
 				rescue Exception => exp

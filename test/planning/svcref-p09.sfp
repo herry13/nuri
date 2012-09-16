@@ -20,10 +20,11 @@ initial state {
 }
 goal constraint {
 	a.running is false
+	pc1.refer = pc2.refer
 }
 global constraint {
 	pc1.refer.running is true
 	pc1.refer in (a, c)
 	pc2.refer.running is true
-	pc2.refer not in (c)
+	pc2.refer not in (b)
 }
