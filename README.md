@@ -69,7 +69,8 @@ Controlling Nuri clients from master node
 
 		$ ./bin/nuri.rb -c pull
 
-3. Applying the goal & global constraints:
+3. Applying the goal & global constraints specified in *etc/main.sfp* on *hpvm11* and *hpvm12*
+   by generating and executing a workflow
 
 		$ ./bin/nuri.rb -c apply
 
