@@ -103,6 +103,5 @@ module Nuri
 			daemon.start
 		end
 
-
 	end
 end

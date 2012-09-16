@@ -2,6 +2,8 @@ require 'nuri/sfp/main'
 
 module Nuri
 	module Planner
+		Heuristic = 'lmcut'
+
 		class Solver
 			attr_reader :parser
 
@@ -78,43 +80,48 @@ module Nuri
 
 			def solve_sas(sas)
 				os = `uname -s`.downcase.strip
-				dir = '/tmp/nuri_' + (rand * 100000).to_i.abs.to_s
-				sas_file = dir + '/problem.sas'
-				plan_file = dir + '/out.plan'
-				cmd = ''
-				case os
-					when 'linux'
-						planner = File.dirname(__FILE__) + '/linux/planner'
-						cmd = planner + ' ' + sas_file + ' ' + plan_file
-					when 'macos', 'darwin'
-						planner = File.dirname(__FILE__) + '/macos/planner'
-						cmd = planner + ' ' + sas_file + ' ' + plan_file
-					else
-						raise UnsupportedPlatformException, 'Platform ' + os + ' is not supported'
+				planner = case os
+					when 'linux' then File.dirname(__FILE__) + '/linux'
+					when 'macos', 'darwin' then File.dirname(__FILE__) + '/macos'
+					else nil
+				end
+				raise UnsupportedPlatformException, os + ' is not supported' if planner == nil
+
+				params = case
+					when 'lmcut' then '--search "astar(lmcut())"'
+					when 'blind' then '--search "astar(blind())"'
+					else '--heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)"'
 				end
 
 				begin
-					# create temporary directory
-					Dir.mkdir(dir) if not File.exist?(dir)
-					# dump SAS+ problem
+					begin
+						tmp_dir = '/tmp/nuri_' + (rand * 100000).to_i.abs.to_s
+					end while File.exist?(tmp_dir)
+					Dir.mkdir(tmp_dir)
+					sas_file = tmp_dir + '/problem.sas'
+					plan_file = tmp_dir + '/out.plan'
 					File.open(sas_file, 'w') do |f|
-						f.write(sas)
+					f.write(sas)
 					end
-					Kernel.system(cmd)
-					plan = File.read(plan_file) if File.exist?(plan_file)
+					command = "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file} 1> /dev/null 2> /dev/null"
+					Kernel.system(command)
+					plan = (File.exist?(plan_file) ? File.read(plan_file) : nil)
 					plan = to_partial_order(plan) if plan != nil
 
 					File.delete(sas_file)
 					File.delete(plan_file) if File.exist?(plan_file)
-					Dir.delete(dir)
+					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
+					Dir.delete(tmp_dir)
 
 					return plan
 				rescue Exception => exp
-					$stderr.puts 'Planner error: ' + exp.to_s
-					system 'rm -rf ' + dir
+					system 'rm -rf ' + tmp_dir
+					raise Exception, exp.to_s
 				end
-				return nil
+
+				nil
 			end
+
 		end
 
 		class Action
