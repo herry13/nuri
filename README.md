@@ -36,7 +36,7 @@ Running Nuri client on managed node
 -----------------------------------
 1. Start client daemon:
 
-    $ ./bin/nuri.rb &
+		$ ./bin/nuri.rb &
 
 2. To check whether the daemon has run, open the following URL in your browser: http://localhost:9090/state.
    If you get an error, you may need to reconfigure your firewall to open port 9090. 
