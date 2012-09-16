@@ -50,17 +50,17 @@ Controlling Nuri clients from master node
      - hpvm12, hpvm12.diy.inf.ed.ac.uk
    - Put the list of your clients in *system* block:
 
-			system {
-			  hpvm11 isa Node {
-			    domainname is "hpvm11.diy.inf.ed.ac.uk"
-			  }
-			  hpvm12 isa Node {
-			    domainname is "hpvm11.diy.inf.ed.ac.uk"
-			  }
-			}
+		system {
+		  hpvm11 isa Node {
+		    domainname is "hpvm11.diy.inf.ed.ac.uk"
+		  }
+		  hpvm12 isa Node {
+		    domainname is "hpvm11.diy.inf.ed.ac.uk"
+		  }
+		}
 
-   - Define the goal and global constraint of your system. For example, if you want both clients to have *apache* service
-     running, then *goal* and *global* blocks will contain:
+    - Define the goal and global constraint of your system. For example, if you want both clients to have *apache* service
+      running, then *goal* and *global* blocks will contain:
 
 			goal constraint {
 			  hpvm11.apache.running = true
@@ -72,7 +72,7 @@ Controlling Nuri clients from master node
 
 2. Get current state of all nodes:
 
-		$ ./bin/nuri.rb -c pull pretty
+		$ ./bin/nuri.rb -c pull
 
 3. Applying the goal & global constraints:
 
