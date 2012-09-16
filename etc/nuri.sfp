@@ -1,0 +1,12 @@
+nuri {
+	host is "0.0.0.0"
+	port is 9090
+
+	secure is no
+	ssl_cert is "cert.pem"
+	ssl_key is "key.pem"
+
+	as_master is no
+	
+	//bsig is yes
+}
