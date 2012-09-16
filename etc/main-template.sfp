@@ -1,8 +1,7 @@
-include "modules/node/node.sfp"
-include "modules/network/network.sfp"
-include "modules/apache/apache.sfp"
-
 system {
+	nena isa Node {
+		domainname is "nena.inf.ed.ac.uk"
+	}
 	hpvm11 isa Node {
 		domainname is "hpvm11.diy.inf.ed.ac.uk"
 	}
@@ -15,6 +14,7 @@ system {
 }
 
 goal constraint {
+	nena.apache.running = true
 	hpvm11.apache.running = false
 	hpvm12.apache.running = true
 	hpvm13.apache.running = true

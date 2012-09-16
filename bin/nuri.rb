@@ -38,14 +38,11 @@ options:
 		puts Nuri::Sfp.to_pretty_json(state) if state != nil
 
 	elsif ARGV[1] == 'pull'
-#for i in 1..1000
 		state = Nuri::Master.state
 		if state != nil
-			state.accept(Nuri::Sfp::PrettyStateGenerator.new) if ARGV[2] == 'pretty'
+			state.accept(Nuri::Sfp::PrettyStateGenerator.new) if ARGV[2] != 'full'
 			puts Nuri::Sfp.to_pretty_json(state)
 		end
-#puts 'cycle #' + i.to_s
-#end
 
 	elsif ARGV[1] == 'plan'
 		plan = Nuri::Master.plan

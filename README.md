@@ -4,45 +4,87 @@ author: Herry (herry13@gmail.com)
 website: http://homepages.inf.ed.ac.uk/s0978621/
 last update: 03-09-2012
  
-Dynamic Workflow Configuration Tool.
+Nuri is a dynamic workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
 Important files:
-- <HOME>/etc/nuri.sfp -- Nuri service configuration file.
-- <HOME>/etc/main.sfp -- Main specification file to be deployed.
-- <HOME>/etc/bsig.sfp -- Specification of Behavioural Signature model.
+- <HOME>/etc/nuri.sfp -- Nuri client configuration file.
+- <HOME>/etc/main.sfp -- Configuration specification file to be deployed onto managed nodes.
 
-Get current state:
-
-	http://<host>:9090/state
-
-
+Requirements
+------------
 Ubuntu
-------
-Required Packages
-- ruby (>= 1.8.7)
-- rubygems
-- libz-dev
-- libaugeas-ruby
-
-Required Ruby Gems
-- mongrel
-- json
-- antlr3
+- required packages
+	- ruby (>= 1.8.7)
+	- rubygems
+	- libz-dev
+	- libaugeas-ruby
+- required Ruby Gems
+	- mongrel
+	- json
+	- antlr3
 
 Scientific Linux
-----------------
-Required Packages
-- ruby (>= 1.8.7)
-- ruby-devel
-- rubygems
-- zlib-devel
-- augeas-devel
+- required packages
+	- ruby (>= 1.8.7)
+	- ruby-devel
+	- rubygems
+	- zlib-devel
+	- augeas-devel
+- required Ruby Gems
+	- mongrel
+	- json
+	- antlr3
+	- ruby-augeas
 
-Required Ruby Gems
-- mongrel
-- json
-- antlr3
-- ruby-augeas
+Run Nuri client on managed node
+-------------------------------
+1. Create nuri configuration file (nuri.sfp) simply by copying from default configuration file (nuri-template.sfp).
+
+	$ cd etc/
+	$ cp nuri-template.sfp nuri.sfp
+
+2. Start client daemon.
+
+	$ ./bin/nuri.rb &
+
+3. To check whether the daemon has run, open the following URL in your browser:
+	http://localhost:9090/state
+	If you get an error, you may need to reconfigure your firewall to open port 9090. 
+
+Control Nuri clients from master node
+--------------------------------------
+1. Create main specification file (main.sfp):
+
+- Put the list of your clients in *system* block. For example, if your clients' hostname and address are:
+	- hpvm11, hpvm11.diy.inf.ed.ac.uk
+	- hpvm12, hpvm12.diy.inf.ed.ac.uk
+then define the following statements in *system* block:
+
+	system {
+	   hpvm11 isa Node {
+	      domainname is "hpvm11.diy.inf.ed.ac.uk"
+	   }
+	   hpvm12 isa Node {
+	      domainname is "hpvm11.diy.inf.ed.ac.uk"
+	   }
+	}
+
+- Define the goal and global constraint of your system. For example, if you want both clients to have *apache* service running, then *goal* and *global* blocks will contain:
+
+	goal constraint {
+	   hpvm11.apache.running = true
+	   hpvm12.apache.running = true
+	}
+	global constraint {
+	}
+
+2. Get current state of all nodes
+
+	$ ./bin/nuri.rb -c pull pretty
+
+3. Applying the goal & global constraints
+
+	$ ./bin/nuri.rb -c apply
 
 Documentation
 -------------
@@ -54,10 +96,6 @@ To build:
 
     $ cd doc
     $ ./build.sh
-
-Issues
-------
-- In Ubuntu 12.04, antlr3(1.8.12) conflicts with libxml-ruby(2.3.3). Each time SFPParser parses a file, it always generates 'segmentation fault'. This issue is not arised when libxml-ruby not being used.
 
 SFp Language
 ------------
