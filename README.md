@@ -1,14 +1,10 @@
 Nuri
 ====
-author: Herry (herry13@gmail.com)
-website: http://homepages.inf.ed.ac.uk/s0978621/
-last update: 03-09-2012
+- author: Herry (herry13@gmail.com)
+- website: http://homepages.inf.ed.ac.uk/s0978621/
+- last update: 16-09-2012
  
 Nuri is a dynamic workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
-
-Important files:
-- <HOME>/etc/nuri.sfp -- Nuri client configuration file.
-- <HOME>/etc/main.sfp -- Configuration specification file to be deployed onto managed nodes.
 
 Requirements
 ------------
@@ -48,7 +44,7 @@ Running Nuri client on managed node
 
 Controlling Nuri clients from master node
 -----------------------------------------
-1. Create main specification file (main.sfp):
+1. Create main specification file (main.sfp). This file is configuration specification to be deployed onto managed nodes:
 
 - Put the list of your clients in *system* block. For example, if your clients' hostname and address are:
 	- hpvm11, hpvm11.diy.inf.ed.ac.uk
