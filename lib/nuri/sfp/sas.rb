@@ -37,9 +37,19 @@ module Nuri
 			attr_accessor :root, :variables, :types, :operators, :axioms
 
 			def to_sas
-				return false if @parser == nil
+				@arrays = Hash.new
 
-				@root = @parser.root 
+				if @parser != nil
+					@parser_arrays.each do |k,v|
+						first, rest = k.explode[1].explode
+						next if rest == nil
+						@arrays['$.' + rest.to_s] = v
+					end
+				end
+
+				return nil if @root == nil
+				return nil if not @root.has_key?('initial') or not @root.has_key?('goal')
+
 				@variables = Hash.new
 				@types = { 'Boolean' => [true, false],
 					'Number' => Array.new,
@@ -47,25 +57,24 @@ module Nuri
 				}
 				@operators = Hash.new
 				@axioms = Array.new
-				
+
 				# collect classes
-				self.collect_classes
-
+				#self.collect_classes
+			
+				# unlink 'initial', 'goal', 'global' with root
+				@root['initial'].delete('_parent')
+				@root['goal'].delete('_parent')
+				@root['global'].delete('_parent') if @root.has_key?('global')
+	
 				# collect variables
-				@root['initial'].accept(VariableCollector.new(self)) #@root, @variables, @types))
-
-				# remove "$.initial" for arrays map
-				@parser.arrays.each { |k,v|
-					first, rest = k.explode[1].explode
-					next if rest == nil
-					@parser.arrays['$.'+rest.to_s] = v
-					@parser.arrays.delete(k)
-				}
+				@root['initial'].accept(VariableCollector.new(self))
 
 				# collect values from goal and global constraint
 				value_collector = Nuri::Sfp::ValueCollector.new(@types)
-				@root['goal'].accept(value_collector) if @root.has_key?('goal') and @root['goal'].isconstraint
-				@root['global'].accept(value_collector) if @root.has_key?('global') and @root['global'].isconstraint
+				@root['goal'].accept(value_collector) if @root.has_key?('goal') and
+						@root['goal'].isconstraint
+				@root['global'].accept(value_collector) if @root.has_key?('global') and
+						@root['global'].isconstraint
 
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
@@ -73,11 +82,13 @@ module Nuri
 				self.set_variable_values
 
 				# process goal constraint
-				process_goal(@root['goal']) if @root.has_key?('goal') and @root['goal'].isconstraint
+				process_goal(@root['goal']) if @root.has_key?('goal') and
+						@root['goal'].isconstraint
 
 				# normalize global constraint formula
 				if @root.has_key?('global') and @root['global'].isconstraint
-					raise Exception, 'Invalid global constraint' if not normalize_formula(@root['global'])
+					raise Exception, 'Invalid global constraint' if 
+							not normalize_formula(@root['global'])
 				end
 
 				# process all procedures
@@ -353,12 +364,11 @@ puts new_operators.length.to_s + ' new merged-operators'
 						params[k] << val if not (val.is_a?(Hash) and val.isnull)
 					}
 				}
-
 				# combinatorial method for all possible values of parameters
 				# using recursive method
 				def combinator(bucket, grounder, procedure, names, params, selected, index)
 					if index >= names.length
-						p = deep_clone(procedure) # procedure.clone
+						p = Nuri::Sfp.deep_clone(procedure) # procedure.clone
 						# grounding all references
 						selected['$.this'] = procedure['_parent'].ref
 						selected.each { |k,v| selected[k] = (v.is_a?(Hash) ? v.ref : v) }
@@ -383,14 +393,6 @@ puts new_operators.length.to_s + ' new merged-operators'
 				grounder = ParameterGrounder.new
 				combinator(bucket, grounder, procedure, params.keys, params, Hash.new, 0)
 				return bucket
-			end
-
-			# collect all classes that are used by the objects
-			def collect_classes
-				@parser.used_classes.each { |c|
-					@types[c] = Array.new
-					@types[c] << Nuri::Sfp.null_of(c) if @types[c].length <= 0
-				}
 			end
 
 			def dump_types
@@ -422,29 +424,6 @@ puts new_operators.length.to_s + ' new merged-operators'
 			def dump_axioms
 				puts '--- axioms'
 				@axioms.each { |ax| puts ax.to_s }
-			end
-
-			# deep cloning of given value
-			# note: this can only be used on String, Number, Boolean, Hash, Array values
-			def deep_clone(value)
-				if value.is_a?(Hash)
-					result = value.clone
-					value.each { |k,v|
-						if k != '_parent'
-							result[k] = deep_clone(v)
-							result[k]['_parent'] = result if result[k].is_a?(Hash) and
-								result[k].has_key?('_parent')
-						end
-					}
-					result
-				elsif value.is_a?(Array)
-					result = value.clone
-					result.clear
-					result.each { |v| result << deep_clone(v) }
-					result
-				else
-					value
-				end
 			end
 
 			# set possible values for each variable
@@ -500,7 +479,8 @@ puts new_operators.length.to_s + ' new merged-operators'
 						map_cond = and_equals_constraint_to_map(@root['global'][key])
 						map_cond.each { |k,v|
 							next if k[0,1] == '_'
-							raise VariableNotFoundException, k if not @variables.has_key?(k)
+							raise VariableNotFoundException, 'Variable not found: ' + k if
+								not @variables.has_key?(k)
 							if not op.has_key?(@variables[k].name)
 								op[@variables[k].name] = Parameter.new(@variables[k], v, nil)
 							else
@@ -549,7 +529,11 @@ puts new_operators.length.to_s + ' new merged-operators'
 				# using recursive method
 				def ref_combinator(bucket, parent, names, last_value, last_names=nil,
 						index=0, selected=Hash.new)
+
+					return if names[index] == nil
 					var_name = parent + '.' + names[index]
+					return if not @variables.has_key?(var_name)
+
 					if index >= names.length or (index >= names.length-1 and last_value != nil)
 						selected[var_name] = last_value if last_value != nil
 						last_names << var_name if last_names != nil
@@ -558,7 +542,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 						result['_type'] = 'and'
 						bucket << result
 					elsif not @variables.has_key?(var_name)
-						raise VariableNotFoundException, var_name + ' is not exist!'
+						raise VariableNotFoundException, 'Variable not found: ' + var_name
 					else
 						@variables[var_name].each { |v|
 							next if v.is_a?(Hash) and v.isnull and index < (names.length-1)
@@ -627,15 +611,16 @@ puts new_operators.length.to_s + ' new merged-operators'
 				end
 
 				def normalize_nested_left_only(left, right, formula)
-#puts 'nested-left-only: ' + left
 					names, rest = break_nested_reference(left)
 					bucket = Array.new
 					ref_combinator(bucket, rest, names, right)
-					key = Nuri::Sfp::Sas.next_constraint_key
-					formula[key] = array_to_or_constraint(bucket)
 					formula.delete(left)
-					to_and_or_graph(formula[key])
-					return key
+					if bucket.length > 0
+						key = Nuri::Sfp::Sas.next_constraint_key
+						formula[key] = array_to_or_constraint(bucket)
+						to_and_or_graph(formula[key])
+						return key
+					end
 				end
 
 				# transform a first-order formula into AND/OR graph
@@ -707,7 +692,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 						end
 					}
 					# dot-product the nodes
-					def dot_product_and(bucket, names, formula, values=Hash.new, index=0)
+					def cross_product_and(bucket, names, formula, values=Hash.new, index=0)
 						if index >= names.length
 							key = Nuri::Sfp::Sas.next_constraint_key
 							c = create_and_constraint(key, formula)
@@ -723,12 +708,12 @@ puts new_operators.length.to_s + ' new merged-operators'
 								val.each { |k,v|
 									next if k[0,1] == '_'
 									values[k] = v
-									dot_product_and(bucket, names, formula, values, index+1)
+									cross_product_and(bucket, names, formula, values, index+1)
 									values.delete(k)
 								}
 							else
 								values[key] = val
-								dot_product_and(bucket, names, formula, values, index+1)
+								cross_product_and(bucket, names, formula, values, index+1)
 							end
 						end
 					end
@@ -737,7 +722,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 						names = Array.new
 						formula.keys.each { |k| names << k if k[0,1] != '_' }
 						bucket = Array.new
-						dot_product_and(bucket, names, formula)
+						cross_product_and(bucket, names, formula)
 						names.each { |k| formula.delete(k) }
 						formula['_type'] = 'or'
 					end
@@ -749,7 +734,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 				# variable x := p1 | p2 | p3
 				# return an array (p2, p3)
 				def get_list_not_value_of(var_name, value)
-					raise VariableNotFoundException, var_name + ' cannot be found' if
+					raise VariableNotFoundException, 'Variable not found: ' + var_name if
 						not @variables.has_key?(var_name)
 					if value.is_a?(String) and value.isref
 						value = @root['initial'].at?(value)
@@ -763,26 +748,28 @@ puts new_operators.length.to_s + ' new merged-operators'
 				# then formula := x not-equals p1 is transformed into
 				# formula := (x equals p2) or (x equals p3)
 				def not_equals_statement_to_or_constraint(formula)
-					formula.each { |k,v|
+					keys = formula.keys
+					keys.each do |k|
 						next if k[0,1] == '_'
+						v = formula[k]
 						if v.is_a?(Hash) and v.isconstraint
 							if v['_type'] == 'or' or v['_type'] == 'and'
 								not_equals_statement_to_or_constraint(v)
 							elsif v['_type'] == 'not-equals'
 								key1 = Nuri::Sfp::Sas.next_constraint_key
 								c_or = create_or_constraint(key1, formula)
-								get_list_not_value_of(k, v['_value']).each { |val1|
+								get_list_not_value_of(k, v['_value']).each do |val1|
 									val1 = val1.ref if val1.is_a?(Hash) and val1.isobject
 									key2 = Nuri::Sfp::Sas.next_constraint_key
 									c_and = create_and_constraint(key2, c_or)
 									c_and[k] = create_equals_constraint(val1)
 									c_or[key2] = c_and
-								}
+								end
 								formula.delete(k)
 								formula[key1] = c_or
 							end
 						end
-					}
+					end
 				end
 
 				# Remove the following type of constraint in the given formula:
@@ -829,14 +816,14 @@ puts new_operators.length.to_s + ' new merged-operators'
 					elsif formula.isconstraint and formula['_type'] == 'iterator'
 						ref = '$.' + formula['_value']
 						var = '$.' + formula['_variable']
-						total = @parser.arrays[ref]
+						total = @arrays[ref] if @arrays.has_key?(ref)
 						names = formula.keys.select { |k| k[0,1] != '_' }
 						grounder = ParameterGrounder.new(Hash.new)
 						for i in 0..(total-1)
 							grounder.map.clear
 							grounder.map[var] = ref + "[#{i}]"
 							id = Nuri::Sfp::Sas.next_constraint_key
-							c_and = deep_clone(formula['_template'])
+							c_and = Nuri::Sfp.deep_clone(formula['_template'])
 							c_and['_self'] = id
 							c_and.accept(grounder)
 							formula[id] = c_and
@@ -888,7 +875,8 @@ puts new_operators.length.to_s + ' new merged-operators'
 
 			def visit(name, value, obj)
 				return if name[0,1] == '_'
-				raise VariableNotFoundException, name if not @vars.has_key?(name)
+				raise VariableNotFoundException, 'Variable not found: ' + name if
+					not @vars.has_key?(name)
 				if value.isconstraint
 					self.set_equals(name, value['_value']) if value['_type'] == 'equals'
 				end
@@ -903,13 +891,15 @@ puts new_operators.length.to_s + ' new merged-operators'
 				@init = main.root['initial']
 			end
 
-			def visit(name, value, obj)
-				return false if name[0,1] == '_' or (value.is_a?(Hash) and not (value.isobject or value.isnull))
-				var_name = obj.ref.push(name)
+			def visit(name, value, parent)
+				return false if name[0,1] == '_' or (value.is_a?(Hash) and
+						not (value.isobject or value.isnull))
+
+				var_name = parent.ref.push(name)
 				isfinal = self.is_final(value)
 				isref = (value.is_a?(String) and value.isref)
 				value = @init.at?(value) if value.is_a?(String) and value.isref
-				type = (isfinal ? self.isa?(value) : self.get_type(name, value, obj))
+				type = (isfinal ? self.isa?(value) : self.get_type(name, value, parent))
 				var = Variable.new(var_name, type, -1, value, nil, isfinal)
 				@vars[var.name] = var
 				if isfinal and value.is_a?(Hash)
@@ -987,12 +977,14 @@ puts new_operators.length.to_s + ' new merged-operators'
 							obj[v] = value
 							obj.delete(name)
 							name = v
+							value['_self'] = name if value.is_a?(Hash)
 							break
 						elsif name.length > k.length and name[k.length,1] == '.' and name[0, k.length] == k
 							grounded = v + name[k.length, (name.length-k.length)]
 							obj[grounded] = value
 							obj.delete(name)
 							name = grounded
+							value['_self'] = name if value.is_a?(Hash)
 							break
 						end
 					}
@@ -1106,7 +1098,9 @@ puts new_operators.length.to_s + ' new merged-operators'
 				return op
 			end
 
-			def to_s; return @name + ': ' + self.length.to_s ; end
+			def to_s
+				return @name + ': ' + self.length.to_s
+			end
 
 			def to_sas(root)
 				prevail = Array.new
@@ -1126,6 +1120,19 @@ puts new_operators.length.to_s + ' new merged-operators'
 				prepost.each { |p| sas += p.to_sas(root) + "\n" }
 				sas += "#{@cost}\nend_operator"
 				return sas
+			end
+
+			def to_sfw
+				id, name = @name.split('$', 2)
+				sfw = { 'name' => '$' + name, 'parameters' => {},
+					'conditions' => {}, 'effects' => {} }
+				@params.each { |k,v|	sfw['parameters'][k.to_s] = v.to_s if k != '$.this' } if @params != nil
+				self.each_value do |param|
+					p = param.to_sfw
+					sfw['conditions'][ p['name'] ] = p['pre'] if p['pre'] != nil
+					sfw['effects'][ p['name'] ] = p['post'] if p['post'] != nil
+				end
+				return sfw
 			end
 		end
 
@@ -1184,6 +1191,14 @@ puts new_operators.length.to_s + ' new merged-operators'
 				return @var.name + ',' +
 					(@pre == nil ? '-' : (@pre.is_a?(Hash) ? @pre.tostring : @pre.to_s)) + ',' +
 					(@post == nil ? '-' : (@post.is_a?(Hash) ? @post.tostring : @post.to_s))
+			end
+
+			def to_sfw
+				return {
+						'name' => @var.name,
+						'pre' => (@pre.is_a?(Hash) ? @pre.tostring : @pre),
+						'post' => (@post.is_a?(Hash) ? @post.tostring: @post)
+					}
 			end
 		end
 	end

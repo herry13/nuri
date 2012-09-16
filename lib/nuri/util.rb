@@ -1,12 +1,12 @@
 module Nuri
-	class Util
-		@@rootdir = File.expand_path(File.dirname(__FILE__) + "/../..")
-		@@logger = Logger.new(@@rootdir + "/log/message.log")
-		@@os = nil
-		@@platform = nil
+	Port = 9090
 
-		def self.rootdir
-			return @@rootdir
+	class Util
+		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
+		@@logger = Logger.new(@@home_dir + "/log/message.log")
+
+		def self.home_dir
+			return @@home_dir
 		end
 
 		def self.log(msg=nil)
@@ -18,8 +18,7 @@ module Nuri
 
 		def self.os
 			return @@os if defined?(@@os) != nil and @@os != nil
-			#@@os = (`uname -o`).strip if @@os == nil
-			@@os = (`uname -s`).strip if @@os == nil
+			@@os = (`uname -s`).strip 
 			@@os = (@@os == 'Darwin' ? 'macos' : @@os.downcase)
 			return @@os
 		end
@@ -53,7 +52,7 @@ module Nuri
 		end
 
 		def self.platform
-			return @@platform if @@platform != nil
+			return @@platform if defined?(@@platform) != nil and @@platform != nil
 			case self.os
 				when 'linux'
 					type = `cat /etc/issue`

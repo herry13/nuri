@@ -11,6 +11,11 @@ Important files:
 - <HOME>/etc/main.sfp -- Main specification file to be deployed.
 - <HOME>/etc/bsig.sfp -- Specification of Behavioural Signature model.
 
+Get current state:
+
+	http://<host>:9090/state
+
+
 Ubuntu
 ------
 Required Packages
@@ -28,6 +33,7 @@ Scientific Linux
 ----------------
 Required Packages
 - ruby (>= 1.8.7)
+- ruby-devel
 - rubygems
 - zlib-devel
 - augeas-devel

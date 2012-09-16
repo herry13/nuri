@@ -3,11 +3,12 @@ require 'json'
 
 module Nuri
 	module Module
-		class Node < Nuri::Resource
+		class Node
+			include Nuri::Resource
+
 			def initialize
-				super
-				@name = Nuri::Util.hostname.strip.sub(/\..*/,'')
-				@state['_isa'] = "Node"
+				name = Nuri::Util.hostname.strip.sub(/\..*/,'')
+				self.load('Node', name)
 			end
 	
 			def get_state(path=nil)

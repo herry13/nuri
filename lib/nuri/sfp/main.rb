@@ -1,7 +1,7 @@
 # external dependencies
 require 'rubygems'
 require 'json'
-require 'nuri/util'
+#require 'nuri/util'
 
 # internal dependencies
 require 'nuri/sfp/ext'

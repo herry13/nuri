@@ -4,16 +4,17 @@ require 'augeas'
 
 module Nuri
 	module Module
-		class Mysqld < Nuri::Resource
+		class Mysqld
+			include Nuri::Resource
+
 			def initialize
-				super
-				@state['_isa'] = 'Mysqld'
+				self.load('Mysqld', 'mysqld')
 			end
 	
 			# get state of this component in JSON
 			def get_state
 				# installed & running
-				data = `/usr/bin/dpkg-query -W mysql-server`
+				data = `/usr/bin/dpkg-query -W mysql-server 2> /dev/null`
 				@state["installed"] = ((data =~ /mysql\-server/) != nil)
 				if @state["installed"]
 					@state["version"] = data.split(' ')[1]

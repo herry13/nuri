@@ -7,11 +7,20 @@ Hash.send(:define_method, "ref") {
 
 # accept method as implementation of Visitor pattern
 Hash.send(:define_method, "accept") { |visitor|
-	self.each_pair { |key,value|
-		next if key == '_parent'
+	keys = self.keys
+	keys.each do |key|
+		next if key == '_parent' or not self.has_key?(key)
+		value = self[key]
 		go_next = visitor.visit(key, value, self)
 		value.accept(visitor) if value.is_a?(Hash) and go_next == true
-	}
+	end
+
+#	self.each_pair { |key,value|
+#		next if key == '_parent'
+#		go_next = visitor.visit(key, value, self)
+#puts value.class.to_s + ' >> ' + visitor.class.to_s
+#		value.accept(visitor) if value.is_a?(Hash) and go_next == true
+#	}
 }
 
 # resolve a reference, return nil if there's no value with given address
@@ -65,10 +74,11 @@ Hash.send(:define_method, "expanded") {
 # copy attributes and procedures from superclass to itself
 # TODO -- implement deep copy
 Hash.send(:define_method, 'inherits') { |parent|
+	return if not parent.is_a?(Hash)
 	parent.each_pair { |key,value|
 		next if key[0,1] == '_' or self.has_key?(key)
 		if value.is_a?(Hash)
-			self[key] = value.clone
+			self[key] = Nuri::Sfp.deep_clone(value) #value.clone
 			self[key]['_parent'] = self
 		else
 			self[key] = value
@@ -123,4 +133,12 @@ String.send(:define_method, 'pop_ref') {
 String.send(:define_method, 'isref') {
 	s = self.to_s
 	return (s.length > 0 and s[0,1] == '$')
+}
+
+# return the parent of this path
+# e.g.: if self == 'a.b.c.d', it will return 'a.b.c'
+String.send(:define_method, 'to_top') {
+	return self if self == '$'
+	parts = self.split('.')
+	return self[0, self.length - parts[parts.length-1].length - 1]
 }

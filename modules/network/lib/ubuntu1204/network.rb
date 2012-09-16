@@ -1,27 +1,14 @@
-begin
-	require 'netifaces'
-rescue LoadError
-	dir = File.dirname(__FILE__) + "/../extra"
-	exec = dir + "/install.sh"
-	`sh #{exec} #{dir}`
-	Nuri::Util.log.info "Install gem \"netifaces\""
-	begin
-		require 'netifaces'
-	rescue LoadError
-		raise 'Cannot install gem "netifaces"'
-	end
-end
-
 module Nuri
 	module Module
-		class Network < Nuri::Resource
+		class Network
 			@@IPV4 = 2
 			@@IPV6 = 10
 			@@MAC = 17
+
+			include Nuri::Resource
 	
 			def initialize
-				super
-				@state['_isa'] = 'Network'
+				self.load(nil, 'net')
 			end
 	
 			def mask(netmask)
@@ -32,19 +19,6 @@ module Nuri
 	
 			# get state of this component in JSON
 			def get_state
-				Netifaces.interfaces.sort.each do |dev|
-					@state[dev] = JSON'{"_isa": "NetDevice"}'
-					addresses = Netifaces.addresses(dev)
-					@state[dev]['hwaddr'] = addresses[@@MAC][0]['addr']
-					@state[dev]['ip'] = (addresses[@@IPV4][0]['addr'] != nil ?
-						addresses[@@IPV4][0]['addr'] : "")
-					@state[dev]['netmask'] = (addresses[@@IPV4][0]['netmask'] != nil ?
-						addresses[@@IPV4][0]['netmask'] : "")
-					@state[dev]['ip6'] = (addresses[@@IPV6][0]['addr'] != nil ?
-						addresses[@@IPV6][0]['addr'].sub(/%.*/,'') : "")
-					@state[dev]['netmask6'] = (addresses[@@IPV6][0]['netmask'] != nil ?
-						addresses[@@IPV6][0]['netmask'].sub(/%.*/,'') : "")
-				end
 				return @state
 			end
 		end

@@ -7,8 +7,8 @@ class WebService extends Service
 
 class DBService extends Service
 
-class AppService extends Service
+/*class AppService extends Service
 
 class MailService extends Service
 
-class FtpService extends Service
+class FtpService extends Service*/

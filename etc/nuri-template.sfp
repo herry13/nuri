@@ -6,5 +6,7 @@ nuri {
 	ssl_cert is "cert.pem"
 	ssl_key is "key.pem"
 
+	as_master is no
+	
 	//bsig is yes
 }

@@ -1,14 +1,45 @@
 module Nuri
-	class Resource
+	module Resource
 		attr_accessor :name, :parent
 		attr_reader :children, :state, :goal
 
-		def initialize(name=nil, parent=nil)
+		def load(class_path, name=nil)
 			@name = name
-			@parent = parent
 			@children = Hash.new
-			@state = JSON['{}']
-			@goal = JSON['{}']
+			@state = self.create_instance(class_path)
+			@goal = {}
+		end
+
+		def create_instance(class_path)
+			return {} if class_path == nil or class_path == ''
+			# TODO
+			class_path = class_path.to_s if not class_path.is_a?(String)
+			class_path = "$.#{class_path}" if not class_path.isref
+			root = Nuri::Resource.get_root
+			if root != nil
+				object = root.at?(class_path)
+				if object != nil
+					object = Nuri::Sfp.deep_clone(object)
+					object['_self'] = @name
+					object['_context'] = 'object'
+					object['_isa'] = class_path
+					object['_classes'] = [class_path]
+					object['_classes'] = object['_classes'].concat(object['_super']) if
+							object.has_key?('_super')
+					object.delete('_super')
+					return object
+				end
+			end
+			return {}
+		end
+
+		def self.set_root(root)
+			@@root = root
+		end
+
+		def self.get_root
+			return {} if defined?(@@root) == nil
+			return @@root
 		end
 
 		def add(mod)
@@ -45,7 +76,6 @@ module Nuri
 			elsif @children.has_key?(first)
 				return false if rest == nil # modules are static
 				@children[first].set_goal(rest, value)
-			#elsif @state.has_key?(first)
 			else
 				if rest == nil
 					@goal[first] = value
@@ -61,7 +91,13 @@ module Nuri
 		def get_state(path='')
 			@state = Hash.new
 			@children.each_value { |m| @state[m.name] = m.get_state }
-			return @state
+			if path == '' or path == nil
+				return @state
+			else
+				value = get(path)
+				return value.get_state if value.respond_to?('get_state')
+				return value
+			end
 		end
 
 		def get_goal
@@ -75,7 +111,6 @@ module Nuri
 			@children.each_value { |mod| mod.reset_goal }
 		end
 
-		protected
 		def get(ref)
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
@@ -122,5 +157,13 @@ module Nuri
 			end
 		end
 =end
+	end
+
+	class Root
+		include Resource
+
+		def initialize
+			load('', 'root')
+		end
 	end
 end

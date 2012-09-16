@@ -3,11 +3,12 @@ require 'json'
 
 module Nuri
 	module Module
-		class Node < Nuri::Resource
+		class Node
+			include Nuri::Resource
+
 			def initialize
-				super
-				@name = Nuri::Util.hostname.strip.sub(/\..*/,'')
-				@state['_isa'] = "Node"
+				name = Nuri::Util.hostname.strip.sub(/\..*/,'')
+				self.load('Node', name)
 			end
 	
 			def get_state(path=nil)
@@ -47,6 +48,7 @@ module Nuri
 				@state["os"] = Nuri::Util.os
 				@state["platform"] = Nuri::Util.platform
 				@state["hostname"] = Nuri::Util.hostname #`uname -n`.strip
+				@state["domainname"] = Socket.gethostbyname(Socket.gethostname).first
 				@state["version"] = `uname -r`.strip
 				@state["arch"] = `uname -p`.strip
 				@state["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i
@@ -56,7 +58,6 @@ module Nuri
 					@state[name] = mod.get_state
 				}
 
-				#return { @name => @state }
 				return @state
 			end
 		end

@@ -16,9 +16,11 @@ class Service {
 	}
 }
 
-class Client {
-	refer isref Service
-	procedure change(s isref Service) {
+class WebService extends Service
+
+class WebClient {
+	refer isref WebService
+	procedure change(s isref WebService) {
 		conditions { }
 		effects {
 			this.refer is s

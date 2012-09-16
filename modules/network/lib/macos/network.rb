@@ -14,14 +14,16 @@ end
 
 module Nuri
 	module Module
-		class Network < Nuri::Resource
+		class Network
 			@@IPV4 = 2
 			@@IPV6 = 10
 			@@MAC = 17
+
+			include Nuri::Resource
 	
 			def initialize
-				super
-				@state['_isa'] = 'Network'
+				self.load
+				@state = self.create_object('Network')
 			end
 	
 			def mask(netmask)
@@ -38,7 +40,7 @@ module Nuri
 					line = data[i]
 					if line[0,2] == 'en' or line[0,2] == 'lo'
 						dev = line.split(':')[0]
-						@state[dev] = { '_isa' => 'NetDevice' }
+						@state[dev] = self.create_object('NetDevice')
 						j = i + 1
 						while j < data.length
 							row = data[j].strip.split(' ')

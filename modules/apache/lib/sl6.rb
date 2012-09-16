@@ -4,10 +4,11 @@ require 'augeas'
 
 module Nuri
 	module Module
-		class Apache < Nuri::Resource
+		class Apache
+			include Nuri::Resource
+
 			def initialize
-				super
-				@state['_isa'] = 'Apache'
+				self.load('Apache', 'apache')
 			end
 	
 			# get state of this component in JSON
@@ -46,7 +47,9 @@ module Nuri
 			end
 	
 			def install
-				return (system('/usr/bin/yum -y install httpd') == true)
+				result = system('/usr/bin/yum -y install httpd')
+				result = system('/sbin/service httpd stop') if result == true
+				return (result == true)
 			end
 		
 			def uninstall
