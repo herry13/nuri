@@ -121,8 +121,12 @@ To build:
 SFp Language
 ------------
 - primitive types: Boolean, String, Number
-- non-primitive type (user-defined Class)
+- non-primitive type: any user-defined Class
 - abstract data-structure: Array (1-dimension)
+
+**Class**
+- could have one or more attributes with a primitive/non-primitive type
+- could have one or more procedures
 
 **Procedure**
 - support cost-value
