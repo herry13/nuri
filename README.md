@@ -6,31 +6,63 @@ Nuri
  
 Nuri is a dynamic workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
+Most parts of Nuri is written in Ruby except the solver which is written in C++.
+
+To Install
+----------
+- If you do not have *git*, then install it first
+
+	$ sudo apt-get install git
+
+- Clone the Nuri software from Github repository
+
+	$ git clone https://github.com/herry13/nuri
+
+
 Requirements
 ------------
-Ubuntu
-- required packages
-	- ruby (>= 1.8.7)
-	- rubygems
-	- libz-dev
-	- libaugeas-ruby
-- required Ruby Gems
-	- mongrel
-	- json
-	- antlr3
+These are requirements for running a *Nuri Client* service on managed node:
+- Ubuntu
+	- required packages
+		- ruby (>= 1.8.7)
+		- rubygems
+		- libz-dev
+		- libaugeas-ruby
+	- required Ruby Gems
+		- mongrel
+		- json
+		- antlr3
+- Scientific Linux
+	- required packages
+		- ruby (>= 1.8.7)
+		- ruby-devel
+		- rubygems
+		- zlib-devel
+		- augeas-devel
+	- required Ruby Gems
+		- mongrel
+		- json
+		- antlr3
+		- ruby-augeas
 
-Scientific Linux
-- required packages
-	- ruby (>= 1.8.7)
-	- ruby-devel
-	- rubygems
-	- zlib-devel
-	- augeas-devel
-- required Ruby Gems
-	- mongrel
-	- json
-	- antlr3
-	- ruby-augeas
+These are requirements for running a *Nuri Master* on master node:
+- Ubuntu
+	- required packages
+		- ruby (>= 1.8.7)
+		- rubygems
+		- libz-dev
+	- required Ruby Gems
+		- json
+		- antlr3
+- Scientific Linux
+	- required packages
+		- ruby (>= 1.8.7)
+		- ruby-devel
+		- rubygems
+		- zlib-devel
+	- required Ruby Gems
+		- json
+		- antlr3
 
 Running Nuri client on managed node
 -----------------------------------
