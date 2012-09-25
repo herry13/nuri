@@ -12,11 +12,11 @@ To Install
 ----------
 - If you do not have *git*, then install it first
 
-	$ sudo apt-get install git
+		$ sudo apt-get install git
 
 - Clone the Nuri software from Github repository
 
-	$ git clone https://github.com/herry13/nuri
+		$ git clone https://github.com/herry13/nuri
 
 
 Requirements
