@@ -10,7 +10,7 @@ Most parts of Nuri is written in Ruby except the solver which is written in C++.
 
 To Install
 ----------
-- If you do not have *git*, then install it first:
+- If you do not have **git**, then install it first:
 
 		$ sudo apt-get install git
 
@@ -22,7 +22,7 @@ To Install
 
 Requirements
 ------------
-These are requirements for running a *Nuri Client* service on managed node:
+These are requirements for running a **Nuri Client** service on managed node:
 - Ubuntu
 	- required packages
 		- ruby (>= 1.8.7)
@@ -46,7 +46,7 @@ These are requirements for running a *Nuri Client* service on managed node:
 		- antlr3
 		- ruby-augeas
 
-These are requirements for running a *Nuri Master* on master node:
+These are requirements for running a **Nuri Master** on master node:
 - Ubuntu
 	- required packages
 		- ruby (>= 1.8.7)
