@@ -90,9 +90,9 @@ Controlling Nuri clients from master node
 
 		goal constraint {
 		  // apache on 'hpvm11' is running
-		  hpvm11.apache.running = true
+		  hpvm11.apache.running is true
 		  // apache on 'hpvm12' is running
-		  hpvm12.apache.running = true
+		  hpvm12.apache.running is true
 		}
 		
 		global constraint {  // no global constraint
@@ -135,14 +135,18 @@ SFp Language
 - support the following *effects* statements:
 
 		x = y
-		x = null
+		x is y
 
 - support the following *conditions* statements:
 
 		x = y
+		x is y
 		x = null
+		x is null
 		x != y
+		x isnt y
 		x != null
+		x isnt null
 		if x1 = y1 then x2 = y2
 		if x1 != y2 then x2 != y2
 		x is in (y1, y2, y3)
@@ -155,9 +159,13 @@ SFp Language
 - support the following the following constraint statements:
 
 		x = y
+		x is y
 		x = null
+		x is null
 		x != y
+		x isnt y
 		x != null
+		x isnt null
 		if x1 = y1 then x2 = y2
 		if x1 != y2 then x2 != y2
 		x is in (y1, y2, y3)
