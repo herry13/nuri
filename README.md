@@ -10,11 +10,12 @@ Most parts of Nuri is written in Ruby except the solver which is written in C++.
 
 To Install
 ----------
-- If you do not have *git*, then install it first
+- If you do not have *git*, then install it first:
 
 		$ sudo apt-get install git
 
-- Clone the Nuri software from Github repository
+
+- Clone the Nuri software from Github repository:
 
 		$ git clone https://github.com/herry13/nuri
 
