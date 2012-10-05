@@ -386,6 +386,7 @@ goal_body
 				}
 			|	constraint_namespace
 			|	constraint_iterator
+			|	constraint_class_quantification
 			)
 		NL+)
 	|	':always' NL*
@@ -525,6 +526,49 @@ constraint_iterator
 			self.goto_parent()
 			self.goto_parent()
 		}
+	;
+
+quantification_keyword
+	:	'forall'
+	|	'exist'
+	|	'forsome'
+	;
+
+constraint_class_quantification
+	:	quantification_keyword '(' path 'as' ID ')'
+		{
+			id = self.next_id.to_s
+			@now[id] = { '_parent' => @now,
+				'_context' => 'constraint',
+				'_type' => $quantification_keyword.text,
+				'_self' => id,
+				'_class' => $path.text,
+				'_variable' => $ID.text
+			}
+			@now = @now[id]
+
+			id = '_template'
+			@now[id] = { '_parent' => @now,
+				'_context' => 'constraint',
+				'_type' => 'and',
+				'_self' => id
+			}
+			@now = @now[id]
+		}
+		(	(	binary_comp
+				{	@now['_count_operator'] = $binary_comp.text	}
+			|	'='
+				{	@now['_count_operator'] = '='	}
+			)
+			NUMBER
+			{	@now['_count_value'] = $NUMBER.text.to_i	}
+		)?
+		NL* '{' NL+
+		(constraint_statement
+		{	@now[$constraint_statement.key] = $constraint_statement.val	}
+		NL+)* '}'
+		{	self.goto_parent()	}
+		{	self.goto_parent()	}
 	;
 
 constraint_statement returns [key, val]

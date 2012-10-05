@@ -137,42 +137,43 @@ SFp Language
 		x = y
 		x is y
 
-- support the following *conditions* statements:
+- support the following *conditions* statements: *see constraints*.
 
-		x = y
-		x is y
-		x = null
-		x is null
-		x != y
-		x isnt y
-		x != null
-		x isnt null
-		if x1 = y1 then x2 = y2
-		if x1 != y2 then x2 != y2
-		x is in (y1, y2, y3)
-		x isnt in (y1, y2, y3)
-		for (my_array as x) {
-			x.attribute = y
-		}
 
-**Goal & Global Constraints**
-- support the following the following constraint statements:
+**Constraints**
+The user could define the following constraints in the procedure's **conditions**, **goal** constraints, and **global** constraints:
 
-		x = y
-		x is y
-		x = null
-		x is null
-		x != y
-		x isnt y
-		x != null
-		x isnt null
-		if x1 = y1 then x2 = y2
-		if x1 != y2 then x2 != y2
-		x is in (y1, y2, y3)
-		x isnt in (y1, y2, y3)
-		for (my_array as x) {
-			x.attribute = y
-		}
+	// equality
+	x = y
+	x is y
+	x = null
+	x is null
+	// inequality
+	x != y
+	x isnt y
+	x != null
+	x isnt null
+	// conditional
+	if x1 = y1 then x2 = y2
+	if x1 != y2 then x2 != y2
+	// membership
+	x is in (y1, y2, y3)
+	x isnt in (y1, y2, y3)
+	// array enumeration
+	foreach (my_array as x) {
+		x.attribute = y
+	}
+	// class quantification
+	forall (ClassName as x) {  // apply for all objects of ClassName
+		x.attribute = y
+	}
+	exist (ClassName as x) {  // apply for minimal one object of ClassName
+		x.attribute = y
+	}
+	forsome (ClassName as x) >= 2 {  // apply for minimal 2 objects of ClassName
+		x.attribute = y
+	}
+
 
 **Trajectory Constraints**
 - goal

@@ -1,0 +1,26 @@
+include "svcref-type.sfp"
+
+initial state {
+	servers isa Server[2] {
+		running is true
+	}
+	a isa Server
+	clients isa Client[2] {
+		refer = servers[0]
+	}
+}
+goal constraint {
+	forall (Server as s) {
+		s.running = true
+	}
+
+	exist (Server as s) {
+		s.running = true
+	}
+
+	forsome (Server as s) >= 2 {
+		s.running = true
+	}
+}
+global constraint {
+}
