@@ -1,0 +1,62 @@
+include "svcref-type.sfp"
+
+initial state {
+	a isa Server {
+		name is "A"
+		running is true
+	}
+	b isa Server {
+		name is "B"
+	}
+	pc1 isa Client {
+		refer is a
+	}
+	pc2 isa Client {
+		refer is a
+	}
+}
+goal {
+	a.running is false
+	pc1.refer is b
+	pc2.refer is b
+
+	:always {
+		pc1.refer.running is true
+	}
+
+	:always {
+		pc2.refer.running is true
+	}
+
+	:sometime {
+		pc1.running = false
+	}
+
+	:sometime {
+		pc2.running = false
+	}
+
+	b.running is true
+
+	:within 5 {
+		pc1.running = true
+	}
+
+	:after {
+		pc1.running = true
+	} then {
+		pc2.running = true
+	}
+
+	:after {
+		pc1.running = true
+	} within 5 {
+		pc2.running = true
+	}
+
+	:before {
+		pc2.running = true
+	} then {
+		pc1.running = true
+	}
+}

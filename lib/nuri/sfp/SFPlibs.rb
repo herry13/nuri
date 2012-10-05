@@ -31,7 +31,15 @@ module Nuri
 			def to_sfp
 				return @root
 			end
-		
+	
+			def create_constraint(name, type='and')
+				return { '_self' => name,
+					'_context' => 'constraint',
+					'_type' => type,
+					'_parent' => @now
+				}
+			end
+
 			def process_file(file)
 				filepath = file
 				filepath = @root_dir + "/" + file if @root_dir != nil and file[0,1] != '/'

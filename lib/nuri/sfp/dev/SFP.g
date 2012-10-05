@@ -41,7 +41,7 @@ sfp
 	:	{	self.init	}
 		NL* include* header*
 		{	self.expand_classes	}
-		(state | composite | constraint)*
+		(state | composite | constraint | goal_constraint)*
 	;
 
 include
@@ -294,6 +294,169 @@ effects
 		mutation_body 
 		'}' NL+
 		{	self.goto_parent()	}
+	;
+
+trajectory_head returns [id, time, nested]
+	:	'goal'
+		{
+			$id = 'goal'
+			$time = 0
+			$nested = false
+		}
+	|	'always'
+		{
+			$id = 'always'
+			$time = 0
+			$nested = false
+		}
+	|	'sometime'
+		{
+			$id = 'sometime'
+			$time = 0
+			$nested = false
+		}
+	|	'within' '(' NUMBER ')'
+		{
+			$id = 'within'
+			$time = $NUMBER.text.to_s.to_i
+			$nested = false
+		}
+	|	'sometime-after'
+		{
+			$id = 'sometime-after'
+			$time = 0
+			$nested = true
+		}
+	|	'sometime-before'
+		{
+			$id = 'sometime-before'
+			$time = 0
+			$nested = true
+		}
+	|	'always-within' '(' NUMBER ')'
+		{
+			$id = 'always-within'
+			$time = $NUMBER.text.to_s.to_i
+			$nested = true
+		}
+	;
+
+trajectory_constraint
+	:	trajectory_head NL*
+		{
+			#id = self.next_id.to_s
+			id = $trajectory_head.id
+			@now[id] = { '_self' => id,
+				'_context' => 'constraint',
+				'_type' => 'and',
+				'_parent' => @now,
+				'_time' => $trajectory_head.time
+			}
+			@now = @now[id]
+		}
+		'{' NL* constraint_body '}'
+		trajectory_constraint_tail? NL+
+		{	self.goto_parent()	}
+	;
+
+trajectory_constraint_tail
+	:	NL* 'then' NL*
+		'{' NL* constraint_body '}'
+	;
+
+goal_constraint
+	:	'goal' 'constraint'? NL*
+		{
+			@now['goal'] = { '_self' => 'goal',
+				'_context' => 'constraint',
+				'_type' => 'and',
+				'_parent' => @now
+			}
+			@now = @now['goal']
+		}
+		'{' NL* goal_body* '}' NL+
+		{	self.goto_parent()	}
+	;
+
+goal_body
+	:	(
+			(	constraint_statement
+				{
+					@now[$constraint_statement.key] = $constraint_statement.val
+				}
+			|	constraint_namespace
+			|	constraint_iterator
+			)
+		NL+)
+	|	':always' NL*
+		{
+			@now['always'] = self.create_constraint('always', 'always') if
+				not @now.has_key?('always')
+			@now = @now['always']
+		}
+		'{' NL* constraint_body '}' NL+
+		{	self.goto_parent()	}
+	|	':sometime' NL*
+		{
+			@now['sometime'] = self.create_constraint('sometime', 'sometime') if
+				not @now.has_key?('sometime')
+			@now = @now['sometime']
+		}
+		'{' NL* constraint_body '}' NL+
+		{	self.goto_parent()	}
+	|	':within' NUMBER NL*
+		{
+			id = self.next_id.to_s
+			@now[id] = self.create_constraint(id, 'within')
+			@now = @now[id]
+			@now['deadline'] = $NUMBER.text.to_s.to_i
+		}
+		'{' NL* constraint_body '}' NL+
+		{	self.goto_parent()	}
+	|	':after' NL*
+		{
+			id = self.next_id.to_s
+			@now[id] = self.create_constraint(id, 'sometime-after')
+			@now = @now[id]
+			@now['after'] = self.create_constraint('after')
+			@now['deadline'] = -1
+			@now = @now['after']
+		}
+		'{' NL* constraint_body '}' NL*
+		{	self.goto_parent()	}
+		(	'then'
+			| 'within' NUMBER
+				{ @now['deadline'] = $NUMBER.text.to_s.to_i }
+		) NL*
+		{
+			@now['then'] = self.create_constraint('then')
+			@now = @now['then']
+		}
+		'{' NL* constraint_body '}' NL+
+		{	self.goto_parent()	}
+		{	self.goto_parent()	}
+	|	':before' NL*
+		{
+			id = self.next_id.to_s
+			@now[id] = self.create_constraint(id, 'sometime-before')
+			@now = @now[id]
+			@now['before'] = self.create_constraint('before')
+			@now = @now['before']
+		}
+		'{' NL* constraint_body '}' NL*
+		{	self.goto_parent()	}
+		'then' NL*
+		{
+			@now['then'] = self.create_constraint('then')
+			@now = @now['then']
+		}
+		'{' NL* constraint_body '}' NL+
+		{	self.goto_parent()	}
+		{	self.goto_parent()	}
+	;
+
+nested_constraint
+	:	'{' NL* constraint_body '}'
 	;
 
 constraint

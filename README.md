@@ -183,25 +183,25 @@ SFp Language
 
 - always (global)
 
-		always {
+		:always {
 		   fw.port80.opened = false
 		}
 
 - sometime
 
-		sometime {
+		:sometime {
 		   a.restarted = true
 		}
 
 - within (deadline)
 
-		within(3) {
+		:within 3 {
 		   fw.port80.opened = false
 		}
 
 - sometime-after
 
-		sometime-after {
+		:after {
 		   a.port != fw.port80
 		} then {
 		   fw.port80.opened = false
@@ -209,7 +209,7 @@ SFp Language
 
 - sometime-before
 
-		sometime-before {
+		:before {
 		   a.port = fw.port80
 		} then {
 		   fw.port80.opened = true
@@ -217,9 +217,9 @@ SFp Language
 
 - always-within (conditional deadline)
 
-		always-within(1) {
+		:after {
 		   a.port != fw.port80
-		} then {
+		} within 1 {
 		   fw.port80.opened = false
 		}
 
