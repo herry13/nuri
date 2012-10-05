@@ -173,3 +173,54 @@ SFp Language
 		for (my_array as x) {
 			x.attribute = y
 		}
+
+**Trajectory Constraints**
+- goal
+
+		goal {
+		   fw.port80.opened = false
+		}
+
+- always (global)
+
+		always {
+		   fw.port80.opened = false
+		}
+
+- sometime
+
+		sometime {
+		   a.restarted = true
+		}
+
+- within (deadline)
+
+		within(3) {
+		   fw.port80.opened = false
+		}
+
+- sometime-after
+
+		sometime-after {
+		   a.port != fw.port80
+		} then {
+		   fw.port80.opened = false
+		}
+
+- sometime-before
+
+		sometime-before {
+		   a.port = fw.port80
+		} then {
+		   fw.port80.opened = true
+		}
+
+- always-within (conditional deadline)
+
+		always-within(1) {
+		   a.port != fw.port80
+		} then {
+		   fw.port80.opened = false
+		}
+
+
