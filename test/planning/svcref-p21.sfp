@@ -20,41 +20,41 @@ goal {
 	pc1.refer is b
 	pc2.refer is b
 
-	:always {
+	always {
 		pc1.refer.running is true
 	}
 
-	:always {
+	always {
 		pc2.refer.running is true
 	}
 
-	:sometime {
+	sometime {
 		pc1.running = false
 	}
 
-	:sometime {
+	sometime {
 		pc2.running = false
 	}
 
 	b.running is true
 
-	:within 5 {
+	within 5 {
 		pc1.running = true
 	}
 
-	:after {
+	after {
 		pc1.running = true
 	} then {
 		pc2.running = true
 	}
 
-	:after {
+	after {
 		pc1.running = true
 	} within 5 {
 		pc2.running = true
 	}
 
-	:before {
+	before {
 		pc2.running = true
 	} then {
 		pc1.running = true

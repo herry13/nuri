@@ -389,7 +389,7 @@ goal_body
 			|	constraint_class_quantification
 			)
 		NL+)
-	|	':always' NL*
+	|	'always' NL*
 		{
 			@now['always'] = self.create_constraint('always', 'always') if
 				not @now.has_key?('always')
@@ -397,7 +397,7 @@ goal_body
 		}
 		'{' NL* constraint_body '}' NL+
 		{	self.goto_parent()	}
-	|	':sometime' NL*
+	|	'sometime' NL*
 		{
 			@now['sometime'] = self.create_constraint('sometime', 'sometime') if
 				not @now.has_key?('sometime')
@@ -405,7 +405,7 @@ goal_body
 		}
 		'{' NL* constraint_body '}' NL+
 		{	self.goto_parent()	}
-	|	':within' NUMBER NL*
+	|	'within' NUMBER NL*
 		{
 			id = self.next_id.to_s
 			@now[id] = self.create_constraint(id, 'within')
@@ -414,7 +414,7 @@ goal_body
 		}
 		'{' NL* constraint_body '}' NL+
 		{	self.goto_parent()	}
-	|	':after' NL*
+	|	'after' NL*
 		{
 			id = self.next_id.to_s
 			@now[id] = self.create_constraint(id, 'sometime-after')
@@ -436,7 +436,7 @@ goal_body
 		'{' NL* constraint_body '}' NL+
 		{	self.goto_parent()	}
 		{	self.goto_parent()	}
-	|	':before' NL*
+	|	'before' NL*
 		{
 			id = self.next_id.to_s
 			@now[id] = self.create_constraint(id, 'sometime-before')
@@ -564,11 +564,26 @@ constraint_class_quantification
 			{	@now['_count_value'] = $NUMBER.text.to_i	}
 		)?
 		NL* '{' NL+
-		(constraint_statement
-		{	@now[$constraint_statement.key] = $constraint_statement.val	}
-		NL+)* '}'
+		(	constraint_statement
+			{	@now[$constraint_statement.key] = $constraint_statement.val	}
+			NL+
+		|	constraint_different
+		)* '}'
 		{	self.goto_parent()	}
 		{	self.goto_parent()	}
+	;
+
+constraint_different
+	:	':different' '(' path ')' NL+
+		{
+			id = self.next_id.to_s
+			@now[id] = { '_parent' => @now,
+				'_context' => 'constraint',
+				'_type' => 'different',
+				'_self' => id,
+				'_path' => $path.text
+			}
+		}
 	;
 
 constraint_statement returns [key, val]

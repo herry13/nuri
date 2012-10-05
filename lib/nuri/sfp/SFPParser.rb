@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-10-05 15:39:44
+# Generated at: 2012-10-05 22:28:16
 # 
 
 # ~~~> start load path setup
@@ -84,7 +84,7 @@ module SFP
                    :T__33 => 33, :T__72 => 72, :T__34 => 34, :T__35 => 35, 
                    :T__70 => 70, :T__36 => 36, :T__37 => 37, :T__38 => 38, 
                    :T__39 => 39, :T__76 => 76, :T__75 => 75, :T__74 => 74, 
-                   :T__73 => 73, :STRING => 5, :T__78 => 78, :T__77 => 77 )
+                   :T__73 => 73, :STRING => 5 )
 
     # register the proper human-readable name or literal value
     # for each token type
@@ -100,12 +100,12 @@ module SFP
                     "'cost'", "'conditions'", "'effects'", "'procedure'", 
                     "'('", "','", "')'", "'areall'", "'goal'", "'always'", 
                     "'sometime'", "'within'", "'sometime-after'", "'sometime-before'", 
-                    "'always-within'", "'constraint'", "':always'", "':sometime'", 
-                    "':within'", "':after'", "':before'", "'foreach'", "'as'", 
-                    "'forall'", "'exist'", "'forsome'", "'='", "'is'", "'in'", 
-                    "'isnt'", "'not'", "'total('", "'new'", "'delete'", 
-                    "'add('", "'remove('", "'.'", "'isref'", "'!='", "'+='", 
-                    "'-='", "'*='", "'/='", "'>'", "'>='", "'<'", "'<='" )
+                    "'always-within'", "'constraint'", "'after'", "'before'", 
+                    "'foreach'", "'as'", "'forall'", "'exist'", "'forsome'", 
+                    "'='", "':different'", "'is'", "'in'", "'isnt'", "'not'", 
+                    "'total('", "'new'", "'delete'", "'add('", "'remove('", 
+                    "'.'", "'isref'", "'!='", "'+='", "'-='", "'*='", "'/='", 
+                    "'>'", "'>='", "'<'", "'<='" )
     
   end
 
@@ -124,12 +124,13 @@ module SFP
                      :goal_constraint, :goal_body, :nested_constraint, :constraint, 
                      :constraint_body, :constraint_namespace, :constraint_iterator, 
                      :quantification_keyword, :constraint_class_quantification, 
-                     :constraint_statement, :total_constraint, :total_statement, 
-                     :comp_value, :conditional_constraint, :conditional_constraint_then, 
-                     :mutation_body, :mutation_iterator, :mutation_statement, 
-                     :set_value, :set_item, :value, :primitive_value, :path, 
-                     :path_with_index, :id_ref, :reference, :reference_type, 
-                     :equals_op, :not_equals_op, :binary_op, :binary_comp ].freeze
+                     :constraint_different, :constraint_statement, :total_constraint, 
+                     :total_statement, :comp_value, :conditional_constraint, 
+                     :conditional_constraint_then, :mutation_body, :mutation_iterator, 
+                     :mutation_statement, :set_value, :set_item, :value, 
+                     :primitive_value, :path, :path_with_index, :id_ref, 
+                     :reference, :reference_type, :equals_op, :not_equals_op, 
+                     :binary_op, :binary_comp ].freeze
 
 
     include TokenData
@@ -799,7 +800,7 @@ module SFP
 
             if ( look_12_2 == T__47 )
               alt_12 = 2
-            elsif ( look_12_2 == NL || look_12_2 == T__20 || look_12_2 == T__25 || look_12_2.between?( T__58, T__59 ) || look_12_2 == T__69 )
+            elsif ( look_12_2 == NL || look_12_2 == T__20 || look_12_2 == T__25 || look_12_2 == T__55 || look_12_2 == T__57 || look_12_2 == T__67 )
               alt_12 = 1
 
             end
@@ -1177,8 +1178,8 @@ module SFP
 
         if ( look_22_0 == ID )
           case look_22 = @input.peek( 2 )
-          when T__58, T__59 then alt_22 = 1
-          when T__69 then alt_22 = 2
+          when T__55, T__57 then alt_22 = 1
+          when T__67 then alt_22 = 2
           when NL, T__20, T__25 then alt_22 = 3
           else
             raise NoViableAlternative( "", 22, 1 )
@@ -1663,7 +1664,7 @@ module SFP
         if ( look_29_0 == ID )
           look_29_1 = @input.peek( 2 )
 
-          if ( look_29_1.between?( T__58, T__59 ) )
+          if ( look_29_1 == T__55 || look_29_1 == T__57 )
             look_29_2 = @input.peek( 3 )
 
             if ( look_29_2.between?( STRING, NUMBER ) || look_29_2.between?( BOOLEAN, MULTILINE_STRING ) || look_29_2 == T__36 )
@@ -1673,7 +1674,7 @@ module SFP
             else
               raise NoViableAlternative( "", 29, 2 )
             end
-          elsif ( look_29_1 == NL || look_29_1 == T__20 || look_29_1 == T__25 || look_29_1 == T__69 )
+          elsif ( look_29_1 == NL || look_29_1 == T__20 || look_29_1 == T__25 || look_29_1 == T__67 )
             alt_29 = 1
           else
             raise NoViableAlternative( "", 29, 1 )
@@ -3248,7 +3249,7 @@ module SFP
 
           if ( look_59_1 == T__39 )
             alt_59 = 2
-          elsif ( look_59_1 == T__69 )
+          elsif ( look_59_1 == T__67 )
             alt_59 = 1
           else
             raise NoViableAlternative( "", 59, 1 )
@@ -4276,7 +4277,7 @@ module SFP
           alt_75 = 2
           look_75_0 = @input.peek( 1 )
 
-          if ( look_75_0 == ID || look_75_0 == T__28 || look_75_0.between?( T__48, T__53 ) || look_75_0.between?( T__55, T__57 ) || look_75_0 == T__63 )
+          if ( look_75_0 == ID || look_75_0 == T__28 || look_75_0.between?( T__41, T__43 ) || look_75_0.between?( T__48, T__50 ) || look_75_0.between?( T__52, T__54 ) || look_75_0 == T__61 )
             alt_75 = 1
 
           end
@@ -4356,7 +4357,7 @@ module SFP
     # parser rule goal_body
     # 
     # (in SFP.g)
-    # 381:1: goal_body : ( ( ( constraint_statement | constraint_namespace | constraint_iterator | constraint_class_quantification ) ( NL )+ ) | ':always' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | ':sometime' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | ':within' NUMBER ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | ':after' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* ( 'then' | 'within' NUMBER ) ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | ':before' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* 'then' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ );
+    # 381:1: goal_body : ( ( ( constraint_statement | constraint_namespace | constraint_iterator | constraint_class_quantification ) ( NL )+ ) | 'always' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | 'sometime' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | 'within' NUMBER ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | 'after' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* ( 'then' | 'within' NUMBER ) ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | 'before' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* 'then' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ );
     # 
     def goal_body
       # -> uncomment the next line to manually enable rule tracing
@@ -4473,15 +4474,15 @@ module SFP
       tree_for_NL247 = nil
 
       begin
-        # at line 382:2: ( ( ( constraint_statement | constraint_namespace | constraint_iterator | constraint_class_quantification ) ( NL )+ ) | ':always' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | ':sometime' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | ':within' NUMBER ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | ':after' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* ( 'then' | 'within' NUMBER ) ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | ':before' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* 'then' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ )
+        # at line 382:2: ( ( ( constraint_statement | constraint_namespace | constraint_iterator | constraint_class_quantification ) ( NL )+ ) | 'always' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | 'sometime' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | 'within' NUMBER ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | 'after' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* ( 'then' | 'within' NUMBER ) ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ | 'before' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* 'then' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+ )
         alt_101 = 6
         case look_101 = @input.peek( 1 )
-        when ID, T__28, T__53, T__55, T__56, T__57, T__63 then alt_101 = 1
-        when T__48 then alt_101 = 2
-        when T__49 then alt_101 = 3
-        when T__50 then alt_101 = 4
-        when T__51 then alt_101 = 5
-        when T__52 then alt_101 = 6
+        when ID, T__28, T__50, T__52, T__53, T__54, T__61 then alt_101 = 1
+        when T__41 then alt_101 = 2
+        when T__42 then alt_101 = 3
+        when T__43 then alt_101 = 4
+        when T__48 then alt_101 = 5
+        when T__49 then alt_101 = 6
         else
           raise NoViableAlternative( "", 101, 0 )
         end
@@ -4566,13 +4567,13 @@ module SFP
           root_0 = @adaptor.create_flat_list
 
 
-          # at line 392:4: ':always' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
-          string_literal196 = match( T__48, TOKENS_FOLLOWING_T__48_IN_goal_body_1183 )
+          # at line 392:4: 'always' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
+          string_literal196 = match( T__41, TOKENS_FOLLOWING_T__41_IN_goal_body_1183 )
 
           tree_for_string_literal196 = @adaptor.create_with_payload( string_literal196 )
           @adaptor.add_child( root_0, tree_for_string_literal196 )
 
-          # at line 392:14: ( NL )*
+          # at line 392:13: ( NL )*
           while true # decision 79
             alt_79 = 2
             look_79_0 = @input.peek( 1 )
@@ -4583,7 +4584,7 @@ module SFP
             end
             case alt_79
             when 1
-              # at line 392:14: NL
+              # at line 392:13: NL
               __NL197__ = match( NL, TOKENS_FOLLOWING_NL_IN_goal_body_1185 )
 
               tree_for_NL197 = @adaptor.create_with_payload( __NL197__ )
@@ -4674,13 +4675,13 @@ module SFP
           root_0 = @adaptor.create_flat_list
 
 
-          # at line 400:4: ':sometime' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
-          string_literal203 = match( T__49, TOKENS_FOLLOWING_T__49_IN_goal_body_1213 )
+          # at line 400:4: 'sometime' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
+          string_literal203 = match( T__42, TOKENS_FOLLOWING_T__42_IN_goal_body_1213 )
 
           tree_for_string_literal203 = @adaptor.create_with_payload( string_literal203 )
           @adaptor.add_child( root_0, tree_for_string_literal203 )
 
-          # at line 400:16: ( NL )*
+          # at line 400:15: ( NL )*
           while true # decision 82
             alt_82 = 2
             look_82_0 = @input.peek( 1 )
@@ -4691,7 +4692,7 @@ module SFP
             end
             case alt_82
             when 1
-              # at line 400:16: NL
+              # at line 400:15: NL
               __NL204__ = match( NL, TOKENS_FOLLOWING_NL_IN_goal_body_1215 )
 
               tree_for_NL204 = @adaptor.create_with_payload( __NL204__ )
@@ -4782,8 +4783,8 @@ module SFP
           root_0 = @adaptor.create_flat_list
 
 
-          # at line 408:4: ':within' NUMBER ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
-          string_literal210 = match( T__50, TOKENS_FOLLOWING_T__50_IN_goal_body_1243 )
+          # at line 408:4: 'within' NUMBER ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
+          string_literal210 = match( T__43, TOKENS_FOLLOWING_T__43_IN_goal_body_1243 )
 
           tree_for_string_literal210 = @adaptor.create_with_payload( string_literal210 )
           @adaptor.add_child( root_0, tree_for_string_literal210 )
@@ -4793,7 +4794,7 @@ module SFP
           tree_for_NUMBER211 = @adaptor.create_with_payload( __NUMBER211__ )
           @adaptor.add_child( root_0, tree_for_NUMBER211 )
 
-          # at line 408:21: ( NL )*
+          # at line 408:20: ( NL )*
           while true # decision 85
             alt_85 = 2
             look_85_0 = @input.peek( 1 )
@@ -4804,7 +4805,7 @@ module SFP
             end
             case alt_85
             when 1
-              # at line 408:21: NL
+              # at line 408:20: NL
               __NL212__ = match( NL, TOKENS_FOLLOWING_NL_IN_goal_body_1247 )
 
               tree_for_NL212 = @adaptor.create_with_payload( __NL212__ )
@@ -4896,13 +4897,13 @@ module SFP
           root_0 = @adaptor.create_flat_list
 
 
-          # at line 417:4: ':after' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* ( 'then' | 'within' NUMBER ) ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
-          string_literal218 = match( T__51, TOKENS_FOLLOWING_T__51_IN_goal_body_1275 )
+          # at line 417:4: 'after' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* ( 'then' | 'within' NUMBER ) ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
+          string_literal218 = match( T__48, TOKENS_FOLLOWING_T__48_IN_goal_body_1275 )
 
           tree_for_string_literal218 = @adaptor.create_with_payload( string_literal218 )
           @adaptor.add_child( root_0, tree_for_string_literal218 )
 
-          # at line 417:13: ( NL )*
+          # at line 417:12: ( NL )*
           while true # decision 88
             alt_88 = 2
             look_88_0 = @input.peek( 1 )
@@ -4913,7 +4914,7 @@ module SFP
             end
             case alt_88
             when 1
-              # at line 417:13: NL
+              # at line 417:12: NL
               __NL219__ = match( NL, TOKENS_FOLLOWING_NL_IN_goal_body_1277 )
 
               tree_for_NL219 = @adaptor.create_with_payload( __NL219__ )
@@ -5136,13 +5137,13 @@ module SFP
           root_0 = @adaptor.create_flat_list
 
 
-          # at line 439:4: ':before' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* 'then' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
-          string_literal234 = match( T__52, TOKENS_FOLLOWING_T__52_IN_goal_body_1359 )
+          # at line 439:4: 'before' ( NL )* '{' ( NL )* constraint_body '}' ( NL )* 'then' ( NL )* '{' ( NL )* constraint_body '}' ( NL )+
+          string_literal234 = match( T__49, TOKENS_FOLLOWING_T__49_IN_goal_body_1359 )
 
           tree_for_string_literal234 = @adaptor.create_with_payload( string_literal234 )
           @adaptor.add_child( root_0, tree_for_string_literal234 )
 
-          # at line 439:14: ( NL )*
+          # at line 439:13: ( NL )*
           while true # decision 95
             alt_95 = 2
             look_95_0 = @input.peek( 1 )
@@ -5153,7 +5154,7 @@ module SFP
             end
             case alt_95
             when 1
-              # at line 439:14: NL
+              # at line 439:13: NL
               __NL235__ = match( NL, TOKENS_FOLLOWING_NL_IN_goal_body_1361 )
 
               tree_for_NL235 = @adaptor.create_with_payload( __NL235__ )
@@ -5628,7 +5629,7 @@ module SFP
           alt_107 = 2
           look_107_0 = @input.peek( 1 )
 
-          if ( look_107_0 == ID || look_107_0 == T__28 || look_107_0 == T__53 || look_107_0 == T__63 )
+          if ( look_107_0 == ID || look_107_0 == T__28 || look_107_0 == T__50 || look_107_0 == T__61 )
             alt_107 = 1
 
           end
@@ -5815,7 +5816,7 @@ module SFP
           alt_111 = 2
           look_111_0 = @input.peek( 1 )
 
-          if ( look_111_0 == ID || look_111_0 == T__28 || look_111_0 == T__63 )
+          if ( look_111_0 == ID || look_111_0 == T__28 || look_111_0 == T__61 )
             alt_111 = 1
 
           end
@@ -5938,7 +5939,7 @@ module SFP
 
 
         # at line 499:4: 'foreach' '(' path 'as' ID ')' ( NL )* '{' ( NL )+ ( constraint_statement ( NL )+ )* '}'
-        string_literal270 = match( T__53, TOKENS_FOLLOWING_T__53_IN_constraint_iterator_1566 )
+        string_literal270 = match( T__50, TOKENS_FOLLOWING_T__50_IN_constraint_iterator_1566 )
 
         tree_for_string_literal270 = @adaptor.create_with_payload( string_literal270 )
         @adaptor.add_child( root_0, tree_for_string_literal270 )
@@ -5952,7 +5953,7 @@ module SFP
         path272 = path
         @state.following.pop
         @adaptor.add_child( root_0, path272.tree )
-        string_literal273 = match( T__54, TOKENS_FOLLOWING_T__54_IN_constraint_iterator_1572 )
+        string_literal273 = match( T__51, TOKENS_FOLLOWING_T__51_IN_constraint_iterator_1572 )
 
         tree_for_string_literal273 = @adaptor.create_with_payload( string_literal273 )
         @adaptor.add_child( root_0, tree_for_string_literal273 )
@@ -6049,7 +6050,7 @@ module SFP
           alt_115 = 2
           look_115_0 = @input.peek( 1 )
 
-          if ( look_115_0 == ID || look_115_0 == T__28 || look_115_0 == T__63 )
+          if ( look_115_0 == ID || look_115_0 == T__28 || look_115_0 == T__61 )
             alt_115 = 1
 
           end
@@ -6158,7 +6159,7 @@ module SFP
 
         # at line 
         set282 = @input.look
-        if @input.peek( 1 ).between?( T__55, T__57 )
+        if @input.peek( 1 ).between?( T__52, T__54 )
           @input.consume
           @adaptor.add_child( root_0, @adaptor.create_with_payload( set282 ) )
           @state.error_recovery = false
@@ -6195,7 +6196,7 @@ module SFP
     # parser rule constraint_class_quantification
     # 
     # (in SFP.g)
-    # 537:1: constraint_class_quantification : quantification_keyword '(' path 'as' ID ')' ( ( binary_comp | '=' ) NUMBER )? ( NL )* '{' ( NL )+ ( constraint_statement ( NL )+ )* '}' ;
+    # 537:1: constraint_class_quantification : quantification_keyword '(' path 'as' ID ')' ( ( binary_comp | '=' ) NUMBER )? ( NL )* '{' ( NL )+ ( constraint_statement ( NL )+ | constraint_different )* '}' ;
     # 
     def constraint_class_quantification
       # -> uncomment the next line to manually enable rule tracing
@@ -6216,11 +6217,12 @@ module SFP
       char_literal293 = nil
       __NL294__ = nil
       __NL296__ = nil
-      char_literal297 = nil
+      char_literal298 = nil
       quantification_keyword283 = nil
       path285 = nil
       binary_comp289 = nil
       constraint_statement295 = nil
+      constraint_different297 = nil
 
       tree_for_char_literal284 = nil
       tree_for_string_literal286 = nil
@@ -6232,13 +6234,13 @@ module SFP
       tree_for_char_literal293 = nil
       tree_for_NL294 = nil
       tree_for_NL296 = nil
-      tree_for_char_literal297 = nil
+      tree_for_char_literal298 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 538:4: quantification_keyword '(' path 'as' ID ')' ( ( binary_comp | '=' ) NUMBER )? ( NL )* '{' ( NL )+ ( constraint_statement ( NL )+ )* '}'
+        # at line 538:4: quantification_keyword '(' path 'as' ID ')' ( ( binary_comp | '=' ) NUMBER )? ( NL )* '{' ( NL )+ ( constraint_statement ( NL )+ | constraint_different )* '}'
         @state.following.push( TOKENS_FOLLOWING_quantification_keyword_IN_constraint_class_quantification_1644 )
         quantification_keyword283 = quantification_keyword
         @state.following.pop
@@ -6252,7 +6254,7 @@ module SFP
         path285 = path
         @state.following.pop
         @adaptor.add_child( root_0, path285.tree )
-        string_literal286 = match( T__54, TOKENS_FOLLOWING_T__54_IN_constraint_class_quantification_1650 )
+        string_literal286 = match( T__51, TOKENS_FOLLOWING_T__51_IN_constraint_class_quantification_1650 )
 
         tree_for_string_literal286 = @adaptor.create_with_payload( string_literal286 )
         @adaptor.add_child( root_0, tree_for_string_literal286 )
@@ -6292,7 +6294,7 @@ module SFP
         alt_117 = 2
         look_117_0 = @input.peek( 1 )
 
-        if ( look_117_0 == T__58 || look_117_0.between?( T__75, T__78 ) )
+        if ( look_117_0 == T__55 || look_117_0.between?( T__73, T__76 ) )
           alt_117 = 1
         end
         case alt_117
@@ -6302,9 +6304,9 @@ module SFP
           alt_116 = 2
           look_116_0 = @input.peek( 1 )
 
-          if ( look_116_0.between?( T__75, T__78 ) )
+          if ( look_116_0.between?( T__73, T__76 ) )
             alt_116 = 1
-          elsif ( look_116_0 == T__58 )
+          elsif ( look_116_0 == T__55 )
             alt_116 = 2
           else
             raise NoViableAlternative( "", 116, 0 )
@@ -6322,7 +6324,7 @@ module SFP
 
           when 2
             # at line 560:6: '='
-            char_literal290 = match( T__58, TOKENS_FOLLOWING_T__58_IN_constraint_class_quantification_1679 )
+            char_literal290 = match( T__55, TOKENS_FOLLOWING_T__55_IN_constraint_class_quantification_1679 )
 
             tree_for_char_literal290 = @adaptor.create_with_payload( char_literal290 )
             @adaptor.add_child( root_0, tree_for_char_literal290 )
@@ -6398,26 +6400,28 @@ module SFP
           match_count_119 += 1
         end
 
-        # at line 567:3: ( constraint_statement ( NL )+ )*
+        # at line 567:3: ( constraint_statement ( NL )+ | constraint_different )*
         while true # decision 121
-          alt_121 = 2
+          alt_121 = 3
           look_121_0 = @input.peek( 1 )
 
-          if ( look_121_0 == ID || look_121_0 == T__28 || look_121_0 == T__63 )
+          if ( look_121_0 == ID || look_121_0 == T__28 || look_121_0 == T__61 )
             alt_121 = 1
+          elsif ( look_121_0 == T__56 )
+            alt_121 = 2
 
           end
           case alt_121
           when 1
-            # at line 567:4: constraint_statement ( NL )+
-            @state.following.push( TOKENS_FOLLOWING_constraint_statement_IN_constraint_class_quantification_1720 )
+            # at line 567:5: constraint_statement ( NL )+
+            @state.following.push( TOKENS_FOLLOWING_constraint_statement_IN_constraint_class_quantification_1721 )
             constraint_statement295 = constraint_statement
             @state.following.pop
             @adaptor.add_child( root_0, constraint_statement295.tree )
             # --> action
             	@now[( constraint_statement295.nil? ? nil : constraint_statement295.key )] = ( constraint_statement295.nil? ? nil : constraint_statement295.val )	
             # <-- action
-            # at file 569:3: ( NL )+
+            # at file 569:4: ( NL )+
             match_count_120 = 0
             while true
               alt_120 = 2
@@ -6429,8 +6433,8 @@ module SFP
               end
               case alt_120
               when 1
-                # at line 569:3: NL
-                __NL296__ = match( NL, TOKENS_FOLLOWING_NL_IN_constraint_class_quantification_1728 )
+                # at line 569:4: NL
+                __NL296__ = match( NL, TOKENS_FOLLOWING_NL_IN_constraint_class_quantification_1731 )
 
                 tree_for_NL296 = @adaptor.create_with_payload( __NL296__ )
                 @adaptor.add_child( root_0, tree_for_NL296 )
@@ -6447,14 +6451,21 @@ module SFP
             end
 
 
+          when 2
+            # at line 570:5: constraint_different
+            @state.following.push( TOKENS_FOLLOWING_constraint_different_IN_constraint_class_quantification_1738 )
+            constraint_different297 = constraint_different
+            @state.following.pop
+            @adaptor.add_child( root_0, constraint_different297.tree )
+
           else
             break # out of loop for decision 121
           end
         end # loop for decision 121
-        char_literal297 = match( T__21, TOKENS_FOLLOWING_T__21_IN_constraint_class_quantification_1733 )
+        char_literal298 = match( T__21, TOKENS_FOLLOWING_T__21_IN_constraint_class_quantification_1745 )
 
-        tree_for_char_literal297 = @adaptor.create_with_payload( char_literal297 )
-        @adaptor.add_child( root_0, tree_for_char_literal297 )
+        tree_for_char_literal298 = @adaptor.create_with_payload( char_literal298 )
+        @adaptor.add_child( root_0, tree_for_char_literal298 )
 
         # --> action
         	self.goto_parent()	
@@ -6483,305 +6494,99 @@ module SFP
       return return_value
     end
 
-    ConstraintStatementReturnValue = define_return_scope :key, :val
+    ConstraintDifferentReturnValue = define_return_scope 
 
     # 
-    # parser rule constraint_statement
+    # parser rule constraint_different
     # 
     # (in SFP.g)
-    # 574:1: constraint_statement returns [key, val] : ( reference equals_op value | reference equals_op NULL | reference not_equals_op value | reference not_equals_op NULL | conditional_constraint | reference ( 'is' )? 'in' set_value | reference ( 'isnt' | 'not' ) 'in' set_value | reference binary_comp comp_value | total_constraint );
+    # 576:1: constraint_different : ':different' '(' path ')' ( NL )+ ;
     # 
-    def constraint_statement
+    def constraint_different
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 37 )
-      return_value = ConstraintStatementReturnValue.new
+      return_value = ConstraintDifferentReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      __NULL303__ = nil
-      __NULL309__ = nil
-      string_literal312 = nil
-      string_literal313 = nil
-      set316 = nil
-      string_literal317 = nil
-      reference298 = nil
-      equals_op299 = nil
-      value300 = nil
-      reference301 = nil
-      equals_op302 = nil
-      reference304 = nil
-      not_equals_op305 = nil
-      value306 = nil
-      reference307 = nil
-      not_equals_op308 = nil
-      conditional_constraint310 = nil
-      reference311 = nil
-      set_value314 = nil
-      reference315 = nil
-      set_value318 = nil
-      reference319 = nil
-      binary_comp320 = nil
-      comp_value321 = nil
-      total_constraint322 = nil
+      string_literal299 = nil
+      char_literal300 = nil
+      char_literal302 = nil
+      __NL303__ = nil
+      path301 = nil
 
-      tree_for_NULL303 = nil
-      tree_for_NULL309 = nil
-      tree_for_string_literal312 = nil
-      tree_for_string_literal313 = nil
-      tree_for_set316 = nil
-      tree_for_string_literal317 = nil
+      tree_for_string_literal299 = nil
+      tree_for_char_literal300 = nil
+      tree_for_char_literal302 = nil
+      tree_for_NL303 = nil
 
       begin
-        # at line 575:2: ( reference equals_op value | reference equals_op NULL | reference not_equals_op value | reference not_equals_op NULL | conditional_constraint | reference ( 'is' )? 'in' set_value | reference ( 'isnt' | 'not' ) 'in' set_value | reference binary_comp comp_value | total_constraint )
-        alt_123 = 9
-        alt_123 = @dfa123.predict( @input )
-        case alt_123
-        when 1
-          root_0 = @adaptor.create_flat_list
+        root_0 = @adaptor.create_flat_list
 
 
-          # at line 575:4: reference equals_op value
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1756 )
-          reference298 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference298.tree )
-          @state.following.push( TOKENS_FOLLOWING_equals_op_IN_constraint_statement_1758 )
-          equals_op299 = equals_op
-          @state.following.pop
-          @adaptor.add_child( root_0, equals_op299.tree )
-          @state.following.push( TOKENS_FOLLOWING_value_IN_constraint_statement_1760 )
-          value300 = value
-          @state.following.pop
-          @adaptor.add_child( root_0, value300.tree )
-          # --> action
+        # at line 577:4: ':different' '(' path ')' ( NL )+
+        string_literal299 = match( T__56, TOKENS_FOLLOWING_T__56_IN_constraint_different_1764 )
 
-          			return_value.key = ( reference298.nil? ? nil : reference298.val )
-          			return_value.val = { '_context' => 'constraint', '_type' => 'equals', '_value' => ( value300.nil? ? nil : value300.val ) }
-          		
-          # <-- action
+        tree_for_string_literal299 = @adaptor.create_with_payload( string_literal299 )
+        @adaptor.add_child( root_0, tree_for_string_literal299 )
 
-        when 2
-          root_0 = @adaptor.create_flat_list
+        char_literal300 = match( T__36, TOKENS_FOLLOWING_T__36_IN_constraint_different_1766 )
 
+        tree_for_char_literal300 = @adaptor.create_with_payload( char_literal300 )
+        @adaptor.add_child( root_0, tree_for_char_literal300 )
 
-          # at line 580:4: reference equals_op NULL
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1769 )
-          reference301 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference301.tree )
-          @state.following.push( TOKENS_FOLLOWING_equals_op_IN_constraint_statement_1771 )
-          equals_op302 = equals_op
-          @state.following.pop
-          @adaptor.add_child( root_0, equals_op302.tree )
-          __NULL303__ = match( NULL, TOKENS_FOLLOWING_NULL_IN_constraint_statement_1773 )
+        @state.following.push( TOKENS_FOLLOWING_path_IN_constraint_different_1768 )
+        path301 = path
+        @state.following.pop
+        @adaptor.add_child( root_0, path301.tree )
+        char_literal302 = match( T__38, TOKENS_FOLLOWING_T__38_IN_constraint_different_1770 )
 
-          tree_for_NULL303 = @adaptor.create_with_payload( __NULL303__ )
-          @adaptor.add_child( root_0, tree_for_NULL303 )
+        tree_for_char_literal302 = @adaptor.create_with_payload( char_literal302 )
+        @adaptor.add_child( root_0, tree_for_char_literal302 )
 
-          # --> action
-
-          			return_value.key = ( reference301.nil? ? nil : reference301.val )
-          			return_value.val = { '_context' => 'constraint', '_type' => 'equals', '_value' => self.null_value }
-          		
-          # <-- action
-
-        when 3
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 585:4: reference not_equals_op value
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1782 )
-          reference304 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference304.tree )
-          @state.following.push( TOKENS_FOLLOWING_not_equals_op_IN_constraint_statement_1784 )
-          not_equals_op305 = not_equals_op
-          @state.following.pop
-          @adaptor.add_child( root_0, not_equals_op305.tree )
-          @state.following.push( TOKENS_FOLLOWING_value_IN_constraint_statement_1786 )
-          value306 = value
-          @state.following.pop
-          @adaptor.add_child( root_0, value306.tree )
-          # --> action
-
-          			return_value.key = ( reference304.nil? ? nil : reference304.val )
-          			return_value.val = { '_context' => 'constraint', '_type' => 'not-equals', '_value' => ( value306.nil? ? nil : value306.val ) }
-          		
-          # <-- action
-
-        when 4
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 590:4: reference not_equals_op NULL
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1795 )
-          reference307 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference307.tree )
-          @state.following.push( TOKENS_FOLLOWING_not_equals_op_IN_constraint_statement_1797 )
-          not_equals_op308 = not_equals_op
-          @state.following.pop
-          @adaptor.add_child( root_0, not_equals_op308.tree )
-          __NULL309__ = match( NULL, TOKENS_FOLLOWING_NULL_IN_constraint_statement_1799 )
-
-          tree_for_NULL309 = @adaptor.create_with_payload( __NULL309__ )
-          @adaptor.add_child( root_0, tree_for_NULL309 )
-
-          # --> action
-
-          			return_value.key = ( reference307.nil? ? nil : reference307.val )
-          			return_value.val = { '_context' => 'constraint', '_type' => 'not-equals', '_value' => self.null_value }
-          		
-          # <-- action
-
-        when 5
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 595:4: conditional_constraint
-          @state.following.push( TOKENS_FOLLOWING_conditional_constraint_IN_constraint_statement_1808 )
-          conditional_constraint310 = conditional_constraint
-          @state.following.pop
-          @adaptor.add_child( root_0, conditional_constraint310.tree )
-          # --> action
-
-          			return_value.key = ( conditional_constraint310.nil? ? nil : conditional_constraint310.key )
-          			return_value.val = ( conditional_constraint310.nil? ? nil : conditional_constraint310.val )
-          		
-          # <-- action
-
-        when 6
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 600:4: reference ( 'is' )? 'in' set_value
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1817 )
-          reference311 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference311.tree )
-          # at line 600:14: ( 'is' )?
+        # at file 577:30: ( NL )+
+        match_count_122 = 0
+        while true
           alt_122 = 2
           look_122_0 = @input.peek( 1 )
 
-          if ( look_122_0 == T__59 )
+          if ( look_122_0 == NL )
             alt_122 = 1
+
           end
           case alt_122
           when 1
-            # at line 600:14: 'is'
-            string_literal312 = match( T__59, TOKENS_FOLLOWING_T__59_IN_constraint_statement_1819 )
+            # at line 577:30: NL
+            __NL303__ = match( NL, TOKENS_FOLLOWING_NL_IN_constraint_different_1772 )
 
-            tree_for_string_literal312 = @adaptor.create_with_payload( string_literal312 )
-            @adaptor.add_child( root_0, tree_for_string_literal312 )
-
-
-          end
-          string_literal313 = match( T__60, TOKENS_FOLLOWING_T__60_IN_constraint_statement_1822 )
-
-          tree_for_string_literal313 = @adaptor.create_with_payload( string_literal313 )
-          @adaptor.add_child( root_0, tree_for_string_literal313 )
-
-          @state.following.push( TOKENS_FOLLOWING_set_value_IN_constraint_statement_1824 )
-          set_value314 = set_value
-          @state.following.pop
-          @adaptor.add_child( root_0, set_value314.tree )
-          # --> action
-
-          			c_or = { '_context' => 'constraint', '_type' => 'or', '_parent' => @now }
-          			( set_value314.nil? ? nil : set_value314.val ).each { |v|
-          				id = self.next_id.to_s
-          				item = { '_context' => 'constraint', '_type' => 'and', '_parent' => c_or }
-          				item[( reference311.nil? ? nil : reference311.val )] = { '_context' => 'constraint', '_type' => 'equals', '_value' => v }
-          				c_or[id] = item
-          			}
-          			return_value.key = self.next_id.to_s
-          			return_value.val = c_or
-          		
-          # <-- action
-
-        when 7
-          root_0 = @adaptor.create_flat_list
+            tree_for_NL303 = @adaptor.create_with_payload( __NL303__ )
+            @adaptor.add_child( root_0, tree_for_NL303 )
 
 
-          # at line 612:4: reference ( 'isnt' | 'not' ) 'in' set_value
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1833 )
-          reference315 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference315.tree )
-          set316 = @input.look
-          if @input.peek( 1 ).between?( T__61, T__62 )
-            @input.consume
-            @adaptor.add_child( root_0, @adaptor.create_with_payload( set316 ) )
-            @state.error_recovery = false
           else
-            mse = MismatchedSet( nil )
-            raise mse
+            match_count_122 > 0 and break
+            eee = EarlyExit(122)
+
+
+            raise eee
           end
+          match_count_122 += 1
+        end
 
+        # --> action
 
-          string_literal317 = match( T__60, TOKENS_FOLLOWING_T__60_IN_constraint_statement_1841 )
-
-          tree_for_string_literal317 = @adaptor.create_with_payload( string_literal317 )
-          @adaptor.add_child( root_0, tree_for_string_literal317 )
-
-          @state.following.push( TOKENS_FOLLOWING_set_value_IN_constraint_statement_1843 )
-          set_value318 = set_value
-          @state.following.pop
-          @adaptor.add_child( root_0, set_value318.tree )
-          # --> action
-
-          			c_and = { '_context'=>'constraint', '_type'=>'and', '_parent'=>@now }
-          			( set_value318.nil? ? nil : set_value318.val ).each { |v|
-          				id = self.next_id.to_s
-          				item = { '_context'=>'constraint', '_type'=>'and'}
-          				item[( reference315.nil? ? nil : reference315.val )] = { '_context'=>'constraint', '_type'=>'not-equals', '_value'=>v }
-          				c_and[id] = item
-          			}
-          			return_value.key = self.next_id.to_s
-          			return_value.val = c_and
-
-          			#return_value.key = ( reference315.nil? ? nil : reference315.val )
-          			#return_value.val = { '_context' => 'constraint', '_type' => 'not-in', '_value' => ( set_value318.nil? ? nil : set_value318.val ) }
-          		
-          # <-- action
-
-        when 8
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 627:4: reference binary_comp comp_value
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1852 )
-          reference319 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference319.tree )
-          @state.following.push( TOKENS_FOLLOWING_binary_comp_IN_constraint_statement_1854 )
-          binary_comp320 = binary_comp
-          @state.following.pop
-          @adaptor.add_child( root_0, binary_comp320.tree )
-          @state.following.push( TOKENS_FOLLOWING_comp_value_IN_constraint_statement_1856 )
-          comp_value321 = comp_value
-          @state.following.pop
-          @adaptor.add_child( root_0, comp_value321.tree )
-          # --> action
-
-          			return_value.key = ( reference319.nil? ? nil : reference319.val )
-          			return_value.val = { '_context' => 'constraint', '_type' => ( binary_comp320 && @input.to_s( binary_comp320.start, binary_comp320.stop ) ), '_value' => ( comp_value321.nil? ? nil : comp_value321.val ) }
-          		
-          # <-- action
-
-        when 9
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 632:4: total_constraint
-          @state.following.push( TOKENS_FOLLOWING_total_constraint_IN_constraint_statement_1865 )
-          total_constraint322 = total_constraint
-          @state.following.pop
-          @adaptor.add_child( root_0, total_constraint322.tree )
-
-        end# - - - - - - - rule clean up - - - - - - - -
+        			id = self.next_id.to_s
+        			@now[id] = { '_parent' => @now,
+        				'_context' => 'constraint',
+        				'_type' => 'different',
+        				'_self' => id,
+        				'_path' => ( path301 && @input.to_s( path301.start, path301.stop ) )
+        			}
+        		
+        # <-- action
+        # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
 
@@ -6802,62 +6607,305 @@ module SFP
       return return_value
     end
 
-    TotalConstraintReturnValue = define_return_scope 
+    ConstraintStatementReturnValue = define_return_scope :key, :val
 
     # 
-    # parser rule total_constraint
+    # parser rule constraint_statement
     # 
     # (in SFP.g)
-    # 635:1: total_constraint : 'total(' total_statement ')' binary_comp NUMBER ;
+    # 589:1: constraint_statement returns [key, val] : ( reference equals_op value | reference equals_op NULL | reference not_equals_op value | reference not_equals_op NULL | conditional_constraint | reference ( 'is' )? 'in' set_value | reference ( 'isnt' | 'not' ) 'in' set_value | reference binary_comp comp_value | total_constraint );
     # 
-    def total_constraint
+    def constraint_statement
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 38 )
-      return_value = TotalConstraintReturnValue.new
+      return_value = ConstraintStatementReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
+      __NULL309__ = nil
+      __NULL315__ = nil
+      string_literal318 = nil
+      string_literal319 = nil
+      set322 = nil
       string_literal323 = nil
-      char_literal325 = nil
-      __NUMBER327__ = nil
-      total_statement324 = nil
+      reference304 = nil
+      equals_op305 = nil
+      value306 = nil
+      reference307 = nil
+      equals_op308 = nil
+      reference310 = nil
+      not_equals_op311 = nil
+      value312 = nil
+      reference313 = nil
+      not_equals_op314 = nil
+      conditional_constraint316 = nil
+      reference317 = nil
+      set_value320 = nil
+      reference321 = nil
+      set_value324 = nil
+      reference325 = nil
       binary_comp326 = nil
+      comp_value327 = nil
+      total_constraint328 = nil
 
+      tree_for_NULL309 = nil
+      tree_for_NULL315 = nil
+      tree_for_string_literal318 = nil
+      tree_for_string_literal319 = nil
+      tree_for_set322 = nil
       tree_for_string_literal323 = nil
-      tree_for_char_literal325 = nil
-      tree_for_NUMBER327 = nil
 
       begin
-        root_0 = @adaptor.create_flat_list
+        # at line 590:2: ( reference equals_op value | reference equals_op NULL | reference not_equals_op value | reference not_equals_op NULL | conditional_constraint | reference ( 'is' )? 'in' set_value | reference ( 'isnt' | 'not' ) 'in' set_value | reference binary_comp comp_value | total_constraint )
+        alt_124 = 9
+        alt_124 = @dfa124.predict( @input )
+        case alt_124
+        when 1
+          root_0 = @adaptor.create_flat_list
 
 
-        # at line 636:4: 'total(' total_statement ')' binary_comp NUMBER
-        string_literal323 = match( T__63, TOKENS_FOLLOWING_T__63_IN_total_constraint_1876 )
+          # at line 590:4: reference equals_op value
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1792 )
+          reference304 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference304.tree )
+          @state.following.push( TOKENS_FOLLOWING_equals_op_IN_constraint_statement_1794 )
+          equals_op305 = equals_op
+          @state.following.pop
+          @adaptor.add_child( root_0, equals_op305.tree )
+          @state.following.push( TOKENS_FOLLOWING_value_IN_constraint_statement_1796 )
+          value306 = value
+          @state.following.pop
+          @adaptor.add_child( root_0, value306.tree )
+          # --> action
 
-        tree_for_string_literal323 = @adaptor.create_with_payload( string_literal323 )
-        @adaptor.add_child( root_0, tree_for_string_literal323 )
+          			return_value.key = ( reference304.nil? ? nil : reference304.val )
+          			return_value.val = { '_context' => 'constraint', '_type' => 'equals', '_value' => ( value306.nil? ? nil : value306.val ) }
+          		
+          # <-- action
 
-        @state.following.push( TOKENS_FOLLOWING_total_statement_IN_total_constraint_1878 )
-        total_statement324 = total_statement
-        @state.following.pop
-        @adaptor.add_child( root_0, total_statement324.tree )
-        char_literal325 = match( T__38, TOKENS_FOLLOWING_T__38_IN_total_constraint_1880 )
+        when 2
+          root_0 = @adaptor.create_flat_list
 
-        tree_for_char_literal325 = @adaptor.create_with_payload( char_literal325 )
-        @adaptor.add_child( root_0, tree_for_char_literal325 )
 
-        @state.following.push( TOKENS_FOLLOWING_binary_comp_IN_total_constraint_1882 )
-        binary_comp326 = binary_comp
-        @state.following.pop
-        @adaptor.add_child( root_0, binary_comp326.tree )
-        __NUMBER327__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_total_constraint_1884 )
+          # at line 595:4: reference equals_op NULL
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1805 )
+          reference307 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference307.tree )
+          @state.following.push( TOKENS_FOLLOWING_equals_op_IN_constraint_statement_1807 )
+          equals_op308 = equals_op
+          @state.following.pop
+          @adaptor.add_child( root_0, equals_op308.tree )
+          __NULL309__ = match( NULL, TOKENS_FOLLOWING_NULL_IN_constraint_statement_1809 )
 
-        tree_for_NUMBER327 = @adaptor.create_with_payload( __NUMBER327__ )
-        @adaptor.add_child( root_0, tree_for_NUMBER327 )
+          tree_for_NULL309 = @adaptor.create_with_payload( __NULL309__ )
+          @adaptor.add_child( root_0, tree_for_NULL309 )
 
-        # - - - - - - - rule clean up - - - - - - - -
+          # --> action
+
+          			return_value.key = ( reference307.nil? ? nil : reference307.val )
+          			return_value.val = { '_context' => 'constraint', '_type' => 'equals', '_value' => self.null_value }
+          		
+          # <-- action
+
+        when 3
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 600:4: reference not_equals_op value
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1818 )
+          reference310 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference310.tree )
+          @state.following.push( TOKENS_FOLLOWING_not_equals_op_IN_constraint_statement_1820 )
+          not_equals_op311 = not_equals_op
+          @state.following.pop
+          @adaptor.add_child( root_0, not_equals_op311.tree )
+          @state.following.push( TOKENS_FOLLOWING_value_IN_constraint_statement_1822 )
+          value312 = value
+          @state.following.pop
+          @adaptor.add_child( root_0, value312.tree )
+          # --> action
+
+          			return_value.key = ( reference310.nil? ? nil : reference310.val )
+          			return_value.val = { '_context' => 'constraint', '_type' => 'not-equals', '_value' => ( value312.nil? ? nil : value312.val ) }
+          		
+          # <-- action
+
+        when 4
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 605:4: reference not_equals_op NULL
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1831 )
+          reference313 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference313.tree )
+          @state.following.push( TOKENS_FOLLOWING_not_equals_op_IN_constraint_statement_1833 )
+          not_equals_op314 = not_equals_op
+          @state.following.pop
+          @adaptor.add_child( root_0, not_equals_op314.tree )
+          __NULL315__ = match( NULL, TOKENS_FOLLOWING_NULL_IN_constraint_statement_1835 )
+
+          tree_for_NULL315 = @adaptor.create_with_payload( __NULL315__ )
+          @adaptor.add_child( root_0, tree_for_NULL315 )
+
+          # --> action
+
+          			return_value.key = ( reference313.nil? ? nil : reference313.val )
+          			return_value.val = { '_context' => 'constraint', '_type' => 'not-equals', '_value' => self.null_value }
+          		
+          # <-- action
+
+        when 5
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 610:4: conditional_constraint
+          @state.following.push( TOKENS_FOLLOWING_conditional_constraint_IN_constraint_statement_1844 )
+          conditional_constraint316 = conditional_constraint
+          @state.following.pop
+          @adaptor.add_child( root_0, conditional_constraint316.tree )
+          # --> action
+
+          			return_value.key = ( conditional_constraint316.nil? ? nil : conditional_constraint316.key )
+          			return_value.val = ( conditional_constraint316.nil? ? nil : conditional_constraint316.val )
+          		
+          # <-- action
+
+        when 6
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 615:4: reference ( 'is' )? 'in' set_value
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1853 )
+          reference317 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference317.tree )
+          # at line 615:14: ( 'is' )?
+          alt_123 = 2
+          look_123_0 = @input.peek( 1 )
+
+          if ( look_123_0 == T__57 )
+            alt_123 = 1
+          end
+          case alt_123
+          when 1
+            # at line 615:14: 'is'
+            string_literal318 = match( T__57, TOKENS_FOLLOWING_T__57_IN_constraint_statement_1855 )
+
+            tree_for_string_literal318 = @adaptor.create_with_payload( string_literal318 )
+            @adaptor.add_child( root_0, tree_for_string_literal318 )
+
+
+          end
+          string_literal319 = match( T__58, TOKENS_FOLLOWING_T__58_IN_constraint_statement_1858 )
+
+          tree_for_string_literal319 = @adaptor.create_with_payload( string_literal319 )
+          @adaptor.add_child( root_0, tree_for_string_literal319 )
+
+          @state.following.push( TOKENS_FOLLOWING_set_value_IN_constraint_statement_1860 )
+          set_value320 = set_value
+          @state.following.pop
+          @adaptor.add_child( root_0, set_value320.tree )
+          # --> action
+
+          			c_or = { '_context' => 'constraint', '_type' => 'or', '_parent' => @now }
+          			( set_value320.nil? ? nil : set_value320.val ).each { |v|
+          				id = self.next_id.to_s
+          				item = { '_context' => 'constraint', '_type' => 'and', '_parent' => c_or }
+          				item[( reference317.nil? ? nil : reference317.val )] = { '_context' => 'constraint', '_type' => 'equals', '_value' => v }
+          				c_or[id] = item
+          			}
+          			return_value.key = self.next_id.to_s
+          			return_value.val = c_or
+          		
+          # <-- action
+
+        when 7
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 627:4: reference ( 'isnt' | 'not' ) 'in' set_value
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1869 )
+          reference321 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference321.tree )
+          set322 = @input.look
+          if @input.peek( 1 ).between?( T__59, T__60 )
+            @input.consume
+            @adaptor.add_child( root_0, @adaptor.create_with_payload( set322 ) )
+            @state.error_recovery = false
+          else
+            mse = MismatchedSet( nil )
+            raise mse
+          end
+
+
+          string_literal323 = match( T__58, TOKENS_FOLLOWING_T__58_IN_constraint_statement_1877 )
+
+          tree_for_string_literal323 = @adaptor.create_with_payload( string_literal323 )
+          @adaptor.add_child( root_0, tree_for_string_literal323 )
+
+          @state.following.push( TOKENS_FOLLOWING_set_value_IN_constraint_statement_1879 )
+          set_value324 = set_value
+          @state.following.pop
+          @adaptor.add_child( root_0, set_value324.tree )
+          # --> action
+
+          			c_and = { '_context'=>'constraint', '_type'=>'and', '_parent'=>@now }
+          			( set_value324.nil? ? nil : set_value324.val ).each { |v|
+          				id = self.next_id.to_s
+          				item = { '_context'=>'constraint', '_type'=>'and'}
+          				item[( reference321.nil? ? nil : reference321.val )] = { '_context'=>'constraint', '_type'=>'not-equals', '_value'=>v }
+          				c_and[id] = item
+          			}
+          			return_value.key = self.next_id.to_s
+          			return_value.val = c_and
+
+          			#return_value.key = ( reference321.nil? ? nil : reference321.val )
+          			#return_value.val = { '_context' => 'constraint', '_type' => 'not-in', '_value' => ( set_value324.nil? ? nil : set_value324.val ) }
+          		
+          # <-- action
+
+        when 8
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 642:4: reference binary_comp comp_value
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_constraint_statement_1888 )
+          reference325 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference325.tree )
+          @state.following.push( TOKENS_FOLLOWING_binary_comp_IN_constraint_statement_1890 )
+          binary_comp326 = binary_comp
+          @state.following.pop
+          @adaptor.add_child( root_0, binary_comp326.tree )
+          @state.following.push( TOKENS_FOLLOWING_comp_value_IN_constraint_statement_1892 )
+          comp_value327 = comp_value
+          @state.following.pop
+          @adaptor.add_child( root_0, comp_value327.tree )
+          # --> action
+
+          			return_value.key = ( reference325.nil? ? nil : reference325.val )
+          			return_value.val = { '_context' => 'constraint', '_type' => ( binary_comp326 && @input.to_s( binary_comp326.start, binary_comp326.stop ) ), '_value' => ( comp_value327.nil? ? nil : comp_value327.val ) }
+          		
+          # <-- action
+
+        when 9
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 647:4: total_constraint
+          @state.following.push( TOKENS_FOLLOWING_total_constraint_IN_constraint_statement_1901 )
+          total_constraint328 = total_constraint
+          @state.following.pop
+          @adaptor.add_child( root_0, total_constraint328.tree )
+
+        end# - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
 
@@ -6878,45 +6926,61 @@ module SFP
       return return_value
     end
 
-    TotalStatementReturnValue = define_return_scope 
+    TotalConstraintReturnValue = define_return_scope 
 
     # 
-    # parser rule total_statement
+    # parser rule total_constraint
     # 
     # (in SFP.g)
-    # 639:1: total_statement : reference equals_op value ;
+    # 650:1: total_constraint : 'total(' total_statement ')' binary_comp NUMBER ;
     # 
-    def total_statement
+    def total_constraint
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 39 )
-      return_value = TotalStatementReturnValue.new
+      return_value = TotalConstraintReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      reference328 = nil
-      equals_op329 = nil
-      value330 = nil
+      string_literal329 = nil
+      char_literal331 = nil
+      __NUMBER333__ = nil
+      total_statement330 = nil
+      binary_comp332 = nil
 
+      tree_for_string_literal329 = nil
+      tree_for_char_literal331 = nil
+      tree_for_NUMBER333 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 640:4: reference equals_op value
-        @state.following.push( TOKENS_FOLLOWING_reference_IN_total_statement_1895 )
-        reference328 = reference
+        # at line 651:4: 'total(' total_statement ')' binary_comp NUMBER
+        string_literal329 = match( T__61, TOKENS_FOLLOWING_T__61_IN_total_constraint_1912 )
+
+        tree_for_string_literal329 = @adaptor.create_with_payload( string_literal329 )
+        @adaptor.add_child( root_0, tree_for_string_literal329 )
+
+        @state.following.push( TOKENS_FOLLOWING_total_statement_IN_total_constraint_1914 )
+        total_statement330 = total_statement
         @state.following.pop
-        @adaptor.add_child( root_0, reference328.tree )
-        @state.following.push( TOKENS_FOLLOWING_equals_op_IN_total_statement_1897 )
-        equals_op329 = equals_op
+        @adaptor.add_child( root_0, total_statement330.tree )
+        char_literal331 = match( T__38, TOKENS_FOLLOWING_T__38_IN_total_constraint_1916 )
+
+        tree_for_char_literal331 = @adaptor.create_with_payload( char_literal331 )
+        @adaptor.add_child( root_0, tree_for_char_literal331 )
+
+        @state.following.push( TOKENS_FOLLOWING_binary_comp_IN_total_constraint_1918 )
+        binary_comp332 = binary_comp
         @state.following.pop
-        @adaptor.add_child( root_0, equals_op329.tree )
-        @state.following.push( TOKENS_FOLLOWING_value_IN_total_statement_1899 )
-        value330 = value
-        @state.following.pop
-        @adaptor.add_child( root_0, value330.tree )
+        @adaptor.add_child( root_0, binary_comp332.tree )
+        __NUMBER333__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_total_constraint_1920 )
+
+        tree_for_NUMBER333 = @adaptor.create_with_payload( __NUMBER333__ )
+        @adaptor.add_child( root_0, tree_for_NUMBER333 )
+
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
@@ -6938,69 +7002,46 @@ module SFP
       return return_value
     end
 
-    CompValueReturnValue = define_return_scope :val
+    TotalStatementReturnValue = define_return_scope 
 
     # 
-    # parser rule comp_value
+    # parser rule total_statement
     # 
     # (in SFP.g)
-    # 643:1: comp_value returns [val] : ( NUMBER | reference );
+    # 654:1: total_statement : reference equals_op value ;
     # 
-    def comp_value
+    def total_statement
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 40 )
-      return_value = CompValueReturnValue.new
+      return_value = TotalStatementReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      __NUMBER331__ = nil
-      reference332 = nil
+      reference334 = nil
+      equals_op335 = nil
+      value336 = nil
 
-      tree_for_NUMBER331 = nil
 
       begin
-        # at line 644:2: ( NUMBER | reference )
-        alt_124 = 2
-        look_124_0 = @input.peek( 1 )
-
-        if ( look_124_0 == NUMBER )
-          alt_124 = 1
-        elsif ( look_124_0 == ID )
-          alt_124 = 2
-        else
-          raise NoViableAlternative( "", 124, 0 )
-        end
-        case alt_124
-        when 1
-          root_0 = @adaptor.create_flat_list
+        root_0 = @adaptor.create_flat_list
 
 
-          # at line 644:4: NUMBER
-          __NUMBER331__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_comp_value_1914 )
-
-          tree_for_NUMBER331 = @adaptor.create_with_payload( __NUMBER331__ )
-          @adaptor.add_child( root_0, tree_for_NUMBER331 )
-
-          # --> action
-          	return_value.val = __NUMBER331__.text.to_f	
-          # <-- action
-
-        when 2
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 646:4: reference
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_comp_value_1923 )
-          reference332 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference332.tree )
-          # --> action
-          	return_value.val = ( reference332.nil? ? nil : reference332.val )	
-          # <-- action
-
-        end# - - - - - - - rule clean up - - - - - - - -
+        # at line 655:4: reference equals_op value
+        @state.following.push( TOKENS_FOLLOWING_reference_IN_total_statement_1931 )
+        reference334 = reference
+        @state.following.pop
+        @adaptor.add_child( root_0, reference334.tree )
+        @state.following.push( TOKENS_FOLLOWING_equals_op_IN_total_statement_1933 )
+        equals_op335 = equals_op
+        @state.following.pop
+        @adaptor.add_child( root_0, equals_op335.tree )
+        @state.following.push( TOKENS_FOLLOWING_value_IN_total_statement_1935 )
+        value336 = value
+        @state.following.pop
+        @adaptor.add_child( root_0, value336.tree )
+        # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
 
@@ -7021,95 +7062,69 @@ module SFP
       return return_value
     end
 
-    ConditionalConstraintReturnValue = define_return_scope :key, :val
+    CompValueReturnValue = define_return_scope :val
 
     # 
-    # parser rule conditional_constraint
+    # parser rule comp_value
     # 
     # (in SFP.g)
-    # 650:1: conditional_constraint returns [key, val] : 'if' constraint_statement ( NL )* conditional_constraint_then ;
+    # 658:1: comp_value returns [val] : ( NUMBER | reference );
     # 
-    def conditional_constraint
+    def comp_value
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 41 )
-      return_value = ConditionalConstraintReturnValue.new
+      return_value = CompValueReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      string_literal333 = nil
-      __NL335__ = nil
-      constraint_statement334 = nil
-      conditional_constraint_then336 = nil
+      __NUMBER337__ = nil
+      reference338 = nil
 
-      tree_for_string_literal333 = nil
-      tree_for_NL335 = nil
+      tree_for_NUMBER337 = nil
 
       begin
-        root_0 = @adaptor.create_flat_list
+        # at line 659:2: ( NUMBER | reference )
+        alt_125 = 2
+        look_125_0 = @input.peek( 1 )
 
-
-        # at line 651:4: 'if' constraint_statement ( NL )* conditional_constraint_then
-        string_literal333 = match( T__28, TOKENS_FOLLOWING_T__28_IN_conditional_constraint_1942 )
-
-        tree_for_string_literal333 = @adaptor.create_with_payload( string_literal333 )
-        @adaptor.add_child( root_0, tree_for_string_literal333 )
-
-        # --> action
-
-        			return_value.key = id = self.next_id.to_s
-        			@now[id] = { '_parent' => @now,
-        				'_context' => 'constraint',
-        				'_type' => 'or'
-        			}
-        			@now = @now[id]
-        		
-        # <-- action
-        @state.following.push( TOKENS_FOLLOWING_constraint_statement_IN_conditional_constraint_1950 )
-        constraint_statement334 = constraint_statement
-        @state.following.pop
-        @adaptor.add_child( root_0, constraint_statement334.tree )
-        # at line 660:24: ( NL )*
-        while true # decision 125
+        if ( look_125_0 == NUMBER )
+          alt_125 = 1
+        elsif ( look_125_0 == ID )
           alt_125 = 2
-          look_125_0 = @input.peek( 1 )
-
-          if ( look_125_0 == NL )
-            alt_125 = 1
-
-          end
-          case alt_125
-          when 1
-            # at line 660:24: NL
-            __NL335__ = match( NL, TOKENS_FOLLOWING_NL_IN_conditional_constraint_1952 )
-
-            tree_for_NL335 = @adaptor.create_with_payload( __NL335__ )
-            @adaptor.add_child( root_0, tree_for_NL335 )
+        else
+          raise NoViableAlternative( "", 125, 0 )
+        end
+        case alt_125
+        when 1
+          root_0 = @adaptor.create_flat_list
 
 
-          else
-            break # out of loop for decision 125
-          end
-        end # loop for decision 125
-        # --> action
+          # at line 659:4: NUMBER
+          __NUMBER337__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_comp_value_1950 )
 
-        			id = self.next_id
-        			@now[id] = { '_parent' => @now,
-        				'_context' => 'constraint',
-        				'_type' => 'not'
-        			}
-        			@now[id][( constraint_statement334.nil? ? nil : constraint_statement334.key )] = ( constraint_statement334.nil? ? nil : constraint_statement334.val )
-        		
-        # <-- action
-        @state.following.push( TOKENS_FOLLOWING_conditional_constraint_then_IN_conditional_constraint_1961 )
-        conditional_constraint_then336 = conditional_constraint_then
-        @state.following.pop
-        @adaptor.add_child( root_0, conditional_constraint_then336.tree )
-        # --> action
-        	return_value.val = self.goto_parent()	
-        # <-- action
-        # - - - - - - - rule clean up - - - - - - - -
+          tree_for_NUMBER337 = @adaptor.create_with_payload( __NUMBER337__ )
+          @adaptor.add_child( root_0, tree_for_NUMBER337 )
+
+          # --> action
+          	return_value.val = __NUMBER337__.text.to_f	
+          # <-- action
+
+        when 2
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 661:4: reference
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_comp_value_1959 )
+          reference338 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference338.tree )
+          # --> action
+          	return_value.val = ( reference338.nil? ? nil : reference338.val )	
+          # <-- action
+
+        end# - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
 
@@ -7130,51 +7145,93 @@ module SFP
       return return_value
     end
 
-    ConditionalConstraintThenReturnValue = define_return_scope 
+    ConditionalConstraintReturnValue = define_return_scope :key, :val
 
     # 
-    # parser rule conditional_constraint_then
+    # parser rule conditional_constraint
     # 
     # (in SFP.g)
-    # 673:1: conditional_constraint_then : 'then' constraint_statement ;
+    # 665:1: conditional_constraint returns [key, val] : 'if' constraint_statement ( NL )* conditional_constraint_then ;
     # 
-    def conditional_constraint_then
+    def conditional_constraint
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 42 )
-      return_value = ConditionalConstraintThenReturnValue.new
+      return_value = ConditionalConstraintReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      string_literal337 = nil
-      constraint_statement338 = nil
+      string_literal339 = nil
+      __NL341__ = nil
+      constraint_statement340 = nil
+      conditional_constraint_then342 = nil
 
-      tree_for_string_literal337 = nil
+      tree_for_string_literal339 = nil
+      tree_for_NL341 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 674:4: 'then' constraint_statement
-        string_literal337 = match( T__29, TOKENS_FOLLOWING_T__29_IN_conditional_constraint_then_1976 )
+        # at line 666:4: 'if' constraint_statement ( NL )* conditional_constraint_then
+        string_literal339 = match( T__28, TOKENS_FOLLOWING_T__28_IN_conditional_constraint_1978 )
 
-        tree_for_string_literal337 = @adaptor.create_with_payload( string_literal337 )
-        @adaptor.add_child( root_0, tree_for_string_literal337 )
+        tree_for_string_literal339 = @adaptor.create_with_payload( string_literal339 )
+        @adaptor.add_child( root_0, tree_for_string_literal339 )
 
-        @state.following.push( TOKENS_FOLLOWING_constraint_statement_IN_conditional_constraint_then_1978 )
-        constraint_statement338 = constraint_statement
+        # --> action
+
+        			return_value.key = id = self.next_id.to_s
+        			@now[id] = { '_parent' => @now,
+        				'_context' => 'constraint',
+        				'_type' => 'or'
+        			}
+        			@now = @now[id]
+        		
+        # <-- action
+        @state.following.push( TOKENS_FOLLOWING_constraint_statement_IN_conditional_constraint_1986 )
+        constraint_statement340 = constraint_statement
         @state.following.pop
-        @adaptor.add_child( root_0, constraint_statement338.tree )
+        @adaptor.add_child( root_0, constraint_statement340.tree )
+        # at line 675:24: ( NL )*
+        while true # decision 126
+          alt_126 = 2
+          look_126_0 = @input.peek( 1 )
+
+          if ( look_126_0 == NL )
+            alt_126 = 1
+
+          end
+          case alt_126
+          when 1
+            # at line 675:24: NL
+            __NL341__ = match( NL, TOKENS_FOLLOWING_NL_IN_conditional_constraint_1988 )
+
+            tree_for_NL341 = @adaptor.create_with_payload( __NL341__ )
+            @adaptor.add_child( root_0, tree_for_NL341 )
+
+
+          else
+            break # out of loop for decision 126
+          end
+        end # loop for decision 126
         # --> action
 
         			id = self.next_id
         			@now[id] = { '_parent' => @now,
         				'_context' => 'constraint',
-        				'_type' => 'and'
+        				'_type' => 'not'
         			}
-        			@now[id][( constraint_statement338.nil? ? nil : constraint_statement338.key )] = ( constraint_statement338.nil? ? nil : constraint_statement338.val )
+        			@now[id][( constraint_statement340.nil? ? nil : constraint_statement340.key )] = ( constraint_statement340.nil? ? nil : constraint_statement340.val )
         		
+        # <-- action
+        @state.following.push( TOKENS_FOLLOWING_conditional_constraint_then_IN_conditional_constraint_1997 )
+        conditional_constraint_then342 = conditional_constraint_then
+        @state.following.pop
+        @adaptor.add_child( root_0, conditional_constraint_then342.tree )
+        # --> action
+        	return_value.val = self.goto_parent()	
         # <-- action
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
@@ -7197,110 +7254,52 @@ module SFP
       return return_value
     end
 
-    MutationBodyReturnValue = define_return_scope 
+    ConditionalConstraintThenReturnValue = define_return_scope 
 
     # 
-    # parser rule mutation_body
+    # parser rule conditional_constraint_then
     # 
     # (in SFP.g)
-    # 685:1: mutation_body : ( ( mutation_statement | mutation_iterator ) ( NL )+ )* ;
+    # 688:1: conditional_constraint_then : 'then' constraint_statement ;
     # 
-    def mutation_body
+    def conditional_constraint_then
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 43 )
-      return_value = MutationBodyReturnValue.new
+      return_value = ConditionalConstraintThenReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      __NL341__ = nil
-      mutation_statement339 = nil
-      mutation_iterator340 = nil
+      string_literal343 = nil
+      constraint_statement344 = nil
 
-      tree_for_NL341 = nil
+      tree_for_string_literal343 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 686:4: ( ( mutation_statement | mutation_iterator ) ( NL )+ )*
-        # at line 686:4: ( ( mutation_statement | mutation_iterator ) ( NL )+ )*
-        while true # decision 128
-          alt_128 = 2
-          look_128_0 = @input.peek( 1 )
+        # at line 689:4: 'then' constraint_statement
+        string_literal343 = match( T__29, TOKENS_FOLLOWING_T__29_IN_conditional_constraint_then_2012 )
 
-          if ( look_128_0 == ID || look_128_0 == T__53 || look_128_0 == T__65 )
-            alt_128 = 1
+        tree_for_string_literal343 = @adaptor.create_with_payload( string_literal343 )
+        @adaptor.add_child( root_0, tree_for_string_literal343 )
 
-          end
-          case alt_128
-          when 1
-            # at line 687:4: ( mutation_statement | mutation_iterator ) ( NL )+
-            # at line 687:4: ( mutation_statement | mutation_iterator )
-            alt_126 = 2
-            look_126_0 = @input.peek( 1 )
+        @state.following.push( TOKENS_FOLLOWING_constraint_statement_IN_conditional_constraint_then_2014 )
+        constraint_statement344 = constraint_statement
+        @state.following.pop
+        @adaptor.add_child( root_0, constraint_statement344.tree )
+        # --> action
 
-            if ( look_126_0 == ID || look_126_0 == T__65 )
-              alt_126 = 1
-            elsif ( look_126_0 == T__53 )
-              alt_126 = 2
-            else
-              raise NoViableAlternative( "", 126, 0 )
-            end
-            case alt_126
-            when 1
-              # at line 687:6: mutation_statement
-              @state.following.push( TOKENS_FOLLOWING_mutation_statement_IN_mutation_body_2000 )
-              mutation_statement339 = mutation_statement
-              @state.following.pop
-              @adaptor.add_child( root_0, mutation_statement339.tree )
-              # --> action
-              	@now[( mutation_statement339.nil? ? nil : mutation_statement339.key )] = ( mutation_statement339.nil? ? nil : mutation_statement339.val )	
-              # <-- action
-
-            when 2
-              # at line 689:6: mutation_iterator
-              @state.following.push( TOKENS_FOLLOWING_mutation_iterator_IN_mutation_body_2013 )
-              mutation_iterator340 = mutation_iterator
-              @state.following.pop
-              @adaptor.add_child( root_0, mutation_iterator340.tree )
-
-            end
-            # at file 691:3: ( NL )+
-            match_count_127 = 0
-            while true
-              alt_127 = 2
-              look_127_0 = @input.peek( 1 )
-
-              if ( look_127_0 == NL )
-                alt_127 = 1
-
-              end
-              case alt_127
-              when 1
-                # at line 691:3: NL
-                __NL341__ = match( NL, TOKENS_FOLLOWING_NL_IN_mutation_body_2022 )
-
-                tree_for_NL341 = @adaptor.create_with_payload( __NL341__ )
-                @adaptor.add_child( root_0, tree_for_NL341 )
-
-
-              else
-                match_count_127 > 0 and break
-                eee = EarlyExit(127)
-
-
-                raise eee
-              end
-              match_count_127 += 1
-            end
-
-
-          else
-            break # out of loop for decision 128
-          end
-        end # loop for decision 128
+        			id = self.next_id
+        			@now[id] = { '_parent' => @now,
+        				'_context' => 'constraint',
+        				'_type' => 'and'
+        			}
+        			@now[id][( constraint_statement344.nil? ? nil : constraint_statement344.key )] = ( constraint_statement344.nil? ? nil : constraint_statement344.val )
+        		
+        # <-- action
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
@@ -7322,195 +7321,110 @@ module SFP
       return return_value
     end
 
-    MutationIteratorReturnValue = define_return_scope 
+    MutationBodyReturnValue = define_return_scope 
 
     # 
-    # parser rule mutation_iterator
+    # parser rule mutation_body
     # 
     # (in SFP.g)
-    # 694:1: mutation_iterator : 'foreach' path 'as' ID ( NL )* '{' ( NL )+ ( mutation_statement ( NL )+ )* '}' ;
+    # 700:1: mutation_body : ( ( mutation_statement | mutation_iterator ) ( NL )+ )* ;
     # 
-    def mutation_iterator
+    def mutation_body
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 44 )
-      return_value = MutationIteratorReturnValue.new
+      return_value = MutationBodyReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      string_literal342 = nil
-      string_literal344 = nil
-      __ID345__ = nil
-      __NL346__ = nil
-      char_literal347 = nil
-      __NL348__ = nil
-      __NL350__ = nil
-      char_literal351 = nil
-      path343 = nil
-      mutation_statement349 = nil
+      __NL347__ = nil
+      mutation_statement345 = nil
+      mutation_iterator346 = nil
 
-      tree_for_string_literal342 = nil
-      tree_for_string_literal344 = nil
-      tree_for_ID345 = nil
-      tree_for_NL346 = nil
-      tree_for_char_literal347 = nil
-      tree_for_NL348 = nil
-      tree_for_NL350 = nil
-      tree_for_char_literal351 = nil
+      tree_for_NL347 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 695:4: 'foreach' path 'as' ID ( NL )* '{' ( NL )+ ( mutation_statement ( NL )+ )* '}'
-        string_literal342 = match( T__53, TOKENS_FOLLOWING_T__53_IN_mutation_iterator_2037 )
-
-        tree_for_string_literal342 = @adaptor.create_with_payload( string_literal342 )
-        @adaptor.add_child( root_0, tree_for_string_literal342 )
-
-        @state.following.push( TOKENS_FOLLOWING_path_IN_mutation_iterator_2039 )
-        path343 = path
-        @state.following.pop
-        @adaptor.add_child( root_0, path343.tree )
-        string_literal344 = match( T__54, TOKENS_FOLLOWING_T__54_IN_mutation_iterator_2041 )
-
-        tree_for_string_literal344 = @adaptor.create_with_payload( string_literal344 )
-        @adaptor.add_child( root_0, tree_for_string_literal344 )
-
-        __ID345__ = match( ID, TOKENS_FOLLOWING_ID_IN_mutation_iterator_2043 )
-
-        tree_for_ID345 = @adaptor.create_with_payload( __ID345__ )
-        @adaptor.add_child( root_0, tree_for_ID345 )
-
-        # at line 695:27: ( NL )*
+        # at line 701:4: ( ( mutation_statement | mutation_iterator ) ( NL )+ )*
+        # at line 701:4: ( ( mutation_statement | mutation_iterator ) ( NL )+ )*
         while true # decision 129
           alt_129 = 2
           look_129_0 = @input.peek( 1 )
 
-          if ( look_129_0 == NL )
+          if ( look_129_0 == ID || look_129_0 == T__50 || look_129_0 == T__63 )
             alt_129 = 1
 
           end
           case alt_129
           when 1
-            # at line 695:27: NL
-            __NL346__ = match( NL, TOKENS_FOLLOWING_NL_IN_mutation_iterator_2045 )
+            # at line 702:4: ( mutation_statement | mutation_iterator ) ( NL )+
+            # at line 702:4: ( mutation_statement | mutation_iterator )
+            alt_127 = 2
+            look_127_0 = @input.peek( 1 )
 
-            tree_for_NL346 = @adaptor.create_with_payload( __NL346__ )
-            @adaptor.add_child( root_0, tree_for_NL346 )
+            if ( look_127_0 == ID || look_127_0 == T__63 )
+              alt_127 = 1
+            elsif ( look_127_0 == T__50 )
+              alt_127 = 2
+            else
+              raise NoViableAlternative( "", 127, 0 )
+            end
+            case alt_127
+            when 1
+              # at line 702:6: mutation_statement
+              @state.following.push( TOKENS_FOLLOWING_mutation_statement_IN_mutation_body_2036 )
+              mutation_statement345 = mutation_statement
+              @state.following.pop
+              @adaptor.add_child( root_0, mutation_statement345.tree )
+              # --> action
+              	@now[( mutation_statement345.nil? ? nil : mutation_statement345.key )] = ( mutation_statement345.nil? ? nil : mutation_statement345.val )	
+              # <-- action
+
+            when 2
+              # at line 704:6: mutation_iterator
+              @state.following.push( TOKENS_FOLLOWING_mutation_iterator_IN_mutation_body_2049 )
+              mutation_iterator346 = mutation_iterator
+              @state.following.pop
+              @adaptor.add_child( root_0, mutation_iterator346.tree )
+
+            end
+            # at file 706:3: ( NL )+
+            match_count_128 = 0
+            while true
+              alt_128 = 2
+              look_128_0 = @input.peek( 1 )
+
+              if ( look_128_0 == NL )
+                alt_128 = 1
+
+              end
+              case alt_128
+              when 1
+                # at line 706:3: NL
+                __NL347__ = match( NL, TOKENS_FOLLOWING_NL_IN_mutation_body_2058 )
+
+                tree_for_NL347 = @adaptor.create_with_payload( __NL347__ )
+                @adaptor.add_child( root_0, tree_for_NL347 )
+
+
+              else
+                match_count_128 > 0 and break
+                eee = EarlyExit(128)
+
+
+                raise eee
+              end
+              match_count_128 += 1
+            end
 
 
           else
             break # out of loop for decision 129
           end
         end # loop for decision 129
-        char_literal347 = match( T__20, TOKENS_FOLLOWING_T__20_IN_mutation_iterator_2048 )
-
-        tree_for_char_literal347 = @adaptor.create_with_payload( char_literal347 )
-        @adaptor.add_child( root_0, tree_for_char_literal347 )
-
-        # at file 695:35: ( NL )+
-        match_count_130 = 0
-        while true
-          alt_130 = 2
-          look_130_0 = @input.peek( 1 )
-
-          if ( look_130_0 == NL )
-            alt_130 = 1
-
-          end
-          case alt_130
-          when 1
-            # at line 695:35: NL
-            __NL348__ = match( NL, TOKENS_FOLLOWING_NL_IN_mutation_iterator_2050 )
-
-            tree_for_NL348 = @adaptor.create_with_payload( __NL348__ )
-            @adaptor.add_child( root_0, tree_for_NL348 )
-
-
-          else
-            match_count_130 > 0 and break
-            eee = EarlyExit(130)
-
-
-            raise eee
-          end
-          match_count_130 += 1
-        end
-
-        # --> action
-
-        			id = self.to_ref(( path343 && @input.to_s( path343.start, path343.stop ) ))
-        			@now[id] = { '_parent' => @now,
-        				'_context' => 'iterator',
-        				'_self' => id,
-        				'_variable' => __ID345__.text
-        			}
-        			@now = @now[id]
-        		
-        # <-- action
-        # at line 705:3: ( mutation_statement ( NL )+ )*
-        while true # decision 132
-          alt_132 = 2
-          look_132_0 = @input.peek( 1 )
-
-          if ( look_132_0 == ID || look_132_0 == T__65 )
-            alt_132 = 1
-
-          end
-          case alt_132
-          when 1
-            # at line 705:4: mutation_statement ( NL )+
-            @state.following.push( TOKENS_FOLLOWING_mutation_statement_IN_mutation_iterator_2060 )
-            mutation_statement349 = mutation_statement
-            @state.following.pop
-            @adaptor.add_child( root_0, mutation_statement349.tree )
-            # --> action
-            	@now[( mutation_statement349.nil? ? nil : mutation_statement349.key )] = ( mutation_statement349.nil? ? nil : mutation_statement349.val )	
-            # <-- action
-            # at file 707:3: ( NL )+
-            match_count_131 = 0
-            while true
-              alt_131 = 2
-              look_131_0 = @input.peek( 1 )
-
-              if ( look_131_0 == NL )
-                alt_131 = 1
-
-              end
-              case alt_131
-              when 1
-                # at line 707:3: NL
-                __NL350__ = match( NL, TOKENS_FOLLOWING_NL_IN_mutation_iterator_2068 )
-
-                tree_for_NL350 = @adaptor.create_with_payload( __NL350__ )
-                @adaptor.add_child( root_0, tree_for_NL350 )
-
-
-              else
-                match_count_131 > 0 and break
-                eee = EarlyExit(131)
-
-
-                raise eee
-              end
-              match_count_131 += 1
-            end
-
-
-          else
-            break # out of loop for decision 132
-          end
-        end # loop for decision 132
-        char_literal351 = match( T__21, TOKENS_FOLLOWING_T__21_IN_mutation_iterator_2075 )
-
-        tree_for_char_literal351 = @adaptor.create_with_payload( char_literal351 )
-        @adaptor.add_child( root_0, tree_for_char_literal351 )
-
-        # --> action
-        	self.goto_parent()	
-        # <-- action
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
@@ -7532,297 +7446,196 @@ module SFP
       return return_value
     end
 
-    MutationStatementReturnValue = define_return_scope :key, :val
+    MutationIteratorReturnValue = define_return_scope 
 
     # 
-    # parser rule mutation_statement
+    # parser rule mutation_iterator
     # 
     # (in SFP.g)
-    # 712:1: mutation_statement returns [key, val] : ( reference equals_op value | reference equals_op NULL | reference binary_op NUMBER | reference 'is' 'new' path ( object_body )? | 'delete' path | reference 'add(' value ')' | reference 'remove(' value ')' );
+    # 709:1: mutation_iterator : 'foreach' path 'as' ID ( NL )* '{' ( NL )+ ( mutation_statement ( NL )+ )* '}' ;
     # 
-    def mutation_statement
+    def mutation_iterator
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 45 )
-      return_value = MutationStatementReturnValue.new
+      return_value = MutationIteratorReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      __NULL357__ = nil
-      __NUMBER360__ = nil
-      string_literal362 = nil
-      string_literal363 = nil
-      string_literal366 = nil
-      string_literal369 = nil
-      char_literal371 = nil
-      string_literal373 = nil
-      char_literal375 = nil
-      reference352 = nil
-      equals_op353 = nil
-      value354 = nil
-      reference355 = nil
-      equals_op356 = nil
-      reference358 = nil
-      binary_op359 = nil
-      reference361 = nil
-      path364 = nil
-      object_body365 = nil
-      path367 = nil
-      reference368 = nil
-      value370 = nil
-      reference372 = nil
-      value374 = nil
+      string_literal348 = nil
+      string_literal350 = nil
+      __ID351__ = nil
+      __NL352__ = nil
+      char_literal353 = nil
+      __NL354__ = nil
+      __NL356__ = nil
+      char_literal357 = nil
+      path349 = nil
+      mutation_statement355 = nil
 
-      tree_for_NULL357 = nil
-      tree_for_NUMBER360 = nil
-      tree_for_string_literal362 = nil
-      tree_for_string_literal363 = nil
-      tree_for_string_literal366 = nil
-      tree_for_string_literal369 = nil
-      tree_for_char_literal371 = nil
-      tree_for_string_literal373 = nil
-      tree_for_char_literal375 = nil
+      tree_for_string_literal348 = nil
+      tree_for_string_literal350 = nil
+      tree_for_ID351 = nil
+      tree_for_NL352 = nil
+      tree_for_char_literal353 = nil
+      tree_for_NL354 = nil
+      tree_for_NL356 = nil
+      tree_for_char_literal357 = nil
 
       begin
-        # at line 713:2: ( reference equals_op value | reference equals_op NULL | reference binary_op NUMBER | reference 'is' 'new' path ( object_body )? | 'delete' path | reference 'add(' value ')' | reference 'remove(' value ')' )
-        alt_134 = 7
-        alt_134 = @dfa134.predict( @input )
-        case alt_134
-        when 1
-          root_0 = @adaptor.create_flat_list
+        root_0 = @adaptor.create_flat_list
 
 
-          # at line 713:4: reference equals_op value
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2094 )
-          reference352 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference352.tree )
-          @state.following.push( TOKENS_FOLLOWING_equals_op_IN_mutation_statement_2096 )
-          equals_op353 = equals_op
-          @state.following.pop
-          @adaptor.add_child( root_0, equals_op353.tree )
-          @state.following.push( TOKENS_FOLLOWING_value_IN_mutation_statement_2098 )
-          value354 = value
-          @state.following.pop
-          @adaptor.add_child( root_0, value354.tree )
-          # --> action
+        # at line 710:4: 'foreach' path 'as' ID ( NL )* '{' ( NL )+ ( mutation_statement ( NL )+ )* '}'
+        string_literal348 = match( T__50, TOKENS_FOLLOWING_T__50_IN_mutation_iterator_2073 )
 
-          			return_value.key = ( reference352.nil? ? nil : reference352.val )
-          			return_value.val = { '_context' => 'mutation',
-          				'_type' => 'equals',
-          				'_value' => ( value354.nil? ? nil : value354.val )
-          			}
-          		
-          # <-- action
+        tree_for_string_literal348 = @adaptor.create_with_payload( string_literal348 )
+        @adaptor.add_child( root_0, tree_for_string_literal348 )
 
-        when 2
-          root_0 = @adaptor.create_flat_list
+        @state.following.push( TOKENS_FOLLOWING_path_IN_mutation_iterator_2075 )
+        path349 = path
+        @state.following.pop
+        @adaptor.add_child( root_0, path349.tree )
+        string_literal350 = match( T__51, TOKENS_FOLLOWING_T__51_IN_mutation_iterator_2077 )
 
+        tree_for_string_literal350 = @adaptor.create_with_payload( string_literal350 )
+        @adaptor.add_child( root_0, tree_for_string_literal350 )
 
-          # at line 721:4: reference equals_op NULL
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2107 )
-          reference355 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference355.tree )
-          @state.following.push( TOKENS_FOLLOWING_equals_op_IN_mutation_statement_2109 )
-          equals_op356 = equals_op
-          @state.following.pop
-          @adaptor.add_child( root_0, equals_op356.tree )
-          __NULL357__ = match( NULL, TOKENS_FOLLOWING_NULL_IN_mutation_statement_2111 )
+        __ID351__ = match( ID, TOKENS_FOLLOWING_ID_IN_mutation_iterator_2079 )
 
-          tree_for_NULL357 = @adaptor.create_with_payload( __NULL357__ )
-          @adaptor.add_child( root_0, tree_for_NULL357 )
+        tree_for_ID351 = @adaptor.create_with_payload( __ID351__ )
+        @adaptor.add_child( root_0, tree_for_ID351 )
 
-          # --> action
+        # at line 710:27: ( NL )*
+        while true # decision 130
+          alt_130 = 2
+          look_130_0 = @input.peek( 1 )
 
-          			return_value.key = ( reference355.nil? ? nil : reference355.val )
-          			return_value.val = { '_context' => 'mutation',
-          				'_type' => 'equals',
-          				'_value' => self.null_value
-          			}
-          		
-          # <-- action
+          if ( look_130_0 == NL )
+            alt_130 = 1
 
-        when 3
-          root_0 = @adaptor.create_flat_list
+          end
+          case alt_130
+          when 1
+            # at line 710:27: NL
+            __NL352__ = match( NL, TOKENS_FOLLOWING_NL_IN_mutation_iterator_2081 )
+
+            tree_for_NL352 = @adaptor.create_with_payload( __NL352__ )
+            @adaptor.add_child( root_0, tree_for_NL352 )
 
 
-          # at line 729:4: reference binary_op NUMBER
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2120 )
-          reference358 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference358.tree )
-          @state.following.push( TOKENS_FOLLOWING_binary_op_IN_mutation_statement_2122 )
-          binary_op359 = binary_op
-          @state.following.pop
-          @adaptor.add_child( root_0, binary_op359.tree )
-          __NUMBER360__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_mutation_statement_2124 )
+          else
+            break # out of loop for decision 130
+          end
+        end # loop for decision 130
+        char_literal353 = match( T__20, TOKENS_FOLLOWING_T__20_IN_mutation_iterator_2084 )
 
-          tree_for_NUMBER360 = @adaptor.create_with_payload( __NUMBER360__ )
-          @adaptor.add_child( root_0, tree_for_NUMBER360 )
+        tree_for_char_literal353 = @adaptor.create_with_payload( char_literal353 )
+        @adaptor.add_child( root_0, tree_for_char_literal353 )
 
-          # --> action
+        # at file 710:35: ( NL )+
+        match_count_131 = 0
+        while true
+          alt_131 = 2
+          look_131_0 = @input.peek( 1 )
 
-          			return_value.key = ( reference358.nil? ? nil : reference358.val )
-          			return_value.val = { '_context' => 'mutation',
-          				'_type' => ( binary_op359 && @input.to_s( binary_op359.start, binary_op359.stop ) ),
-          				'_value' => __NUMBER360__.text.to_f
-          			}
-          		
-          # <-- action
+          if ( look_131_0 == NL )
+            alt_131 = 1
 
-        when 4
-          root_0 = @adaptor.create_flat_list
+          end
+          case alt_131
+          when 1
+            # at line 710:35: NL
+            __NL354__ = match( NL, TOKENS_FOLLOWING_NL_IN_mutation_iterator_2086 )
+
+            tree_for_NL354 = @adaptor.create_with_payload( __NL354__ )
+            @adaptor.add_child( root_0, tree_for_NL354 )
 
 
-          # at line 737:4: reference 'is' 'new' path ( object_body )?
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2133 )
-          reference361 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference361.tree )
-          string_literal362 = match( T__59, TOKENS_FOLLOWING_T__59_IN_mutation_statement_2135 )
+          else
+            match_count_131 > 0 and break
+            eee = EarlyExit(131)
 
-          tree_for_string_literal362 = @adaptor.create_with_payload( string_literal362 )
-          @adaptor.add_child( root_0, tree_for_string_literal362 )
 
-          string_literal363 = match( T__64, TOKENS_FOLLOWING_T__64_IN_mutation_statement_2137 )
+            raise eee
+          end
+          match_count_131 += 1
+        end
 
-          tree_for_string_literal363 = @adaptor.create_with_payload( string_literal363 )
-          @adaptor.add_child( root_0, tree_for_string_literal363 )
+        # --> action
 
-          @state.following.push( TOKENS_FOLLOWING_path_IN_mutation_statement_2139 )
-          path364 = path
-          @state.following.pop
-          @adaptor.add_child( root_0, path364.tree )
-          # --> action
-
-          			id = '_' + self.next_id
-          			@now[id] = { '_self' => id,
-          				'_context' => 'object',
-          				'_isa' => self.to_ref(( path364 && @input.to_s( path364.start, path364.stop ) )),
-          				'_parent' => @now
-          			}
-          			@now = @now[id]
-          		
-          # <-- action
-          # at line 747:3: ( object_body )?
+        			id = self.to_ref(( path349 && @input.to_s( path349.start, path349.stop ) ))
+        			@now[id] = { '_parent' => @now,
+        				'_context' => 'iterator',
+        				'_self' => id,
+        				'_variable' => __ID351__.text
+        			}
+        			@now = @now[id]
+        		
+        # <-- action
+        # at line 720:3: ( mutation_statement ( NL )+ )*
+        while true # decision 133
           alt_133 = 2
           look_133_0 = @input.peek( 1 )
 
-          if ( look_133_0 == T__20 )
+          if ( look_133_0 == ID || look_133_0 == T__63 )
             alt_133 = 1
+
           end
           case alt_133
           when 1
-            # at line 747:3: object_body
-            @state.following.push( TOKENS_FOLLOWING_object_body_IN_mutation_statement_2147 )
-            object_body365 = object_body
+            # at line 720:4: mutation_statement ( NL )+
+            @state.following.push( TOKENS_FOLLOWING_mutation_statement_IN_mutation_iterator_2096 )
+            mutation_statement355 = mutation_statement
             @state.following.pop
-            @adaptor.add_child( root_0, object_body365.tree )
+            @adaptor.add_child( root_0, mutation_statement355.tree )
+            # --> action
+            	@now[( mutation_statement355.nil? ? nil : mutation_statement355.key )] = ( mutation_statement355.nil? ? nil : mutation_statement355.val )	
+            # <-- action
+            # at file 722:3: ( NL )+
+            match_count_132 = 0
+            while true
+              alt_132 = 2
+              look_132_0 = @input.peek( 1 )
 
+              if ( look_132_0 == NL )
+                alt_132 = 1
+
+              end
+              case alt_132
+              when 1
+                # at line 722:3: NL
+                __NL356__ = match( NL, TOKENS_FOLLOWING_NL_IN_mutation_iterator_2104 )
+
+                tree_for_NL356 = @adaptor.create_with_payload( __NL356__ )
+                @adaptor.add_child( root_0, tree_for_NL356 )
+
+
+              else
+                match_count_132 > 0 and break
+                eee = EarlyExit(132)
+
+
+                raise eee
+              end
+              match_count_132 += 1
+            end
+
+
+          else
+            break # out of loop for decision 133
           end
-          # --> action
+        end # loop for decision 133
+        char_literal357 = match( T__21, TOKENS_FOLLOWING_T__21_IN_mutation_iterator_2111 )
 
-          			n = self.goto_parent()
-          			@now.delete(n['_self'])
-          			return_value.key = ( reference361.nil? ? nil : reference361.val )
-          			return_value.val = n
-          		
-          # <-- action
+        tree_for_char_literal357 = @adaptor.create_with_payload( char_literal357 )
+        @adaptor.add_child( root_0, tree_for_char_literal357 )
 
-        when 5
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 754:4: 'delete' path
-          string_literal366 = match( T__65, TOKENS_FOLLOWING_T__65_IN_mutation_statement_2157 )
-
-          tree_for_string_literal366 = @adaptor.create_with_payload( string_literal366 )
-          @adaptor.add_child( root_0, tree_for_string_literal366 )
-
-          @state.following.push( TOKENS_FOLLOWING_path_IN_mutation_statement_2159 )
-          path367 = path
-          @state.following.pop
-          @adaptor.add_child( root_0, path367.tree )
-          # --> action
-
-          			id = '_' + self.next_id
-          			@now[id] = { '_self' => id,
-          				'_context' => 'mutation',
-          				'_type' => 'delete',
-          				'_value' => self.to_ref(( path367 && @input.to_s( path367.start, path367.stop ) ))
-          			}
-          		
-          # <-- action
-
-        when 6
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 763:4: reference 'add(' value ')'
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2168 )
-          reference368 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference368.tree )
-          string_literal369 = match( T__66, TOKENS_FOLLOWING_T__66_IN_mutation_statement_2170 )
-
-          tree_for_string_literal369 = @adaptor.create_with_payload( string_literal369 )
-          @adaptor.add_child( root_0, tree_for_string_literal369 )
-
-          @state.following.push( TOKENS_FOLLOWING_value_IN_mutation_statement_2172 )
-          value370 = value
-          @state.following.pop
-          @adaptor.add_child( root_0, value370.tree )
-          char_literal371 = match( T__38, TOKENS_FOLLOWING_T__38_IN_mutation_statement_2174 )
-
-          tree_for_char_literal371 = @adaptor.create_with_payload( char_literal371 )
-          @adaptor.add_child( root_0, tree_for_char_literal371 )
-
-          # --> action
-
-          			return_value.key = ( reference368.nil? ? nil : reference368.val )
-          			return_value.val = { '_context' => 'mutation',
-          				'_type' => 'add',
-          				'_value' => ( value370.nil? ? nil : value370.val )
-          			}
-          		
-          # <-- action
-
-        when 7
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 771:4: reference 'remove(' value ')'
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2183 )
-          reference372 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference372.tree )
-          string_literal373 = match( T__67, TOKENS_FOLLOWING_T__67_IN_mutation_statement_2185 )
-
-          tree_for_string_literal373 = @adaptor.create_with_payload( string_literal373 )
-          @adaptor.add_child( root_0, tree_for_string_literal373 )
-
-          @state.following.push( TOKENS_FOLLOWING_value_IN_mutation_statement_2187 )
-          value374 = value
-          @state.following.pop
-          @adaptor.add_child( root_0, value374.tree )
-          char_literal375 = match( T__38, TOKENS_FOLLOWING_T__38_IN_mutation_statement_2189 )
-
-          tree_for_char_literal375 = @adaptor.create_with_payload( char_literal375 )
-          @adaptor.add_child( root_0, tree_for_char_literal375 )
-
-          # --> action
-
-          			return_value.key = ( reference372.nil? ? nil : reference372.val )
-          			return_value.val = { '_context' => 'mutation',
-          				'_type' => 'remove',
-          				'_value' => ( value374.nil? ? nil : value374.val )
-          			}
-          		
-          # <-- action
-
-        end# - - - - - - - rule clean up - - - - - - - -
+        # --> action
+        	self.goto_parent()	
+        # <-- action
+        # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
 
@@ -7843,85 +7656,297 @@ module SFP
       return return_value
     end
 
-    SetValueReturnValue = define_return_scope :val
+    MutationStatementReturnValue = define_return_scope :key, :val
 
     # 
-    # parser rule set_value
+    # parser rule mutation_statement
     # 
     # (in SFP.g)
-    # 781:1: set_value returns [val] : '(' set_item ( ',' set_item )* ')' ;
+    # 727:1: mutation_statement returns [key, val] : ( reference equals_op value | reference equals_op NULL | reference binary_op NUMBER | reference 'is' 'new' path ( object_body )? | 'delete' path | reference 'add(' value ')' | reference 'remove(' value ')' );
     # 
-    def set_value
+    def mutation_statement
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 46 )
-      return_value = SetValueReturnValue.new
+      return_value = MutationStatementReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      char_literal376 = nil
-      char_literal378 = nil
-      char_literal380 = nil
-      set_item377 = nil
-      set_item379 = nil
+      __NULL363__ = nil
+      __NUMBER366__ = nil
+      string_literal368 = nil
+      string_literal369 = nil
+      string_literal372 = nil
+      string_literal375 = nil
+      char_literal377 = nil
+      string_literal379 = nil
+      char_literal381 = nil
+      reference358 = nil
+      equals_op359 = nil
+      value360 = nil
+      reference361 = nil
+      equals_op362 = nil
+      reference364 = nil
+      binary_op365 = nil
+      reference367 = nil
+      path370 = nil
+      object_body371 = nil
+      path373 = nil
+      reference374 = nil
+      value376 = nil
+      reference378 = nil
+      value380 = nil
 
-      tree_for_char_literal376 = nil
-      tree_for_char_literal378 = nil
-      tree_for_char_literal380 = nil
+      tree_for_NULL363 = nil
+      tree_for_NUMBER366 = nil
+      tree_for_string_literal368 = nil
+      tree_for_string_literal369 = nil
+      tree_for_string_literal372 = nil
+      tree_for_string_literal375 = nil
+      tree_for_char_literal377 = nil
+      tree_for_string_literal379 = nil
+      tree_for_char_literal381 = nil
 
       begin
-        root_0 = @adaptor.create_flat_list
+        # at line 728:2: ( reference equals_op value | reference equals_op NULL | reference binary_op NUMBER | reference 'is' 'new' path ( object_body )? | 'delete' path | reference 'add(' value ')' | reference 'remove(' value ')' )
+        alt_135 = 7
+        alt_135 = @dfa135.predict( @input )
+        case alt_135
+        when 1
+          root_0 = @adaptor.create_flat_list
 
 
-        # at line 782:4: '(' set_item ( ',' set_item )* ')'
-        char_literal376 = match( T__36, TOKENS_FOLLOWING_T__36_IN_set_value_2208 )
+          # at line 728:4: reference equals_op value
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2130 )
+          reference358 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference358.tree )
+          @state.following.push( TOKENS_FOLLOWING_equals_op_IN_mutation_statement_2132 )
+          equals_op359 = equals_op
+          @state.following.pop
+          @adaptor.add_child( root_0, equals_op359.tree )
+          @state.following.push( TOKENS_FOLLOWING_value_IN_mutation_statement_2134 )
+          value360 = value
+          @state.following.pop
+          @adaptor.add_child( root_0, value360.tree )
+          # --> action
 
-        tree_for_char_literal376 = @adaptor.create_with_payload( char_literal376 )
-        @adaptor.add_child( root_0, tree_for_char_literal376 )
+          			return_value.key = ( reference358.nil? ? nil : reference358.val )
+          			return_value.val = { '_context' => 'mutation',
+          				'_type' => 'equals',
+          				'_value' => ( value360.nil? ? nil : value360.val )
+          			}
+          		
+          # <-- action
 
-        # --> action
-        	@set = Array.new	
-        # <-- action
-        @state.following.push( TOKENS_FOLLOWING_set_item_IN_set_value_2216 )
-        set_item377 = set_item
-        @state.following.pop
-        @adaptor.add_child( root_0, set_item377.tree )
-        # at line 784:12: ( ',' set_item )*
-        while true # decision 135
-          alt_135 = 2
-          look_135_0 = @input.peek( 1 )
+        when 2
+          root_0 = @adaptor.create_flat_list
 
-          if ( look_135_0 == T__37 )
-            alt_135 = 1
 
+          # at line 736:4: reference equals_op NULL
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2143 )
+          reference361 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference361.tree )
+          @state.following.push( TOKENS_FOLLOWING_equals_op_IN_mutation_statement_2145 )
+          equals_op362 = equals_op
+          @state.following.pop
+          @adaptor.add_child( root_0, equals_op362.tree )
+          __NULL363__ = match( NULL, TOKENS_FOLLOWING_NULL_IN_mutation_statement_2147 )
+
+          tree_for_NULL363 = @adaptor.create_with_payload( __NULL363__ )
+          @adaptor.add_child( root_0, tree_for_NULL363 )
+
+          # --> action
+
+          			return_value.key = ( reference361.nil? ? nil : reference361.val )
+          			return_value.val = { '_context' => 'mutation',
+          				'_type' => 'equals',
+          				'_value' => self.null_value
+          			}
+          		
+          # <-- action
+
+        when 3
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 744:4: reference binary_op NUMBER
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2156 )
+          reference364 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference364.tree )
+          @state.following.push( TOKENS_FOLLOWING_binary_op_IN_mutation_statement_2158 )
+          binary_op365 = binary_op
+          @state.following.pop
+          @adaptor.add_child( root_0, binary_op365.tree )
+          __NUMBER366__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_mutation_statement_2160 )
+
+          tree_for_NUMBER366 = @adaptor.create_with_payload( __NUMBER366__ )
+          @adaptor.add_child( root_0, tree_for_NUMBER366 )
+
+          # --> action
+
+          			return_value.key = ( reference364.nil? ? nil : reference364.val )
+          			return_value.val = { '_context' => 'mutation',
+          				'_type' => ( binary_op365 && @input.to_s( binary_op365.start, binary_op365.stop ) ),
+          				'_value' => __NUMBER366__.text.to_f
+          			}
+          		
+          # <-- action
+
+        when 4
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 752:4: reference 'is' 'new' path ( object_body )?
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2169 )
+          reference367 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference367.tree )
+          string_literal368 = match( T__57, TOKENS_FOLLOWING_T__57_IN_mutation_statement_2171 )
+
+          tree_for_string_literal368 = @adaptor.create_with_payload( string_literal368 )
+          @adaptor.add_child( root_0, tree_for_string_literal368 )
+
+          string_literal369 = match( T__62, TOKENS_FOLLOWING_T__62_IN_mutation_statement_2173 )
+
+          tree_for_string_literal369 = @adaptor.create_with_payload( string_literal369 )
+          @adaptor.add_child( root_0, tree_for_string_literal369 )
+
+          @state.following.push( TOKENS_FOLLOWING_path_IN_mutation_statement_2175 )
+          path370 = path
+          @state.following.pop
+          @adaptor.add_child( root_0, path370.tree )
+          # --> action
+
+          			id = '_' + self.next_id
+          			@now[id] = { '_self' => id,
+          				'_context' => 'object',
+          				'_isa' => self.to_ref(( path370 && @input.to_s( path370.start, path370.stop ) )),
+          				'_parent' => @now
+          			}
+          			@now = @now[id]
+          		
+          # <-- action
+          # at line 762:3: ( object_body )?
+          alt_134 = 2
+          look_134_0 = @input.peek( 1 )
+
+          if ( look_134_0 == T__20 )
+            alt_134 = 1
           end
-          case alt_135
+          case alt_134
           when 1
-            # at line 784:13: ',' set_item
-            char_literal378 = match( T__37, TOKENS_FOLLOWING_T__37_IN_set_value_2219 )
-
-            tree_for_char_literal378 = @adaptor.create_with_payload( char_literal378 )
-            @adaptor.add_child( root_0, tree_for_char_literal378 )
-
-            @state.following.push( TOKENS_FOLLOWING_set_item_IN_set_value_2221 )
-            set_item379 = set_item
+            # at line 762:3: object_body
+            @state.following.push( TOKENS_FOLLOWING_object_body_IN_mutation_statement_2183 )
+            object_body371 = object_body
             @state.following.pop
-            @adaptor.add_child( root_0, set_item379.tree )
+            @adaptor.add_child( root_0, object_body371.tree )
 
-          else
-            break # out of loop for decision 135
           end
-        end # loop for decision 135
-        # --> action
-        	return_value.val = @set	
-        # <-- action
-        char_literal380 = match( T__38, TOKENS_FOLLOWING_T__38_IN_set_value_2231 )
+          # --> action
 
-        tree_for_char_literal380 = @adaptor.create_with_payload( char_literal380 )
-        @adaptor.add_child( root_0, tree_for_char_literal380 )
+          			n = self.goto_parent()
+          			@now.delete(n['_self'])
+          			return_value.key = ( reference367.nil? ? nil : reference367.val )
+          			return_value.val = n
+          		
+          # <-- action
 
-        # - - - - - - - rule clean up - - - - - - - -
+        when 5
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 769:4: 'delete' path
+          string_literal372 = match( T__63, TOKENS_FOLLOWING_T__63_IN_mutation_statement_2193 )
+
+          tree_for_string_literal372 = @adaptor.create_with_payload( string_literal372 )
+          @adaptor.add_child( root_0, tree_for_string_literal372 )
+
+          @state.following.push( TOKENS_FOLLOWING_path_IN_mutation_statement_2195 )
+          path373 = path
+          @state.following.pop
+          @adaptor.add_child( root_0, path373.tree )
+          # --> action
+
+          			id = '_' + self.next_id
+          			@now[id] = { '_self' => id,
+          				'_context' => 'mutation',
+          				'_type' => 'delete',
+          				'_value' => self.to_ref(( path373 && @input.to_s( path373.start, path373.stop ) ))
+          			}
+          		
+          # <-- action
+
+        when 6
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 778:4: reference 'add(' value ')'
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2204 )
+          reference374 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference374.tree )
+          string_literal375 = match( T__64, TOKENS_FOLLOWING_T__64_IN_mutation_statement_2206 )
+
+          tree_for_string_literal375 = @adaptor.create_with_payload( string_literal375 )
+          @adaptor.add_child( root_0, tree_for_string_literal375 )
+
+          @state.following.push( TOKENS_FOLLOWING_value_IN_mutation_statement_2208 )
+          value376 = value
+          @state.following.pop
+          @adaptor.add_child( root_0, value376.tree )
+          char_literal377 = match( T__38, TOKENS_FOLLOWING_T__38_IN_mutation_statement_2210 )
+
+          tree_for_char_literal377 = @adaptor.create_with_payload( char_literal377 )
+          @adaptor.add_child( root_0, tree_for_char_literal377 )
+
+          # --> action
+
+          			return_value.key = ( reference374.nil? ? nil : reference374.val )
+          			return_value.val = { '_context' => 'mutation',
+          				'_type' => 'add',
+          				'_value' => ( value376.nil? ? nil : value376.val )
+          			}
+          		
+          # <-- action
+
+        when 7
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 786:4: reference 'remove(' value ')'
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_mutation_statement_2219 )
+          reference378 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference378.tree )
+          string_literal379 = match( T__65, TOKENS_FOLLOWING_T__65_IN_mutation_statement_2221 )
+
+          tree_for_string_literal379 = @adaptor.create_with_payload( string_literal379 )
+          @adaptor.add_child( root_0, tree_for_string_literal379 )
+
+          @state.following.push( TOKENS_FOLLOWING_value_IN_mutation_statement_2223 )
+          value380 = value
+          @state.following.pop
+          @adaptor.add_child( root_0, value380.tree )
+          char_literal381 = match( T__38, TOKENS_FOLLOWING_T__38_IN_mutation_statement_2225 )
+
+          tree_for_char_literal381 = @adaptor.create_with_payload( char_literal381 )
+          @adaptor.add_child( root_0, tree_for_char_literal381 )
+
+          # --> action
+
+          			return_value.key = ( reference378.nil? ? nil : reference378.val )
+          			return_value.val = { '_context' => 'mutation',
+          				'_type' => 'remove',
+          				'_value' => ( value380.nil? ? nil : value380.val )
+          			}
+          		
+          # <-- action
+
+        end# - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
 
@@ -7942,38 +7967,84 @@ module SFP
       return return_value
     end
 
-    SetItemReturnValue = define_return_scope 
+    SetValueReturnValue = define_return_scope :val
 
     # 
-    # parser rule set_item
+    # parser rule set_value
     # 
     # (in SFP.g)
-    # 789:1: set_item : value ;
+    # 796:1: set_value returns [val] : '(' set_item ( ',' set_item )* ')' ;
     # 
-    def set_item
+    def set_value
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 47 )
-      return_value = SetItemReturnValue.new
+      return_value = SetValueReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      value381 = nil
+      char_literal382 = nil
+      char_literal384 = nil
+      char_literal386 = nil
+      set_item383 = nil
+      set_item385 = nil
 
+      tree_for_char_literal382 = nil
+      tree_for_char_literal384 = nil
+      tree_for_char_literal386 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 790:4: value
-        @state.following.push( TOKENS_FOLLOWING_value_IN_set_item_2242 )
-        value381 = value
-        @state.following.pop
-        @adaptor.add_child( root_0, value381.tree )
+        # at line 797:4: '(' set_item ( ',' set_item )* ')'
+        char_literal382 = match( T__36, TOKENS_FOLLOWING_T__36_IN_set_value_2244 )
+
+        tree_for_char_literal382 = @adaptor.create_with_payload( char_literal382 )
+        @adaptor.add_child( root_0, tree_for_char_literal382 )
+
         # --> action
-        	@set.push(( value381.nil? ? nil : value381.val ))	
+        	@set = Array.new	
         # <-- action
+        @state.following.push( TOKENS_FOLLOWING_set_item_IN_set_value_2252 )
+        set_item383 = set_item
+        @state.following.pop
+        @adaptor.add_child( root_0, set_item383.tree )
+        # at line 799:12: ( ',' set_item )*
+        while true # decision 136
+          alt_136 = 2
+          look_136_0 = @input.peek( 1 )
+
+          if ( look_136_0 == T__37 )
+            alt_136 = 1
+
+          end
+          case alt_136
+          when 1
+            # at line 799:13: ',' set_item
+            char_literal384 = match( T__37, TOKENS_FOLLOWING_T__37_IN_set_value_2255 )
+
+            tree_for_char_literal384 = @adaptor.create_with_payload( char_literal384 )
+            @adaptor.add_child( root_0, tree_for_char_literal384 )
+
+            @state.following.push( TOKENS_FOLLOWING_set_item_IN_set_value_2257 )
+            set_item385 = set_item
+            @state.following.pop
+            @adaptor.add_child( root_0, set_item385.tree )
+
+          else
+            break # out of loop for decision 136
+          end
+        end # loop for decision 136
+        # --> action
+        	return_value.val = @set	
+        # <-- action
+        char_literal386 = match( T__38, TOKENS_FOLLOWING_T__38_IN_set_value_2267 )
+
+        tree_for_char_literal386 = @adaptor.create_with_payload( char_literal386 )
+        @adaptor.add_child( root_0, tree_for_char_literal386 )
+
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
@@ -7995,79 +8066,39 @@ module SFP
       return return_value
     end
 
-    ValueReturnValue = define_return_scope :val
+    SetItemReturnValue = define_return_scope 
 
     # 
-    # parser rule value
+    # parser rule set_item
     # 
     # (in SFP.g)
-    # 794:1: value returns [val] : ( primitive_value | reference | set_value );
+    # 804:1: set_item : value ;
     # 
-    def value
+    def set_item
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 48 )
-      return_value = ValueReturnValue.new
+      return_value = SetItemReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      primitive_value382 = nil
-      reference383 = nil
-      set_value384 = nil
+      value387 = nil
 
 
       begin
-        # at line 795:2: ( primitive_value | reference | set_value )
-        alt_136 = 3
-        case look_136 = @input.peek( 1 )
-        when STRING, NUMBER, BOOLEAN, MULTILINE_STRING then alt_136 = 1
-        when ID then alt_136 = 2
-        when T__36 then alt_136 = 3
-        else
-          raise NoViableAlternative( "", 136, 0 )
-        end
-        case alt_136
-        when 1
-          root_0 = @adaptor.create_flat_list
+        root_0 = @adaptor.create_flat_list
 
 
-          # at line 795:4: primitive_value
-          @state.following.push( TOKENS_FOLLOWING_primitive_value_IN_value_2261 )
-          primitive_value382 = primitive_value
-          @state.following.pop
-          @adaptor.add_child( root_0, primitive_value382.tree )
-          # --> action
-          	return_value.val = ( primitive_value382.nil? ? nil : primitive_value382.val )	
-          # <-- action
-
-        when 2
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 797:4: reference
-          @state.following.push( TOKENS_FOLLOWING_reference_IN_value_2270 )
-          reference383 = reference
-          @state.following.pop
-          @adaptor.add_child( root_0, reference383.tree )
-          # --> action
-          	return_value.val = ( reference383.nil? ? nil : reference383.val )	
-          # <-- action
-
-        when 3
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 799:4: set_value
-          @state.following.push( TOKENS_FOLLOWING_set_value_IN_value_2279 )
-          set_value384 = set_value
-          @state.following.pop
-          @adaptor.add_child( root_0, set_value384.tree )
-          # --> action
-          	return_value.val = ( set_value384.nil? ? nil : set_value384.val )	
-          # <-- action
-
-        end# - - - - - - - rule clean up - - - - - - - -
+        # at line 805:4: value
+        @state.following.push( TOKENS_FOLLOWING_value_IN_set_item_2278 )
+        value387 = value
+        @state.following.pop
+        @adaptor.add_child( root_0, value387.tree )
+        # --> action
+        	@set.push(( value387.nil? ? nil : value387.val ))	
+        # <-- action
+        # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
 
@@ -8088,41 +8119,35 @@ module SFP
       return return_value
     end
 
-    PrimitiveValueReturnValue = define_return_scope :val
+    ValueReturnValue = define_return_scope :val
 
     # 
-    # parser rule primitive_value
+    # parser rule value
     # 
     # (in SFP.g)
-    # 803:1: primitive_value returns [val] : ( BOOLEAN | NUMBER | STRING | MULTILINE_STRING );
+    # 809:1: value returns [val] : ( primitive_value | reference | set_value );
     # 
-    def primitive_value
+    def value
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 49 )
-      return_value = PrimitiveValueReturnValue.new
+      return_value = ValueReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      __BOOLEAN385__ = nil
-      __NUMBER386__ = nil
-      __STRING387__ = nil
-      __MULTILINE_STRING388__ = nil
+      primitive_value388 = nil
+      reference389 = nil
+      set_value390 = nil
 
-      tree_for_BOOLEAN385 = nil
-      tree_for_NUMBER386 = nil
-      tree_for_STRING387 = nil
-      tree_for_MULTILINE_STRING388 = nil
 
       begin
-        # at line 804:2: ( BOOLEAN | NUMBER | STRING | MULTILINE_STRING )
-        alt_137 = 4
+        # at line 810:2: ( primitive_value | reference | set_value )
+        alt_137 = 3
         case look_137 = @input.peek( 1 )
-        when BOOLEAN then alt_137 = 1
-        when NUMBER then alt_137 = 2
-        when STRING then alt_137 = 3
-        when MULTILINE_STRING then alt_137 = 4
+        when STRING, NUMBER, BOOLEAN, MULTILINE_STRING then alt_137 = 1
+        when ID then alt_137 = 2
+        when T__36 then alt_137 = 3
         else
           raise NoViableAlternative( "", 137, 0 )
         end
@@ -8131,62 +8156,39 @@ module SFP
           root_0 = @adaptor.create_flat_list
 
 
-          # at line 804:4: BOOLEAN
-          __BOOLEAN385__ = match( BOOLEAN, TOKENS_FOLLOWING_BOOLEAN_IN_primitive_value_2298 )
-
-          tree_for_BOOLEAN385 = @adaptor.create_with_payload( __BOOLEAN385__ )
-          @adaptor.add_child( root_0, tree_for_BOOLEAN385 )
-
+          # at line 810:4: primitive_value
+          @state.following.push( TOKENS_FOLLOWING_primitive_value_IN_value_2297 )
+          primitive_value388 = primitive_value
+          @state.following.pop
+          @adaptor.add_child( root_0, primitive_value388.tree )
           # --> action
-
-          			if __BOOLEAN385__.text == 'true' or __BOOLEAN385__.text == 'on' or __BOOLEAN385__.text == 'yes'
-          				return_value.val = true
-          			else  # 'false', 'no', 'off'
-          				return_value.val = false
-          			end
-          		
+          	return_value.val = ( primitive_value388.nil? ? nil : primitive_value388.val )	
           # <-- action
 
         when 2
           root_0 = @adaptor.create_flat_list
 
 
-          # at line 812:4: NUMBER
-          __NUMBER386__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_primitive_value_2307 )
-
-          tree_for_NUMBER386 = @adaptor.create_with_payload( __NUMBER386__ )
-          @adaptor.add_child( root_0, tree_for_NUMBER386 )
-
+          # at line 812:4: reference
+          @state.following.push( TOKENS_FOLLOWING_reference_IN_value_2306 )
+          reference389 = reference
+          @state.following.pop
+          @adaptor.add_child( root_0, reference389.tree )
           # --> action
-          	return_value.val = __NUMBER386__.text.to_f	
+          	return_value.val = ( reference389.nil? ? nil : reference389.val )	
           # <-- action
 
         when 3
           root_0 = @adaptor.create_flat_list
 
 
-          # at line 814:4: STRING
-          __STRING387__ = match( STRING, TOKENS_FOLLOWING_STRING_IN_primitive_value_2316 )
-
-          tree_for_STRING387 = @adaptor.create_with_payload( __STRING387__ )
-          @adaptor.add_child( root_0, tree_for_STRING387 )
-
+          # at line 814:4: set_value
+          @state.following.push( TOKENS_FOLLOWING_set_value_IN_value_2315 )
+          set_value390 = set_value
+          @state.following.pop
+          @adaptor.add_child( root_0, set_value390.tree )
           # --> action
-          	return_value.val = __STRING387__.text[1,__STRING387__.text.length-2]	
-          # <-- action
-
-        when 4
-          root_0 = @adaptor.create_flat_list
-
-
-          # at line 816:4: MULTILINE_STRING
-          __MULTILINE_STRING388__ = match( MULTILINE_STRING, TOKENS_FOLLOWING_MULTILINE_STRING_IN_primitive_value_2325 )
-
-          tree_for_MULTILINE_STRING388 = @adaptor.create_with_payload( __MULTILINE_STRING388__ )
-          @adaptor.add_child( root_0, tree_for_MULTILINE_STRING388 )
-
-          # --> action
-          	return_value.val = __MULTILINE_STRING388__.text[2, __MULTILINE_STRING388__.text.length-2]	
+          	return_value.val = ( set_value390.nil? ? nil : set_value390.val )	
           # <-- action
 
         end# - - - - - - - rule clean up - - - - - - - -
@@ -8210,69 +8212,108 @@ module SFP
       return return_value
     end
 
-    PathReturnValue = define_return_scope 
+    PrimitiveValueReturnValue = define_return_scope :val
 
     # 
-    # parser rule path
+    # parser rule primitive_value
     # 
     # (in SFP.g)
-    # 820:1: path : ID ( '.' ID )* ;
+    # 818:1: primitive_value returns [val] : ( BOOLEAN | NUMBER | STRING | MULTILINE_STRING );
     # 
-    def path
+    def primitive_value
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 50 )
-      return_value = PathReturnValue.new
+      return_value = PrimitiveValueReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      __ID389__ = nil
-      char_literal390 = nil
-      __ID391__ = nil
+      __BOOLEAN391__ = nil
+      __NUMBER392__ = nil
+      __STRING393__ = nil
+      __MULTILINE_STRING394__ = nil
 
-      tree_for_ID389 = nil
-      tree_for_char_literal390 = nil
-      tree_for_ID391 = nil
+      tree_for_BOOLEAN391 = nil
+      tree_for_NUMBER392 = nil
+      tree_for_STRING393 = nil
+      tree_for_MULTILINE_STRING394 = nil
 
       begin
-        root_0 = @adaptor.create_flat_list
+        # at line 819:2: ( BOOLEAN | NUMBER | STRING | MULTILINE_STRING )
+        alt_138 = 4
+        case look_138 = @input.peek( 1 )
+        when BOOLEAN then alt_138 = 1
+        when NUMBER then alt_138 = 2
+        when STRING then alt_138 = 3
+        when MULTILINE_STRING then alt_138 = 4
+        else
+          raise NoViableAlternative( "", 138, 0 )
+        end
+        case alt_138
+        when 1
+          root_0 = @adaptor.create_flat_list
 
 
-        # at line 821:4: ID ( '.' ID )*
-        __ID389__ = match( ID, TOKENS_FOLLOWING_ID_IN_path_2340 )
+          # at line 819:4: BOOLEAN
+          __BOOLEAN391__ = match( BOOLEAN, TOKENS_FOLLOWING_BOOLEAN_IN_primitive_value_2334 )
 
-        tree_for_ID389 = @adaptor.create_with_payload( __ID389__ )
-        @adaptor.add_child( root_0, tree_for_ID389 )
+          tree_for_BOOLEAN391 = @adaptor.create_with_payload( __BOOLEAN391__ )
+          @adaptor.add_child( root_0, tree_for_BOOLEAN391 )
 
-        # at line 821:6: ( '.' ID )*
-        while true # decision 138
-          alt_138 = 2
-          look_138_0 = @input.peek( 1 )
+          # --> action
 
-          if ( look_138_0 == T__68 )
-            alt_138 = 1
+          			if __BOOLEAN391__.text == 'true' or __BOOLEAN391__.text == 'on' or __BOOLEAN391__.text == 'yes'
+          				return_value.val = true
+          			else  # 'false', 'no', 'off'
+          				return_value.val = false
+          			end
+          		
+          # <-- action
 
-          end
-          case alt_138
-          when 1
-            # at line 821:7: '.' ID
-            char_literal390 = match( T__68, TOKENS_FOLLOWING_T__68_IN_path_2342 )
-
-            tree_for_char_literal390 = @adaptor.create_with_payload( char_literal390 )
-            @adaptor.add_child( root_0, tree_for_char_literal390 )
-
-            __ID391__ = match( ID, TOKENS_FOLLOWING_ID_IN_path_2343 )
-
-            tree_for_ID391 = @adaptor.create_with_payload( __ID391__ )
-            @adaptor.add_child( root_0, tree_for_ID391 )
+        when 2
+          root_0 = @adaptor.create_flat_list
 
 
-          else
-            break # out of loop for decision 138
-          end
-        end # loop for decision 138
-        # - - - - - - - rule clean up - - - - - - - -
+          # at line 827:4: NUMBER
+          __NUMBER392__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_primitive_value_2343 )
+
+          tree_for_NUMBER392 = @adaptor.create_with_payload( __NUMBER392__ )
+          @adaptor.add_child( root_0, tree_for_NUMBER392 )
+
+          # --> action
+          	return_value.val = __NUMBER392__.text.to_f	
+          # <-- action
+
+        when 3
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 829:4: STRING
+          __STRING393__ = match( STRING, TOKENS_FOLLOWING_STRING_IN_primitive_value_2352 )
+
+          tree_for_STRING393 = @adaptor.create_with_payload( __STRING393__ )
+          @adaptor.add_child( root_0, tree_for_STRING393 )
+
+          # --> action
+          	return_value.val = __STRING393__.text[1,__STRING393__.text.length-2]	
+          # <-- action
+
+        when 4
+          root_0 = @adaptor.create_flat_list
+
+
+          # at line 831:4: MULTILINE_STRING
+          __MULTILINE_STRING394__ = match( MULTILINE_STRING, TOKENS_FOLLOWING_MULTILINE_STRING_IN_primitive_value_2361 )
+
+          tree_for_MULTILINE_STRING394 = @adaptor.create_with_payload( __MULTILINE_STRING394__ )
+          @adaptor.add_child( root_0, tree_for_MULTILINE_STRING394 )
+
+          # --> action
+          	return_value.val = __MULTILINE_STRING394__.text[2, __MULTILINE_STRING394__.text.length-2]	
+          # <-- action
+
+        end# - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
 
@@ -8293,59 +8334,63 @@ module SFP
       return return_value
     end
 
-    PathWithIndexReturnValue = define_return_scope 
+    PathReturnValue = define_return_scope 
 
     # 
-    # parser rule path_with_index
+    # parser rule path
     # 
     # (in SFP.g)
-    # 824:1: path_with_index : id_ref ( '.' id_ref )* ;
+    # 835:1: path : ID ( '.' ID )* ;
     # 
-    def path_with_index
+    def path
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 51 )
-      return_value = PathWithIndexReturnValue.new
+      return_value = PathReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      char_literal393 = nil
-      id_ref392 = nil
-      id_ref394 = nil
+      __ID395__ = nil
+      char_literal396 = nil
+      __ID397__ = nil
 
-      tree_for_char_literal393 = nil
+      tree_for_ID395 = nil
+      tree_for_char_literal396 = nil
+      tree_for_ID397 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 825:4: id_ref ( '.' id_ref )*
-        @state.following.push( TOKENS_FOLLOWING_id_ref_IN_path_with_index_2356 )
-        id_ref392 = id_ref
-        @state.following.pop
-        @adaptor.add_child( root_0, id_ref392.tree )
-        # at line 825:10: ( '.' id_ref )*
+        # at line 836:4: ID ( '.' ID )*
+        __ID395__ = match( ID, TOKENS_FOLLOWING_ID_IN_path_2376 )
+
+        tree_for_ID395 = @adaptor.create_with_payload( __ID395__ )
+        @adaptor.add_child( root_0, tree_for_ID395 )
+
+        # at line 836:6: ( '.' ID )*
         while true # decision 139
           alt_139 = 2
           look_139_0 = @input.peek( 1 )
 
-          if ( look_139_0 == T__68 )
+          if ( look_139_0 == T__66 )
             alt_139 = 1
 
           end
           case alt_139
           when 1
-            # at line 825:11: '.' id_ref
-            char_literal393 = match( T__68, TOKENS_FOLLOWING_T__68_IN_path_with_index_2358 )
+            # at line 836:7: '.' ID
+            char_literal396 = match( T__66, TOKENS_FOLLOWING_T__66_IN_path_2378 )
 
-            tree_for_char_literal393 = @adaptor.create_with_payload( char_literal393 )
-            @adaptor.add_child( root_0, tree_for_char_literal393 )
+            tree_for_char_literal396 = @adaptor.create_with_payload( char_literal396 )
+            @adaptor.add_child( root_0, tree_for_char_literal396 )
 
-            @state.following.push( TOKENS_FOLLOWING_id_ref_IN_path_with_index_2359 )
-            id_ref394 = id_ref
-            @state.following.pop
-            @adaptor.add_child( root_0, id_ref394.tree )
+            __ID397__ = match( ID, TOKENS_FOLLOWING_ID_IN_path_2379 )
+
+            tree_for_ID397 = @adaptor.create_with_payload( __ID397__ )
+            @adaptor.add_child( root_0, tree_for_ID397 )
+
 
           else
             break # out of loop for decision 139
@@ -8372,70 +8417,64 @@ module SFP
       return return_value
     end
 
-    IdRefReturnValue = define_return_scope 
+    PathWithIndexReturnValue = define_return_scope 
 
     # 
-    # parser rule id_ref
+    # parser rule path_with_index
     # 
     # (in SFP.g)
-    # 828:1: id_ref : ID ( '[' NUMBER ']' )? ;
+    # 839:1: path_with_index : id_ref ( '.' id_ref )* ;
     # 
-    def id_ref
+    def path_with_index
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 52 )
-      return_value = IdRefReturnValue.new
+      return_value = PathWithIndexReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      __ID395__ = nil
-      char_literal396 = nil
-      __NUMBER397__ = nil
-      char_literal398 = nil
+      char_literal399 = nil
+      id_ref398 = nil
+      id_ref400 = nil
 
-      tree_for_ID395 = nil
-      tree_for_char_literal396 = nil
-      tree_for_NUMBER397 = nil
-      tree_for_char_literal398 = nil
+      tree_for_char_literal399 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 829:4: ID ( '[' NUMBER ']' )?
-        __ID395__ = match( ID, TOKENS_FOLLOWING_ID_IN_id_ref_2372 )
+        # at line 840:4: id_ref ( '.' id_ref )*
+        @state.following.push( TOKENS_FOLLOWING_id_ref_IN_path_with_index_2392 )
+        id_ref398 = id_ref
+        @state.following.pop
+        @adaptor.add_child( root_0, id_ref398.tree )
+        # at line 840:10: ( '.' id_ref )*
+        while true # decision 140
+          alt_140 = 2
+          look_140_0 = @input.peek( 1 )
 
-        tree_for_ID395 = @adaptor.create_with_payload( __ID395__ )
-        @adaptor.add_child( root_0, tree_for_ID395 )
+          if ( look_140_0 == T__66 )
+            alt_140 = 1
 
-        # at line 829:6: ( '[' NUMBER ']' )?
-        alt_140 = 2
-        look_140_0 = @input.peek( 1 )
+          end
+          case alt_140
+          when 1
+            # at line 840:11: '.' id_ref
+            char_literal399 = match( T__66, TOKENS_FOLLOWING_T__66_IN_path_with_index_2394 )
 
-        if ( look_140_0 == T__26 )
-          alt_140 = 1
-        end
-        case alt_140
-        when 1
-          # at line 829:7: '[' NUMBER ']'
-          char_literal396 = match( T__26, TOKENS_FOLLOWING_T__26_IN_id_ref_2374 )
+            tree_for_char_literal399 = @adaptor.create_with_payload( char_literal399 )
+            @adaptor.add_child( root_0, tree_for_char_literal399 )
 
-          tree_for_char_literal396 = @adaptor.create_with_payload( char_literal396 )
-          @adaptor.add_child( root_0, tree_for_char_literal396 )
+            @state.following.push( TOKENS_FOLLOWING_id_ref_IN_path_with_index_2395 )
+            id_ref400 = id_ref
+            @state.following.pop
+            @adaptor.add_child( root_0, id_ref400.tree )
 
-          __NUMBER397__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_id_ref_2376 )
-
-          tree_for_NUMBER397 = @adaptor.create_with_payload( __NUMBER397__ )
-          @adaptor.add_child( root_0, tree_for_NUMBER397 )
-
-          char_literal398 = match( T__27, TOKENS_FOLLOWING_T__27_IN_id_ref_2378 )
-
-          tree_for_char_literal398 = @adaptor.create_with_payload( char_literal398 )
-          @adaptor.add_child( root_0, tree_for_char_literal398 )
-
-
-        end
+          else
+            break # out of loop for decision 140
+          end
+        end # loop for decision 140
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
@@ -8457,38 +8496,70 @@ module SFP
       return return_value
     end
 
-    ReferenceReturnValue = define_return_scope :val
+    IdRefReturnValue = define_return_scope 
 
     # 
-    # parser rule reference
+    # parser rule id_ref
     # 
     # (in SFP.g)
-    # 832:1: reference returns [val] : path_with_index ;
+    # 843:1: id_ref : ID ( '[' NUMBER ']' )? ;
     # 
-    def reference
+    def id_ref
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 53 )
-      return_value = ReferenceReturnValue.new
+      return_value = IdRefReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      path_with_index399 = nil
+      __ID401__ = nil
+      char_literal402 = nil
+      __NUMBER403__ = nil
+      char_literal404 = nil
 
+      tree_for_ID401 = nil
+      tree_for_char_literal402 = nil
+      tree_for_NUMBER403 = nil
+      tree_for_char_literal404 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 833:4: path_with_index
-        @state.following.push( TOKENS_FOLLOWING_path_with_index_IN_reference_2395 )
-        path_with_index399 = path_with_index
-        @state.following.pop
-        @adaptor.add_child( root_0, path_with_index399.tree )
-        # --> action
-        	return_value.val = self.to_ref(( path_with_index399 && @input.to_s( path_with_index399.start, path_with_index399.stop ) ))	
-        # <-- action
+        # at line 844:4: ID ( '[' NUMBER ']' )?
+        __ID401__ = match( ID, TOKENS_FOLLOWING_ID_IN_id_ref_2408 )
+
+        tree_for_ID401 = @adaptor.create_with_payload( __ID401__ )
+        @adaptor.add_child( root_0, tree_for_ID401 )
+
+        # at line 844:6: ( '[' NUMBER ']' )?
+        alt_141 = 2
+        look_141_0 = @input.peek( 1 )
+
+        if ( look_141_0 == T__26 )
+          alt_141 = 1
+        end
+        case alt_141
+        when 1
+          # at line 844:7: '[' NUMBER ']'
+          char_literal402 = match( T__26, TOKENS_FOLLOWING_T__26_IN_id_ref_2410 )
+
+          tree_for_char_literal402 = @adaptor.create_with_payload( char_literal402 )
+          @adaptor.add_child( root_0, tree_for_char_literal402 )
+
+          __NUMBER403__ = match( NUMBER, TOKENS_FOLLOWING_NUMBER_IN_id_ref_2412 )
+
+          tree_for_NUMBER403 = @adaptor.create_with_payload( __NUMBER403__ )
+          @adaptor.add_child( root_0, tree_for_NUMBER403 )
+
+          char_literal404 = match( T__27, TOKENS_FOLLOWING_T__27_IN_id_ref_2414 )
+
+          tree_for_char_literal404 = @adaptor.create_with_payload( char_literal404 )
+          @adaptor.add_child( root_0, tree_for_char_literal404 )
+
+
+        end
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
@@ -8510,48 +8581,37 @@ module SFP
       return return_value
     end
 
-    ReferenceTypeReturnValue = define_return_scope :val
+    ReferenceReturnValue = define_return_scope :val
 
     # 
-    # parser rule reference_type
+    # parser rule reference
     # 
     # (in SFP.g)
-    # 837:1: reference_type returns [val] : 'isref' path ;
+    # 847:1: reference returns [val] : path_with_index ;
     # 
-    def reference_type
+    def reference
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 54 )
-      return_value = ReferenceTypeReturnValue.new
+      return_value = ReferenceReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      string_literal400 = nil
-      path401 = nil
+      path_with_index405 = nil
 
-      tree_for_string_literal400 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 838:4: 'isref' path
-        string_literal400 = match( T__69, TOKENS_FOLLOWING_T__69_IN_reference_type_2414 )
-
-        tree_for_string_literal400 = @adaptor.create_with_payload( string_literal400 )
-        @adaptor.add_child( root_0, tree_for_string_literal400 )
-
-        @state.following.push( TOKENS_FOLLOWING_path_IN_reference_type_2416 )
-        path401 = path
+        # at line 848:4: path_with_index
+        @state.following.push( TOKENS_FOLLOWING_path_with_index_IN_reference_2431 )
+        path_with_index405 = path_with_index
         @state.following.pop
-        @adaptor.add_child( root_0, path401.tree )
+        @adaptor.add_child( root_0, path_with_index405.tree )
         # --> action
-
-        			return_value.val = { '_context' => 'null',
-        				'_isa' => self.to_ref(( path401 && @input.to_s( path401.start, path401.stop ) ))
-        			}
-        		
+        	return_value.val = self.to_ref(( path_with_index405 && @input.to_s( path_with_index405.start, path_with_index405.stop ) ))	
         # <-- action
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
@@ -8574,43 +8634,49 @@ module SFP
       return return_value
     end
 
-    EqualsOpReturnValue = define_return_scope 
+    ReferenceTypeReturnValue = define_return_scope :val
 
     # 
-    # parser rule equals_op
+    # parser rule reference_type
     # 
     # (in SFP.g)
-    # 846:1: equals_op : ( '=' | 'is' );
+    # 852:1: reference_type returns [val] : 'isref' path ;
     # 
-    def equals_op
+    def reference_type
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 55 )
-      return_value = EqualsOpReturnValue.new
+      return_value = ReferenceTypeReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      set402 = nil
+      string_literal406 = nil
+      path407 = nil
 
-      tree_for_set402 = nil
+      tree_for_string_literal406 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 
-        set402 = @input.look
-        if @input.peek( 1 ).between?( T__58, T__59 )
-          @input.consume
-          @adaptor.add_child( root_0, @adaptor.create_with_payload( set402 ) )
-          @state.error_recovery = false
-        else
-          mse = MismatchedSet( nil )
-          raise mse
-        end
+        # at line 853:4: 'isref' path
+        string_literal406 = match( T__67, TOKENS_FOLLOWING_T__67_IN_reference_type_2450 )
 
+        tree_for_string_literal406 = @adaptor.create_with_payload( string_literal406 )
+        @adaptor.add_child( root_0, tree_for_string_literal406 )
 
+        @state.following.push( TOKENS_FOLLOWING_path_IN_reference_type_2452 )
+        path407 = path
+        @state.following.pop
+        @adaptor.add_child( root_0, path407.tree )
+        # --> action
+
+        			return_value.val = { '_context' => 'null',
+        				'_isa' => self.to_ref(( path407 && @input.to_s( path407.start, path407.stop ) ))
+        			}
+        		
+        # <-- action
         # - - - - - - - rule clean up - - - - - - - -
         return_value.stop = @input.look( -1 )
 
@@ -8632,36 +8698,36 @@ module SFP
       return return_value
     end
 
-    NotEqualsOpReturnValue = define_return_scope 
+    EqualsOpReturnValue = define_return_scope 
 
     # 
-    # parser rule not_equals_op
+    # parser rule equals_op
     # 
     # (in SFP.g)
-    # 851:1: not_equals_op : ( '!=' | 'isnt' );
+    # 861:1: equals_op : ( '=' | 'is' );
     # 
-    def not_equals_op
+    def equals_op
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 56 )
-      return_value = NotEqualsOpReturnValue.new
+      return_value = EqualsOpReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      set403 = nil
+      set408 = nil
 
-      tree_for_set403 = nil
+      tree_for_set408 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
         # at line 
-        set403 = @input.look
-        if @input.peek(1) == T__61 || @input.peek(1) == T__70
+        set408 = @input.look
+        if @input.peek(1) == T__55 || @input.peek(1) == T__57
           @input.consume
-          @adaptor.add_child( root_0, @adaptor.create_with_payload( set403 ) )
+          @adaptor.add_child( root_0, @adaptor.create_with_payload( set408 ) )
           @state.error_recovery = false
         else
           mse = MismatchedSet( nil )
@@ -8690,36 +8756,36 @@ module SFP
       return return_value
     end
 
-    BinaryOpReturnValue = define_return_scope 
+    NotEqualsOpReturnValue = define_return_scope 
 
     # 
-    # parser rule binary_op
+    # parser rule not_equals_op
     # 
     # (in SFP.g)
-    # 856:1: binary_op : ( '+=' | '-=' | '*=' | '/=' );
+    # 866:1: not_equals_op : ( '!=' | 'isnt' );
     # 
-    def binary_op
+    def not_equals_op
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 57 )
-      return_value = BinaryOpReturnValue.new
+      return_value = NotEqualsOpReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      set404 = nil
+      set409 = nil
 
-      tree_for_set404 = nil
+      tree_for_set409 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
         # at line 
-        set404 = @input.look
-        if @input.peek( 1 ).between?( T__71, T__74 )
+        set409 = @input.look
+        if @input.peek(1) == T__59 || @input.peek(1) == T__68
           @input.consume
-          @adaptor.add_child( root_0, @adaptor.create_with_payload( set404 ) )
+          @adaptor.add_child( root_0, @adaptor.create_with_payload( set409 ) )
           @state.error_recovery = false
         else
           mse = MismatchedSet( nil )
@@ -8748,36 +8814,36 @@ module SFP
       return return_value
     end
 
-    BinaryCompReturnValue = define_return_scope 
+    BinaryOpReturnValue = define_return_scope 
 
     # 
-    # parser rule binary_comp
+    # parser rule binary_op
     # 
     # (in SFP.g)
-    # 863:1: binary_comp : ( '>' | '>=' | '<' | '<=' );
+    # 871:1: binary_op : ( '+=' | '-=' | '*=' | '/=' );
     # 
-    def binary_comp
+    def binary_op
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 58 )
-      return_value = BinaryCompReturnValue.new
+      return_value = BinaryOpReturnValue.new
 
       # $rule.start = the first token seen before matching
       return_value.start = @input.look
 
       root_0 = nil
-      set405 = nil
+      set410 = nil
 
-      tree_for_set405 = nil
+      tree_for_set410 = nil
 
       begin
         root_0 = @adaptor.create_flat_list
 
 
         # at line 
-        set405 = @input.look
-        if @input.peek( 1 ).between?( T__75, T__78 )
+        set410 = @input.look
+        if @input.peek( 1 ).between?( T__69, T__72 )
           @input.consume
-          @adaptor.add_child( root_0, @adaptor.create_with_payload( set405 ) )
+          @adaptor.add_child( root_0, @adaptor.create_with_payload( set410 ) )
           @state.error_recovery = false
         else
           mse = MismatchedSet( nil )
@@ -8800,6 +8866,64 @@ module SFP
       ensure
         # -> uncomment the next line to manually enable rule tracing
         # trace_out( __method__, 58 )
+
+      end
+      
+      return return_value
+    end
+
+    BinaryCompReturnValue = define_return_scope 
+
+    # 
+    # parser rule binary_comp
+    # 
+    # (in SFP.g)
+    # 878:1: binary_comp : ( '>' | '>=' | '<' | '<=' );
+    # 
+    def binary_comp
+      # -> uncomment the next line to manually enable rule tracing
+      # trace_in( __method__, 59 )
+      return_value = BinaryCompReturnValue.new
+
+      # $rule.start = the first token seen before matching
+      return_value.start = @input.look
+
+      root_0 = nil
+      set411 = nil
+
+      tree_for_set411 = nil
+
+      begin
+        root_0 = @adaptor.create_flat_list
+
+
+        # at line 
+        set411 = @input.look
+        if @input.peek( 1 ).between?( T__73, T__76 )
+          @input.consume
+          @adaptor.add_child( root_0, @adaptor.create_with_payload( set411 ) )
+          @state.error_recovery = false
+        else
+          mse = MismatchedSet( nil )
+          raise mse
+        end
+
+
+        # - - - - - - - rule clean up - - - - - - - -
+        return_value.stop = @input.look( -1 )
+
+
+        return_value.tree = @adaptor.rule_post_processing( root_0 )
+        @adaptor.set_token_boundaries( return_value.tree, return_value.start, return_value.stop )
+
+      rescue ANTLR3::Error::RecognitionError => re
+        report_error(re)
+        recover(re)
+        return_value.tree = @adaptor.create_error_node( @input, return_value.start, @input.look(-1), re )
+
+      ensure
+        # -> uncomment the next line to manually enable rule tracing
+        # trace_out( __method__, 59 )
 
       end
       
@@ -8872,21 +8996,21 @@ module SFP
       EOT = unpack( 8, -1 )
       EOF = unpack( 8, -1 )
       MIN = unpack( 1, 6, 1, 4, 3, -1, 1, 6, 1, -1, 1, 4 )
-      MAX = unpack( 1, 63, 1, 78, 3, -1, 1, 6, 1, -1, 1, 78 )
+      MAX = unpack( 1, 61, 1, 76, 3, -1, 1, 6, 1, -1, 1, 76 )
       ACCEPT = unpack( 2, -1, 1, 1, 1, 3, 1, 4, 1, -1, 1, 2, 1, -1 )
       SPECIAL = unpack( 8, -1 )
       TRANSITION = [
-        unpack( 1, 1, 21, -1, 1, 2, 24, -1, 1, 3, 1, -1, 3, 4, 5, -1, 1, 
+        unpack( 1, 1, 21, -1, 1, 2, 21, -1, 1, 3, 1, -1, 3, 4, 6, -1, 1, 
                 2 ),
-        unpack( 1, 6, 15, -1, 1, 6, 5, -1, 1, 2, 31, -1, 5, 2, 5, -1, 1, 
-                 5, 1, -1, 1, 2, 4, -1, 4, 2 ),
+        unpack( 1, 6, 15, -1, 1, 6, 5, -1, 1, 2, 28, -1, 1, 2, 1, -1, 4, 
+                 2, 5, -1, 1, 5, 1, -1, 1, 2, 4, -1, 4, 2 ),
         unpack(  ),
         unpack(  ),
         unpack(  ),
         unpack( 1, 7 ),
         unpack(  ),
-        unpack( 1, 6, 15, -1, 1, 6, 5, -1, 1, 2, 31, -1, 5, 2, 5, -1, 1, 
-                 5, 1, -1, 1, 2, 4, -1, 4, 2 )
+        unpack( 1, 6, 15, -1, 1, 6, 5, -1, 1, 2, 28, -1, 1, 2, 1, -1, 4, 
+                 2, 5, -1, 1, 5, 1, -1, 1, 2, 4, -1, 4, 2 )
       ].freeze
       
       ( 0 ... MIN.length ).zip( MIN, MAX ) do | i, a, z |
@@ -8908,19 +9032,19 @@ module SFP
       EOT = unpack( 7, -1 )
       EOF = unpack( 7, -1 )
       MIN = unpack( 1, 6, 1, 4, 2, -1, 1, 6, 1, -1, 1, 4 )
-      MAX = unpack( 1, 63, 1, 78, 2, -1, 1, 6, 1, -1, 1, 78 )
+      MAX = unpack( 1, 61, 1, 76, 2, -1, 1, 6, 1, -1, 1, 76 )
       ACCEPT = unpack( 2, -1, 1, 1, 1, 3, 1, -1, 1, 2, 1, -1 )
       SPECIAL = unpack( 7, -1 )
       TRANSITION = [
-        unpack( 1, 1, 21, -1, 1, 2, 24, -1, 1, 3, 9, -1, 1, 2 ),
-        unpack( 1, 5, 15, -1, 1, 5, 5, -1, 1, 2, 31, -1, 5, 2, 5, -1, 1, 
-                 4, 1, -1, 1, 2, 4, -1, 4, 2 ),
+        unpack( 1, 1, 21, -1, 1, 2, 21, -1, 1, 3, 10, -1, 1, 2 ),
+        unpack( 1, 5, 15, -1, 1, 5, 5, -1, 1, 2, 28, -1, 1, 2, 1, -1, 4, 
+                 2, 5, -1, 1, 4, 1, -1, 1, 2, 4, -1, 4, 2 ),
         unpack(  ),
         unpack(  ),
         unpack( 1, 6 ),
         unpack(  ),
-        unpack( 1, 5, 15, -1, 1, 5, 5, -1, 1, 2, 31, -1, 5, 2, 5, -1, 1, 
-                 4, 1, -1, 1, 2, 4, -1, 4, 2 )
+        unpack( 1, 5, 15, -1, 1, 5, 5, -1, 1, 2, 28, -1, 1, 2, 1, -1, 4, 
+                 2, 5, -1, 1, 4, 1, -1, 1, 2, 4, -1, 4, 2 )
       ].freeze
       
       ( 0 ... MIN.length ).zip( MIN, MAX ) do | i, a, z |
@@ -8938,45 +9062,45 @@ module SFP
         __dfa_description__
       end
     end
-    class DFA123 < ANTLR3::DFA
+    class DFA124 < ANTLR3::DFA
       EOT = unpack( 23, -1 )
       EOF = unpack( 23, -1 )
       MIN = unpack( 1, 6, 1, 26, 2, -1, 1, 7, 1, 6, 3, 5, 1, -1, 1, 5, 2, 
-                    -1, 1, 27, 1, 26, 4, -1, 1, 58, 1, 7, 1, 27, 1, 58 )
-      MAX = unpack( 1, 63, 1, 78, 2, -1, 1, 7, 1, 6, 2, 60, 1, 36, 1, -1, 
-                    1, 36, 2, -1, 1, 27, 1, 78, 4, -1, 1, 78, 1, 7, 1, 27, 
-                    1, 78 )
+                    -1, 1, 27, 1, 26, 4, -1, 1, 55, 1, 7, 1, 27, 1, 55 )
+      MAX = unpack( 1, 61, 1, 76, 2, -1, 1, 7, 1, 6, 2, 58, 1, 36, 1, -1, 
+                    1, 36, 2, -1, 1, 27, 1, 76, 4, -1, 1, 76, 1, 7, 1, 27, 
+                    1, 76 )
       ACCEPT = unpack( 2, -1, 1, 5, 1, 9, 5, -1, 1, 6, 1, -1, 1, 7, 1, 8, 
                        2, -1, 1, 1, 1, 2, 1, 3, 1, 4, 4, -1 )
       SPECIAL = unpack( 23, -1 )
       TRANSITION = [
-        unpack( 1, 1, 21, -1, 1, 2, 34, -1, 1, 3 ),
-        unpack( 1, 4, 31, -1, 1, 8, 1, 6, 1, 9, 1, 7, 1, 11, 5, -1, 1, 
-                 5, 1, -1, 1, 10, 4, -1, 4, 12 ),
+        unpack( 1, 1, 21, -1, 1, 2, 32, -1, 1, 3 ),
+        unpack( 1, 4, 28, -1, 1, 8, 1, -1, 1, 6, 1, 9, 1, 7, 1, 11, 5, 
+                 -1, 1, 5, 1, -1, 1, 10, 4, -1, 4, 12 ),
         unpack(  ),
         unpack(  ),
         unpack( 1, 13 ),
         unpack( 1, 14 ),
-        unpack( 3, 15, 1, 16, 2, 15, 25, -1, 1, 15, 23, -1, 1, 9 ),
-        unpack( 3, 17, 1, 18, 2, 17, 25, -1, 1, 17, 23, -1, 1, 11 ),
+        unpack( 3, 15, 1, 16, 2, 15, 25, -1, 1, 15, 21, -1, 1, 9 ),
+        unpack( 3, 17, 1, 18, 2, 17, 25, -1, 1, 17, 21, -1, 1, 11 ),
         unpack( 3, 15, 1, 16, 2, 15, 25, -1, 1, 15 ),
         unpack(  ),
         unpack( 3, 17, 1, 18, 2, 17, 25, -1, 1, 17 ),
         unpack(  ),
         unpack(  ),
         unpack( 1, 19 ),
-        unpack( 1, 20, 31, -1, 1, 8, 1, 6, 1, 9, 1, 7, 1, 11, 5, -1, 1, 
-                 5, 1, -1, 1, 10, 4, -1, 4, 12 ),
+        unpack( 1, 20, 28, -1, 1, 8, 1, -1, 1, 6, 1, 9, 1, 7, 1, 11, 5, 
+                 -1, 1, 5, 1, -1, 1, 10, 4, -1, 4, 12 ),
         unpack(  ),
         unpack(  ),
         unpack(  ),
         unpack(  ),
-        unpack( 1, 8, 1, 6, 1, 9, 1, 7, 1, 11, 5, -1, 1, 5, 1, -1, 1, 10, 
-                 4, -1, 4, 12 ),
+        unpack( 1, 8, 1, -1, 1, 6, 1, 9, 1, 7, 1, 11, 5, -1, 1, 5, 1, -1, 
+                 1, 10, 4, -1, 4, 12 ),
         unpack( 1, 21 ),
         unpack( 1, 22 ),
-        unpack( 1, 8, 1, 6, 1, 9, 1, 7, 1, 11, 5, -1, 1, 5, 1, -1, 1, 10, 
-                 4, -1, 4, 12 )
+        unpack( 1, 8, 1, -1, 1, 6, 1, 9, 1, 7, 1, 11, 5, -1, 1, 5, 1, -1, 
+                 1, 10, 4, -1, 4, 12 )
       ].freeze
       
       ( 0 ... MIN.length ).zip( MIN, MAX ) do | i, a, z |
@@ -8985,47 +9109,47 @@ module SFP
         end
       end
       
-      @decision = 123
+      @decision = 124
       
 
       def description
         <<-'__dfa_description__'.strip!
-          574:1: constraint_statement returns [key, val] : ( reference equals_op value | reference equals_op NULL | reference not_equals_op value | reference not_equals_op NULL | conditional_constraint | reference ( 'is' )? 'in' set_value | reference ( 'isnt' | 'not' ) 'in' set_value | reference binary_comp comp_value | total_constraint );
+          589:1: constraint_statement returns [key, val] : ( reference equals_op value | reference equals_op NULL | reference not_equals_op value | reference not_equals_op NULL | conditional_constraint | reference ( 'is' )? 'in' set_value | reference ( 'isnt' | 'not' ) 'in' set_value | reference binary_comp comp_value | total_constraint );
         __dfa_description__
       end
     end
-    class DFA134 < ANTLR3::DFA
+    class DFA135 < ANTLR3::DFA
       EOT = unpack( 19, -1 )
       EOF = unpack( 19, -1 )
       MIN = unpack( 1, 6, 1, 26, 1, -1, 1, 7, 1, 6, 1, 5, 1, -1, 1, 5, 2, 
-                    -1, 1, 27, 1, 26, 3, -1, 1, 58, 1, 7, 1, 27, 1, 58 )
-      MAX = unpack( 1, 65, 1, 74, 1, -1, 1, 7, 1, 6, 1, 64, 1, -1, 1, 36, 
-                    2, -1, 1, 27, 1, 74, 3, -1, 1, 74, 1, 7, 1, 27, 1, 74 )
+                    -1, 1, 27, 1, 26, 3, -1, 1, 55, 1, 7, 1, 27, 1, 55 )
+      MAX = unpack( 1, 63, 1, 72, 1, -1, 1, 7, 1, 6, 1, 62, 1, -1, 1, 36, 
+                    2, -1, 1, 27, 1, 72, 3, -1, 1, 72, 1, 7, 1, 27, 1, 72 )
       ACCEPT = unpack( 2, -1, 1, 5, 3, -1, 1, 3, 1, -1, 1, 6, 1, 7, 2, -1, 
                        1, 4, 1, 1, 1, 2, 4, -1 )
       SPECIAL = unpack( 19, -1 )
       TRANSITION = [
-        unpack( 1, 1, 58, -1, 1, 2 ),
-        unpack( 1, 3, 31, -1, 1, 7, 1, 5, 6, -1, 1, 8, 1, 9, 1, 4, 2, -1, 
-                 4, 6 ),
+        unpack( 1, 1, 56, -1, 1, 2 ),
+        unpack( 1, 3, 28, -1, 1, 7, 1, -1, 1, 5, 6, -1, 1, 8, 1, 9, 1, 
+                 4, 2, -1, 4, 6 ),
         unpack(  ),
         unpack( 1, 10 ),
         unpack( 1, 11 ),
-        unpack( 3, 13, 1, 14, 2, 13, 25, -1, 1, 13, 27, -1, 1, 12 ),
+        unpack( 3, 13, 1, 14, 2, 13, 25, -1, 1, 13, 25, -1, 1, 12 ),
         unpack(  ),
         unpack( 3, 13, 1, 14, 2, 13, 25, -1, 1, 13 ),
         unpack(  ),
         unpack(  ),
         unpack( 1, 15 ),
-        unpack( 1, 16, 31, -1, 1, 7, 1, 5, 6, -1, 1, 8, 1, 9, 1, 4, 2, 
-                 -1, 4, 6 ),
+        unpack( 1, 16, 28, -1, 1, 7, 1, -1, 1, 5, 6, -1, 1, 8, 1, 9, 1, 
+                 4, 2, -1, 4, 6 ),
         unpack(  ),
         unpack(  ),
         unpack(  ),
-        unpack( 1, 7, 1, 5, 6, -1, 1, 8, 1, 9, 1, 4, 2, -1, 4, 6 ),
+        unpack( 1, 7, 1, -1, 1, 5, 6, -1, 1, 8, 1, 9, 1, 4, 2, -1, 4, 6 ),
         unpack( 1, 17 ),
         unpack( 1, 18 ),
-        unpack( 1, 7, 1, 5, 6, -1, 1, 8, 1, 9, 1, 4, 2, -1, 4, 6 )
+        unpack( 1, 7, 1, -1, 1, 5, 6, -1, 1, 8, 1, 9, 1, 4, 2, -1, 4, 6 )
       ].freeze
       
       ( 0 ... MIN.length ).zip( MIN, MAX ) do | i, a, z |
@@ -9034,12 +9158,12 @@ module SFP
         end
       end
       
-      @decision = 134
+      @decision = 135
       
 
       def description
         <<-'__dfa_description__'.strip!
-          712:1: mutation_statement returns [key, val] : ( reference equals_op value | reference equals_op NULL | reference binary_op NUMBER | reference 'is' 'new' path ( object_body )? | 'delete' path | reference 'add(' value ')' | reference 'remove(' value ')' );
+          727:1: mutation_statement returns [key, val] : ( reference equals_op value | reference equals_op NULL | reference binary_op NUMBER | reference 'is' 'new' path ( object_body )? | 'delete' path | reference 'add(' value ')' | reference 'remove(' value ')' );
         __dfa_description__
       end
     end
@@ -9053,8 +9177,8 @@ module SFP
       @dfa67 = DFA67.new( self, 67 )
       @dfa77 = DFA77.new( self, 77 )
       @dfa105 = DFA105.new( self, 105 )
-      @dfa123 = DFA123.new( self, 123 )
-      @dfa134 = DFA134.new( self, 134 )
+      @dfa124 = DFA124.new( self, 124 )
+      @dfa135 = DFA135.new( self, 135 )
 
     end
     TOKENS_FOLLOWING_NL_IN_sfp_49 = Set[ 1, 4, 6, 18, 22, 23, 35, 40 ]
@@ -9096,11 +9220,11 @@ module SFP
     TOKENS_FOLLOWING_NL_IN_class_definition_270 = Set[ 1, 4 ]
     TOKENS_FOLLOWING_T__24_IN_extends_class_291 = Set[ 6 ]
     TOKENS_FOLLOWING_path_IN_extends_class_293 = Set[ 1 ]
-    TOKENS_FOLLOWING_ID_IN_attribute_308 = Set[ 58, 59 ]
+    TOKENS_FOLLOWING_ID_IN_attribute_308 = Set[ 55, 57 ]
     TOKENS_FOLLOWING_equals_op_IN_attribute_310 = Set[ 5, 6, 7, 9, 10, 36 ]
     TOKENS_FOLLOWING_value_IN_attribute_312 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_attribute_314 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_ID_IN_attribute_324 = Set[ 69 ]
+    TOKENS_FOLLOWING_ID_IN_attribute_324 = Set[ 67 ]
     TOKENS_FOLLOWING_reference_type_IN_attribute_326 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_attribute_328 = Set[ 1, 4 ]
     TOKENS_FOLLOWING_object_def_IN_attribute_338 = Set[ 4 ]
@@ -9119,7 +9243,7 @@ module SFP
     TOKENS_FOLLOWING_operator_IN_object_body_417 = Set[ 6, 21, 28, 31 ]
     TOKENS_FOLLOWING_T__21_IN_object_body_422 = Set[ 1 ]
     TOKENS_FOLLOWING_attribute_IN_object_attribute_433 = Set[ 1 ]
-    TOKENS_FOLLOWING_ID_IN_object_attribute_438 = Set[ 58, 59 ]
+    TOKENS_FOLLOWING_ID_IN_object_attribute_438 = Set[ 55, 57 ]
     TOKENS_FOLLOWING_equals_op_IN_object_attribute_440 = Set[ 8 ]
     TOKENS_FOLLOWING_NULL_IN_object_attribute_442 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_object_attribute_444 = Set[ 1, 4 ]
@@ -9128,19 +9252,19 @@ module SFP
     TOKENS_FOLLOWING_NL_IN_state_dependency_466 = Set[ 4, 29 ]
     TOKENS_FOLLOWING_T__29_IN_state_dependency_469 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_state_dependency_471 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_state_dependency_474 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_state_dependency_478 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_state_dependency_474 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_state_dependency_478 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_state_dependency_481 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_state_dependency_486 = Set[ 4, 30 ]
     TOKENS_FOLLOWING_NL_IN_state_dependency_492 = Set[ 4, 30 ]
     TOKENS_FOLLOWING_T__30_IN_state_dependency_495 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_state_dependency_497 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_state_dependency_500 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_state_dependency_504 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_state_dependency_500 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_state_dependency_504 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_state_dependency_507 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_state_dependency_511 = Set[ 4, 30 ]
     TOKENS_FOLLOWING_NL_IN_state_dependency_517 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_reference_IN_dep_effect_529 = Set[ 58, 59 ]
+    TOKENS_FOLLOWING_reference_IN_dep_effect_529 = Set[ 55, 57 ]
     TOKENS_FOLLOWING_equals_op_IN_dep_effect_531 = Set[ 5, 6, 7, 8, 9, 10, 36 ]
     TOKENS_FOLLOWING_value_IN_dep_effect_538 = Set[ 1 ]
     TOKENS_FOLLOWING_NULL_IN_dep_effect_544 = Set[ 1 ]
@@ -9148,7 +9272,7 @@ module SFP
     TOKENS_FOLLOWING_ID_IN_operator_562 = Set[ 20 ]
     TOKENS_FOLLOWING_T__20_IN_operator_564 = Set[ 4, 32, 33, 34 ]
     TOKENS_FOLLOWING_NL_IN_operator_566 = Set[ 4, 32, 33, 34 ]
-    TOKENS_FOLLOWING_T__32_IN_operator_577 = Set[ 58, 59 ]
+    TOKENS_FOLLOWING_T__32_IN_operator_577 = Set[ 55, 57 ]
     TOKENS_FOLLOWING_equals_op_IN_operator_579 = Set[ 7 ]
     TOKENS_FOLLOWING_NUMBER_IN_operator_581 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_operator_583 = Set[ 4, 32, 33, 34 ]
@@ -9156,7 +9280,7 @@ module SFP
     TOKENS_FOLLOWING_op_effects_IN_operator_605 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_operator_609 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_operator_611 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_ID_IN_op_param_627 = Set[ 58, 59 ]
+    TOKENS_FOLLOWING_ID_IN_op_param_627 = Set[ 55, 57 ]
     TOKENS_FOLLOWING_equals_op_IN_op_param_629 = Set[ 6 ]
     TOKENS_FOLLOWING_reference_IN_op_param_631 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_op_param_633 = Set[ 1, 4 ]
@@ -9172,7 +9296,7 @@ module SFP
     TOKENS_FOLLOWING_op_statement_IN_op_effects_698 = Set[ 6, 21 ]
     TOKENS_FOLLOWING_T__21_IN_op_effects_703 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_op_effects_705 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_reference_IN_op_statement_721 = Set[ 58, 59 ]
+    TOKENS_FOLLOWING_reference_IN_op_statement_721 = Set[ 55, 57 ]
     TOKENS_FOLLOWING_equals_op_IN_op_statement_723 = Set[ 5, 6, 7, 9, 10, 36 ]
     TOKENS_FOLLOWING_value_IN_op_statement_725 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_op_statement_727 = Set[ 1, 4 ]
@@ -9181,7 +9305,7 @@ module SFP
     TOKENS_FOLLOWING_parameters_IN_procedure_753 = Set[ 20 ]
     TOKENS_FOLLOWING_T__20_IN_procedure_756 = Set[ 4, 32, 33, 34 ]
     TOKENS_FOLLOWING_NL_IN_procedure_758 = Set[ 4, 32, 33, 34 ]
-    TOKENS_FOLLOWING_T__32_IN_procedure_766 = Set[ 58, 59 ]
+    TOKENS_FOLLOWING_T__32_IN_procedure_766 = Set[ 55, 57 ]
     TOKENS_FOLLOWING_equals_op_IN_procedure_768 = Set[ 7 ]
     TOKENS_FOLLOWING_NUMBER_IN_procedure_770 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_procedure_780 = Set[ 4, 32, 33, 34 ]
@@ -9194,20 +9318,20 @@ module SFP
     TOKENS_FOLLOWING_T__37_IN_parameters_818 = Set[ 6 ]
     TOKENS_FOLLOWING_parameter_IN_parameters_820 = Set[ 37, 38 ]
     TOKENS_FOLLOWING_T__38_IN_parameters_824 = Set[ 1 ]
-    TOKENS_FOLLOWING_ID_IN_parameter_836 = Set[ 69 ]
+    TOKENS_FOLLOWING_ID_IN_parameter_836 = Set[ 67 ]
     TOKENS_FOLLOWING_reference_type_IN_parameter_838 = Set[ 1 ]
     TOKENS_FOLLOWING_ID_IN_parameter_847 = Set[ 39 ]
     TOKENS_FOLLOWING_T__39_IN_parameter_849 = Set[ 6 ]
     TOKENS_FOLLOWING_path_IN_parameter_851 = Set[ 1 ]
     TOKENS_FOLLOWING_T__33_IN_conditions_866 = Set[ 20 ]
-    TOKENS_FOLLOWING_T__20_IN_conditions_874 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_conditions_876 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_conditions_874 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_conditions_876 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_conditions_879 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_conditions_881 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_conditions_883 = Set[ 1, 4 ]
     TOKENS_FOLLOWING_T__34_IN_effects_900 = Set[ 20 ]
-    TOKENS_FOLLOWING_T__20_IN_effects_908 = Set[ 4, 6, 21, 53, 65 ]
-    TOKENS_FOLLOWING_NL_IN_effects_910 = Set[ 4, 6, 21, 53, 65 ]
+    TOKENS_FOLLOWING_T__20_IN_effects_908 = Set[ 4, 6, 21, 50, 63 ]
+    TOKENS_FOLLOWING_NL_IN_effects_910 = Set[ 4, 6, 21, 50, 63 ]
     TOKENS_FOLLOWING_mutation_body_IN_effects_916 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_effects_921 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_effects_923 = Set[ 1, 4 ]
@@ -9226,8 +9350,8 @@ module SFP
     TOKENS_FOLLOWING_T__38_IN_trajectory_head_1009 = Set[ 1 ]
     TOKENS_FOLLOWING_trajectory_head_IN_trajectory_constraint_1024 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_trajectory_constraint_1026 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_trajectory_constraint_1035 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_trajectory_constraint_1037 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_trajectory_constraint_1035 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_trajectory_constraint_1037 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_trajectory_constraint_1040 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_trajectory_constraint_1042 = Set[ 4, 29 ]
     TOKENS_FOLLOWING_trajectory_constraint_tail_IN_trajectory_constraint_1046 = Set[ 4 ]
@@ -9235,16 +9359,16 @@ module SFP
     TOKENS_FOLLOWING_NL_IN_trajectory_constraint_tail_1065 = Set[ 4, 29 ]
     TOKENS_FOLLOWING_T__29_IN_trajectory_constraint_tail_1068 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_trajectory_constraint_tail_1070 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_trajectory_constraint_tail_1075 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_trajectory_constraint_tail_1077 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_trajectory_constraint_tail_1075 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_trajectory_constraint_tail_1077 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_trajectory_constraint_tail_1080 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_trajectory_constraint_tail_1082 = Set[ 1 ]
     TOKENS_FOLLOWING_T__40_IN_goal_constraint_1093 = Set[ 4, 20, 47 ]
     TOKENS_FOLLOWING_T__47_IN_goal_constraint_1095 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_goal_constraint_1098 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_goal_constraint_1107 = Set[ 4, 6, 21, 28, 48, 49, 50, 51, 52, 53, 55, 56, 57, 63 ]
-    TOKENS_FOLLOWING_NL_IN_goal_constraint_1109 = Set[ 4, 6, 21, 28, 48, 49, 50, 51, 52, 53, 55, 56, 57, 63 ]
-    TOKENS_FOLLOWING_goal_body_IN_goal_constraint_1112 = Set[ 6, 21, 28, 48, 49, 50, 51, 52, 53, 55, 56, 57, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_goal_constraint_1107 = Set[ 4, 6, 21, 28, 41, 42, 43, 48, 49, 50, 52, 53, 54, 61 ]
+    TOKENS_FOLLOWING_NL_IN_goal_constraint_1109 = Set[ 4, 6, 21, 28, 41, 42, 43, 48, 49, 50, 52, 53, 54, 61 ]
+    TOKENS_FOLLOWING_goal_body_IN_goal_constraint_1112 = Set[ 6, 21, 28, 41, 42, 43, 48, 49, 50, 52, 53, 54, 61 ]
     TOKENS_FOLLOWING_T__21_IN_goal_constraint_1115 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_goal_constraint_1117 = Set[ 1, 4 ]
     TOKENS_FOLLOWING_constraint_statement_IN_goal_body_1140 = Set[ 4 ]
@@ -9252,32 +9376,32 @@ module SFP
     TOKENS_FOLLOWING_constraint_iterator_IN_goal_body_1160 = Set[ 4 ]
     TOKENS_FOLLOWING_constraint_class_quantification_IN_goal_body_1167 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1176 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_T__48_IN_goal_body_1183 = Set[ 4, 20 ]
+    TOKENS_FOLLOWING_T__41_IN_goal_body_1183 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1185 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_goal_body_1194 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_goal_body_1196 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_goal_body_1194 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_goal_body_1196 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_goal_body_1199 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_goal_body_1201 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1203 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_T__49_IN_goal_body_1213 = Set[ 4, 20 ]
+    TOKENS_FOLLOWING_T__42_IN_goal_body_1213 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1215 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_goal_body_1224 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_goal_body_1226 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_goal_body_1224 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_goal_body_1226 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_goal_body_1229 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_goal_body_1231 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1233 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_T__50_IN_goal_body_1243 = Set[ 7 ]
+    TOKENS_FOLLOWING_T__43_IN_goal_body_1243 = Set[ 7 ]
     TOKENS_FOLLOWING_NUMBER_IN_goal_body_1245 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1247 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_goal_body_1256 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_goal_body_1258 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_goal_body_1256 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_goal_body_1258 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_goal_body_1261 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_goal_body_1263 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1265 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_T__51_IN_goal_body_1275 = Set[ 4, 20 ]
+    TOKENS_FOLLOWING_T__48_IN_goal_body_1275 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1277 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_goal_body_1286 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_goal_body_1288 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_goal_body_1286 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_goal_body_1288 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_goal_body_1291 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_goal_body_1293 = Set[ 4, 29, 43 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1295 = Set[ 4, 29, 43 ]
@@ -9285,179 +9409,185 @@ module SFP
     TOKENS_FOLLOWING_T__43_IN_goal_body_1313 = Set[ 7 ]
     TOKENS_FOLLOWING_NUMBER_IN_goal_body_1315 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1327 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_goal_body_1336 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_goal_body_1338 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_goal_body_1336 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_goal_body_1338 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_goal_body_1341 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_goal_body_1343 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1345 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_T__52_IN_goal_body_1359 = Set[ 4, 20 ]
+    TOKENS_FOLLOWING_T__49_IN_goal_body_1359 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1361 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_goal_body_1370 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_goal_body_1372 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_goal_body_1370 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_goal_body_1372 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_goal_body_1375 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_goal_body_1377 = Set[ 4, 29 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1379 = Set[ 4, 29 ]
     TOKENS_FOLLOWING_T__29_IN_goal_body_1388 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1390 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_goal_body_1399 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_goal_body_1401 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_goal_body_1399 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_goal_body_1401 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_goal_body_1404 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_goal_body_1406 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_goal_body_1408 = Set[ 1, 4 ]
-    TOKENS_FOLLOWING_T__20_IN_nested_constraint_1428 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_nested_constraint_1430 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_nested_constraint_1428 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_nested_constraint_1430 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_nested_constraint_1433 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_nested_constraint_1435 = Set[ 1 ]
     TOKENS_FOLLOWING_ID_IN_constraint_1446 = Set[ 47 ]
     TOKENS_FOLLOWING_T__47_IN_constraint_1448 = Set[ 20 ]
-    TOKENS_FOLLOWING_T__20_IN_constraint_1456 = Set[ 4, 6, 21, 28, 53, 63 ]
-    TOKENS_FOLLOWING_NL_IN_constraint_1458 = Set[ 4, 6, 21, 28, 53, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_constraint_1456 = Set[ 4, 6, 21, 28, 50, 61 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_1458 = Set[ 4, 6, 21, 28, 50, 61 ]
     TOKENS_FOLLOWING_constraint_body_IN_constraint_1461 = Set[ 21 ]
     TOKENS_FOLLOWING_T__21_IN_constraint_1463 = Set[ 4 ]
     TOKENS_FOLLOWING_NL_IN_constraint_1465 = Set[ 1, 4 ]
     TOKENS_FOLLOWING_constraint_statement_IN_constraint_body_1488 = Set[ 4 ]
     TOKENS_FOLLOWING_constraint_namespace_IN_constraint_body_1501 = Set[ 4 ]
     TOKENS_FOLLOWING_constraint_iterator_IN_constraint_body_1508 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_constraint_body_1517 = Set[ 1, 4, 6, 28, 53, 63 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_body_1517 = Set[ 1, 4, 6, 28, 50, 61 ]
     TOKENS_FOLLOWING_path_IN_constraint_namespace_1531 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_constraint_namespace_1533 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_constraint_namespace_1536 = Set[ 4, 6, 21, 28, 63 ]
-    TOKENS_FOLLOWING_NL_IN_constraint_namespace_1538 = Set[ 4, 6, 21, 28, 63 ]
+    TOKENS_FOLLOWING_T__20_IN_constraint_namespace_1536 = Set[ 4, 6, 21, 28, 61 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_namespace_1538 = Set[ 4, 6, 21, 28, 61 ]
     TOKENS_FOLLOWING_constraint_statement_IN_constraint_namespace_1542 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_constraint_namespace_1550 = Set[ 4, 6, 21, 28, 63 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_namespace_1550 = Set[ 4, 6, 21, 28, 61 ]
     TOKENS_FOLLOWING_T__21_IN_constraint_namespace_1555 = Set[ 1 ]
-    TOKENS_FOLLOWING_T__53_IN_constraint_iterator_1566 = Set[ 36 ]
+    TOKENS_FOLLOWING_T__50_IN_constraint_iterator_1566 = Set[ 36 ]
     TOKENS_FOLLOWING_T__36_IN_constraint_iterator_1568 = Set[ 6 ]
-    TOKENS_FOLLOWING_path_IN_constraint_iterator_1570 = Set[ 54 ]
-    TOKENS_FOLLOWING_T__54_IN_constraint_iterator_1572 = Set[ 6 ]
+    TOKENS_FOLLOWING_path_IN_constraint_iterator_1570 = Set[ 51 ]
+    TOKENS_FOLLOWING_T__51_IN_constraint_iterator_1572 = Set[ 6 ]
     TOKENS_FOLLOWING_ID_IN_constraint_iterator_1574 = Set[ 38 ]
     TOKENS_FOLLOWING_T__38_IN_constraint_iterator_1576 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_constraint_iterator_1578 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_T__20_IN_constraint_iterator_1581 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_constraint_iterator_1583 = Set[ 4, 6, 21, 28, 63 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_iterator_1583 = Set[ 4, 6, 21, 28, 61 ]
     TOKENS_FOLLOWING_constraint_statement_IN_constraint_iterator_1593 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_constraint_iterator_1601 = Set[ 4, 6, 21, 28, 63 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_iterator_1601 = Set[ 4, 6, 21, 28, 61 ]
     TOKENS_FOLLOWING_T__21_IN_constraint_iterator_1608 = Set[ 1 ]
     TOKENS_FOLLOWING_set_IN_quantification_keyword_0 = Set[ 1 ]
     TOKENS_FOLLOWING_quantification_keyword_IN_constraint_class_quantification_1644 = Set[ 36 ]
     TOKENS_FOLLOWING_T__36_IN_constraint_class_quantification_1646 = Set[ 6 ]
-    TOKENS_FOLLOWING_path_IN_constraint_class_quantification_1648 = Set[ 54 ]
-    TOKENS_FOLLOWING_T__54_IN_constraint_class_quantification_1650 = Set[ 6 ]
+    TOKENS_FOLLOWING_path_IN_constraint_class_quantification_1648 = Set[ 51 ]
+    TOKENS_FOLLOWING_T__51_IN_constraint_class_quantification_1650 = Set[ 6 ]
     TOKENS_FOLLOWING_ID_IN_constraint_class_quantification_1652 = Set[ 38 ]
-    TOKENS_FOLLOWING_T__38_IN_constraint_class_quantification_1654 = Set[ 4, 20, 58, 75, 76, 77, 78 ]
+    TOKENS_FOLLOWING_T__38_IN_constraint_class_quantification_1654 = Set[ 4, 20, 55, 73, 74, 75, 76 ]
     TOKENS_FOLLOWING_binary_comp_IN_constraint_class_quantification_1666 = Set[ 7 ]
-    TOKENS_FOLLOWING_T__58_IN_constraint_class_quantification_1679 = Set[ 7 ]
+    TOKENS_FOLLOWING_T__55_IN_constraint_class_quantification_1679 = Set[ 7 ]
     TOKENS_FOLLOWING_NUMBER_IN_constraint_class_quantification_1695 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_NL_IN_constraint_class_quantification_1709 = Set[ 4, 20 ]
     TOKENS_FOLLOWING_T__20_IN_constraint_class_quantification_1712 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_constraint_class_quantification_1714 = Set[ 4, 6, 21, 28, 63 ]
-    TOKENS_FOLLOWING_constraint_statement_IN_constraint_class_quantification_1720 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_constraint_class_quantification_1728 = Set[ 4, 6, 21, 28, 63 ]
-    TOKENS_FOLLOWING_T__21_IN_constraint_class_quantification_1733 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_constraint_statement_1756 = Set[ 58, 59 ]
-    TOKENS_FOLLOWING_equals_op_IN_constraint_statement_1758 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_value_IN_constraint_statement_1760 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_constraint_statement_1769 = Set[ 58, 59 ]
-    TOKENS_FOLLOWING_equals_op_IN_constraint_statement_1771 = Set[ 8 ]
-    TOKENS_FOLLOWING_NULL_IN_constraint_statement_1773 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_constraint_statement_1782 = Set[ 61, 70 ]
-    TOKENS_FOLLOWING_not_equals_op_IN_constraint_statement_1784 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_value_IN_constraint_statement_1786 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_constraint_statement_1795 = Set[ 61, 70 ]
-    TOKENS_FOLLOWING_not_equals_op_IN_constraint_statement_1797 = Set[ 8 ]
-    TOKENS_FOLLOWING_NULL_IN_constraint_statement_1799 = Set[ 1 ]
-    TOKENS_FOLLOWING_conditional_constraint_IN_constraint_statement_1808 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_constraint_statement_1817 = Set[ 59, 60 ]
-    TOKENS_FOLLOWING_T__59_IN_constraint_statement_1819 = Set[ 60 ]
-    TOKENS_FOLLOWING_T__60_IN_constraint_statement_1822 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_set_value_IN_constraint_statement_1824 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_constraint_statement_1833 = Set[ 61, 62 ]
-    TOKENS_FOLLOWING_set_IN_constraint_statement_1835 = Set[ 60 ]
-    TOKENS_FOLLOWING_T__60_IN_constraint_statement_1841 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_set_value_IN_constraint_statement_1843 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_constraint_statement_1852 = Set[ 75, 76, 77, 78 ]
-    TOKENS_FOLLOWING_binary_comp_IN_constraint_statement_1854 = Set[ 6, 7 ]
-    TOKENS_FOLLOWING_comp_value_IN_constraint_statement_1856 = Set[ 1 ]
-    TOKENS_FOLLOWING_total_constraint_IN_constraint_statement_1865 = Set[ 1 ]
-    TOKENS_FOLLOWING_T__63_IN_total_constraint_1876 = Set[ 6 ]
-    TOKENS_FOLLOWING_total_statement_IN_total_constraint_1878 = Set[ 38 ]
-    TOKENS_FOLLOWING_T__38_IN_total_constraint_1880 = Set[ 75, 76, 77, 78 ]
-    TOKENS_FOLLOWING_binary_comp_IN_total_constraint_1882 = Set[ 7 ]
-    TOKENS_FOLLOWING_NUMBER_IN_total_constraint_1884 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_total_statement_1895 = Set[ 58, 59 ]
-    TOKENS_FOLLOWING_equals_op_IN_total_statement_1897 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_value_IN_total_statement_1899 = Set[ 1 ]
-    TOKENS_FOLLOWING_NUMBER_IN_comp_value_1914 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_comp_value_1923 = Set[ 1 ]
-    TOKENS_FOLLOWING_T__28_IN_conditional_constraint_1942 = Set[ 6, 28, 63 ]
-    TOKENS_FOLLOWING_constraint_statement_IN_conditional_constraint_1950 = Set[ 4, 29 ]
-    TOKENS_FOLLOWING_NL_IN_conditional_constraint_1952 = Set[ 4, 29 ]
-    TOKENS_FOLLOWING_conditional_constraint_then_IN_conditional_constraint_1961 = Set[ 1 ]
-    TOKENS_FOLLOWING_T__29_IN_conditional_constraint_then_1976 = Set[ 6, 28, 63 ]
-    TOKENS_FOLLOWING_constraint_statement_IN_conditional_constraint_then_1978 = Set[ 1 ]
-    TOKENS_FOLLOWING_mutation_statement_IN_mutation_body_2000 = Set[ 4 ]
-    TOKENS_FOLLOWING_mutation_iterator_IN_mutation_body_2013 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_mutation_body_2022 = Set[ 1, 4, 6, 53, 65 ]
-    TOKENS_FOLLOWING_T__53_IN_mutation_iterator_2037 = Set[ 6 ]
-    TOKENS_FOLLOWING_path_IN_mutation_iterator_2039 = Set[ 54 ]
-    TOKENS_FOLLOWING_T__54_IN_mutation_iterator_2041 = Set[ 6 ]
-    TOKENS_FOLLOWING_ID_IN_mutation_iterator_2043 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_NL_IN_mutation_iterator_2045 = Set[ 4, 20 ]
-    TOKENS_FOLLOWING_T__20_IN_mutation_iterator_2048 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_mutation_iterator_2050 = Set[ 4, 6, 21, 65 ]
-    TOKENS_FOLLOWING_mutation_statement_IN_mutation_iterator_2060 = Set[ 4 ]
-    TOKENS_FOLLOWING_NL_IN_mutation_iterator_2068 = Set[ 4, 6, 21, 65 ]
-    TOKENS_FOLLOWING_T__21_IN_mutation_iterator_2075 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_mutation_statement_2094 = Set[ 58, 59 ]
-    TOKENS_FOLLOWING_equals_op_IN_mutation_statement_2096 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_value_IN_mutation_statement_2098 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_mutation_statement_2107 = Set[ 58, 59 ]
-    TOKENS_FOLLOWING_equals_op_IN_mutation_statement_2109 = Set[ 8 ]
-    TOKENS_FOLLOWING_NULL_IN_mutation_statement_2111 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_mutation_statement_2120 = Set[ 71, 72, 73, 74 ]
-    TOKENS_FOLLOWING_binary_op_IN_mutation_statement_2122 = Set[ 7 ]
-    TOKENS_FOLLOWING_NUMBER_IN_mutation_statement_2124 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_mutation_statement_2133 = Set[ 59 ]
-    TOKENS_FOLLOWING_T__59_IN_mutation_statement_2135 = Set[ 64 ]
-    TOKENS_FOLLOWING_T__64_IN_mutation_statement_2137 = Set[ 6 ]
-    TOKENS_FOLLOWING_path_IN_mutation_statement_2139 = Set[ 1, 20 ]
-    TOKENS_FOLLOWING_object_body_IN_mutation_statement_2147 = Set[ 1 ]
-    TOKENS_FOLLOWING_T__65_IN_mutation_statement_2157 = Set[ 6 ]
-    TOKENS_FOLLOWING_path_IN_mutation_statement_2159 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_mutation_statement_2168 = Set[ 66 ]
-    TOKENS_FOLLOWING_T__66_IN_mutation_statement_2170 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_value_IN_mutation_statement_2172 = Set[ 38 ]
-    TOKENS_FOLLOWING_T__38_IN_mutation_statement_2174 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_mutation_statement_2183 = Set[ 67 ]
-    TOKENS_FOLLOWING_T__67_IN_mutation_statement_2185 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_value_IN_mutation_statement_2187 = Set[ 38 ]
-    TOKENS_FOLLOWING_T__38_IN_mutation_statement_2189 = Set[ 1 ]
-    TOKENS_FOLLOWING_T__36_IN_set_value_2208 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_set_item_IN_set_value_2216 = Set[ 37, 38 ]
-    TOKENS_FOLLOWING_T__37_IN_set_value_2219 = Set[ 5, 6, 7, 9, 10, 36 ]
-    TOKENS_FOLLOWING_set_item_IN_set_value_2221 = Set[ 37, 38 ]
-    TOKENS_FOLLOWING_T__38_IN_set_value_2231 = Set[ 1 ]
-    TOKENS_FOLLOWING_value_IN_set_item_2242 = Set[ 1 ]
-    TOKENS_FOLLOWING_primitive_value_IN_value_2261 = Set[ 1 ]
-    TOKENS_FOLLOWING_reference_IN_value_2270 = Set[ 1 ]
-    TOKENS_FOLLOWING_set_value_IN_value_2279 = Set[ 1 ]
-    TOKENS_FOLLOWING_BOOLEAN_IN_primitive_value_2298 = Set[ 1 ]
-    TOKENS_FOLLOWING_NUMBER_IN_primitive_value_2307 = Set[ 1 ]
-    TOKENS_FOLLOWING_STRING_IN_primitive_value_2316 = Set[ 1 ]
-    TOKENS_FOLLOWING_MULTILINE_STRING_IN_primitive_value_2325 = Set[ 1 ]
-    TOKENS_FOLLOWING_ID_IN_path_2340 = Set[ 1, 68 ]
-    TOKENS_FOLLOWING_T__68_IN_path_2342 = Set[ 6 ]
-    TOKENS_FOLLOWING_ID_IN_path_2343 = Set[ 1, 68 ]
-    TOKENS_FOLLOWING_id_ref_IN_path_with_index_2356 = Set[ 1, 68 ]
-    TOKENS_FOLLOWING_T__68_IN_path_with_index_2358 = Set[ 6 ]
-    TOKENS_FOLLOWING_id_ref_IN_path_with_index_2359 = Set[ 1, 68 ]
-    TOKENS_FOLLOWING_ID_IN_id_ref_2372 = Set[ 1, 26 ]
-    TOKENS_FOLLOWING_T__26_IN_id_ref_2374 = Set[ 7 ]
-    TOKENS_FOLLOWING_NUMBER_IN_id_ref_2376 = Set[ 27 ]
-    TOKENS_FOLLOWING_T__27_IN_id_ref_2378 = Set[ 1 ]
-    TOKENS_FOLLOWING_path_with_index_IN_reference_2395 = Set[ 1 ]
-    TOKENS_FOLLOWING_T__69_IN_reference_type_2414 = Set[ 6 ]
-    TOKENS_FOLLOWING_path_IN_reference_type_2416 = Set[ 1 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_class_quantification_1714 = Set[ 4, 6, 21, 28, 56, 61 ]
+    TOKENS_FOLLOWING_constraint_statement_IN_constraint_class_quantification_1721 = Set[ 4 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_class_quantification_1731 = Set[ 4, 6, 21, 28, 56, 61 ]
+    TOKENS_FOLLOWING_constraint_different_IN_constraint_class_quantification_1738 = Set[ 6, 21, 28, 56, 61 ]
+    TOKENS_FOLLOWING_T__21_IN_constraint_class_quantification_1745 = Set[ 1 ]
+    TOKENS_FOLLOWING_T__56_IN_constraint_different_1764 = Set[ 36 ]
+    TOKENS_FOLLOWING_T__36_IN_constraint_different_1766 = Set[ 6 ]
+    TOKENS_FOLLOWING_path_IN_constraint_different_1768 = Set[ 38 ]
+    TOKENS_FOLLOWING_T__38_IN_constraint_different_1770 = Set[ 4 ]
+    TOKENS_FOLLOWING_NL_IN_constraint_different_1772 = Set[ 1, 4 ]
+    TOKENS_FOLLOWING_reference_IN_constraint_statement_1792 = Set[ 55, 57 ]
+    TOKENS_FOLLOWING_equals_op_IN_constraint_statement_1794 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_value_IN_constraint_statement_1796 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_constraint_statement_1805 = Set[ 55, 57 ]
+    TOKENS_FOLLOWING_equals_op_IN_constraint_statement_1807 = Set[ 8 ]
+    TOKENS_FOLLOWING_NULL_IN_constraint_statement_1809 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_constraint_statement_1818 = Set[ 59, 68 ]
+    TOKENS_FOLLOWING_not_equals_op_IN_constraint_statement_1820 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_value_IN_constraint_statement_1822 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_constraint_statement_1831 = Set[ 59, 68 ]
+    TOKENS_FOLLOWING_not_equals_op_IN_constraint_statement_1833 = Set[ 8 ]
+    TOKENS_FOLLOWING_NULL_IN_constraint_statement_1835 = Set[ 1 ]
+    TOKENS_FOLLOWING_conditional_constraint_IN_constraint_statement_1844 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_constraint_statement_1853 = Set[ 57, 58 ]
+    TOKENS_FOLLOWING_T__57_IN_constraint_statement_1855 = Set[ 58 ]
+    TOKENS_FOLLOWING_T__58_IN_constraint_statement_1858 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_set_value_IN_constraint_statement_1860 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_constraint_statement_1869 = Set[ 59, 60 ]
+    TOKENS_FOLLOWING_set_IN_constraint_statement_1871 = Set[ 58 ]
+    TOKENS_FOLLOWING_T__58_IN_constraint_statement_1877 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_set_value_IN_constraint_statement_1879 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_constraint_statement_1888 = Set[ 73, 74, 75, 76 ]
+    TOKENS_FOLLOWING_binary_comp_IN_constraint_statement_1890 = Set[ 6, 7 ]
+    TOKENS_FOLLOWING_comp_value_IN_constraint_statement_1892 = Set[ 1 ]
+    TOKENS_FOLLOWING_total_constraint_IN_constraint_statement_1901 = Set[ 1 ]
+    TOKENS_FOLLOWING_T__61_IN_total_constraint_1912 = Set[ 6 ]
+    TOKENS_FOLLOWING_total_statement_IN_total_constraint_1914 = Set[ 38 ]
+    TOKENS_FOLLOWING_T__38_IN_total_constraint_1916 = Set[ 73, 74, 75, 76 ]
+    TOKENS_FOLLOWING_binary_comp_IN_total_constraint_1918 = Set[ 7 ]
+    TOKENS_FOLLOWING_NUMBER_IN_total_constraint_1920 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_total_statement_1931 = Set[ 55, 57 ]
+    TOKENS_FOLLOWING_equals_op_IN_total_statement_1933 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_value_IN_total_statement_1935 = Set[ 1 ]
+    TOKENS_FOLLOWING_NUMBER_IN_comp_value_1950 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_comp_value_1959 = Set[ 1 ]
+    TOKENS_FOLLOWING_T__28_IN_conditional_constraint_1978 = Set[ 6, 28, 61 ]
+    TOKENS_FOLLOWING_constraint_statement_IN_conditional_constraint_1986 = Set[ 4, 29 ]
+    TOKENS_FOLLOWING_NL_IN_conditional_constraint_1988 = Set[ 4, 29 ]
+    TOKENS_FOLLOWING_conditional_constraint_then_IN_conditional_constraint_1997 = Set[ 1 ]
+    TOKENS_FOLLOWING_T__29_IN_conditional_constraint_then_2012 = Set[ 6, 28, 61 ]
+    TOKENS_FOLLOWING_constraint_statement_IN_conditional_constraint_then_2014 = Set[ 1 ]
+    TOKENS_FOLLOWING_mutation_statement_IN_mutation_body_2036 = Set[ 4 ]
+    TOKENS_FOLLOWING_mutation_iterator_IN_mutation_body_2049 = Set[ 4 ]
+    TOKENS_FOLLOWING_NL_IN_mutation_body_2058 = Set[ 1, 4, 6, 50, 63 ]
+    TOKENS_FOLLOWING_T__50_IN_mutation_iterator_2073 = Set[ 6 ]
+    TOKENS_FOLLOWING_path_IN_mutation_iterator_2075 = Set[ 51 ]
+    TOKENS_FOLLOWING_T__51_IN_mutation_iterator_2077 = Set[ 6 ]
+    TOKENS_FOLLOWING_ID_IN_mutation_iterator_2079 = Set[ 4, 20 ]
+    TOKENS_FOLLOWING_NL_IN_mutation_iterator_2081 = Set[ 4, 20 ]
+    TOKENS_FOLLOWING_T__20_IN_mutation_iterator_2084 = Set[ 4 ]
+    TOKENS_FOLLOWING_NL_IN_mutation_iterator_2086 = Set[ 4, 6, 21, 63 ]
+    TOKENS_FOLLOWING_mutation_statement_IN_mutation_iterator_2096 = Set[ 4 ]
+    TOKENS_FOLLOWING_NL_IN_mutation_iterator_2104 = Set[ 4, 6, 21, 63 ]
+    TOKENS_FOLLOWING_T__21_IN_mutation_iterator_2111 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_mutation_statement_2130 = Set[ 55, 57 ]
+    TOKENS_FOLLOWING_equals_op_IN_mutation_statement_2132 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_value_IN_mutation_statement_2134 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_mutation_statement_2143 = Set[ 55, 57 ]
+    TOKENS_FOLLOWING_equals_op_IN_mutation_statement_2145 = Set[ 8 ]
+    TOKENS_FOLLOWING_NULL_IN_mutation_statement_2147 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_mutation_statement_2156 = Set[ 69, 70, 71, 72 ]
+    TOKENS_FOLLOWING_binary_op_IN_mutation_statement_2158 = Set[ 7 ]
+    TOKENS_FOLLOWING_NUMBER_IN_mutation_statement_2160 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_mutation_statement_2169 = Set[ 57 ]
+    TOKENS_FOLLOWING_T__57_IN_mutation_statement_2171 = Set[ 62 ]
+    TOKENS_FOLLOWING_T__62_IN_mutation_statement_2173 = Set[ 6 ]
+    TOKENS_FOLLOWING_path_IN_mutation_statement_2175 = Set[ 1, 20 ]
+    TOKENS_FOLLOWING_object_body_IN_mutation_statement_2183 = Set[ 1 ]
+    TOKENS_FOLLOWING_T__63_IN_mutation_statement_2193 = Set[ 6 ]
+    TOKENS_FOLLOWING_path_IN_mutation_statement_2195 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_mutation_statement_2204 = Set[ 64 ]
+    TOKENS_FOLLOWING_T__64_IN_mutation_statement_2206 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_value_IN_mutation_statement_2208 = Set[ 38 ]
+    TOKENS_FOLLOWING_T__38_IN_mutation_statement_2210 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_mutation_statement_2219 = Set[ 65 ]
+    TOKENS_FOLLOWING_T__65_IN_mutation_statement_2221 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_value_IN_mutation_statement_2223 = Set[ 38 ]
+    TOKENS_FOLLOWING_T__38_IN_mutation_statement_2225 = Set[ 1 ]
+    TOKENS_FOLLOWING_T__36_IN_set_value_2244 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_set_item_IN_set_value_2252 = Set[ 37, 38 ]
+    TOKENS_FOLLOWING_T__37_IN_set_value_2255 = Set[ 5, 6, 7, 9, 10, 36 ]
+    TOKENS_FOLLOWING_set_item_IN_set_value_2257 = Set[ 37, 38 ]
+    TOKENS_FOLLOWING_T__38_IN_set_value_2267 = Set[ 1 ]
+    TOKENS_FOLLOWING_value_IN_set_item_2278 = Set[ 1 ]
+    TOKENS_FOLLOWING_primitive_value_IN_value_2297 = Set[ 1 ]
+    TOKENS_FOLLOWING_reference_IN_value_2306 = Set[ 1 ]
+    TOKENS_FOLLOWING_set_value_IN_value_2315 = Set[ 1 ]
+    TOKENS_FOLLOWING_BOOLEAN_IN_primitive_value_2334 = Set[ 1 ]
+    TOKENS_FOLLOWING_NUMBER_IN_primitive_value_2343 = Set[ 1 ]
+    TOKENS_FOLLOWING_STRING_IN_primitive_value_2352 = Set[ 1 ]
+    TOKENS_FOLLOWING_MULTILINE_STRING_IN_primitive_value_2361 = Set[ 1 ]
+    TOKENS_FOLLOWING_ID_IN_path_2376 = Set[ 1, 66 ]
+    TOKENS_FOLLOWING_T__66_IN_path_2378 = Set[ 6 ]
+    TOKENS_FOLLOWING_ID_IN_path_2379 = Set[ 1, 66 ]
+    TOKENS_FOLLOWING_id_ref_IN_path_with_index_2392 = Set[ 1, 66 ]
+    TOKENS_FOLLOWING_T__66_IN_path_with_index_2394 = Set[ 6 ]
+    TOKENS_FOLLOWING_id_ref_IN_path_with_index_2395 = Set[ 1, 66 ]
+    TOKENS_FOLLOWING_ID_IN_id_ref_2408 = Set[ 1, 26 ]
+    TOKENS_FOLLOWING_T__26_IN_id_ref_2410 = Set[ 7 ]
+    TOKENS_FOLLOWING_NUMBER_IN_id_ref_2412 = Set[ 27 ]
+    TOKENS_FOLLOWING_T__27_IN_id_ref_2414 = Set[ 1 ]
+    TOKENS_FOLLOWING_path_with_index_IN_reference_2431 = Set[ 1 ]
+    TOKENS_FOLLOWING_T__67_IN_reference_type_2450 = Set[ 6 ]
+    TOKENS_FOLLOWING_path_IN_reference_type_2452 = Set[ 1 ]
     TOKENS_FOLLOWING_set_IN_equals_op_0 = Set[ 1 ]
     TOKENS_FOLLOWING_set_IN_not_equals_op_0 = Set[ 1 ]
     TOKENS_FOLLOWING_set_IN_binary_op_0 = Set[ 1 ]

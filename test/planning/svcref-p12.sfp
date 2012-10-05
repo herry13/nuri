@@ -21,6 +21,10 @@ goal constraint {
 	forsome (Server as s) >= 2 {
 		s.running = true
 	}
+
+	forall (Client as c) {
+		:different(c.refer)
+	}
 }
 global constraint {
 }
