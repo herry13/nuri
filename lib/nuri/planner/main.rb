@@ -100,9 +100,16 @@ module Nuri
 					sas_file = tmp_dir + '/problem.sas'
 					plan_file = tmp_dir + '/out.plan'
 					File.open(sas_file, 'w') do |f|
-					f.write(sas)
+						f.write(sas)
+						f.flush
 					end
-					command = "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file} 1> /dev/null 2> /dev/null"
+
+					command = case os
+						when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file} 1> /dev/null 2> /dev/null"
+						when 'macos', 'darwin' then "cd #{tmp_dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; #{planner}/downward #{params} --plan-file #{plan_file} < #{tmp_dir}/output 1> /dev/null;"
+						else nil
+					end
+
 					Kernel.system(command)
 					plan = (File.exist?(plan_file) ? File.read(plan_file) : nil)
 					plan = to_partial_order(plan) if plan != nil
@@ -110,16 +117,20 @@ module Nuri
 					File.delete(sas_file)
 					File.delete(plan_file) if File.exist?(plan_file)
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
-					Dir.delete(tmp_dir)
 
-					plan.each_index do |i|
-						plan.delete_at(i) if (plan[i] =~ /op_[0-9]+\-goal_[0-9]+/) != nil
+					if plan != nil
+						plan.each_index do |i|
+							plan.delete_at(i) if
+								(plan[i] =~ /op_[0-9]+\-goal_[0-9]+/) != nil or
+								(plan[i] =~ /op_[0-9]+\-sometime.*/) != nil
+						end
 					end
 
 					return plan
 				rescue Exception => exp
-					system 'rm -rf ' + tmp_dir
 					raise Exception, exp.to_s
+				ensure
+					system 'rm -rf ' + tmp_dir
 				end
 
 				nil

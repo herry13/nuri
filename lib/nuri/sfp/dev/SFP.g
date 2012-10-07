@@ -296,74 +296,6 @@ effects
 		{	self.goto_parent()	}
 	;
 
-trajectory_head returns [id, time, nested]
-	:	'goal'
-		{
-			$id = 'goal'
-			$time = 0
-			$nested = false
-		}
-	|	'always'
-		{
-			$id = 'always'
-			$time = 0
-			$nested = false
-		}
-	|	'sometime'
-		{
-			$id = 'sometime'
-			$time = 0
-			$nested = false
-		}
-	|	'within' '(' NUMBER ')'
-		{
-			$id = 'within'
-			$time = $NUMBER.text.to_s.to_i
-			$nested = false
-		}
-	|	'sometime-after'
-		{
-			$id = 'sometime-after'
-			$time = 0
-			$nested = true
-		}
-	|	'sometime-before'
-		{
-			$id = 'sometime-before'
-			$time = 0
-			$nested = true
-		}
-	|	'always-within' '(' NUMBER ')'
-		{
-			$id = 'always-within'
-			$time = $NUMBER.text.to_s.to_i
-			$nested = true
-		}
-	;
-
-trajectory_constraint
-	:	trajectory_head NL*
-		{
-			#id = self.next_id.to_s
-			id = $trajectory_head.id
-			@now[id] = { '_self' => id,
-				'_context' => 'constraint',
-				'_type' => 'and',
-				'_parent' => @now,
-				'_time' => $trajectory_head.time
-			}
-			@now = @now[id]
-		}
-		'{' NL* constraint_body '}'
-		trajectory_constraint_tail? NL+
-		{	self.goto_parent()	}
-	;
-
-trajectory_constraint_tail
-	:	NL* 'then' NL*
-		'{' NL* constraint_body '}'
-	;
-
 goal_constraint
 	:	'goal' 'constraint'? NL*
 		{
@@ -391,7 +323,7 @@ goal_body
 		NL+)
 	|	'always' NL*
 		{
-			@now['always'] = self.create_constraint('always', 'always') if
+			@now['always'] = self.create_constraint('always', 'and') if
 				not @now.has_key?('always')
 			@now = @now['always']
 		}
@@ -399,11 +331,15 @@ goal_body
 		{	self.goto_parent()	}
 	|	'sometime' NL*
 		{
-			@now['sometime'] = self.create_constraint('sometime', 'sometime') if
+			@now['sometime'] = self.create_constraint('sometime', 'or') if
 				not @now.has_key?('sometime')
 			@now = @now['sometime']
+			id = self.next_id.to_s
+			@now[id] = self.create_constraint(id, 'and')
+			@now = @now[id]
 		}
 		'{' NL* constraint_body '}' NL+
+		{	self.goto_parent()	}
 		{	self.goto_parent()	}
 	|	'within' NUMBER NL*
 		{
@@ -416,6 +352,10 @@ goal_body
 		{	self.goto_parent()	}
 	|	'after' NL*
 		{
+			@now['sometime-after'] = self.create_constraint('sometime-after', 'or') if
+				not @now.has_key?('sometime-after')
+			@now = @now['sometime-after']
+
 			id = self.next_id.to_s
 			@now[id] = self.create_constraint(id, 'sometime-after')
 			@now = @now[id]
@@ -434,6 +374,7 @@ goal_body
 			@now = @now['then']
 		}
 		'{' NL* constraint_body '}' NL+
+		{	self.goto_parent()	}
 		{	self.goto_parent()	}
 		{	self.goto_parent()	}
 	|	'before' NL*
@@ -482,6 +423,7 @@ constraint_body
 				}
 			|	constraint_namespace
 			|	constraint_iterator
+			|	constraint_class_quantification
 			)
 		NL+)*
 	;

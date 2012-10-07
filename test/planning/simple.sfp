@@ -1,0 +1,13 @@
+include "svcref-type.sfp"
+
+initial state {
+	a isa Server {
+		name is "A"
+		running is true
+	}
+}
+goal constraint {
+	a.running is false
+}
+global constraint {
+}

@@ -1,0 +1,96 @@
+class Hoist {
+	lifting isref Crate
+	is_at isref Area
+
+	procedure lift(c isref Crate, a1 isref StoreArea, a2 isref Area, p isref Place) {
+		conditions {
+			a2 is in a1.connected
+			this.is_at = a2
+			this.lifting = null
+			c.is_on = a1
+			a1.is_in = p
+		}
+		effects {
+			a1.clear = true
+			this.lifting = c
+			c.is_in = null
+		}
+	}
+
+	procedure drop(c isref Crate, a1 isref StoreArea, a2 isref Area, p isref Place) {
+		conditions {
+			a2 is in a1.connected
+			this.is_at = a2
+			this.lifting = c
+			a1.clear = true
+			a1.is_in = p
+		}
+		effects {
+			this.lifting = null
+			a1.clear = false
+			c.is_on = a1
+			c.is_in = p
+		}
+	}
+
+	procedure move(from isref StoreArea, to isref StoreArea) {
+		conditions {
+			this.is_at = from
+			to.clear = true
+			to is in from.connected
+		}
+		effects {
+			this.is_at = to
+			from.clear = true
+			to.clear = false
+		}
+	}
+
+	procedure go_out(from isref StoreArea, to isref TransitArea) {
+		conditions {
+			this.is_at = from
+			to is_in from.connected
+		}
+		effects {
+			this.is_at = to
+			from.clear = true
+		}
+	}
+
+	procedure go_in(from isref TransitArea, to isref StoreArea) {
+		conditions {
+			this.is_at = from
+			to is in from.connected
+			to.clear = true
+		}
+		effects {
+			this.is_at = to
+			to.clear = false
+		}
+	}
+}
+
+class Surface
+
+class Place
+
+class Area extends Surface {
+	connected isref Area
+}
+
+class Container extends Place
+
+class Depot extends Place
+
+class StoreArea extends Area {
+	clear = true
+	is_in isref Place
+}
+
+class TransitArea extends Area
+
+class Crate extends Surface {
+	is_on isref StoreArea
+	is_in isref StoreArea
+	compatible isref Crate
+}

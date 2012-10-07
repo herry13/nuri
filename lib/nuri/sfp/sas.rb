@@ -64,34 +64,63 @@ module Nuri
 				# unlink 'initial', 'goal', 'global' with root
 				@root['initial'].delete('_parent')
 				@root['goal'].delete('_parent')
+				if @root['goal'].has_key?('always')
+					@root['global'] = @root['goal']['always']
+					@root['goal'].delete('always')
+					@root['global']['_self'] = 'global'
+					@root['global']['_type'] = 'and'
+				end
 				@root['global'].delete('_parent') if @root.has_key?('global')
-	
-				# collect variables
+
+				if @root['goal'].has_key?('sometime')
+					@root['sometime'] = @root['goal']['sometime']
+					@root['goal'].delete('sometime')
+					@root['sometime']['_type'] = 'or'
+					@root['sometime'].delete('_parent')
+				end
+
+				if @root['goal'].has_key?('sometime-after')
+					@root['sometime-after'] = @root['goal']['sometime-after']
+					@root['goal'].delete('sometime')
+					@root['sometime-after'].delete('_parent')
+				end
+
+				### collect variables ###
 				@root['initial'].accept(VariableCollector.new(self))
 
-				# collect values from goal and global constraint
+				### collect values ###
+				# collect values from goal constraint
 				value_collector = Nuri::Sfp::ValueCollector.new(@types)
 				@root['goal'].accept(value_collector) if @root.has_key?('goal') and
 						@root['goal'].isconstraint
+				# collect values from global constraint
 				@root['global'].accept(value_collector) if @root.has_key?('global') and
 						@root['global'].isconstraint
+				# collect values from sometime constraint
+				@root['sometime'].accept(value_collector) if @root.has_key?('sometime')
 
 				# remove duplicates from type's set of value
 				@types.each_value { |type| type.uniq! }
 				# set domain values for each variable
 				self.set_variable_values
 
-				# process goal constraint
+				### process goal constraint ###
 				process_goal(@root['goal']) if @root.has_key?('goal') and
 						@root['goal'].isconstraint
 
-				# normalize global constraint formula
+				### normalize global constraint formula ###
 				if @root.has_key?('global') and @root['global'].isconstraint
 					raise Exception, 'Invalid global constraint' if 
 							not normalize_formula(@root['global'])
 				end
 
-				# process all procedures
+				### normalize sometime formulae ###
+				if @root.has_key?('sometime')
+					raise Exception, 'Invalid sometime constraint' if
+						not normalize_formula(@root['sometime'])
+				end
+
+				### process all procedures
 				@variables.each_value { |var|
 					if var.is_final
 						var.init.each { |k,v|
@@ -101,6 +130,11 @@ module Nuri
 				}
 				self.reset_operators_name
 
+				### process sometime modalities ###
+				self.process_sometime if @root.has_key?('sometime')
+				### process sometime-after modalities ###
+				self.process_sometime_after if @root.has_key?('sometime-after')
+
 				# detect and merge mutually inclusive operators
 				#self.solve_mutually_inclusive_operators
 
@@ -109,6 +143,48 @@ module Nuri
 				#self.dump_operators
 
 				return create_output
+			end
+
+			def process_sometime
+				@root['sometime'].each do |k,v|
+					next if k[0,1] == '_'
+					# dummy-variable
+					var = Variable.new('sometime_' + k, 'Boolean', -1, false, true)
+					var << true
+					var << false
+					@variables[var.name] = var
+					# dummy-operator
+					op = Operator.new('-sometime_' + k, 0)
+					eff = Parameter.new(var, false, true)
+					op[eff.var.name] = eff
+					map = and_equals_constraint_to_map(v)
+					map.each { |k1,v1|
+						op[@variables[k1].name] = Parameter.new(@variables[k1], v1, nil)
+					}
+					@operators[op.name] = op
+				end
+			end
+
+			def process_sometime_after
+# TODO
+begin
+				@root['sometime-after'].each do |k,v|
+					next if k[0,1] == '_'
+					# dummy-variable
+					var = Variable.new('sometime_after_' + k, 'Boolean', -1, true, true)
+					var << true
+					var << false
+					@variables[var.name] = var
+					# normalize formula
+					
+					# dummy-operator
+					op = Operator.new('-sometime_after_activate_' + k, 0)
+					eff = Parameter.new(var, true, false)
+					op[eff.var.name] = eff
+				end
+rescue Exception => e
+puts e
+end
 			end
 
 			def solve_mutually_inclusive_operators
@@ -497,7 +573,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 			end
 
 			# normalize the given first-order formula by transforming it into
-			# AND/OR clauses
+			# CNF formula
 			def normalize_formula(formula)
 				def create_equals_constraint(value)
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
