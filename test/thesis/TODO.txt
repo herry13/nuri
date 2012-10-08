@@ -1,0 +1,3 @@
+TODO:
+- implements Set data-structure
+- implements Class enumeration
