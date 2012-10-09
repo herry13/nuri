@@ -114,9 +114,18 @@ extends_class returns [val]
 
 attribute
 	:	ID equals_op value NL+
-		{	@now[$ID.text] = $value.val	}
+		{
+			if @now.has_key?($ID.text) and @now[$ID.text].is_a?(Hash) and
+					@now[$ID.text].isset and $value.type == 'Set'
+				$value.val.each { |v| @now[$ID.text]['_values'].push(v) }
+			else
+				@now[$ID.text] = $value.val
+			end
+		}
 	|	ID reference_type NL+
 		{	@now[$ID.text] = $reference_type.val	}
+	|	ID set_type NL+
+		{	@now[$ID.text] = $set_type.val	}
 	|	object_def NL+
 	;
 
@@ -738,26 +747,36 @@ mutation_statement returns [key, val]
 set_value returns [val]
 	:	'('
 		{	@set = Array.new	}
-		set_item (',' set_item)*
+		(set_item (',' set_item)*)?
 		{	$val = @set	}
 		')'
 	;
 
 set_item
 	:	value
-		{	@set.push($value.val)	}
+		{	@set.push($value.val)	
+			puts 'push item to set' }
 	;
 
-value returns [val]
+value returns [val, type]
 	:	primitive_value
-		{	$val = $primitive_value.val	}
+		{
+			$val = $primitive_value.val
+			$type = $primitive_value.type
+		}
 	|	reference
-		{	$val = $reference.val	}
+		{
+			$val = $reference.val
+			$type = 'Reference'
+		}
 	|	set_value
-		{	$val = $set_value.val	}
+		{
+			$val = $set_value.val
+			$type = 'Set'
+		}
 	;
 
-primitive_value returns [val]
+primitive_value returns [val, type]
 	:	BOOLEAN
 		{
 			if $BOOLEAN.text == 'true' or $BOOLEAN.text == 'on' or $BOOLEAN.text == 'yes'
@@ -765,13 +784,23 @@ primitive_value returns [val]
 			else  # 'false', 'no', 'off'
 				$val = false
 			end
+			$type = 'Boolean'
 		}
 	|	NUMBER
-		{	$val = $NUMBER.text.to_f	}
+		{
+			$val = $NUMBER.text.to_f
+			$type = 'Number'
+		}
 	|	STRING
-		{	$val = $STRING.text[1,$STRING.text.length-2]	}
+		{
+			$val = $STRING.text[1,$STRING.text.length-2]
+			$type = 'String'
+		}
 	|	MULTILINE_STRING
-		{	$val = $MULTILINE_STRING.text[2, $MULTILINE_STRING.text.length-2]	}
+		{
+			$val = $MULTILINE_STRING.text[2, $MULTILINE_STRING.text.length-2]
+			$type = 'String'
+		}
 	;
 
 path
@@ -796,6 +825,16 @@ reference_type returns [val]
 		{
 			$val = { '_context' => 'null',
 				'_isa' => self.to_ref($path.text)
+			}
+		}
+	;
+
+set_type returns [val]
+	:	'isset' path
+		{
+			$val = { '_context' => 'set',
+				'_isa' => self.to_ref($path.text),
+				'_values' => []
 			}
 		}
 	;

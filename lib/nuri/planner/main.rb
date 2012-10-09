@@ -89,6 +89,7 @@ module Nuri
 				params = case
 					when 'lmcut' then '--search "astar(lmcut())"'
 					when 'blind' then '--search "astar(blind())"'
+					when 'cg' then '--search "lazy_greedy(cg(), preferred=cg())"'
 					else '--heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)"'
 				end
 

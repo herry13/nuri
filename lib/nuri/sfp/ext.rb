@@ -50,6 +50,10 @@ Hash.send(:define_method, "isconstraint") {
 	return (self.has_key?('_context') and self['_context'] == 'constraint')
 }
 
+Hash.send(:define_method, "isset") {
+	return (self.has_key?('_context') and self['_context'] == 'set')
+}
+
 Hash.send(:define_method, "isprocedure") {
 	return (self.has_key?('_context') and self['_context'] == 'procedure')
 }

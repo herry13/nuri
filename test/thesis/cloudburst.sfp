@@ -27,7 +27,7 @@ class Runnable {
 class Cloud
 
 class Service extends Runnable {
-	depend isset Service
+	depend isset Server
 	is_in isref VM
 }
 
