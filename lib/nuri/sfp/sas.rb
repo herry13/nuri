@@ -1,3 +1,6 @@
+# 12-10-2012
+# - support CLASS enumerator
+#
 # 01-09-2012
 # - support IN/NOT-IN SET constraint
 # - support ARRAY data-structure, index operator
@@ -31,12 +34,15 @@ module Nuri
 		# - enumeration of values of particular type
 		# - SET abstract data-type, membership operators
 		module Sas
-			GLOBAL_OPERATOR = '#global_op'
-			GLOBAL_VARIABLE = '#global_var'
+			GlobalOperator = '_global_op'
+			GlobalVariable = '_global_var'
+
+			GlobalConstraintMethod = 1 # 1: proposed method, 2: patrik's
 
 			attr_accessor :root, :variables, :types, :operators, :axioms
 
 			def to_sas
+begin
 				@arrays = Hash.new
 
 				if @parser_arrays != nil
@@ -104,17 +110,16 @@ module Nuri
 				# set domain values for each variable
 				self.set_variable_values
 
-				self.dump_vars
+				# TODO
+				#self.identify_unmutable_variables
 
 				### process goal constraint ###
 				process_goal(@root['goal']) if @root.has_key?('goal') and
 						@root['goal'].isconstraint
 
-				### normalize global constraint formula ###
-				if @root.has_key?('global') and @root['global'].isconstraint
-					raise Exception, 'Invalid global constraint' if 
-							not normalize_formula(@root['global'])
-				end
+puts 'normalize global constraint...'
+				self.process_global_constraint
+puts '...finish'
 
 				### normalize sometime formulae ###
 				if @root.has_key?('sometime')
@@ -122,6 +127,7 @@ module Nuri
 						not normalize_formula(@root['sometime'])
 				end
 
+#puts 'process procedures...'
 				### process all procedures
 				@variables.each_value { |var|
 					if var.is_final
@@ -131,6 +137,7 @@ module Nuri
 					end
 				}
 				self.reset_operators_name
+#puts '...finish'
 
 				### process sometime modalities ###
 				self.process_sometime if @root.has_key?('sometime')
@@ -142,8 +149,73 @@ module Nuri
 
 				#self.dump_types
 				#self.dump_operators
+				#self.dump_vars
 
 				return create_output
+rescue Exception => e
+	p e.backtrace
+	$stderr.puts e
+end
+			end
+
+			def identify_unmutable_variables
+=begin
+				@variables.each_value do |var|
+					if var.is_final
+						var.init.each do |k,v|
+							next if not v.is_a?(Hash) or not v.isprocedure
+
+							v['_effects'].each do |k2,v2|
+								next if k2[0,1] == '_' or not k2.isref
+
+								_, ref = k2.explode
+								#first, ref = ref.explode
+								#if first == 'this'
+									
+								#end
+							end
+
+						end
+					end
+				end
+=end
+			end
+
+			def process_global_constraint
+				### normalize global constraint formula ###
+				if @root.has_key?('global') and @root['global'].isconstraint
+					raise Exception, 'Invalid global constraint' if 
+							not normalize_formula(@root['global'])
+
+					if GlobalConstraintMethod == 1
+						# dummy variable
+						@global_var = Variable.new(GlobalVariable, 'Boolean', -1, false, true)
+						@global_var << true
+						@global_var << false
+						@variables[@global_var.name] = @global_var
+						# dummy operator
+						eff = Parameter.new(@global_var, false, true)
+						if @root['global']['_type'] == 'and'
+							op = Operator.new(GlobalOperator, 0)
+							op[eff.var.name] = eff
+							@operators[op.name] = op
+						else
+							index = 0
+							@root['global'].each do |name,constraint|
+								next if name[0,1] == '_'
+								map_cond = and_equals_constraint_to_map(constraint)
+								op = Operator.new(GlobalOperator + index.to_s, 0)
+								op[eff.var.name] = eff
+								map_cond.each do |k,v|
+									next if k[0,1] == '_'
+									raise VariableNotFoundException, k if not @variables.has_key?(k)
+									op[@variables[k].name] = Parameter.new(@variables[k], v)
+								end
+								@operators[op.name] = op
+							end
+						end
+					end
+				end
 			end
 
 			def process_sometime
@@ -414,7 +486,11 @@ puts new_operators.length.to_s + ' new merged-operators'
 					sas_op[@variables[k].name] = Parameter.new(@variables[k], pre, post)
 				}
 
-				@operators[sas_op.name] = sas_op if apply_global_constraint(sas_op)
+				if GlobalConstraintMethod == 1
+					@operators[sas_op.name] = sas_op if apply_global_constraint_method_1(sas_op)
+				elsif GlobalConstraintMethod == 2
+					@operators[sas_op.name] = sas_op if apply_global_constraint_method_2(sas_op)
+				end
 			end
 
 			# process all object procedures in order to get
@@ -515,9 +591,17 @@ puts new_operators.length.to_s + ' new merged-operators'
 				}
 			end
 
+			def apply_global_constraint_method_1(operator)
+				return true if not @root.has_key?('global') or #@root['global'] == nil or
+					not @root['global'].isconstraint
+				
+				operator[@global_var.name] = Parameter.new(@global_var, true, false)
+			end
+
 			# return true if global constraint could be applied, otherwise false
-			def apply_global_constraint(operator)
-				return true if not @root.has_key?('global') or not @root['global'].isconstraint
+			def apply_global_constraint_method_2(operator)
+				return true if not @root.has_key?('global') or #@root['global'] == nil or
+					not @root['global'].isconstraint
 
 				def satisfy_equals(left, right, operator)
 					return false if operator.has_key?(left) and operator[left].post != nil and
@@ -575,7 +659,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 
 			# normalize the given first-order formula by transforming it into
 			# CNF formula
-			def normalize_formula(formula)
+			def normalize_formula(formula, dump=false)
 				def create_equals_constraint(value)
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}
 				end
@@ -822,8 +906,8 @@ puts new_operators.length.to_s + ' new merged-operators'
 				end
 
 				# variable x := p1 | p2 | p3
-				# then formula := x not-equals p1 is transformed into
-				# formula := (x equals p2) or (x equals p3)
+				# then formula  (x not-equals p1) is transformed into
+				# formula ( (x equals p2) or (x equals p3) )
 				def not_equals_statement_to_or_constraint(formula)
 					keys = formula.keys
 					keys.each do |k|
@@ -847,6 +931,16 @@ puts new_operators.length.to_s + ' new merged-operators'
 							end
 						end
 					end
+				end
+
+				def substitute_template(grounder, template, parent)
+					id = Nuri::Sfp::Sas.next_constraint_key
+					c_and = Nuri::Sfp.deep_clone(template)
+					c_and['_self'] = id
+					c_and.accept(grounder)
+					parent[id] = c_and
+					remove_not_iterator_constraint(c_and)
+					c_and
 				end
 
 				# Remove the following type of constraint in the given formula:
@@ -891,29 +985,37 @@ puts new_operators.length.to_s + ' new merged-operators'
 							end
 						}
 					elsif formula.isconstraint and formula['_type'] == 'iterator'
-						ref = '$.' + formula['_value']
+						ref = formula['_value']
 						var = '$.' + formula['_variable']
 						if @arrays.has_key?(ref)
+							# substitute ARRAY
 							total = @arrays[ref]
 							grounder = ParameterGrounder.new(Hash.new)
 							for i in 0..(total-1)
 								grounder.map.clear
 								grounder.map[var] = ref + "[#{i}]"
-								id = Nuri::Sfp::Sas.next_constraint_key
-								c_and = Nuri::Sfp.deep_clone(formula['_template'])
-								c_and['_self'] = id
-								c_and.accept(grounder)
-								formula[id] = c_and
-								remove_not_iterator_constraint(c_and)
+								substitute_template(grounder, formula['_template'], formula)
 							end
 						else
+							setvalue = @root['initial'].at?(ref)
+							if setvalue != nil and setvalue.is_a?(Hash) and setvalue.isset
+								# substitute SET
+								grounder = ParameterGrounder.new(Hash.new)
+								setvalue['_values'].each do |v|
+									grounder.map.clear
+									grounder.map[var] = v
+									substitute_template(grounder, formula['_template'], formula)
+								end
+							else
+puts ref + ' -- ' + var
+								raise Exception, 'Undefined'
+							end
 						end
 						formula['_type'] = 'and'
 						formula.delete('_value')
 						formula.delete('_variable')
 						formula.delete('_template')
 					elsif formula.isconstraint and formula['_type'] == 'forall'
-						puts 'forall'
 						classref = '$.' + formula['_class']
 						raise ClassNotFoundException, classref if not @types.has_key?(classref)
 						var = '$.' + formula['_variable']
@@ -922,12 +1024,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 							next if v == nil or (v.is_a?(Hash) and v.isnull)
 							grounder.map.clear
 							grounder.map[var] = v.ref
-							id = Nuri::Sfp::Sas.next_constraint_key
-							c_and = Nuri::Sfp.deep_clone(formula['_template'])
-							c_and['_self'] = id
-							c_and.accept(grounder)
-							formula[id] = c_and
-							remove_not_iterator_constraint(c_and)
+							substitute_template(grounder, formula['_template'], formula)
 						end
 						formula['_type'] = 'and'
 						formula.delete('_class')
@@ -941,13 +1038,10 @@ puts new_operators.length.to_s + ' new merged-operators'
 					end
 				end
 
-#$stderr.puts 'step1'
 				remove_not_iterator_constraint(formula)
-#$stderr.puts 'step2'
+Nuri::Sfp::Parser.dump(formula) if dump
 				to_and_or_graph(formula)
-#$stderr.puts 'step3'
 				not_equals_statement_to_or_constraint(formula)
-#$stderr.puts 'step4'
 				return flatten_and_or_graph(formula)
 			end
 
@@ -1077,7 +1171,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 			end
 
 			def visit(name, value, obj)
-				return if name[0,1] == '_' and name != '_value'
+				return if name[0,1] == '_' and name != '_value' and name != '_template'
 				if name[0,1] != '_'
 					map.each { |k,v|
 						if name == k

@@ -59,6 +59,7 @@ module Nuri
 
 			def self.dump(root)
 				return if root == nil
+				root = Nuri::Sfp.deep_clone(root)
 				root.accept(ParentEliminator.new)
 				puts JSON.pretty_generate(root)
 			end

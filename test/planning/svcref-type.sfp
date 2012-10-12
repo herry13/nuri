@@ -20,7 +20,6 @@ class Server extends Machine {
 	name is ""
 }
 
-
 class Client {
 	refer isref Server
 	procedure change(s isref Server) {

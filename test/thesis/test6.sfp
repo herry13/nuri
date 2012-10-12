@@ -36,15 +36,28 @@ initial state {
 		running is false
 		in_cloud = cloud1
 	}
-
 	vm5 isa VM {
 		running is false
 		in_cloud = cloud1
 	}
-
 	vm6 isa VM {
 		running is false
 		in_cloud = cloud1
+	}
+	ws2 isa WebService {
+		running is false
+		is_in = vm4
+		depend is (app2)
+	}
+	app2 isa AppService {
+		running is false
+		is_in = vm5
+		depend is (db2)
+	}
+	db2 isa DBService {
+		running is false
+		is_in = vm6
+		depend is ()
 	}
 
 	pc1 isa Client {
@@ -57,10 +70,13 @@ initial state {
 
 goal {
 	vm1.running = false
-
+	ws2.running = true
 	always {
 		forall (Service as s1) {
-			if s1.running = true then s1.is_in.running = true
+			foreach (s1.depend as s2) {
+				if s1.running = true then s2.running = true
+			}
+			//if s1.running = true then s1.is_in.running = true
 		}
 	}
 }

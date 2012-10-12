@@ -71,9 +71,9 @@ initial state {
 goal {
 	vm1.running = false
 
-	always {
+	//always {
 		forall (Service as s1) {
 			if s1.running = true then s1.is_in.running = true
 		}
-	}
+	//}
 }

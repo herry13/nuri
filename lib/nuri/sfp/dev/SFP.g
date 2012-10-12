@@ -457,7 +457,7 @@ constraint_iterator
 				'_context' => 'constraint',
 				'_type' => 'iterator',
 				'_self' => id,
-				'_value' => $path.text,
+				'_value' => '$.' + $path.text,
 				'_variable' => $ID.text
 			}
 			@now = @now[id]
@@ -521,14 +521,15 @@ constraint_class_quantification
 		(	constraint_statement
 			{	@now[$constraint_statement.key] = $constraint_statement.val	}
 			NL+
-		|	constraint_different
+		|	constraint_different NL+
+		|	constraint_iterator NL+
 		)* '}'
 		{	self.goto_parent()	}
 		{	self.goto_parent()	}
 	;
 
 constraint_different
-	:	':different' '(' path ')' NL+
+	:	':different' '(' path ')'
 		{
 			id = self.next_id.to_s
 			@now[id] = { '_parent' => @now,
@@ -757,8 +758,7 @@ set_value returns [val]
 
 set_item
 	:	value
-		{	@set.push($value.val)	
-			puts 'push item to set' }
+		{	@set.push($value.val)	}
 	;
 
 value returns [val, type]

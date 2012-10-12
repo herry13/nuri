@@ -124,6 +124,7 @@ String.send(:define_method, 'explode') {
 	return self.split('.', 2)
 }
 
+# return an array of [ parent, last_element]
 String.send(:define_method, 'pop_ref') {
 	return self if not self.isref
 	parts = self.split('.')
