@@ -39,7 +39,7 @@ module Nuri
 			def to_sas
 				@arrays = Hash.new
 
-				if @parser != nil
+				if @parser_arrays != nil
 					@parser_arrays.each do |k,v|
 						first, rest = k.explode[1].explode
 						next if rest == nil
@@ -104,6 +104,8 @@ module Nuri
 				# set domain values for each variable
 				self.set_variable_values
 
+				self.dump_vars
+
 				### process goal constraint ###
 				process_goal(@root['goal']) if @root.has_key?('goal') and
 						@root['goal'].isconstraint
@@ -138,8 +140,7 @@ module Nuri
 				# detect and merge mutually inclusive operators
 				#self.solve_mutually_inclusive_operators
 
-				self.dump_types
-				#self.dump_vars
+				#self.dump_types
 				#self.dump_operators
 
 				return create_output
@@ -892,18 +893,20 @@ puts new_operators.length.to_s + ' new merged-operators'
 					elsif formula.isconstraint and formula['_type'] == 'iterator'
 						ref = '$.' + formula['_value']
 						var = '$.' + formula['_variable']
-						total = @arrays[ref] if @arrays.has_key?(ref)
-						#names = formula.keys.select { |k| k[0,1] != '_' }
-						grounder = ParameterGrounder.new(Hash.new)
-						for i in 0..(total-1)
-							grounder.map.clear
-							grounder.map[var] = ref + "[#{i}]"
-							id = Nuri::Sfp::Sas.next_constraint_key
-							c_and = Nuri::Sfp.deep_clone(formula['_template'])
-							c_and['_self'] = id
-							c_and.accept(grounder)
-							formula[id] = c_and
-							remove_not_iterator_constraint(c_and)
+						if @arrays.has_key?(ref)
+							total = @arrays[ref]
+							grounder = ParameterGrounder.new(Hash.new)
+							for i in 0..(total-1)
+								grounder.map.clear
+								grounder.map[var] = ref + "[#{i}]"
+								id = Nuri::Sfp::Sas.next_constraint_key
+								c_and = Nuri::Sfp.deep_clone(formula['_template'])
+								c_and['_self'] = id
+								c_and.accept(grounder)
+								formula[id] = c_and
+								remove_not_iterator_constraint(c_and)
+							end
+						else
 						end
 						formula['_type'] = 'and'
 						formula.delete('_value')
@@ -938,9 +941,13 @@ puts new_operators.length.to_s + ' new merged-operators'
 					end
 				end
 
+#$stderr.puts 'step1'
 				remove_not_iterator_constraint(formula)
+#$stderr.puts 'step2'
 				to_and_or_graph(formula)
+#$stderr.puts 'step3'
 				not_equals_statement_to_or_constraint(formula)
+#$stderr.puts 'step4'
 				return flatten_and_or_graph(formula)
 			end
 

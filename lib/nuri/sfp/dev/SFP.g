@@ -138,9 +138,9 @@ object_def
 				'_isa' => '$.Object'
 			}
 			@now = @now[$ID.text]
-			@is_array = false
+			@now['_is_array'] = false
 		}
-		('isa' path('[' NUMBER { @is_array = true } ']')?
+		('isa' path('[' NUMBER { @now['_is_array'] = true } ']')?
 		{
 			@now['_isa'] = self.to_ref($path.text)
 			self.expand_object(@now)
@@ -148,8 +148,9 @@ object_def
 		)?
 		object_body?
 		{
-			obj = self.goto_parent()
-			if @is_array
+			if @now['_is_array']
+				@now.delete('_is_array')
+				obj = self.goto_parent()
 				total = $NUMBER.to_s.to_i
 				@arrays[obj.ref] = total
 				for i in 0..(total-1)
@@ -160,6 +161,8 @@ object_def
 					#puts 'is_array: ' + $ID.text + '[' + i.to_s + ']'
 				end
 				@now.delete(obj['_self'])
+			else
+				self.goto_parent()
 			end
 		}
 	;
