@@ -69,18 +69,19 @@ initial state {
 }
 
 goal {
-	pc1.refer = ws1
-	pc2.refer = ws1
-	vm1.in_cloud = cloud2
+	ws1.running = false
+	//pc1.refer = ws1
+	//pc2.refer = ws1
+	/*vm1.in_cloud = cloud2
 	vm2.in_cloud = cloud2
 	vm3.in_cloud = cloud2
 	vm4.running is false
 	vm5.running is false
-	vm6.running is false
+	vm6.running is false*/
 
 	always {
-		/*forall (Client as c) {
+		forall (Client as c) {
 			c.refer.running = true
-		}*/
+		}
 	}
 }

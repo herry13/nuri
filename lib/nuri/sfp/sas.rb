@@ -138,7 +138,7 @@ module Nuri
 				# detect and merge mutually inclusive operators
 				#self.solve_mutually_inclusive_operators
 
-				#self.dump_types
+				self.dump_types
 				#self.dump_vars
 				#self.dump_operators
 
@@ -893,7 +893,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 						ref = '$.' + formula['_value']
 						var = '$.' + formula['_variable']
 						total = @arrays[ref] if @arrays.has_key?(ref)
-						names = formula.keys.select { |k| k[0,1] != '_' }
+						#names = formula.keys.select { |k| k[0,1] != '_' }
 						grounder = ParameterGrounder.new(Hash.new)
 						for i in 0..(total-1)
 							grounder.map.clear
@@ -907,6 +907,27 @@ puts new_operators.length.to_s + ' new merged-operators'
 						end
 						formula['_type'] = 'and'
 						formula.delete('_value')
+						formula.delete('_variable')
+						formula.delete('_template')
+					elsif formula.isconstraint and formula['_type'] == 'forall'
+						puts 'forall'
+						classref = '$.' + formula['_class']
+						raise ClassNotFoundException, classref if not @types.has_key?(classref)
+						var = '$.' + formula['_variable']
+						grounder = ParameterGrounder.new(Hash.new)
+						@types[classref].each do |v|
+							next if v == nil or (v.is_a?(Hash) and v.isnull)
+							grounder.map.clear
+							grounder.map[var] = v.ref
+							id = Nuri::Sfp::Sas.next_constraint_key
+							c_and = Nuri::Sfp.deep_clone(formula['_template'])
+							c_and['_self'] = id
+							c_and.accept(grounder)
+							formula[id] = c_and
+							remove_not_iterator_constraint(c_and)
+						end
+						formula['_type'] = 'and'
+						formula.delete('_class')
 						formula.delete('_variable')
 						formula.delete('_template')
 					else
@@ -926,6 +947,9 @@ puts new_operators.length.to_s + ' new merged-operators'
 		end
 
 		class VariableNotFoundException < Exception
+		end
+
+		class ClassNotFoundException < Exception
 		end
 
 		# Visitor class has 3 attributes

@@ -1,0 +1,32 @@
+include "svcref-type.sfp"
+
+initial state {
+	a isa Server {
+		name is "A"
+		running is true
+	}
+	b isa Server {
+		name is "B"
+	}
+	pc1 isa Client {
+		refer is a
+	}
+	pc2 isa Client {
+		refer is a
+	}
+	pc3 isa Client {
+		refer is a
+	}
+}
+goal {
+	a.running is false
+	pc1.refer is b
+	pc2.refer is b
+	b.running is true
+
+	always {
+		forall (Client as c) {
+			c.refer.running is true
+		}
+	}
+}
