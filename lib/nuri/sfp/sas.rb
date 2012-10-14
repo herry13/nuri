@@ -151,7 +151,6 @@ begin
 
 				# detect and merge mutually inclusive operators
 				self.search_and_merge_mutually_inclusive_operators
-				#self.solve_mutually_inclusive_operators
 
 				#self.dump_types
 				#self.dump_operators
@@ -159,7 +158,7 @@ begin
 
 				return create_output
 rescue Exception => e
-	p e.backtrace
+	$stderr.puts e.backtrace
 	$stderr.puts e
 end
 			end
@@ -183,36 +182,6 @@ end
 					end
 					@operators[op1.name] = op1 if op1 != @g_operators[i]
 				end
-			end
-
-			def search_and_merge_mutually_inclusive_operators2
-				len = @g_operators.length-1
-				group = []
-				@g_operators.each_index do |i|
-					op1 = @g_operators[i]
-					group.clear
-					group << op1
-puts op1.name + ': ' + op1.modifier_id + " = " + op1.get_post_state.inspect
-					state = op1.get_pre_state
-puts "\t\t1: " + state.inspect
-					exists = false
-					for j in i+1..len
-						op2 = @g_operators[j]
-						next if op1.conflict?(op2)
-						op2.each_value { |p| state[p.var.name] = p.pre if p.pre != nil }
-puts "\t" + op2.name
-puts "\t\t2: " + state.inspect
-						group << op2
-						exists = true
-					end
-					if exists
-						group.each do |op|
-							op.each_value { |p| state[p.var.name] = p.post if p.post != nil }
-						end
-puts "\t\t3: " + state.inspect
-					end
-				end
-#puts @root['global'].keys.inspect
 			end
 
 			# Find immutable variables -- variables that will never be affected with any
@@ -308,8 +277,7 @@ puts "\t\t3: " + state.inspect
 			end
 
 			def process_sometime_after
-# TODO
-begin
+				# TODO
 				@root['sometime-after'].each do |k,v|
 					next if k[0,1] == '_'
 					# dummy-variable
@@ -324,38 +292,6 @@ begin
 					eff = Parameter.new(var, true, false)
 					op[eff.var.name] = eff
 				end
-rescue Exception => e
-puts e
-end
-			end
-
-			def solve_mutually_inclusive_operators
-				merged = Array.new
-				new_operators = Array.new
-				begin
-puts 'checking ' + @operators.length.to_s + ' operators'
-					new_operators.clear
-					@operators.each_value do |op1|
-						@operators.each_value do |op2|
-							next if op1 == op2
-							name1 = op1.name + '+' + op2.name
-							name2 = op2.name + '+' + op1.name
-							next if merged.index(name1) != nil or merged.index(name2) != nil
-
-							if mutually_inclusive_operators?(op1, op2)
-								new_operators << op1.merge(op2)
-								merged << name1
-								merged << name2
-							end
-						end
-					end
-					new_operators.each { |op| @operators[op.name] = op }
-puts new_operators.length.to_s + ' new merged-operators'
-				end while new_operators.length > 0
-			end
-
-			def mutually_inclusive_operators?(operator1, operator2)
-				return ( (operator1.requires?(operator2)) and (operator2.requires?(operator1)) )
 			end
 
 			def process_goal(goal)
@@ -1077,7 +1013,6 @@ puts new_operators.length.to_s + ' new merged-operators'
 									substitute_template(grounder, formula['_template'], formula)
 								end
 							else
-puts ref + ' -- ' + var
 								raise Exception, 'Undefined'
 							end
 						end
@@ -1108,6 +1043,7 @@ puts ref + ' -- ' + var
 					end
 				end
 
+### testing methods
 				def calculate_depth(formula, depth)
 					formula.each { |k,v|
 						next if k[0,1] == '_'
@@ -1185,6 +1121,7 @@ puts ref + ' -- ' + var
 					end
 					total
 				end
+### end of testing methods
 
 				remove_not_and_iterator_constraint(formula)
 #Nuri::Sfp::Parser.dump(formula) if dump
