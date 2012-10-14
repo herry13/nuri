@@ -1,3 +1,6 @@
+# 14-10-2012
+# - find and reduce the domain of immutable variables
+#
 # 12-10-2012
 # - support CLASS enumerator
 #
@@ -110,16 +113,16 @@ begin
 				# set domain values for each variable
 				self.set_variable_values
 
-				# TODO
-				#self.identify_unmutable_variables
+				# identify immutable variables
+				self.identify_immutable_variables
 
 				### process goal constraint ###
 				process_goal(@root['goal']) if @root.has_key?('goal') and
 						@root['goal'].isconstraint
 
-puts 'normalize global constraint...'
+#puts 'normalize global constraint...'
 				self.process_global_constraint
-puts '...finish'
+#puts '...finish'
 
 				### normalize sometime formulae ###
 				if @root.has_key?('sometime')
@@ -158,27 +161,39 @@ rescue Exception => e
 end
 			end
 
-			def identify_unmutable_variables
-=begin
+			# Find immutable variables -- variables that will never be affected with any
+			# actions. Then reduce the size of their domain by 1 only i.e. the possible
+			# value is only their initial value.
+			def identify_immutable_variables
+				def is_this(ref)
+					ref.length > 7 and (ref[0,7] == '$.this.' or ref[0,7] == '$.self.')
+				end
+
+				mutables = {}
+				@variables.each_key { |k| mutables[k] = false }
 				@variables.each_value do |var|
-					if var.is_final
-						var.init.each do |k,v|
-							next if not v.is_a?(Hash) or not v.isprocedure
-
-							v['_effects'].each do |k2,v2|
-								next if k2[0,1] == '_' or not k2.isref
-
-								_, ref = k2.explode
-								#first, ref = ref.explode
-								#if first == 'this'
-									
-								#end
+					next if not var.is_final
+					var.init.each do |k1,v1|
+						next if k1[0,1] == '_' or not v1.is_a?(Hash) or not v1.isprocedure
+						v1['_effects'].each do |k2,v2|
+							next if k2[0,1] == '_' or not k2.isref
+							if is_this(k2)
+								vname = var.name + k2[6..k2.length-1]
+								mutables[vname] = true
+							else
+								# TODO
+								#puts v1.keys.inspect
 							end
-
 						end
 					end
 				end
-=end
+				mutables.each do |vname, is_mutable|
+					if @variables[vname].is_final != (not is_mutable)
+						@variables[vname].clear
+						@variables[vname] << @variables[vname].init
+						#puts vname + ': ' + @variables[vname].length.to_s
+					end
+				end
 			end
 
 			def process_global_constraint

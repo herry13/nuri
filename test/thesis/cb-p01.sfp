@@ -81,7 +81,6 @@ goal {
 	always {
 		forall (Service as s1) {
 			if s1.running = true then s1.is_in.running = true
-
 			forall (s1.depend as s2) {
 				if s1.running = true then s2.running = true
 			}

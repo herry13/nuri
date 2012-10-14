@@ -69,14 +69,19 @@ initial state {
 }
 
 goal {
-	vm1.running = false
+	//vm4.running = true
+	ws1.running = false
 	ws2.running = true
 	always {
 		forall (Service as s1) {
+			if s1.running = true then s1.is_in.running = true
 			foreach (s1.depend as s2) {
 				if s1.running = true then s2.running = true
 			}
-			//if s1.running = true then s1.is_in.running = true
+		}
+
+		forall (Client as c) {
+			c.refer.running = true
 		}
 	}
 }
