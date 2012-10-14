@@ -40,7 +40,7 @@ module Nuri
 			GlobalOperator = '_global_op'
 			GlobalVariable = '_global_var'
 
-			GlobalConstraintMethod = 1 # 1: proposed method, 2: patrik's
+			GlobalConstraintMethod = 2 # 1: proposed method, 2: patrik's
 
 			attr_accessor :root, :variables, :types, :operators, :axioms
 
@@ -66,6 +66,8 @@ begin
 				}
 				@operators = Hash.new
 				@axioms = Array.new
+
+				@g_operators = []
 
 				# collect classes
 				#self.collect_classes
@@ -148,6 +150,7 @@ begin
 				self.process_sometime_after if @root.has_key?('sometime-after')
 
 				# detect and merge mutually inclusive operators
+				self.search_and_merge_mutually_inclusive_operators
 				#self.solve_mutually_inclusive_operators
 
 				#self.dump_types
@@ -159,6 +162,57 @@ rescue Exception => e
 	p e.backtrace
 	$stderr.puts e
 end
+			end
+
+			def search_and_merge_mutually_inclusive_operators
+				last = @g_operators.length-1
+				@g_operators.each_index do |i|
+					op1 = @g_operators[i]
+#puts '=> ' + op1.name + ' : ' + op1.get_pre_state.inspect
+					for j in i+1..last
+						op2 = @g_operators[j]
+						next if op1.modifier_id != op2.modifier_id or op1.conflict?(op2)
+						next if not (op1.supports?(op2) and op2.supports?(op1))
+#puts "\t" + op2.name	#+ ' : ' + op1.supports?(op2).to_s + ',' + op2.supports?(op1).to_s
+						if op1.supports?(op2) and op2.supports?(op1)
+							op = op1.merge(op2)
+							op.modifier_id = op1.modifier_id
+#puts "\t\t" + op.name + ":\n\t\t" + op.get_pre_state.inspect + "\n\t\t" + op.get_post_state.inspect
+							op1 = op
+						end
+					end
+					@operators[op1.name] = op1 if op1 != @g_operators[i]
+				end
+			end
+
+			def search_and_merge_mutually_inclusive_operators2
+				len = @g_operators.length-1
+				group = []
+				@g_operators.each_index do |i|
+					op1 = @g_operators[i]
+					group.clear
+					group << op1
+puts op1.name + ': ' + op1.modifier_id + " = " + op1.get_post_state.inspect
+					state = op1.get_pre_state
+puts "\t\t1: " + state.inspect
+					exists = false
+					for j in i+1..len
+						op2 = @g_operators[j]
+						next if op1.conflict?(op2)
+						op2.each_value { |p| state[p.var.name] = p.pre if p.pre != nil }
+puts "\t" + op2.name
+puts "\t\t2: " + state.inspect
+						group << op2
+						exists = true
+					end
+					if exists
+						group.each do |op|
+							op.each_value { |p| state[p.var.name] = p.post if p.post != nil }
+						end
+puts "\t\t3: " + state.inspect
+					end
+				end
+#puts @root['global'].keys.inspect
 			end
 
 			# Find immutable variables -- variables that will never be affected with any
@@ -200,7 +254,7 @@ end
 				### normalize global constraint formula ###
 				if @root.has_key?('global') and @root['global'].isconstraint
 					raise Exception, 'Invalid global constraint' if 
-							not normalize_formula(@root['global'])
+							not normalize_formula(@root['global'], true)
 
 					if GlobalConstraintMethod == 1
 						# dummy variable
@@ -618,26 +672,25 @@ puts new_operators.length.to_s + ' new merged-operators'
 				return true if not @root.has_key?('global') or #@root['global'] == nil or
 					not @root['global'].isconstraint
 
-				def satisfy_equals(left, right, operator)
+				# return true if operator's effect is consistent with "left := right"
+				def consistent_with_equals(left, right, operator)
 					return false if operator.has_key?(left) and operator[left].post != nil and
 						operator[left].post != right['_value']
 					return true
 				end
 
-
-				def satisfy_and(constraint, operator)
+				# return true if operator's effect is consistent with given 'and' constraint
+				def consistent_with_and(constraint, operator)
 					constraint.each { |k,v|
 						next if k[0,1] == '_'
-						# 1) x = y
-						return false if not satisfy_equals(k, v, operator)
-						# 2) x in (y1, y2, y3) := x = y1 | y2 | y3 -- TODO
-						# 3) if x1 = y1 then x2 = y2 := not (x1=y1) or x2=y2 -- TODO
+						return false if not consistent_with_equals(k, v, operator)
 					}
 					return true
 				end
 
 				# global constraint is AND formula
-				return satisfy_and(@root['global'], operator) if @root['global']['_type'] == 'and'
+				return consistent_with_and(@root['global'], operator) if
+						@root['global']['_type'] == 'and'
 				
 				# global constraint is OR formula
 				total = 0
@@ -645,13 +698,14 @@ puts new_operators.length.to_s + ' new merged-operators'
 				@root['global'].each { |k,v|
 					next if k[0,1] == '_'
 					total += 1
-					satisfied << k if satisfy_and(v, operator)
+					satisfied << k if consistent_with_and(v, operator)
 				}
 				if satisfied.length < total
 					# partial satisfaction or OR formula
 					satisfied.each { |key|
 						# create an operator for each satisfied sub-formula
 						op = operator.clone
+						op.modifier_id = key
 						map_cond = and_equals_constraint_to_map(@root['global'][key])
 						map_cond.each { |k,v|
 							next if k[0,1] == '_'
@@ -664,6 +718,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 							end
 						}
 						@operators[op.name] = op
+						@g_operators << op
 					}
 					# the original operator is not required
 					return false
@@ -954,7 +1009,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 					c_and['_self'] = id
 					c_and.accept(grounder)
 					parent[id] = c_and
-					remove_not_iterator_constraint(c_and)
+					remove_not_and_iterator_constraint(c_and)
 					c_and
 				end
 
@@ -962,7 +1017,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 				# - NOT constraints by transforming them into EQUALS, NOT-EQUALS, AND, OR constraints
 				# - ARRAY-Iterator constraint by extracting all possible values of given ARRAY
 				#
-				def remove_not_iterator_constraint(formula)
+				def remove_not_and_iterator_constraint(formula)
 					# TODO: (not (equals) (not-equals) (and) (or))
 					if formula.isconstraint and formula['_type'] == 'not'
 						formula['_type'] = 'and'
@@ -982,7 +1037,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 										c_not[k1] = v1
 										v1['_parent'] = c_not
 										v.delete(k1)
-										remove_not_iterator_constraint(c_not)
+										remove_not_and_iterator_constraint(c_not)
 									}
 								when 'or'
 									v['_type'] = 'and'
@@ -992,7 +1047,7 @@ puts new_operators.length.to_s + ' new merged-operators'
 										c_not[k1] = v1
 										v1['_parent'] = c_not
 										v.delete(k1)
-										remove_not_iterator_constraint(c_not)
+										remove_not_and_iterator_constraint(c_not)
 									}
 								else
 									raise Exception, 'unknown rules: ' + v['_type']
@@ -1048,19 +1103,149 @@ puts ref + ' -- ' + var
 					else
 						formula.each { |k,v|
 							next if k[0,1] == '_'
-							remove_not_iterator_constraint(v) if v.is_a?(Hash) and v.isconstraint
+							remove_not_and_iterator_constraint(v) if v.is_a?(Hash) and v.isconstraint
 						}
 					end
 				end
 
-				remove_not_iterator_constraint(formula)
-Nuri::Sfp::Parser.dump(formula) if dump
+				def calculate_depth(formula, depth)
+					formula.each { |k,v|
+						next if k[0,1] == '_'
+						depth = calculate_depth(v, depth+1)
+						break
+					}
+					depth
+				end
+
+				def total_element(formula, total=0, total_or=0, total_and=0)
+					formula.each { |k,v|
+						next if k[0,1] == '_'
+						if v['_type'] == 'or'
+							total_or += 1
+						elsif v['_type'] == 'and'
+							total_and += 1
+						else
+#puts v.inspect if v['_type'] == 'equals'
+						end
+						total, total_or, total_and = total_element(v, total+1, total_or, total_and)
+					}
+					[total,total_or,total_and]
+				end
+
+				def visit_and_or_graph(formula, map={}, total=0)
+					if formula['_type'] == 'and'
+						map = map.clone
+						is_end = true
+						formula.each do |k,v|
+							next if k[0,1] == '_'
+							if v['_type'] == 'equals'
+								# bad branch
+								if map.has_key?(k) and map[k] != v['_value']
+#puts 'bad branch'
+									return
+								end
+								map[k] = v['_value']
+							elsif v['_type'] == 'and' or v['_type'] == 'or'
+								is_end = false
+							end
+						end
+
+						if is_end
+							# map is valid conjunction
+#puts '--- is end #1'
+#puts map.inspect
+						else
+							formula.each do |k,v|
+								next if k[0,1] == '_'
+								if v['_type'] == 'and' or v['_type'] == 'or'
+									return visit_and_or_graph(v, map, total)
+								end
+							end
+#puts 'not end'
+						end
+
+					elsif formula['_type'] == 'or'
+						formula.each do |k,v|
+							next if k[0,1] == '_'
+							if v['_type'] == 'equals'
+								# bad branch
+								if map.has_key?(k) and map[k] != v['_value']
+#puts 'bad branch'
+								end
+								final_map = map.clone
+								final_map[k] = v['_value']
+								# map is valid conjunction
+#puts '--- is end #2'
+#puts final_map.inspect
+							elsif v['_type'] == 'and' or v['_type'] == 'or'
+								visit_and_or_graph(v, map, total)
+							end
+						end
+
+					end
+					total
+				end
+
+				remove_not_and_iterator_constraint(formula)
+#Nuri::Sfp::Parser.dump(formula) if dump
+#puts 'step 1' if dump
 				to_and_or_graph(formula)
+#puts 'step 2' if dump
+#puts total_element(formula) if dump
 				not_equals_statement_to_or_constraint(formula)
+#puts 'step 3' if dump
+#puts visit_and_or_graph(formula) if dump
+#Nuri::Sfp::Parser.dump(formula)
+
 				return flatten_and_or_graph(formula)
 			end
 
 		end
+
+=begin
+		class Node
+			def self.generate(constraint)
+				case constraint['_type']
+				when 'equals'
+					NodeEquals.new(constraint['_self'], constraint['_value'])
+				when 'not-equals'
+					NodeNotEquals.new(constraint['_self'], constraint['_value'])
+				when 'or'
+				when 'and'
+				end
+			end
+		end
+
+		class NodeEquals < Node
+			attr_accessor :var, :value
+			def initialize(var, value)
+				@var = var
+				@value = value
+			end
+		end
+
+		class NodeNotEquals < Node
+			attr_accessor :var, :value
+			def initialize(var, value)
+				@var = var
+				@value = value
+			end
+		end
+
+		class NodeOr < Node
+			attr_accessor :children
+			def initialize
+				@children = []
+			end
+		end
+
+		class NodeAnd < Node
+			attr_accessor :children
+			def initialize
+				@children = []
+			end
+		end
+=end
 
 		class VariableNotFoundException < Exception
 		end
@@ -1266,13 +1451,14 @@ Nuri::Sfp::Parser.dump(formula) if dump
 
 		# A class for Grounded Operator
 		class Operator < Hash
-			attr_accessor :id, :name, :cost, :params
+			attr_accessor :id, :name, :cost, :params, :modifier_id
 			attr_reader :ref
 
 			def initialize(ref, cost=1, id=nil)
 				@id = (id == nil ? Nuri::Sfp::Sas.next_operator_id : id)
 				@cost = cost
 				@ref = ref
+				@modifier_id = nil
 				self.update_name
 			end
 
@@ -1287,7 +1473,19 @@ Nuri::Sfp::Parser.dump(formula) if dump
 				@name = 'op_' + @id.to_s + @ref
 			end
 
-			# return true if this requires an effect of given operator
+			# return true if this operator supports given operator's precondition
+			# otherwise return false
+			def supports?(operator)
+				operator.each_value do |p2|
+					# precondition is any value or this operator does not effecting variable 'p2'
+					next if p2.pre == nil or not self.has_key?(p2.var.name) or
+							self[p2.var.name].post == nil
+					return true if self[p2.var.name].post == p2.pre
+				end
+				false
+			end
+
+			# return true if this operator requires an effect of given operator
 			# otherwise return false
 			def requires?(operator)
 				self.each_value do |p1|
@@ -1302,7 +1500,9 @@ Nuri::Sfp::Parser.dump(formula) if dump
 
 			def merge(operator)
 				cost = (@cost > operator.cost ? @cost : operator.cost)
-				op = Operator.new('#' + @name + '+' + operator.name, cost)
+				names = @name.split('#')
+				name = (names.length > 1 ? names[1] : names[0])
+				op = Operator.new('#' + name + '|' + operator.name, cost)
 				self.each_value { |p| op[p.var.name] = p.clone }
 				operator.each_value do |p|
 					if not op.has_key?(p.var.name)
@@ -1312,6 +1512,34 @@ Nuri::Sfp::Parser.dump(formula) if dump
 					end
 				end
 				return op
+			end
+
+			def get_pre_state
+				state = {}
+				self.each_value { |p| state[p.var.name] = p.pre if p.pre != nil }
+				state
+			end
+
+			def get_post_state
+				state = {}
+				self.each_value { |p| state[p.var.name] = p.post if p.post != nil }
+				state
+			end
+
+			# two operators can be parallel if
+			# - their preconditions are non consistent
+			# - their effects are not consistent
+			# - one's during condition is not consistent with another
+			def conflict?(operator)
+				self.each_value do |param1|
+					next if not operator.has_key?(param1.var.name)
+					param2 = operator[param1.var.name]
+					return true if param1.pre != nil and param2.pre != nil and param1.pre != param2.pre
+					return true if param1.post != nil and param2.post != nil and param1.post != param2.post
+					return true if param1.pre != nil and param2.post != nil and param1.pre != param2.post
+					return true if param1.post != nil and param2.pre != nil and param1.post != param2.pre
+				end
+				return false
 			end
 
 			def to_s

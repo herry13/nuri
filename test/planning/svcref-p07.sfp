@@ -20,11 +20,17 @@ initial state {
 	pc2 isa Client {
 		refer is a
 	}
+	pc3 isa Client {
+		refer is a
+	}
 }
 goal constraint {
 	pc1.refer = b
 }
 global constraint {
 	pc1.refer.running = true
+	pc2.refer.running = true
+	pc3.refer.running = true
 	pc2.refer = pc1.refer
+	pc3.refer = pc1.refer
 }
