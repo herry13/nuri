@@ -792,7 +792,10 @@ end
 
 				# transform a first-order formula into AND/OR graph
 				def to_and_or_graph(formula)
-					formula.each { |k,v|
+					keys = formula.keys
+					keys.each { |k|
+						v = formula[k]
+					#formula.each { |k,v|
 						next if k[0,1] == '_'
 						if k.isref and not @variables.has_key?(k)
 							if v.is_a?(Hash) and v.isconstraint
@@ -830,8 +833,11 @@ end
 					# transform formula into a format:
 					#   (x1 and x2) or (y1 and y2 and y3) or z1
 					is_and_or_tree = false
-					formula.each { |k,v|
+					keys = formula.keys
+					keys.each { |k|
+					#formula.each { |k,v|
 						next if k[0,1] == '_'
+						v = formula[k]
 						if v.is_a?(Hash) and v.isconstraint
 							if v['_type'] == 'or' or v['_type'] == 'and'
 								if not flatten_and_or_graph(v)
@@ -842,8 +848,11 @@ end
 
 								if formula['_type'] == v['_type']
 									# pull-out all node's elements
-									v.each { |k1,v1|
+									keys1 = v.keys
+									keys1.each { |k1|
+									#v.each { |k1,v1|
 										next if k1[0,1] == '_'
+										v1 = v[k1]
 										# check contradiction facts
 										if formula.has_key?(k1)
 											return false if formula[k1]['_type'] != v1['_type']
