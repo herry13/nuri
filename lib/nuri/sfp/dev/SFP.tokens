@@ -81,9 +81,9 @@ STRING=5
 '.'=63
 'is'=54
 'delete'=60
-'effects'=34
 'exist'=50
 'total('=58
+'condition'=33
 'extends'=24
 '+='=67
 '{'=20
@@ -104,9 +104,9 @@ STRING=5
 'class'=23
 'new'=59
 'areall'=39
+'effect'=34
 'add('=61
 'within'=44
-'conditions'=33
 ':different'=53
 '='=52
 'constraint'=41

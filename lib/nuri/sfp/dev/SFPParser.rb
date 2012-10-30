@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-10-12 21:09:50
+# Generated at: 2012-10-23 03:45:07
 # 
 
 # ~~~> start load path setup
@@ -96,7 +96,7 @@ module SFP
                     "UNICODE_ESC", "OCTAL_ESC", "'include'", "'state'", 
                     "'{'", "'}'", "'composite'", "'class'", "'extends'", 
                     "'isa'", "'['", "']'", "'if'", "'then'", "'or'", "'operator'", 
-                    "'cost'", "'conditions'", "'effects'", "'procedure'", 
+                    "'cost'", "'condition'", "'effect'", "'procedure'", 
                     "'('", "','", "')'", "'areall'", "'goal'", "'constraint'", 
                     "'always'", "'sometime'", "'within'", "'after'", "'before'", 
                     "'foreach'", "'as'", "'forall'", "'exist'", "'forsome'", 
@@ -2296,8 +2296,8 @@ module SFP
         				'_context' => 'operator',
         				'_parent' => @now,
         				'_cost' => 1,
-        				'_conditions' => { '_context' => 'constraint' },
-        				'_effects' => { '_context' => 'mutation' }
+        				'_condition' => { '_context' => 'constraint' },
+        				'_effect' => { '_context' => 'mutation' }
         			}
         			@now = @now[__ID92__.text]
         		
@@ -2540,7 +2540,7 @@ module SFP
     # parser rule op_conditions
     # 
     # (in SFP.g)
-    # 224:1: op_conditions : 'conditions' '{' ( NL )* ( op_statement )* '}' ( NL )+ ;
+    # 224:1: op_conditions : 'condition' '{' ( NL )* ( op_statement )* '}' ( NL )+ ;
     # 
     def op_conditions
       # -> uncomment the next line to manually enable rule tracing
@@ -2568,7 +2568,7 @@ module SFP
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 225:4: 'conditions' '{' ( NL )* ( op_statement )* '}' ( NL )+
+        # at line 225:4: 'condition' '{' ( NL )* ( op_statement )* '}' ( NL )+
         string_literal107 = match( T__33, TOKENS_FOLLOWING_T__33_IN_op_conditions_663 )
 
         tree_for_string_literal107 = @adaptor.create_with_payload( string_literal107 )
@@ -2579,7 +2579,7 @@ module SFP
         tree_for_char_literal108 = @adaptor.create_with_payload( char_literal108 )
         @adaptor.add_child( root_0, tree_for_char_literal108 )
 
-        # at line 225:21: ( NL )*
+        # at line 225:20: ( NL )*
         while true # decision 46
           alt_46 = 2
           look_46_0 = @input.peek( 1 )
@@ -2590,7 +2590,7 @@ module SFP
           end
           case alt_46
           when 1
-            # at line 225:21: NL
+            # at line 225:20: NL
             __NL109__ = match( NL, TOKENS_FOLLOWING_NL_IN_op_conditions_667 )
 
             tree_for_NL109 = @adaptor.create_with_payload( __NL109__ )
@@ -2603,8 +2603,8 @@ module SFP
         end # loop for decision 46
         # --> action
 
-        			@now['_conditions']['_parent'] = @now
-        			@now = @now['_conditions']
+        			@now['_condition']['_parent'] = @now
+        			@now = @now['_condition']
         		
         # <-- action
         # at line 230:3: ( op_statement )*
@@ -2692,7 +2692,7 @@ module SFP
     # parser rule op_effects
     # 
     # (in SFP.g)
-    # 235:1: op_effects : 'effects' '{' ( NL )* ( op_statement )* '}' ( NL )+ ;
+    # 235:1: op_effects : 'effect' '{' ( NL )* ( op_statement )* '}' ( NL )+ ;
     # 
     def op_effects
       # -> uncomment the next line to manually enable rule tracing
@@ -2720,7 +2720,7 @@ module SFP
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 236:4: 'effects' '{' ( NL )* ( op_statement )* '}' ( NL )+
+        # at line 236:4: 'effect' '{' ( NL )* ( op_statement )* '}' ( NL )+
         string_literal113 = match( T__34, TOKENS_FOLLOWING_T__34_IN_op_effects_699 )
 
         tree_for_string_literal113 = @adaptor.create_with_payload( string_literal113 )
@@ -2731,7 +2731,7 @@ module SFP
         tree_for_char_literal114 = @adaptor.create_with_payload( char_literal114 )
         @adaptor.add_child( root_0, tree_for_char_literal114 )
 
-        # at line 236:18: ( NL )*
+        # at line 236:17: ( NL )*
         while true # decision 49
           alt_49 = 2
           look_49_0 = @input.peek( 1 )
@@ -2742,7 +2742,7 @@ module SFP
           end
           case alt_49
           when 1
-            # at line 236:18: NL
+            # at line 236:17: NL
             __NL115__ = match( NL, TOKENS_FOLLOWING_NL_IN_op_effects_703 )
 
             tree_for_NL115 = @adaptor.create_with_payload( __NL115__ )
@@ -2755,8 +2755,8 @@ module SFP
         end # loop for decision 49
         # --> action
 
-        			@now['_effects']['_parent'] = @now
-        			@now = @now['_effects']
+        			@now['_effect']['_parent'] = @now
+        			@now = @now['_effect']
         		
         # <-- action
         # at line 241:3: ( op_statement )*
@@ -2994,8 +2994,8 @@ module SFP
         				'_context' => 'procedure',
         				'_parent' => @now,
         				'_cost' => 1,
-        				'_conditions' => { '_context' => 'constraint', '_type' => 'and' },
-        				'_effects' => { '_context' => 'mutation', '_type' => 'and' }
+        				'_condition' => { '_context' => 'constraint', '_type' => 'and' },
+        				'_effect' => { '_context' => 'mutation', '_type' => 'and' }
         			}
         			@now = @now[__ID124__.text]
         		
@@ -3391,7 +3391,7 @@ module SFP
     # parser rule conditions
     # 
     # (in SFP.g)
-    # 288:1: conditions : 'conditions' '{' ( NL )* constraint_body '}' ( NL )+ ;
+    # 288:1: conditions : 'condition' '{' ( NL )* constraint_body '}' ( NL )+ ;
     # 
     def conditions
       # -> uncomment the next line to manually enable rule tracing
@@ -3419,7 +3419,7 @@ module SFP
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 289:4: 'conditions' '{' ( NL )* constraint_body '}' ( NL )+
+        # at line 289:4: 'condition' '{' ( NL )* constraint_body '}' ( NL )+
         string_literal146 = match( T__33, TOKENS_FOLLOWING_T__33_IN_conditions_880 )
 
         tree_for_string_literal146 = @adaptor.create_with_payload( string_literal146 )
@@ -3427,8 +3427,8 @@ module SFP
 
         # --> action
 
-        			@now['_conditions']['_parent'] = @now
-        			@now = @now['_conditions']
+        			@now['_condition']['_parent'] = @now
+        			@now = @now['_condition']
         		
         # <-- action
         char_literal147 = match( T__20, TOKENS_FOLLOWING_T__20_IN_conditions_888 )
@@ -3526,7 +3526,7 @@ module SFP
     # parser rule effects
     # 
     # (in SFP.g)
-    # 299:1: effects : 'effects' '{' ( NL )* mutation_body '}' ( NL )+ ;
+    # 299:1: effects : 'effect' '{' ( NL )* mutation_body '}' ( NL )+ ;
     # 
     def effects
       # -> uncomment the next line to manually enable rule tracing
@@ -3554,7 +3554,7 @@ module SFP
         root_0 = @adaptor.create_flat_list
 
 
-        # at line 300:4: 'effects' '{' ( NL )* mutation_body '}' ( NL )+
+        # at line 300:4: 'effect' '{' ( NL )* mutation_body '}' ( NL )+
         string_literal152 = match( T__34, TOKENS_FOLLOWING_T__34_IN_effects_914 )
 
         tree_for_string_literal152 = @adaptor.create_with_payload( string_literal152 )
@@ -3562,8 +3562,8 @@ module SFP
 
         # --> action
 
-        			@now['_effects']['_parent'] = @now
-        			@now = @now['_effects']
+        			@now['_effect']['_parent'] = @now
+        			@now = @now['_effect']
         		
         # <-- action
         char_literal153 = match( T__20, TOKENS_FOLLOWING_T__20_IN_effects_922 )

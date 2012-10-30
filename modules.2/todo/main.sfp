@@ -1,0 +1,6 @@
+include "vm.sfp"
+include "tikiwiki.sfp"
+include "ganglia-apache.sfp"
+include "ganglia-apache-lb.sfp"
+include "ganglia-mysql.sfp"
+

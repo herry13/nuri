@@ -202,8 +202,8 @@ operator
 				'_context' => 'operator',
 				'_parent' => @now,
 				'_cost' => 1,
-				'_conditions' => { '_context' => 'constraint' },
-				'_effects' => { '_context' => 'mutation' }
+				'_condition' => { '_context' => 'constraint' },
+				'_effect' => { '_context' => 'mutation' }
 			}
 			@now = @now[$ID.text]
 		}
@@ -222,10 +222,10 @@ op_param
 	;
 
 op_conditions
-	:	'conditions' '{' NL*
+	:	'condition' '{' NL*
 		{
-			@now['_conditions']['_parent'] = @now
-			@now = @now['_conditions']
+			@now['_condition']['_parent'] = @now
+			@now = @now['_condition']
 		}
 		op_statement*
 		'}' NL+
@@ -233,10 +233,10 @@ op_conditions
 	;
 
 op_effects
-	:	'effects' '{' NL*
+	:	'effect' '{' NL*
 		{
-			@now['_effects']['_parent'] = @now
-			@now = @now['_effects']
+			@now['_effect']['_parent'] = @now
+			@now = @now['_effect']
 		}
 		op_statement*
 		'}' NL+
@@ -255,8 +255,8 @@ procedure
 				'_context' => 'procedure',
 				'_parent' => @now,
 				'_cost' => 1,
-				'_conditions' => { '_context' => 'constraint', '_type' => 'and' },
-				'_effects' => { '_context' => 'mutation', '_type' => 'and' }
+				'_condition' => { '_context' => 'constraint', '_type' => 'and' },
+				'_effect' => { '_context' => 'mutation', '_type' => 'and' }
 			}
 			@now = @now[$ID.text]
 		}
@@ -286,10 +286,10 @@ parameter
 	;
 
 conditions
-	:	'conditions'
+	:	'condition'
 		{
-			@now['_conditions']['_parent'] = @now
-			@now = @now['_conditions']
+			@now['_condition']['_parent'] = @now
+			@now = @now['_condition']
 		}
 		'{' NL* constraint_body '}' NL+
 
@@ -297,10 +297,10 @@ conditions
 	;
 
 effects
-	:	'effects'
+	:	'effect'
 		{
-			@now['_effects']['_parent'] = @now
-			@now = @now['_effects']
+			@now['_effect']['_parent'] = @now
+			@now = @now['_effect']
 		}
 		'{' NL* 
 		mutation_body 

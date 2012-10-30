@@ -1,0 +1,46 @@
+include "apache.sfp"
+include "mysql.sfp"
+
+class TikiWiki {
+	installed  = false
+	version = 0
+	path = "/wiki"
+	webserver isref Apache
+	database isref Mysql
+
+	procedure install {
+		condition {
+			this.webserver.installed = true
+			this.webserver.running = false
+			this.mysql.running = true
+		}
+		effect {
+			this.installed = true
+		}
+	}
+
+	procedure uninstall {
+		condition { }
+		effect {
+			this.installed = true
+		}
+	}
+
+	procedure change_path (target isref String) {
+		condition { }
+		effect {
+			this.path = target
+		}
+	}
+
+	procedure upgrade (target isref Integer) {
+		condition {
+			this.webserver.installed = true
+			this.webserver.running = false
+			this.mysql.running = true
+		}
+		effect {
+			this.version = target
+		}
+	}
+}

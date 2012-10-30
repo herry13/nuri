@@ -1,0 +1,15 @@
+include "service.sfp"
+
+class Mysql extends Service {
+	port = 3306
+	root_password = ""
+
+	procedure change_root_password (passwd isref String) {
+		condition {
+			this.running = true
+		}
+		effect {
+			this.root_password = passwd
+		}
+	}
+}

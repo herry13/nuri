@@ -1,0 +1,46 @@
+class Service {
+	installed = false
+	running = false
+	port = 0
+	
+	procedure install {
+		condition { }
+		effect {
+			this.installed = true
+		}
+	}
+
+	procedure uninstall {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.installed = false
+		}
+	}
+
+	procedure start {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		condition { }
+		effect {
+			this.running = false
+		}
+	}
+
+	procedure change_port (target isref Integer) {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.port = target
+		}
+	}
+}

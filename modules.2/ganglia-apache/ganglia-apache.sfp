@@ -1,0 +1,15 @@
+include "ganglia.sfp"
+include "apache.sfp"
+
+class GangliaApache extends Ganglia {
+	child isref Apache
+
+	procedure start {
+		condition {
+			this.child.installed = true
+		}
+		effect {
+			this.running = true
+		}
+	}
+}

@@ -40,7 +40,7 @@ module Nuri
 			GlobalOperator = '_global_op'
 			GlobalVariable = '_global_var'
 
-			GlobalConstraintMethod = 2 # 1: proposed method, 2: patrik's
+			GlobalConstraintMethod = 1 # 1: proposed method, 2: patrik's, 3: concurrent-actions
 
 			attr_accessor :root, :variables, :types, :operators, :axioms
 
@@ -164,6 +164,7 @@ end
 			end
 
 			def search_and_merge_mutually_inclusive_operators
+				return if GlobalConstraintMethod != 3
 				last = @g_operators.length-1
 				@g_operators.each_index do |i|
 					op1 = @g_operators[i]
@@ -493,7 +494,7 @@ end
 
 				if GlobalConstraintMethod == 1
 					@operators[sas_op.name] = sas_op if apply_global_constraint_method_1(sas_op)
-				elsif GlobalConstraintMethod == 2
+				elsif GlobalConstraintMethod == 2 or GlobalConstraintMethod == 3
 					@operators[sas_op.name] = sas_op if apply_global_constraint_method_2(sas_op)
 				end
 			end
@@ -664,7 +665,7 @@ end
 			end
 
 			# normalize the given first-order formula by transforming it into
-			# CNF formula
+			# DNF 
 			def normalize_formula(formula, dump=false)
 				def create_equals_constraint(value)
 					return {'_context'=>'constraint', '_type'=>'equals', '_value'=>value}

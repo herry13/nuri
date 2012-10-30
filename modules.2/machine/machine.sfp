@@ -1,0 +1,17 @@
+class Machine {
+	running = false
+	
+	procedure start {
+		condition { }
+		effect {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		condition { }
+		effect {
+			this.running = false
+		}
+	}
+}

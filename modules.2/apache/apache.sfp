@@ -1,0 +1,36 @@
+include "service.sfp"
+
+class Apache extends Service {
+	port = 80
+	php_module = false
+	doc_root = "/var/www"
+
+	procedure install_php_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_module = true
+		}
+	}
+
+	procedure uninstall_php_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_module = false
+		}
+	}
+
+	procedure change_doc_root (target isref String) {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.doc_root = target
+		}
+	}
+}
