@@ -60,9 +60,9 @@ begin
 				return nil if not @root.has_key?('initial') or not @root.has_key?('goal')
 
 				@variables = Hash.new
-				@types = { 'Boolean' => [true, false],
-					'Number' => Array.new,
-					'String' => Array.new
+				@types = { '$.Boolean' => [true, false],
+					'$.Integer' => Array.new,
+					'$.String' => Array.new
 				}
 				@operators = Hash.new
 				@axioms = Array.new
@@ -152,9 +152,9 @@ begin
 				# detect and merge mutually inclusive operators
 				self.search_and_merge_mutually_inclusive_operators
 
-				#self.dump_types
-				#self.dump_operators
-				#self.dump_vars
+				self.dump_types
+				self.dump_operators
+				self.dump_vars
 
 				return create_output
 rescue Exception => e
@@ -230,7 +230,7 @@ end
 
 					if GlobalConstraintMethod == 1
 						# dummy variable
-						@global_var = Variable.new(GlobalVariable, 'Boolean', -1, false, true)
+						@global_var = Variable.new(GlobalVariable, '$.Boolean', -1, false, true)
 						@global_var << true
 						@global_var << false
 						@variables[@global_var.name] = @global_var
@@ -263,7 +263,7 @@ end
 				@root['sometime'].each do |k,v|
 					next if k[0,1] == '_'
 					# dummy-variable
-					var = Variable.new('sometime_' + k, 'Boolean', -1, false, true)
+					var = Variable.new('sometime_' + k, '$.Boolean', -1, false, true)
 					var << true
 					var << false
 					@variables[var.name] = var
@@ -284,7 +284,7 @@ end
 				@root['sometime-after'].each do |k,v|
 					next if k[0,1] == '_'
 					# dummy-variable
-					var = Variable.new('sometime_after_' + k, 'Boolean', -1, true, true)
+					var = Variable.new('sometime_after_' + k, '$.Boolean', -1, true, true)
 					var << true
 					var << false
 					@variables[var.name] = var
@@ -308,7 +308,7 @@ end
 					}
 				elsif goal['_type'] == 'or'
 					count = 0
-					var = Variable.new("goal", 'Boolean', -1, false, true)
+					var = Variable.new("goal", '$.Boolean', -1, false, true)
 					var << true
 					var << false
 					@variables[var.name] = var
@@ -518,8 +518,11 @@ end
 				params = Hash.new
 				procedure.each { |k,v|
 					next if k[0,1] == '_'
-					# if the specified parameter does not any value, then it's invalid procedure
+					# if the specified parameter does not have any value,
+					# then it's invalid procedure
+print v['_isa']
 					return nil if not @types.has_key?( v['_isa'] )
+puts ' ok'
 					params[k] = Array.new
 					@types[ v['_isa'] ].each { |val|
 						params[k] << val if not (val.is_a?(Hash) and val.isnull)
@@ -1263,7 +1266,7 @@ end
 			def get_type(name, value, parent)
 				# TODO -- re-evaluate this method
 				type = self.isa?(value)
-				return type if type == 'Boolean' or type == 'Number' or type == 'String'
+				return type if type == '$.Boolean' or type == '$.Integer' or type == '$.String'
 
 				parent_class = @root.at?( @vars[parent.ref].type )
 				return parent_class[name]['_isa']
@@ -1278,9 +1281,9 @@ end
 			end
 
 			def isa?(value)
-				return 'Boolean' if value.is_a?(TrueClass) or value.is_a?(FalseClass)
-				return 'Number' if value.is_a?(Numeric)
-				return 'String' if value.is_a?(String) and not value.isref
+				return '$.Boolean' if value.is_a?(TrueClass) or value.is_a?(FalseClass)
+				return '$.Integer' if value.is_a?(Numeric)
+				return '$.String' if value.is_a?(String) and not value.isref
 				return value['_isa'] if value.is_a?(Hash) and value.has_key?('_isa')
 				return nil
 			end
@@ -1300,11 +1303,11 @@ end
 			def visit(name, value, obj)
 				if name[0,1] == '_' and name != '_value'
 				elsif value.is_a?(String) and not value.isref
-					@bucket['String'] << value
+					@bucket['$.String'] << value
 				elsif value.is_a?(Numeric)
-					@bucket['Number'] << value
+					@bucket['$.Integer'] << value
 				elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
-					@bucket['Boolean'] << value
+					@bucket['$.Boolean'] << value
 				elsif value.is_a?(Hash) and value.isobject
 					value['_classes'].each { |c| @bucket[c] << value }
 				end
@@ -1372,7 +1375,7 @@ end
 				@init = init
 				@goal = goal
 				@is_final = is_final
-				@is_primitive = (type == 'String' or type == 'Number' or type == 'Boolean')
+				@is_primitive = (type == '$.String' or type == '$.Integer' or type == '$.Boolean')
 			end
 
 			def to_s
