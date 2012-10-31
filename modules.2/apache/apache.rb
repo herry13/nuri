@@ -75,7 +75,10 @@ module Nuri
 				return (result == true)
 			end
 		
-			def set_port(p)
+			def set_port(params=nil)
+				return false if params == nil
+puts params.inspect
+				p = params['target']
 				Augeas::open do |aug|
 					aug.set("/files/etc/apache2/ports.conf/*[self::directive='NameVirtualHost']/arg",
 						"*:" + p.to_s)
@@ -86,7 +89,9 @@ module Nuri
 				return false
 			end
 		
-			def set_document_root(dir)
+			def set_document_root(params=nil)
+				return false if params == nil
+puts params.inspect
 				Augeas::open do |aug|
 					aug.set("/files/etc/apache2/sites-available/default/VirtualHost/*[self::directive='DocumentRoot']/arg", dir)
 					return true if aug.save

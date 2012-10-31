@@ -26,7 +26,7 @@ module Nuri
 					if e.is_a?(Interrupt)
 						Nuri::Util.log 'Daemon is stopped with forced!'
 					else
-						Nuri::Util.log 'Client Daemon error: ' + e.backtrace
+						Nuri::Util.log 'Client Daemon error: ' + e.to_s #backtrace.inspect
 					end
 				end
 			end
@@ -68,14 +68,26 @@ module Nuri
 			end
 
 			def execute(procedure)
+				def clean_parameters(params)
+					p = {}
+					params.each { |k,v| p[k[2,k.length-2]] = params[k] }
+					return p
+				end
+
 				cmd = JSON[procedure]
-				puts cmd.inspect
+				params = clean_parameters(cmd['parameters'])
+puts "exec: " + cmd.inspect
 				comp_name, cmd_name = cmd['name'].pop_ref
 				component = @daemon.root.get(comp_name)
 				success = false
 				if component != nil
 					begin
-						component.send(cmd_name)
+						if params.size <= 0
+							component.send(cmd_name)
+						else
+puts 'has params'
+							component.send(cmd_name, params)
+						end
 						success = true
 					rescue Exception => e
 						Nuri::Util.log 'Cannot execute procedure: ' + procedure
