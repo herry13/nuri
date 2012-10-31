@@ -35,7 +35,7 @@ class Service {
 		}
 	}
 
-	procedure set_port (target isref integer) {
+	procedure set_port (target isref Integer) {
 		condition {
 			this.running = false
 		}
