@@ -1,9 +1,9 @@
-include "service.sfp"
+include "modules/service/service.sfp"
 
 class Apache extends Service {
 	port = 80
 	php_module = false
-	doc_root = "/var/www"
+	document_root = "/var/www"
 
 	procedure install_php_module {
 		condition {
@@ -25,12 +25,12 @@ class Apache extends Service {
 		}
 	}
 
-	procedure change_doc_root (target isref String) {
+	procedure set_document_root (target isref String) {
 		condition {
 			this.running = false
 		}
 		effect {
-			this.doc_root = target
+			this.document_root = target
 		}
 	}
 }

@@ -34,8 +34,8 @@ module Nuri
 		end
 
 		def self.hostname
-			ip = self.local_ip
-			return `uname -n`.split('.')[0] if ip == nil or ip == ''
+			name = `uname -n`.chop
+			return name if name != ''
 			return Socket.getaddrinfo(ip, 0, Socket::AF_UNSPEC, Socket::SOCK_STREAM,
 				nil, Socket::AI_CANONNAME)[0][2].split('.')[0]
 		end

@@ -12,7 +12,7 @@ def cli
 
 options:
   main             print the content of 'main.sfp'
-  state            print the current state of this node
+  state [details]  print the current state of this node
   pull             pull and print the current state of all managed nodes
   plan             generate a workflow to achieve the goal state
   apply            apply a workflow to achieve the goal state
@@ -35,12 +35,15 @@ options:
 	elsif ARGV[1] == 'state'
 		client = Nuri::Client::Daemon.new
 		state = client.get_state
+		state = {} if state == nil
+		state.accept(Nuri::Sfp::PrettyStateGenerator.new) if
+				ARGV.length < 3 or ARGV[2] != 'details'
 		puts Nuri::Sfp.to_pretty_json(state) if state != nil
 
 	elsif ARGV[1] == 'pull'
 		state = Nuri::Master.state
 		if state != nil
-			state.accept(Nuri::Sfp::PrettyStateGenerator.new) if ARGV[2] != 'full'
+			state.accept(Nuri::Sfp::PrettyStateGenerator.new) if ARGV[2] != 'details'
 			puts Nuri::Sfp.to_pretty_json(state)
 		end
 

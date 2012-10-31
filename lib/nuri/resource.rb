@@ -1,18 +1,19 @@
 module Nuri
 	module Resource
 		attr_accessor :name, :parent
-		attr_reader :children, :state, :goal
+		attr_reader :children, :state, :is_abstract, :goal
 
-		def load(class_path, name=nil)
+		def load(class_path, name=nil, is_abstract=false)
 			@name = name
 			@children = Hash.new
 			@state = self.create_instance(class_path)
 			@goal = {}
+			@is_abstract = is_abstract
 		end
 
 		def create_instance(class_path)
 			return {} if class_path == nil or class_path == ''
-			# TODO
+
 			class_path = class_path.to_s if not class_path.is_a?(String)
 			class_path = "$.#{class_path}" if not class_path.isref
 			root = Nuri::Resource.get_root
@@ -88,15 +89,43 @@ module Nuri
 			return true
 		end
 
-		def get_state(path='')
-			@state = Hash.new
-			@children.each_value { |m| @state[m.name] = m.get_state }
-			if path == '' or path == nil
-				return @state
+		def get_state(path=nil)
+			return self.get_all_state if path == nil or path.strip == ''
+
+			path.strip!
+			first, nextpath = path.split('/', 2)
+			if @children[first] != nil
+				state = @children[first].get_state
+				return self.path_value(state, nextpath)
 			else
-				value = get(path)
-				return value.get_state if value.respond_to?('get_state')
-				return value
+				return self.path_value(@state, path)
+			end
+
+			# not found
+			return Nuri::Undefined.new
+		end
+
+		def get_all_state
+			self.get_my_state
+			# get state of children components
+			@children.each_pair { |name,mod| @state[name] = mod.get_state }
+
+			return @state
+		end
+
+		def get_my_state
+			# all components must implement this method
+		end
+
+		def get_path_value(state, path)
+			return state if path == nil or path == ''
+			return Nuri::Undefined.new if not state.is_a?(Hash)
+			first, nextpath = path.split('/', 2)
+			if state.has_key?(first)
+				return self.get_path_value(state[first], nextpath)
+			else
+				# not found
+				return Nuri::Undefined.new
 			end
 		end
 
@@ -128,35 +157,6 @@ module Nuri
 			return nil
 		end
 
-		#def set_goal(goals)
-			#goals.each { |g|
-			#	ref, value = g
-			#	puts ref + ": " + self.get(ref).to_s
-			#	puts self.set(ref, value)
-			#}
-		#end
-=begin
-		def set_goal(path, value)
-			if path == nil or path == '' or path == '/'
-				value.each_pair { |key,val|
-					if @children.has_key?(key)
-						@children[key].set_goal('/', val)
-					else
-						@goal[key] = val
-					end
-				}
-			else
-				first, nextpath = path.split('/', 2)
-				if @children.has_key?(first)
-					@children[first].set_goal(nextpath, value)
-				elsif nextpath == nil or nextpath == ''
-					@goal[first] = value
-				else
-					raise Exception
-				end
-			end
-		end
-=end
 	end
 
 	class Root

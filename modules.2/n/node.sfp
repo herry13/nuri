@@ -1,0 +1,12 @@
+class Node {
+	hostname is ""
+	domainname is ""
+	os is ""
+	platform is ""
+	arch is ""
+	release is ""
+	memory_total is 0
+	memory_free is 0
+	cpus is 0
+
+}

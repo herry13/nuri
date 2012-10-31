@@ -11,7 +11,7 @@ require 'nuri/undefined'
 require 'nuri/sfp/main'
 require 'nuri/planner/main'
 # Nuri modules
-require 'modules/node/node'
+require 'modules/machine/machine'
 
 module Nuri
 	module Config
@@ -25,7 +25,7 @@ module Nuri
 
 		def get_main
 			begin
-				main = "include \"modules/node/node.sfp\"\n"
+				main = 'include "modules/machine/machine.sfp"' + "\n"
 				self.get_modules.each do |mod|
 					main += "include \"" + Nuri::Util.home_dir + "/modules/#{mod}/#{mod}.sfp\"\n"
 				end
@@ -68,7 +68,7 @@ module Nuri
 			modules_dir = Nuri::Util.home_dir + "/modules"
 			modules = Array.new
 			Dir.foreach(modules_dir) do |mod|
-				next if mod == 'node' or  mod[0,1] == '.'
+				next if mod == 'machine' or  mod[0,1] == '.'
 				path = modules_dir + "/" + mod
 				modules << mod if File.directory?(path) and
 						File.file?(path + "/" + mod + ".sfp") and
@@ -86,17 +86,17 @@ module Nuri
 			# create dummy root
 			@root = Nuri::Root.new
 
-			# load module 'Node'
-			node = Nuri::Module::Node.new
-			@root.add(node)
+			# load module "Machine"
+			machine = Nuri::Module::Machine.new
+			@root.add(machine)
 
-			# load other modules and put them as node's children
+			# load other modules and put them as machine's children
 			self.get_modules.each do |mod|
 				begin
 					require 'modules/' + mod + '/' + mod
 					m = eval("Nuri::Module::" + mod.capitalize + ".new")
 					m.name = mod if m.name == nil or m.name == ''
-					node.add(m) 
+					machine.add(m) if not m.is_abstract
 					Nuri::Util.log "Successfully load module " + mod
 				rescue Exception => exp
 					Nuri::Util.log.error "Cannot load module " + mod + " -- " + exp.to_s
