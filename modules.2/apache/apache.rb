@@ -13,7 +13,7 @@ module Nuri
 			end
 	
 			# get state of this component in JSON
-			def get_my_state
+			def get_self_state
 				# installed & running
 				data = `/usr/bin/dpkg-query -W apache2`
 				data = data.split(' ')

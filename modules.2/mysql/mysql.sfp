@@ -1,10 +1,10 @@
-include "service.sfp"
+include "modules/service/service.sfp"
 
 class Mysql extends Service {
 	port = 3306
 	root_password = ""
 
-	procedure change_root_password (passwd isref String) {
+	procedure set_root_password (passwd isref String) {
 		condition {
 			this.running = true
 		}

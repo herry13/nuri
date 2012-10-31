@@ -106,14 +106,14 @@ module Nuri
 		end
 
 		def get_all_state
-			self.get_my_state
+			self.get_self_state
 			# get state of children components
 			@children.each_pair { |name,mod| @state[name] = mod.get_state }
 
 			return @state
 		end
 
-		def get_my_state
+		def get_self_state
 			# all components must implement this method
 		end
 
