@@ -2,8 +2,18 @@ include "modules/service/service.sfp"
 
 class Apache extends Service {
 	port = 80
-	php_module = false
 	document_root = "/var/www"
+	php_module = false
+	php_mysql_module = false
+
+	procedure set_document_root (target isref String) {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.document_root = target
+		}
+	}
 
 	procedure install_php_module {
 		condition {
@@ -17,7 +27,6 @@ class Apache extends Service {
 
 	procedure uninstall_php_module {
 		condition {
-			this.installed = true
 			this.running = false
 		}
 		effect {
@@ -25,12 +34,22 @@ class Apache extends Service {
 		}
 	}
 
-	procedure set_document_root (target isref String) {
+	procedure install_php_mysql_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_mysql_module = true
+		}
+	}
+
+	procedure uninstall_php_mysql_module {
 		condition {
 			this.running = false
 		}
 		effect {
-			this.document_root = target
+			this.php_mysql_module = false
 		}
 	}
 }

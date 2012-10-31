@@ -14,10 +14,20 @@ module Nuri
 	
 			# get state of this component in JSON
 			def get_self_state
+				# php module
+				data = `/usr/bin/dpkg-query -W libapache2-mod-php5 2> /dev/null`.chop
+				data = data.split(' ')
+				@state['php_module'] = (data.length > 1 and data[0] == 'libapache2-mod-php5')
+
+				# php_mysql module
+				data = `/usr/bin/dpkg-query -W php5-mysql 2> /dev/null`
+				data = data.split(' ')
+				@state['php_mysql_module'] = (data.length > 1 and data[0] == 'php5-mysql')
+
 				# installed & running
 				data = `/usr/bin/dpkg-query -W apache2`
 				data = data.split(' ')
-				@state["installed"] = data.length > 1 and data[0] == 'apache2'
+				@state["installed"] = (data.length > 1 and data[0] == 'apache2')
 				if @state["installed"]
 					@state["version"] = data[1]
 					data = `/usr/bin/service apache2 status`
@@ -56,7 +66,7 @@ module Nuri
 			end
 		
 			def uninstall
-				result = system('/usr/bin/apt-get -y remove apache2')
+				result = system('/usr/bin/apt-get -y --purge remove apache2')
 				system('/usr/bin/apt-get -y autoremove') if (result == true)
 				return (result == true)
 			end
@@ -98,14 +108,26 @@ module Nuri
 				return false
 			end
 
+			def install_php_mysql_module
+				result = system('/usr/bin/apt-get -y install php5-mysql')
+				return (result == true)
+			end
+
+			def uninstall_php_mysql_module
+				result = system('/usr/bin/apt-get -y --purge remove php5-mysql')
+				system('/usr/bin/apt-get -y autoremove') if (result == true)
+				return (result == true)
+			end
+
 			def install_php_module
-				# TODO
-				return false
+				result = system('/usr/bin/apt-get -y install libapache2-mod-php5')
+				return (result == true)
 			end
 
 			def uninstall_php_module
-				# TODO
-				return false
+				result = system('/usr/bin/apt-get -y --purge remove libapache2-mod-php5')
+				system('/usr/bin/apt-get -y autoremove') if (result == true)
+				return (result == true)
 			end
 		end
 	end
