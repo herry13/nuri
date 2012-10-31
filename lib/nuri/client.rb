@@ -23,7 +23,11 @@ module Nuri
 					Nuri::Util.log 'Start Nuri Client on port: ' + port.to_s
 					@http.run.join
 				rescue Exception => e
-					Nuri::Util.log 'Client Daemon error: ' + e.to_s
+					if e.is_a?(Interrupt)
+						Nuri::Util.log 'Daemon is stopped with forced!'
+					else
+						Nuri::Util.log 'Client Daemon error: ' + e.backtrace
+					end
 				end
 			end
 
@@ -31,7 +35,7 @@ module Nuri
 				Nuri::Client::Agent.new(self, req, res).serve
 			end
 			
-			def get_state(path='')
+			def get_state(path=nil)
 				return @root.get_state(path)
 			end
 		end
