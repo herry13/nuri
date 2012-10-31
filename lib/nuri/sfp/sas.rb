@@ -1525,7 +1525,11 @@ end
 				id, name = @name.split('$', 2)
 				sfw = { 'name' => '$' + name, 'parameters' => {},
 					'condition' => {}, 'effect' => {} }
-				@params.each { |k,v|	sfw['parameters'][k.to_s] = v.to_s if k != '$.this' } if @params != nil
+
+				@params.each { |k,v|
+					sfw['parameters'][k.to_s] = v if k != '$.this'
+				} if @params != nil
+
 				self.each_value do |param|
 					next if param.var.name == Nuri::Sfp::Sas::GlobalVariable
 					p = param.to_sfw
