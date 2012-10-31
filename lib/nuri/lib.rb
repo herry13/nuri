@@ -17,6 +17,8 @@ module Nuri
 	module Config
 		attr_reader :config, :root
 
+		MainComponent = '$.Machine'
+
 		def load(client=true)
 			self.read_config
 			Nuri::Resource.set_root(self.get_main)

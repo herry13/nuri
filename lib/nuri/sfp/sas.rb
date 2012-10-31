@@ -198,8 +198,10 @@ end
 				@variables.each_value do |var|
 					next if not var.is_final
 					var.init.each do |k1,v1|
-						next if k1[0,1] == '_' or not v1.is_a?(Hash) or not v1.isprocedure
-						v1['_effects'].each do |k2,v2|
+						next if k1[0,1] == '_' or
+								not v1.is_a?(Hash) or
+								not v1.isprocedure
+						v1['_effect'].each do |k2,v2|
 							next if k2[0,1] == '_' or not k2.isref
 							if is_this(k2)
 								vname = var.name + k2[6..k2.length-1]
@@ -459,15 +461,15 @@ end
 			# process given operator
 			def process_operator(op)
 				# return if given operator is not valid
-				return if not normalize_formula(op['_conditions'])
+				return if not normalize_formula(op['_condition'])
 				# at this step, the conditions formula has been normalized (AND/OR tree)
 				# AND conditions
-				if op['_conditions']['_type'] == 'and'
-					process_grounded_operator(op, op['_conditions'], op['_effects'])
+				if op['_condition']['_type'] == 'and'
+					process_grounded_operator(op, op['_condition'], op['_effect'])
 				else
-					op['_conditions'].each { |k,v|
+					op['_condition'].each { |k,v|
 						next if k[0,1] == '_'
-						process_grounded_operator(op, v, op['_effects'])
+						process_grounded_operator(op, v, op['_effect'])
 					}
 				end
 			end
@@ -532,8 +534,8 @@ end
 						selected['$.this'] = procedure['_parent'].ref
 						selected.each { |k,v| selected[k] = (v.is_a?(Hash) ? v.ref : v) }
 						grounder.map = selected
-						p['_conditions'].accept(grounder)
-						p['_effects'].accept(grounder)
+						p['_condition'].accept(grounder)
+						p['_effect'].accept(grounder)
 						p['_context'] = 'operator'
 						p['_parameters'] = selected.clone
 						# remove parameters because it's already grounded
@@ -1516,12 +1518,13 @@ end
 			def to_sfw
 				id, name = @name.split('$', 2)
 				sfw = { 'name' => '$' + name, 'parameters' => {},
-					'conditions' => {}, 'effects' => {} }
+					'condition' => {}, 'effect' => {} }
 				@params.each { |k,v|	sfw['parameters'][k.to_s] = v.to_s if k != '$.this' } if @params != nil
 				self.each_value do |param|
+					next if param.var.name == Nuri::Sfp::Sas::GlobalVariable
 					p = param.to_sfw
-					sfw['conditions'][ p['name'] ] = p['pre'] if p['pre'] != nil
-					sfw['effects'][ p['name'] ] = p['post'] if p['post'] != nil
+					sfw['condition'][ p['name'] ] = p['pre'] if p['pre'] != nil
+					sfw['effect'][ p['name'] ] = p['post'] if p['post'] != nil
 				end
 				return sfw
 			end

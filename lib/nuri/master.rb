@@ -16,8 +16,7 @@ module Nuri
 			def get_plan(state=nil)
 				sfp = Nuri::Sfp.deep_clone(@main)
 				sfp.delete('system')
-				sfp['initial'] = (state == nil ? self.get_state :
-						Nuri::Sfp.deep_clone(state))
+				sfp['initial'] = (state == nil ? self.get_state : Nuri::Sfp.deep_clone(state))
 				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 				planner = Nuri::Planner::Solver.new
 				return planner.solve_sfp_to_json(sfp)
@@ -25,9 +24,11 @@ module Nuri
 
 			def get_state(path='')
 				return nil if not @main.has_key?('system')
+
 				current_state = {'_context'=>'state', '_self'=>'initial'}
 				@main['system'].each do |key,node|
-					next if key[0,1] == '_' or not node['_isa'] == '$.Node' or
+					next if key[0,1] == '_' or
+							node['_classes'].rindex(MainComponent) == nil or
 							node['domainname'] == ''
 					state = self.get_child_state(node['domainname'])
 					if state != nil
@@ -65,7 +66,11 @@ puts JSON.pretty_generate(plan)
 				if plan['workflow'] != nil
 					plan['workflow'].each do |action|
 						node = self.get_node(action['name'], @main['system'])
-						succeed = self.execute(action, node['domainname']) if node != nil
+						if node == nil
+							succeed = false
+						else
+							succeed = self.execute(action, node['domainname'])
+						end
 						break if not succeed
 					end
 				end
@@ -75,7 +80,7 @@ puts JSON.pretty_generate(plan)
 			def execute(action, address)
 				def verify(action)
 					state = get_state
-					action['effects'].each do |key,value|
+					action['effect'].each do |key,value|
 						raise Nuri::ExecutionFailedException, action['name'] if state.at?(key) != value
 puts '...OK'
 					end
@@ -103,7 +108,7 @@ puts '...FAILED'
 				while path != '$'
 					path = path.to_top
 					n = root.at?(path)
-					return n if n != nil and n['_isa'] == '$.Node'
+					return n if n != nil and n['_classes'].rindex(MainComponent) != nil
 				end
 			end
 		end
@@ -117,7 +122,7 @@ puts '...FAILED'
 			master.apply
 		end
 
-		def self.state
+		def self.pull
 			master = Nuri::Master::Daemon.new
 			return master.get_state
 		end

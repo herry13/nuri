@@ -13,7 +13,7 @@ def cli
 options:
   main             print the content of 'main.sfp'
   state [details]  print the current state of this node
-  pull             pull and print the current state of all managed nodes
+  pull [details]   pull and print the current state of all managed nodes
   plan             generate a workflow to achieve the goal state
   apply            apply a workflow to achieve the goal state
   planner <file>   solve an SFp planning problem in <file> and print the solution
@@ -41,7 +41,7 @@ options:
 		puts Nuri::Sfp.to_pretty_json(state) if state != nil
 
 	elsif ARGV[1] == 'pull'
-		state = Nuri::Master.state
+		state = Nuri::Master.pull
 		if state != nil
 			state.accept(Nuri::Sfp::PrettyStateGenerator.new) if ARGV[2] != 'details'
 			puts Nuri::Sfp.to_pretty_json(state)
