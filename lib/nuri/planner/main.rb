@@ -43,10 +43,9 @@ module Nuri
 			def sequential_plan_to_sfw(seq)
 				plan = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
 				return plan if seq == nil
-
 				plan['workflow'] = []
 				seq.each do |line|
-					op_name = line[1, line.length-2]
+					op_name = line[1, line.length-2].split(' ')[0]
 					operator = @parser.operators[op_name]
 					raise Exception, 'Cannot find operator: ' + op_name if operator == nil
 					plan['workflow'] << operator.to_sfw

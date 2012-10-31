@@ -1,3 +1,8 @@
+# 31-10-2012
+# - rename primitive types: $.Boolean, $.Integer, $.String
+# - set SFp to only recognise integer value
+# - enable primitive type as procedure's parameter
+#
 # 14-10-2012
 # - find and reduce the domain of immutable variables
 #
@@ -152,9 +157,9 @@ begin
 				# detect and merge mutually inclusive operators
 				self.search_and_merge_mutually_inclusive_operators
 
-				self.dump_types
-				self.dump_operators
-				self.dump_vars
+				#self.dump_types
+				#self.dump_operators
+				#self.dump_vars
 
 				return create_output
 rescue Exception => e
@@ -520,9 +525,7 @@ end
 					next if k[0,1] == '_'
 					# if the specified parameter does not have any value,
 					# then it's invalid procedure
-print v['_isa']
 					return nil if not @types.has_key?( v['_isa'] )
-puts ' ok'
 					params[k] = Array.new
 					@types[ v['_isa'] ].each { |val|
 						params[k] << val if not (val.is_a?(Hash) and val.isnull)

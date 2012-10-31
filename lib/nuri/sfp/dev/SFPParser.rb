@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-10-23 03:45:07
+# Generated at: 2012-10-31 02:49:01
 # 
 
 # ~~~> start load path setup
@@ -66,21 +66,21 @@ module SFP
   module TokenData
 
     # define the token constants
-    define_tokens( :T__68 => 68, :T__69 => 69, :T__66 => 66, :EXPONENT => 11, 
+    define_tokens( :T__68 => 68, :T__69 => 69, :T__66 => 66, :EXPONENT => 14, 
                    :T__67 => 67, :T__64 => 64, :T__29 => 29, :T__65 => 65, 
                    :T__28 => 28, :T__62 => 62, :T__27 => 27, :T__63 => 63, 
                    :T__26 => 26, :T__25 => 25, :T__24 => 24, :T__23 => 23, 
                    :T__22 => 22, :T__21 => 21, :T__20 => 20, :OCTAL_ESC => 17, 
                    :ID => 6, :T__61 => 61, :T__60 => 60, :EOF => -1, :T__55 => 55, 
                    :T__19 => 19, :T__56 => 56, :T__57 => 57, :T__58 => 58, 
-                   :ESC_SEQ => 14, :BOOLEAN => 9, :T__51 => 51, :T__52 => 52, 
+                   :ESC_SEQ => 13, :BOOLEAN => 9, :T__51 => 51, :T__52 => 52, 
                    :T__18 => 18, :T__53 => 53, :T__54 => 54, :T__59 => 59, 
-                   :NL => 4, :COMMENT => 12, :T__50 => 50, :T__42 => 42, 
+                   :NL => 4, :COMMENT => 11, :T__50 => 50, :T__42 => 42, 
                    :T__43 => 43, :T__40 => 40, :T__41 => 41, :T__46 => 46, 
                    :T__47 => 47, :T__44 => 44, :T__45 => 45, :T__48 => 48, 
                    :T__49 => 49, :UNICODE_ESC => 16, :NULL => 8, :NUMBER => 7, 
                    :HEX_DIGIT => 15, :MULTILINE_STRING => 10, :T__30 => 30, 
-                   :T__31 => 31, :T__32 => 32, :WS => 13, :T__71 => 71, 
+                   :T__31 => 31, :T__32 => 32, :WS => 12, :T__71 => 71, 
                    :T__33 => 33, :T__72 => 72, :T__34 => 34, :T__35 => 35, 
                    :T__70 => 70, :T__36 => 36, :T__37 => 37, :T__38 => 38, 
                    :T__39 => 39, :T__74 => 74, :T__73 => 73, :STRING => 5 )
@@ -92,7 +92,7 @@ module SFP
     # created from literal values in the grammar, do not
     # have descriptive names
     register_names( "NL", "STRING", "ID", "NUMBER", "NULL", "BOOLEAN", "MULTILINE_STRING", 
-                    "EXPONENT", "COMMENT", "WS", "ESC_SEQ", "HEX_DIGIT", 
+                    "COMMENT", "WS", "ESC_SEQ", "EXPONENT", "HEX_DIGIT", 
                     "UNICODE_ESC", "OCTAL_ESC", "'include'", "'state'", 
                     "'{'", "'}'", "'composite'", "'class'", "'extends'", 
                     "'isa'", "'['", "']'", "'if'", "'then'", "'or'", "'operator'", 
@@ -6668,7 +6668,7 @@ module SFP
           @adaptor.add_child( root_0, tree_for_NUMBER315 )
 
           # --> action
-          	return_value.val = __NUMBER315__.text.to_f	
+          	return_value.val = __NUMBER315__.text.to_i	
           # <-- action
 
         when 2
@@ -7351,7 +7351,7 @@ module SFP
           			return_value.key = ( reference342.nil? ? nil : reference342.val )
           			return_value.val = { '_context' => 'mutation',
           				'_type' => ( binary_op343 && @input.to_s( binary_op343.start, binary_op343.stop ) ),
-          				'_value' => __NUMBER344__.text.to_f
+          				'_value' => __NUMBER344__.text.to_i
           			}
           		
           # <-- action
@@ -7865,7 +7865,7 @@ module SFP
 
           # --> action
 
-          			return_value.val = __NUMBER370__.text.to_f
+          			return_value.val = __NUMBER370__.text.to_i
           			return_value.type = 'Number'
           		
           # <-- action

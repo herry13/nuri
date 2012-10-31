@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-10-23 03:45:08
+# Generated at: 2012-10-31 02:49:02
 # 
 
 # ~~~> start load path setup
@@ -67,21 +67,21 @@ module SFP
 
     # define the token constants
     define_tokens( :T__68 => 68, :T__69 => 69, :T__66 => 66, :T__67 => 67, 
-                   :EXPONENT => 11, :T__29 => 29, :T__64 => 64, :T__28 => 28, 
+                   :EXPONENT => 14, :T__29 => 29, :T__64 => 64, :T__28 => 28, 
                    :T__65 => 65, :T__27 => 27, :T__62 => 62, :T__26 => 26, 
                    :T__63 => 63, :T__25 => 25, :T__24 => 24, :T__23 => 23, 
                    :T__22 => 22, :T__21 => 21, :T__20 => 20, :OCTAL_ESC => 17, 
                    :ID => 6, :T__61 => 61, :EOF => -1, :T__60 => 60, :T__55 => 55, 
                    :T__19 => 19, :T__56 => 56, :T__57 => 57, :T__58 => 58, 
-                   :ESC_SEQ => 14, :BOOLEAN => 9, :T__51 => 51, :T__52 => 52, 
+                   :ESC_SEQ => 13, :BOOLEAN => 9, :T__51 => 51, :T__52 => 52, 
                    :T__18 => 18, :T__53 => 53, :T__54 => 54, :T__59 => 59, 
-                   :NL => 4, :COMMENT => 12, :T__50 => 50, :T__42 => 42, 
+                   :NL => 4, :COMMENT => 11, :T__50 => 50, :T__42 => 42, 
                    :T__43 => 43, :T__40 => 40, :T__41 => 41, :T__46 => 46, 
                    :T__47 => 47, :T__44 => 44, :T__45 => 45, :T__48 => 48, 
                    :T__49 => 49, :NULL => 8, :UNICODE_ESC => 16, :NUMBER => 7, 
                    :HEX_DIGIT => 15, :MULTILINE_STRING => 10, :T__30 => 30, 
                    :T__31 => 31, :T__32 => 32, :T__33 => 33, :T__71 => 71, 
-                   :WS => 13, :T__34 => 34, :T__72 => 72, :T__35 => 35, 
+                   :WS => 12, :T__34 => 34, :T__72 => 72, :T__35 => 35, 
                    :T__36 => 36, :T__70 => 70, :T__37 => 37, :T__38 => 38, 
                    :T__39 => 39, :T__74 => 74, :T__73 => 73, :STRING => 5 )
     
@@ -1685,222 +1685,46 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 887:2: ( ( '-' )? ( '0' .. '9' )+ | ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT )
-      alt_15 = 4
-      alt_15 = @dfa15.predict( @input )
-      case alt_15
+      # at line 887:4: ( '-' )? ( '0' .. '9' )+
+      # at line 887:4: ( '-' )?
+      alt_4 = 2
+      look_4_0 = @input.peek( 1 )
+
+      if ( look_4_0 == 0x2d )
+        alt_4 = 1
+      end
+      case alt_4
       when 1
-        # at line 887:4: ( '-' )? ( '0' .. '9' )+
-        # at line 887:4: ( '-' )?
-        alt_4 = 2
-        look_4_0 = @input.peek( 1 )
-
-        if ( look_4_0 == 0x2d )
-          alt_4 = 1
-        end
-        case alt_4
-        when 1
-          # at line 887:4: '-'
-          match( 0x2d )
-
-        end
-        # at file 887:8: ( '0' .. '9' )+
-        match_count_5 = 0
-        while true
-          alt_5 = 2
-          look_5_0 = @input.peek( 1 )
-
-          if ( look_5_0.between?( 0x30, 0x39 ) )
-            alt_5 = 1
-
-          end
-          case alt_5
-          when 1
-            # at line 887:9: '0' .. '9'
-            match_range( 0x30, 0x39 )
-
-          else
-            match_count_5 > 0 and break
-            eee = EarlyExit(5)
-
-
-            raise eee
-          end
-          match_count_5 += 1
-        end
-
-
-      when 2
-        # at line 888:4: ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )?
-        # at line 888:4: ( '-' )?
-        alt_6 = 2
-        look_6_0 = @input.peek( 1 )
-
-        if ( look_6_0 == 0x2d )
-          alt_6 = 1
-        end
-        case alt_6
-        when 1
-          # at line 888:4: '-'
-          match( 0x2d )
-
-        end
-        # at file 888:8: ( '0' .. '9' )+
-        match_count_7 = 0
-        while true
-          alt_7 = 2
-          look_7_0 = @input.peek( 1 )
-
-          if ( look_7_0.between?( 0x30, 0x39 ) )
-            alt_7 = 1
-
-          end
-          case alt_7
-          when 1
-            # at line 888:9: '0' .. '9'
-            match_range( 0x30, 0x39 )
-
-          else
-            match_count_7 > 0 and break
-            eee = EarlyExit(7)
-
-
-            raise eee
-          end
-          match_count_7 += 1
-        end
-
-        match( 0x2e )
-        # at line 888:22: ( '0' .. '9' )*
-        while true # decision 8
-          alt_8 = 2
-          look_8_0 = @input.peek( 1 )
-
-          if ( look_8_0.between?( 0x30, 0x39 ) )
-            alt_8 = 1
-
-          end
-          case alt_8
-          when 1
-            # at line 888:23: '0' .. '9'
-            match_range( 0x30, 0x39 )
-
-          else
-            break # out of loop for decision 8
-          end
-        end # loop for decision 8
-        # at line 888:34: ( EXPONENT )?
-        alt_9 = 2
-        look_9_0 = @input.peek( 1 )
-
-        if ( look_9_0 == 0x45 || look_9_0 == 0x65 )
-          alt_9 = 1
-        end
-        case alt_9
-        when 1
-          # at line 888:34: EXPONENT
-          exponent!
-
-        end
-
-      when 3
-        # at line 889:4: ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )?
-        # at line 889:4: ( '-' )?
-        alt_10 = 2
-        look_10_0 = @input.peek( 1 )
-
-        if ( look_10_0 == 0x2d )
-          alt_10 = 1
-        end
-        case alt_10
-        when 1
-          # at line 889:4: '-'
-          match( 0x2d )
-
-        end
-        match( 0x2e )
-        # at file 889:11: ( '0' .. '9' )+
-        match_count_11 = 0
-        while true
-          alt_11 = 2
-          look_11_0 = @input.peek( 1 )
-
-          if ( look_11_0.between?( 0x30, 0x39 ) )
-            alt_11 = 1
-
-          end
-          case alt_11
-          when 1
-            # at line 889:12: '0' .. '9'
-            match_range( 0x30, 0x39 )
-
-          else
-            match_count_11 > 0 and break
-            eee = EarlyExit(11)
-
-
-            raise eee
-          end
-          match_count_11 += 1
-        end
-
-        # at line 889:23: ( EXPONENT )?
-        alt_12 = 2
-        look_12_0 = @input.peek( 1 )
-
-        if ( look_12_0 == 0x45 || look_12_0 == 0x65 )
-          alt_12 = 1
-        end
-        case alt_12
-        when 1
-          # at line 889:23: EXPONENT
-          exponent!
-
-        end
-
-      when 4
-        # at line 890:4: ( '-' )? ( '0' .. '9' )+ EXPONENT
-        # at line 890:4: ( '-' )?
-        alt_13 = 2
-        look_13_0 = @input.peek( 1 )
-
-        if ( look_13_0 == 0x2d )
-          alt_13 = 1
-        end
-        case alt_13
-        when 1
-          # at line 890:4: '-'
-          match( 0x2d )
-
-        end
-        # at file 890:8: ( '0' .. '9' )+
-        match_count_14 = 0
-        while true
-          alt_14 = 2
-          look_14_0 = @input.peek( 1 )
-
-          if ( look_14_0.between?( 0x30, 0x39 ) )
-            alt_14 = 1
-
-          end
-          case alt_14
-          when 1
-            # at line 890:9: '0' .. '9'
-            match_range( 0x30, 0x39 )
-
-          else
-            match_count_14 > 0 and break
-            eee = EarlyExit(14)
-
-
-            raise eee
-          end
-          match_count_14 += 1
-        end
-
-        exponent!
+        # at line 887:4: '-'
+        match( 0x2d )
 
       end
+      # at file 887:8: ( '0' .. '9' )+
+      match_count_5 = 0
+      while true
+        alt_5 = 2
+        look_5_0 = @input.peek( 1 )
+
+        if ( look_5_0.between?( 0x30, 0x39 ) )
+          alt_5 = 1
+
+        end
+        case alt_5
+        when 1
+          # at line 887:9: '0' .. '9'
+          match_range( 0x30, 0x39 )
+
+        else
+          match_count_5 > 0 and break
+          eee = EarlyExit(5)
+
+
+          raise eee
+        end
+        match_count_5 += 1
+      end
+
+
       
       @state.type = type
       @state.channel = channel
@@ -1922,41 +1746,41 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 894:2: ( '//' (~ ( '\\n' | '\\r' ) )* | '#' (~ ( '\\n' | '\\r' ) )* | '/*' ( options {greedy=false; } : . )* '*/' )
-      alt_19 = 3
-      look_19_0 = @input.peek( 1 )
+      # at line 898:2: ( '//' (~ ( '\\n' | '\\r' ) )* | '#' (~ ( '\\n' | '\\r' ) )* | '/*' ( options {greedy=false; } : . )* '*/' )
+      alt_9 = 3
+      look_9_0 = @input.peek( 1 )
 
-      if ( look_19_0 == 0x2f )
-        look_19_1 = @input.peek( 2 )
+      if ( look_9_0 == 0x2f )
+        look_9_1 = @input.peek( 2 )
 
-        if ( look_19_1 == 0x2f )
-          alt_19 = 1
-        elsif ( look_19_1 == 0x2a )
-          alt_19 = 3
+        if ( look_9_1 == 0x2f )
+          alt_9 = 1
+        elsif ( look_9_1 == 0x2a )
+          alt_9 = 3
         else
-          raise NoViableAlternative( "", 19, 1 )
+          raise NoViableAlternative( "", 9, 1 )
         end
-      elsif ( look_19_0 == 0x23 )
-        alt_19 = 2
+      elsif ( look_9_0 == 0x23 )
+        alt_9 = 2
       else
-        raise NoViableAlternative( "", 19, 0 )
+        raise NoViableAlternative( "", 9, 0 )
       end
-      case alt_19
+      case alt_9
       when 1
-        # at line 894:4: '//' (~ ( '\\n' | '\\r' ) )*
+        # at line 898:4: '//' (~ ( '\\n' | '\\r' ) )*
         match( "//" )
-        # at line 894:9: (~ ( '\\n' | '\\r' ) )*
-        while true # decision 16
-          alt_16 = 2
-          look_16_0 = @input.peek( 1 )
+        # at line 898:9: (~ ( '\\n' | '\\r' ) )*
+        while true # decision 6
+          alt_6 = 2
+          look_6_0 = @input.peek( 1 )
 
-          if ( look_16_0.between?( 0x0, 0x9 ) || look_16_0.between?( 0xb, 0xc ) || look_16_0.between?( 0xe, 0xffff ) )
-            alt_16 = 1
+          if ( look_6_0.between?( 0x0, 0x9 ) || look_6_0.between?( 0xb, 0xc ) || look_6_0.between?( 0xe, 0xffff ) )
+            alt_6 = 1
 
           end
-          case alt_16
+          case alt_6
           when 1
-            # at line 894:9: ~ ( '\\n' | '\\r' )
+            # at line 898:9: ~ ( '\\n' | '\\r' )
             if @input.peek( 1 ).between?( 0x0, 0x9 ) || @input.peek( 1 ).between?( 0xb, 0xc ) || @input.peek( 1 ).between?( 0xe, 0xff )
               @input.consume
             else
@@ -1968,28 +1792,28 @@ module SFP
 
 
           else
-            break # out of loop for decision 16
+            break # out of loop for decision 6
           end
-        end # loop for decision 16
+        end # loop for decision 6
         # --> action
         channel=HIDDEN;
         # <-- action
 
       when 2
-        # at line 895:4: '#' (~ ( '\\n' | '\\r' ) )*
+        # at line 899:4: '#' (~ ( '\\n' | '\\r' ) )*
         match( 0x23 )
-        # at line 895:8: (~ ( '\\n' | '\\r' ) )*
-        while true # decision 17
-          alt_17 = 2
-          look_17_0 = @input.peek( 1 )
+        # at line 899:8: (~ ( '\\n' | '\\r' ) )*
+        while true # decision 7
+          alt_7 = 2
+          look_7_0 = @input.peek( 1 )
 
-          if ( look_17_0.between?( 0x0, 0x9 ) || look_17_0.between?( 0xb, 0xc ) || look_17_0.between?( 0xe, 0xffff ) )
-            alt_17 = 1
+          if ( look_7_0.between?( 0x0, 0x9 ) || look_7_0.between?( 0xb, 0xc ) || look_7_0.between?( 0xe, 0xffff ) )
+            alt_7 = 1
 
           end
-          case alt_17
+          case alt_7
           when 1
-            # at line 895:8: ~ ( '\\n' | '\\r' )
+            # at line 899:8: ~ ( '\\n' | '\\r' )
             if @input.peek( 1 ).between?( 0x0, 0x9 ) || @input.peek( 1 ).between?( 0xb, 0xc ) || @input.peek( 1 ).between?( 0xe, 0xff )
               @input.consume
             else
@@ -2001,43 +1825,43 @@ module SFP
 
 
           else
-            break # out of loop for decision 17
+            break # out of loop for decision 7
           end
-        end # loop for decision 17
+        end # loop for decision 7
         # --> action
         channel=HIDDEN;
         # <-- action
 
       when 3
-        # at line 896:4: '/*' ( options {greedy=false; } : . )* '*/'
+        # at line 900:4: '/*' ( options {greedy=false; } : . )* '*/'
         match( "/*" )
-        # at line 896:9: ( options {greedy=false; } : . )*
-        while true # decision 18
-          alt_18 = 2
-          look_18_0 = @input.peek( 1 )
+        # at line 900:9: ( options {greedy=false; } : . )*
+        while true # decision 8
+          alt_8 = 2
+          look_8_0 = @input.peek( 1 )
 
-          if ( look_18_0 == 0x2a )
-            look_18_1 = @input.peek( 2 )
+          if ( look_8_0 == 0x2a )
+            look_8_1 = @input.peek( 2 )
 
-            if ( look_18_1 == 0x2f )
-              alt_18 = 2
-            elsif ( look_18_1.between?( 0x0, 0x2e ) || look_18_1.between?( 0x30, 0xffff ) )
-              alt_18 = 1
+            if ( look_8_1 == 0x2f )
+              alt_8 = 2
+            elsif ( look_8_1.between?( 0x0, 0x2e ) || look_8_1.between?( 0x30, 0xffff ) )
+              alt_8 = 1
 
             end
-          elsif ( look_18_0.between?( 0x0, 0x29 ) || look_18_0.between?( 0x2b, 0xffff ) )
-            alt_18 = 1
+          elsif ( look_8_0.between?( 0x0, 0x29 ) || look_8_0.between?( 0x2b, 0xffff ) )
+            alt_8 = 1
 
           end
-          case alt_18
+          case alt_8
           when 1
-            # at line 896:37: .
+            # at line 900:37: .
             match_any
 
           else
-            break # out of loop for decision 18
+            break # out of loop for decision 8
           end
-        end # loop for decision 18
+        end # loop for decision 8
         match( "*/" )
         # --> action
         channel=HIDDEN;
@@ -2065,28 +1889,28 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 900:4: 'r\"' ( options {greedy=false; } : . )* '\"'
+      # at line 904:4: 'r\"' ( options {greedy=false; } : . )* '\"'
       match( "r\"" )
-      # at line 900:9: ( options {greedy=false; } : . )*
-      while true # decision 20
-        alt_20 = 2
-        look_20_0 = @input.peek( 1 )
+      # at line 904:9: ( options {greedy=false; } : . )*
+      while true # decision 10
+        alt_10 = 2
+        look_10_0 = @input.peek( 1 )
 
-        if ( look_20_0 == 0x22 )
-          alt_20 = 2
-        elsif ( look_20_0.between?( 0x0, 0x21 ) || look_20_0.between?( 0x23, 0xffff ) )
-          alt_20 = 1
+        if ( look_10_0 == 0x22 )
+          alt_10 = 2
+        elsif ( look_10_0.between?( 0x0, 0x21 ) || look_10_0.between?( 0x23, 0xffff ) )
+          alt_10 = 1
 
         end
-        case alt_20
+        case alt_10
         when 1
-          # at line 900:37: .
+          # at line 904:37: .
           match_any
 
         else
-          break # out of loop for decision 20
+          break # out of loop for decision 10
         end
-      end # loop for decision 20
+      end # loop for decision 10
       match( 0x22 )
 
       
@@ -2110,17 +1934,17 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 903:6: ( '\\r' )? '\\n'
-      # at line 903:6: ( '\\r' )?
-      alt_21 = 2
-      look_21_0 = @input.peek( 1 )
+      # at line 907:6: ( '\\r' )? '\\n'
+      # at line 907:6: ( '\\r' )?
+      alt_11 = 2
+      look_11_0 = @input.peek( 1 )
 
-      if ( look_21_0 == 0xd )
-        alt_21 = 1
+      if ( look_11_0 == 0xd )
+        alt_11 = 1
       end
-      case alt_21
+      case alt_11
       when 1
-        # at line 903:6: '\\r'
+        # at line 907:6: '\\r'
         match( 0xd )
 
       end
@@ -2147,7 +1971,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 906:8: ( ' ' | '\\t' )
+      # at line 910:8: ( ' ' | '\\t' )
       if @input.peek(1) == 0x9 || @input.peek(1) == 0x20
         @input.consume
       else
@@ -2182,26 +2006,26 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 910:5: '\"' ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )* '\"'
+      # at line 914:5: '\"' ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )* '\"'
       match( 0x22 )
-      # at line 910:9: ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )*
-      while true # decision 22
-        alt_22 = 3
-        look_22_0 = @input.peek( 1 )
+      # at line 914:9: ( ESC_SEQ | ~ ( '\\\\' | '\"' ) )*
+      while true # decision 12
+        alt_12 = 3
+        look_12_0 = @input.peek( 1 )
 
-        if ( look_22_0 == 0x5c )
-          alt_22 = 1
-        elsif ( look_22_0.between?( 0x0, 0x21 ) || look_22_0.between?( 0x23, 0x5b ) || look_22_0.between?( 0x5d, 0xffff ) )
-          alt_22 = 2
+        if ( look_12_0 == 0x5c )
+          alt_12 = 1
+        elsif ( look_12_0.between?( 0x0, 0x21 ) || look_12_0.between?( 0x23, 0x5b ) || look_12_0.between?( 0x5d, 0xffff ) )
+          alt_12 = 2
 
         end
-        case alt_22
+        case alt_12
         when 1
-          # at line 910:11: ESC_SEQ
+          # at line 914:11: ESC_SEQ
           esc_seq!
 
         when 2
-          # at line 910:21: ~ ( '\\\\' | '\"' )
+          # at line 914:21: ~ ( '\\\\' | '\"' )
           if @input.peek( 1 ).between?( 0x0, 0x21 ) || @input.peek( 1 ).between?( 0x23, 0x5b ) || @input.peek( 1 ).between?( 0x5d, 0xff )
             @input.consume
           else
@@ -2213,9 +2037,9 @@ module SFP
 
 
         else
-          break # out of loop for decision 22
+          break # out of loop for decision 12
         end
-      end # loop for decision 22
+      end # loop for decision 12
       match( 0x22 )
 
       
@@ -2236,7 +2060,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 914:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
+      # at line 918:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
       if @input.peek(1) == 0x45 || @input.peek(1) == 0x65
         @input.consume
       else
@@ -2246,14 +2070,14 @@ module SFP
       end
 
 
-      # at line 914:22: ( '+' | '-' )?
-      alt_23 = 2
-      look_23_0 = @input.peek( 1 )
+      # at line 918:22: ( '+' | '-' )?
+      alt_13 = 2
+      look_13_0 = @input.peek( 1 )
 
-      if ( look_23_0 == 0x2b || look_23_0 == 0x2d )
-        alt_23 = 1
+      if ( look_13_0 == 0x2b || look_13_0 == 0x2d )
+        alt_13 = 1
       end
-      case alt_23
+      case alt_13
       when 1
         # at line 
         if @input.peek(1) == 0x2b || @input.peek(1) == 0x2d
@@ -2267,29 +2091,29 @@ module SFP
 
 
       end
-      # at file 914:33: ( '0' .. '9' )+
-      match_count_24 = 0
+      # at file 918:33: ( '0' .. '9' )+
+      match_count_14 = 0
       while true
-        alt_24 = 2
-        look_24_0 = @input.peek( 1 )
+        alt_14 = 2
+        look_14_0 = @input.peek( 1 )
 
-        if ( look_24_0.between?( 0x30, 0x39 ) )
-          alt_24 = 1
+        if ( look_14_0.between?( 0x30, 0x39 ) )
+          alt_14 = 1
 
         end
-        case alt_24
+        case alt_14
         when 1
-          # at line 914:34: '0' .. '9'
+          # at line 918:34: '0' .. '9'
           match_range( 0x30, 0x39 )
 
         else
-          match_count_24 > 0 and break
-          eee = EarlyExit(24)
+          match_count_14 > 0 and break
+          eee = EarlyExit(14)
 
 
           raise eee
         end
-        match_count_24 += 1
+        match_count_14 += 1
       end
 
 
@@ -2307,7 +2131,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 917:13: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
+      # at line 921:13: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
       if @input.peek( 1 ).between?( 0x30, 0x39 ) || @input.peek( 1 ).between?( 0x41, 0x46 ) || @input.peek( 1 ).between?( 0x61, 0x66 )
         @input.consume
       else
@@ -2332,24 +2156,24 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 921:2: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
-      alt_25 = 3
-      look_25_0 = @input.peek( 1 )
+      # at line 925:2: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
+      alt_15 = 3
+      look_15_0 = @input.peek( 1 )
 
-      if ( look_25_0 == 0x5c )
-        case look_25 = @input.peek( 2 )
-        when 0x22, 0x27, 0x5c, 0x62, 0x66, 0x6e, 0x72, 0x74 then alt_25 = 1
-        when 0x75 then alt_25 = 2
-        when 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 then alt_25 = 3
+      if ( look_15_0 == 0x5c )
+        case look_15 = @input.peek( 2 )
+        when 0x22, 0x27, 0x5c, 0x62, 0x66, 0x6e, 0x72, 0x74 then alt_15 = 1
+        when 0x75 then alt_15 = 2
+        when 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 then alt_15 = 3
         else
-          raise NoViableAlternative( "", 25, 1 )
+          raise NoViableAlternative( "", 15, 1 )
         end
       else
-        raise NoViableAlternative( "", 25, 0 )
+        raise NoViableAlternative( "", 15, 0 )
       end
-      case alt_25
+      case alt_15
       when 1
-        # at line 921:6: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
+        # at line 925:6: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
         match( 0x5c )
         if @input.peek(1) == 0x22 || @input.peek(1) == 0x27 || @input.peek(1) == 0x5c || @input.peek(1) == 0x62 || @input.peek(1) == 0x66 || @input.peek(1) == 0x6e || @input.peek(1) == 0x72 || @input.peek(1) == 0x74
           @input.consume
@@ -2362,11 +2186,11 @@ module SFP
 
 
       when 2
-        # at line 922:6: UNICODE_ESC
+        # at line 926:6: UNICODE_ESC
         unicode_esc!
 
       when 3
-        # at line 923:6: OCTAL_ESC
+        # at line 927:6: OCTAL_ESC
         octal_esc!
 
       end
@@ -2384,75 +2208,75 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 928:2: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
-      alt_26 = 3
-      look_26_0 = @input.peek( 1 )
+      # at line 932:2: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+      alt_16 = 3
+      look_16_0 = @input.peek( 1 )
 
-      if ( look_26_0 == 0x5c )
-        look_26_1 = @input.peek( 2 )
+      if ( look_16_0 == 0x5c )
+        look_16_1 = @input.peek( 2 )
 
-        if ( look_26_1.between?( 0x30, 0x33 ) )
-          look_26_2 = @input.peek( 3 )
+        if ( look_16_1.between?( 0x30, 0x33 ) )
+          look_16_2 = @input.peek( 3 )
 
-          if ( look_26_2.between?( 0x30, 0x37 ) )
-            look_26_4 = @input.peek( 4 )
+          if ( look_16_2.between?( 0x30, 0x37 ) )
+            look_16_4 = @input.peek( 4 )
 
-            if ( look_26_4.between?( 0x30, 0x37 ) )
-              alt_26 = 1
+            if ( look_16_4.between?( 0x30, 0x37 ) )
+              alt_16 = 1
             else
-              alt_26 = 2
+              alt_16 = 2
             end
           else
-            alt_26 = 3
+            alt_16 = 3
           end
-        elsif ( look_26_1.between?( 0x34, 0x37 ) )
-          look_26_3 = @input.peek( 3 )
+        elsif ( look_16_1.between?( 0x34, 0x37 ) )
+          look_16_3 = @input.peek( 3 )
 
-          if ( look_26_3.between?( 0x30, 0x37 ) )
-            alt_26 = 2
+          if ( look_16_3.between?( 0x30, 0x37 ) )
+            alt_16 = 2
           else
-            alt_26 = 3
+            alt_16 = 3
           end
         else
-          raise NoViableAlternative( "", 26, 1 )
+          raise NoViableAlternative( "", 16, 1 )
         end
       else
-        raise NoViableAlternative( "", 26, 0 )
+        raise NoViableAlternative( "", 16, 0 )
       end
-      case alt_26
+      case alt_16
       when 1
-        # at line 928:6: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+        # at line 932:6: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
         match( 0x5c )
-        # at line 928:11: ( '0' .. '3' )
-        # at line 928:12: '0' .. '3'
+        # at line 932:11: ( '0' .. '3' )
+        # at line 932:12: '0' .. '3'
         match_range( 0x30, 0x33 )
 
-        # at line 928:22: ( '0' .. '7' )
-        # at line 928:23: '0' .. '7'
+        # at line 932:22: ( '0' .. '7' )
+        # at line 932:23: '0' .. '7'
         match_range( 0x30, 0x37 )
 
-        # at line 928:33: ( '0' .. '7' )
-        # at line 928:34: '0' .. '7'
+        # at line 932:33: ( '0' .. '7' )
+        # at line 932:34: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
       when 2
-        # at line 929:6: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
+        # at line 933:6: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
         match( 0x5c )
-        # at line 929:11: ( '0' .. '7' )
-        # at line 929:12: '0' .. '7'
+        # at line 933:11: ( '0' .. '7' )
+        # at line 933:12: '0' .. '7'
         match_range( 0x30, 0x37 )
 
-        # at line 929:22: ( '0' .. '7' )
-        # at line 929:23: '0' .. '7'
+        # at line 933:22: ( '0' .. '7' )
+        # at line 933:23: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
       when 3
-        # at line 930:6: '\\\\' ( '0' .. '7' )
+        # at line 934:6: '\\\\' ( '0' .. '7' )
         match( 0x5c )
-        # at line 930:11: ( '0' .. '7' )
-        # at line 930:12: '0' .. '7'
+        # at line 934:11: ( '0' .. '7' )
+        # at line 934:12: '0' .. '7'
         match_range( 0x30, 0x37 )
 
 
@@ -2471,7 +2295,7 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 935:6: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
+      # at line 939:6: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
       match( 0x5c )
       match( 0x75 )
       hex_digit!
@@ -2494,9 +2318,9 @@ module SFP
     # build and emit the actual next token
     def token!
       # at line 1:8: ( T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | T__26 | T__27 | T__28 | T__29 | T__30 | T__31 | T__32 | T__33 | T__34 | T__35 | T__36 | T__37 | T__38 | T__39 | T__40 | T__41 | T__42 | T__43 | T__44 | T__45 | T__46 | T__47 | T__48 | T__49 | T__50 | T__51 | T__52 | T__53 | T__54 | T__55 | T__56 | T__57 | T__58 | T__59 | T__60 | T__61 | T__62 | T__63 | T__64 | T__65 | T__66 | T__67 | T__68 | T__69 | T__70 | T__71 | T__72 | T__73 | T__74 | NULL | BOOLEAN | ID | NUMBER | COMMENT | MULTILINE_STRING | NL | WS | STRING )
-      alt_27 = 66
-      alt_27 = @dfa27.predict( @input )
-      case alt_27
+      alt_17 = 66
+      alt_17 = @dfa17.predict( @input )
+      case alt_17
       when 1
         # at line 1:10: T__18
         t__18!
@@ -2766,120 +2590,88 @@ module SFP
 
     
     # - - - - - - - - - - DFA definitions - - - - - - - - - - -
-    class DFA15 < ANTLR3::DFA
-      EOT = unpack( 2, -1, 1, 4, 4, -1 )
-      EOF = unpack( 7, -1 )
-      MIN = unpack( 1, 45, 2, 46, 4, -1 )
-      MAX = unpack( 2, 57, 1, 101, 4, -1 )
-      ACCEPT = unpack( 3, -1, 1, 3, 1, 1, 1, 2, 1, 4 )
-      SPECIAL = unpack( 7, -1 )
-      TRANSITION = [
-        unpack( 1, 1, 1, 3, 1, -1, 10, 2 ),
-        unpack( 1, 3, 1, -1, 10, 2 ),
-        unpack( 1, 5, 1, -1, 10, 2, 11, -1, 1, 6, 31, -1, 1, 6 ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  )
-      ].freeze
-      
-      ( 0 ... MIN.length ).zip( MIN, MAX ) do | i, a, z |
-        if a > 0 and z < 0
-          MAX[ i ] %= 0x10000
-        end
-      end
-      
-      @decision = 15
-      
-
-      def description
-        <<-'__dfa_description__'.strip!
-          886:1: NUMBER : ( ( '-' )? ( '0' .. '9' )+ | ( '-' )? ( '0' .. '9' )+ '.' ( '0' .. '9' )* ( EXPONENT )? | ( '-' )? '.' ( '0' .. '9' )+ ( EXPONENT )? | ( '-' )? ( '0' .. '9' )+ EXPONENT );
-        __dfa_description__
-      end
-    end
-    class DFA27 < ANTLR3::DFA
+    class DFA17 < ANTLR3::DFA
       EOT = unpack( 1, -1, 2, 34, 2, -1, 2, 34, 2, -1, 3, 34, 3, -1, 5, 
-                    34, 2, -1, 3, 34, 1, 74, 5, -1, 1, 78, 1, 80, 1, 34, 
-                    6, -1, 1, 83, 1, 88, 1, 89, 9, 34, 1, 102, 2, 34, 1, 
-                    105, 4, 34, 1, 110, 6, 34, 1, 105, 5, 34, 8, -1, 2, 
-                    34, 1, -1, 1, 125, 3, 34, 2, -1, 12, 34, 1, -1, 1, 34, 
-                    1, 105, 1, -1, 4, 34, 1, -1, 6, 34, 1, 155, 1, 156, 
-                    1, 34, 1, 158, 2, 34, 1, 105, 1, 34, 1, -1, 1, 162, 
-                    5, 34, 1, 168, 6, 34, 1, 175, 1, 34, 1, 105, 5, 34, 
-                    1, -1, 1, 182, 6, 34, 2, -1, 1, 158, 1, -1, 3, 34, 1, 
-                    -1, 1, 192, 1, 193, 1, 194, 2, 34, 1, -1, 2, 34, 1, 
-                    199, 1, 34, 1, 201, 1, 34, 1, -1, 5, 34, 1, 208, 1, 
-                    -1, 5, 34, 1, 105, 3, 34, 3, -1, 4, 34, 1, -1, 1, 34, 
-                    1, -1, 1, 222, 1, -1, 2, 34, 1, 225, 1, 226, 1, -1, 
-                    1, 227, 1, 228, 1, 34, 1, 230, 1, 34, 1, 232, 1, 34, 
-                    1, 234, 4, 34, 1, 239, 1, -1, 2, 34, 4, -1, 1, 242, 
-                    1, -1, 1, 243, 3, -1, 1, 244, 3, 34, 1, -1, 1, 248, 
-                    1, 34, 3, -1, 1, 250, 1, 251, 1, 34, 1, -1, 1, 253, 
-                    2, -1, 1, 254, 2, -1 )
-      EOF = unpack( 255, -1 )
+                    34, 2, -1, 3, 34, 6, -1, 1, 77, 1, 79, 1, 34, 6, -1, 
+                    1, 82, 1, 87, 1, 88, 9, 34, 1, 101, 2, 34, 1, 104, 4, 
+                    34, 1, 109, 6, 34, 1, 104, 5, 34, 7, -1, 2, 34, 1, -1, 
+                    1, 124, 3, 34, 2, -1, 12, 34, 1, -1, 1, 34, 1, 104, 
+                    1, -1, 4, 34, 1, -1, 6, 34, 1, 154, 1, 155, 1, 34, 1, 
+                    157, 2, 34, 1, 104, 1, 34, 1, -1, 1, 161, 5, 34, 1, 
+                    167, 6, 34, 1, 174, 1, 34, 1, 104, 5, 34, 1, -1, 1, 
+                    181, 6, 34, 2, -1, 1, 157, 1, -1, 3, 34, 1, -1, 1, 191, 
+                    1, 192, 1, 193, 2, 34, 1, -1, 2, 34, 1, 198, 1, 34, 
+                    1, 200, 1, 34, 1, -1, 5, 34, 1, 207, 1, -1, 5, 34, 1, 
+                    104, 3, 34, 3, -1, 4, 34, 1, -1, 1, 34, 1, -1, 1, 221, 
+                    1, -1, 2, 34, 1, 224, 1, 225, 1, -1, 1, 226, 1, 227, 
+                    1, 34, 1, 229, 1, 34, 1, 231, 1, 34, 1, 233, 4, 34, 
+                    1, 238, 1, -1, 2, 34, 4, -1, 1, 241, 1, -1, 1, 242, 
+                    3, -1, 1, 243, 3, 34, 1, -1, 1, 247, 1, 34, 3, -1, 1, 
+                    249, 1, 250, 1, 34, 1, -1, 1, 252, 2, -1, 1, 253, 2, 
+                    -1 )
+      EOF = unpack( 254, -1 )
       MIN = unpack( 1, 9, 1, 102, 1, 111, 2, -1, 1, 108, 1, 102, 2, -1, 
                     1, 104, 1, 102, 1, 114, 3, -1, 1, 100, 1, 111, 1, 105, 
-                    1, 101, 1, 97, 2, -1, 2, 101, 1, 34, 1, 48, 2, -1, 1, 
-                    46, 1, -1, 1, 42, 2, 61, 1, 101, 6, -1, 3, 45, 1, 97, 
-                    2, 109, 1, 97, 1, 105, 1, 102, 1, 101, 1, 116, 1, 117, 
-                    1, 45, 1, 101, 1, 102, 1, 45, 1, 111, 1, 101, 1, 119, 
-                    1, 116, 1, 45, 1, 100, 1, 97, 1, 116, 1, 102, 1, 114, 
-                    1, 108, 1, 45, 1, 119, 3, 108, 1, 109, 8, -1, 1, 115, 
-                    1, 108, 1, -1, 1, 45, 1, 116, 2, 101, 2, -1, 1, 116, 
-                    1, 101, 1, 112, 1, 116, 1, 100, 1, 115, 1, 101, 1, 115, 
-                    1, 101, 1, 110, 1, 97, 1, 101, 1, -1, 1, 114, 1, 45, 
-                    1, -1, 1, 99, 2, 97, 1, 101, 1, -1, 1, 40, 1, 108, 1, 
-                    104, 1, 111, 1, 97, 1, 115, 2, 45, 1, 108, 1, 45, 1, 
-                    101, 1, 111, 1, 45, 1, 117, 1, -1, 1, 45, 1, 102, 1, 
-                    116, 1, 101, 1, 116, 1, 111, 1, 45, 1, 105, 1, 116, 
-                    1, 115, 1, 110, 1, 116, 1, 99, 1, 45, 1, 108, 1, 45, 
-                    1, 97, 1, 101, 1, 108, 1, 121, 1, 114, 1, -1, 1, 45, 
-                    1, 105, 1, 114, 1, 97, 1, 108, 1, 111, 1, 101, 2, -1, 
-                    1, 45, 1, -1, 1, 116, 1, 118, 1, 100, 1, -1, 3, 45, 
-                    1, 105, 1, 115, 1, -1, 1, 116, 1, 114, 1, 45, 1, 100, 
-                    1, 45, 1, 116, 1, -1, 1, 40, 1, 116, 1, 100, 1, 108, 
-                    1, 115, 1, 45, 1, -1, 1, 110, 1, 101, 1, 99, 1, 108, 
-                    1, 109, 1, 45, 3, 101, 3, -1, 1, 109, 2, 105, 1, 97, 
-                    1, -1, 1, 115, 1, -1, 1, 45, 1, -1, 1, 111, 1, 117, 
-                    2, 45, 1, -1, 2, 45, 1, 104, 1, 45, 1, 101, 1, 45, 1, 
-                    40, 1, 45, 1, 101, 1, 116, 1, 111, 1, 105, 1, 45, 1, 
-                    -1, 2, 114, 4, -1, 1, 45, 1, -1, 1, 45, 3, -1, 1, 45, 
-                    1, 101, 2, 110, 1, -1, 1, 45, 1, 101, 3, -1, 2, 45, 
-                    1, 116, 1, -1, 1, 45, 2, -1, 1, 45, 2, -1 )
+                    1, 101, 1, 97, 2, -1, 2, 101, 1, 34, 3, -1, 1, 48, 1, 
+                    -1, 1, 42, 2, 61, 1, 101, 6, -1, 3, 45, 1, 97, 2, 109, 
+                    1, 97, 1, 105, 1, 102, 1, 101, 1, 116, 1, 117, 1, 45, 
+                    1, 101, 1, 102, 1, 45, 1, 111, 1, 101, 1, 119, 1, 116, 
+                    1, 45, 1, 100, 1, 97, 1, 116, 1, 102, 1, 114, 1, 108, 
+                    1, 45, 1, 119, 3, 108, 1, 109, 7, -1, 1, 115, 1, 108, 
+                    1, -1, 1, 45, 1, 116, 2, 101, 2, -1, 1, 116, 1, 101, 
+                    1, 112, 1, 116, 1, 100, 1, 115, 1, 101, 1, 115, 1, 101, 
+                    1, 110, 1, 97, 1, 101, 1, -1, 1, 114, 1, 45, 1, -1, 
+                    1, 99, 2, 97, 1, 101, 1, -1, 1, 40, 1, 108, 1, 104, 
+                    1, 111, 1, 97, 1, 115, 2, 45, 1, 108, 1, 45, 1, 101, 
+                    1, 111, 1, 45, 1, 117, 1, -1, 1, 45, 1, 102, 1, 116, 
+                    1, 101, 1, 116, 1, 111, 1, 45, 1, 105, 1, 116, 1, 115, 
+                    1, 110, 1, 116, 1, 99, 1, 45, 1, 108, 1, 45, 1, 97, 
+                    1, 101, 1, 108, 1, 121, 1, 114, 1, -1, 1, 45, 1, 105, 
+                    1, 114, 1, 97, 1, 108, 1, 111, 1, 101, 2, -1, 1, 45, 
+                    1, -1, 1, 116, 1, 118, 1, 100, 1, -1, 3, 45, 1, 105, 
+                    1, 115, 1, -1, 1, 116, 1, 114, 1, 45, 1, 100, 1, 45, 
+                    1, 116, 1, -1, 1, 40, 1, 116, 1, 100, 1, 108, 1, 115, 
+                    1, 45, 1, -1, 1, 110, 1, 101, 1, 99, 1, 108, 1, 109, 
+                    1, 45, 3, 101, 3, -1, 1, 109, 2, 105, 1, 97, 1, -1, 
+                    1, 115, 1, -1, 1, 45, 1, -1, 1, 111, 1, 117, 2, 45, 
+                    1, -1, 2, 45, 1, 104, 1, 45, 1, 101, 1, 45, 1, 40, 1, 
+                    45, 1, 101, 1, 116, 1, 111, 1, 105, 1, 45, 1, -1, 2, 
+                    114, 4, -1, 1, 45, 1, -1, 1, 45, 3, -1, 1, 45, 1, 101, 
+                    2, 110, 1, -1, 1, 45, 1, 101, 3, -1, 2, 45, 1, 116, 
+                    1, -1, 1, 45, 2, -1, 1, 45, 2, -1 )
       MAX = unpack( 1, 125, 1, 115, 1, 116, 2, -1, 1, 111, 1, 120, 2, -1, 
                     3, 114, 3, -1, 1, 115, 1, 111, 1, 105, 1, 101, 1, 111, 
-                    2, -1, 1, 117, 2, 101, 1, 57, 2, -1, 1, 61, 1, -1, 3, 
-                    61, 1, 101, 6, -1, 3, 122, 1, 97, 1, 109, 1, 115, 1, 
-                    97, 1, 116, 1, 102, 1, 101, 1, 116, 1, 117, 1, 122, 
-                    1, 101, 1, 102, 1, 122, 1, 111, 1, 101, 1, 119, 1, 116, 
-                    1, 122, 1, 100, 1, 97, 1, 116, 1, 102, 1, 114, 1, 108, 
-                    1, 122, 1, 119, 3, 108, 1, 109, 8, -1, 1, 115, 1, 108, 
-                    1, -1, 1, 122, 1, 116, 2, 101, 2, -1, 1, 116, 1, 101, 
-                    1, 112, 1, 116, 2, 115, 1, 101, 1, 115, 1, 101, 1, 110, 
-                    1, 97, 1, 101, 1, -1, 1, 114, 1, 122, 1, -1, 1, 99, 
-                    2, 97, 1, 101, 1, -1, 1, 40, 1, 108, 1, 104, 1, 111, 
-                    2, 115, 2, 122, 1, 108, 1, 122, 1, 101, 1, 111, 1, 122, 
-                    1, 117, 1, -1, 1, 122, 1, 102, 1, 116, 1, 101, 1, 116, 
-                    1, 111, 1, 122, 1, 105, 1, 116, 1, 115, 1, 110, 1, 116, 
-                    1, 99, 1, 122, 1, 108, 1, 122, 1, 97, 1, 101, 1, 108, 
-                    1, 121, 1, 114, 1, -1, 1, 122, 1, 105, 1, 114, 1, 97, 
-                    1, 108, 1, 111, 1, 101, 2, -1, 1, 122, 1, -1, 1, 116, 
-                    1, 118, 1, 100, 1, -1, 3, 122, 1, 105, 1, 115, 1, -1, 
-                    1, 116, 1, 114, 1, 122, 1, 100, 1, 122, 1, 116, 1, -1, 
-                    1, 40, 1, 116, 1, 100, 1, 108, 1, 115, 1, 122, 1, -1, 
-                    1, 110, 1, 101, 1, 99, 1, 108, 1, 109, 1, 122, 3, 101, 
-                    3, -1, 1, 109, 2, 105, 1, 97, 1, -1, 1, 115, 1, -1, 
-                    1, 122, 1, -1, 1, 111, 1, 117, 2, 122, 1, -1, 2, 122, 
-                    1, 104, 1, 122, 1, 101, 1, 122, 1, 40, 1, 122, 1, 101, 
-                    1, 116, 1, 111, 1, 105, 1, 122, 1, -1, 2, 114, 4, -1, 
-                    1, 122, 1, -1, 1, 122, 3, -1, 1, 122, 1, 101, 2, 110, 
-                    1, -1, 1, 122, 1, 101, 3, -1, 2, 122, 1, 116, 1, -1, 
-                    1, 122, 2, -1, 1, 122, 2, -1 )
+                    2, -1, 1, 117, 2, 101, 3, -1, 1, 61, 1, -1, 3, 61, 1, 
+                    101, 6, -1, 3, 122, 1, 97, 1, 109, 1, 115, 1, 97, 1, 
+                    116, 1, 102, 1, 101, 1, 116, 1, 117, 1, 122, 1, 101, 
+                    1, 102, 1, 122, 1, 111, 1, 101, 1, 119, 1, 116, 1, 122, 
+                    1, 100, 1, 97, 1, 116, 1, 102, 1, 114, 1, 108, 1, 122, 
+                    1, 119, 3, 108, 1, 109, 7, -1, 1, 115, 1, 108, 1, -1, 
+                    1, 122, 1, 116, 2, 101, 2, -1, 1, 116, 1, 101, 1, 112, 
+                    1, 116, 2, 115, 1, 101, 1, 115, 1, 101, 1, 110, 1, 97, 
+                    1, 101, 1, -1, 1, 114, 1, 122, 1, -1, 1, 99, 2, 97, 
+                    1, 101, 1, -1, 1, 40, 1, 108, 1, 104, 1, 111, 2, 115, 
+                    2, 122, 1, 108, 1, 122, 1, 101, 1, 111, 1, 122, 1, 117, 
+                    1, -1, 1, 122, 1, 102, 1, 116, 1, 101, 1, 116, 1, 111, 
+                    1, 122, 1, 105, 1, 116, 1, 115, 1, 110, 1, 116, 1, 99, 
+                    1, 122, 1, 108, 1, 122, 1, 97, 1, 101, 1, 108, 1, 121, 
+                    1, 114, 1, -1, 1, 122, 1, 105, 1, 114, 1, 97, 1, 108, 
+                    1, 111, 1, 101, 2, -1, 1, 122, 1, -1, 1, 116, 1, 118, 
+                    1, 100, 1, -1, 3, 122, 1, 105, 1, 115, 1, -1, 1, 116, 
+                    1, 114, 1, 122, 1, 100, 1, 122, 1, 116, 1, -1, 1, 40, 
+                    1, 116, 1, 100, 1, 108, 1, 115, 1, 122, 1, -1, 1, 110, 
+                    1, 101, 1, 99, 1, 108, 1, 109, 1, 122, 3, 101, 3, -1, 
+                    1, 109, 2, 105, 1, 97, 1, -1, 1, 115, 1, -1, 1, 122, 
+                    1, -1, 1, 111, 1, 117, 2, 122, 1, -1, 2, 122, 1, 104, 
+                    1, 122, 1, 101, 1, 122, 1, 40, 1, 122, 1, 101, 1, 116, 
+                    1, 111, 1, 105, 1, 122, 1, -1, 2, 114, 4, -1, 1, 122, 
+                    1, -1, 1, 122, 3, -1, 1, 122, 1, 101, 2, 110, 1, -1, 
+                    1, 122, 1, 101, 3, -1, 2, 122, 1, 116, 1, -1, 1, 122, 
+                    2, -1, 1, 122, 2, -1 )
       ACCEPT = unpack( 3, -1, 1, 3, 1, 4, 2, -1, 1, 9, 1, 10, 3, -1, 1, 
-                       19, 1, 20, 1, 21, 5, -1, 1, 35, 1, 36, 4, -1, 1, 
-                       49, 1, 50, 1, -1, 1, 52, 4, -1, 1, 60, 1, 61, 1, 
-                       62, 1, 64, 1, 65, 1, 66, 33, -1, 1, 63, 1, 46, 1, 
+                       19, 1, 20, 1, 21, 5, -1, 1, 35, 1, 36, 3, -1, 1, 
+                       46, 1, 49, 1, 50, 1, -1, 1, 52, 4, -1, 1, 60, 1, 
+                       61, 1, 62, 1, 64, 1, 65, 1, 66, 33, -1, 1, 63, 1, 
                        51, 1, 53, 1, 55, 1, 54, 1, 57, 1, 56, 2, -1, 1, 
                        38, 4, -1, 1, 37, 1, 11, 12, -1, 1, 13, 2, -1, 1, 
                        59, 4, -1, 1, 31, 14, -1, 1, 8, 21, -1, 1, 44, 7, 
@@ -2891,7 +2683,7 @@ module SFP
                        1, 45, 1, 1, 4, -1, 1, 7, 2, -1, 1, 30, 1, 34, 1, 
                        26, 3, -1, 1, 14, 1, -1, 1, 5, 1, 16, 1, -1, 1, 18, 
                        1, 24 )
-      SPECIAL = unpack( 255, -1 )
+      SPECIAL = unpack( 254, -1 )
       TRANSITION = [
         unpack( 1, 38, 1, 37, 2, -1, 1, 37, 18, -1, 1, 38, 1, 26, 1, 39, 
                 1, 36, 4, -1, 1, 12, 1, 14, 1, 29, 1, 27, 1, 13, 1, 28, 
@@ -2924,15 +2716,15 @@ module SFP
         unpack( 1, 68, 3, -1, 1, 70, 5, -1, 1, 67, 5, -1, 1, 69 ),
         unpack( 1, 71 ),
         unpack( 1, 73, 66, -1, 1, 72 ),
-        unpack( 10, 35 ),
         unpack(  ),
         unpack(  ),
-        unpack( 1, 35, 1, -1, 10, 35, 3, -1, 1, 75 ),
         unpack(  ),
-        unpack( 1, 36, 4, -1, 1, 36, 13, -1, 1, 76 ),
-        unpack( 1, 77 ),
-        unpack( 1, 79 ),
-        unpack( 1, 81 ),
+        unpack( 10, 35, 3, -1, 1, 74 ),
+        unpack(  ),
+        unpack( 1, 36, 4, -1, 1, 36, 13, -1, 1, 75 ),
+        unpack( 1, 76 ),
+        unpack( 1, 78 ),
+        unpack( 1, 80 ),
         unpack(  ),
         unpack(  ),
         unpack(  ),
@@ -2940,146 +2732,145 @@ module SFP
         unpack(  ),
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
-                 2, 34, 1, 82, 23, 34 ),
+                 2, 34, 1, 81, 23, 34 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
-                 1, 84, 12, 34, 1, 85, 3, 34, 1, 86, 1, 87, 7, 34 ),
+                 1, 83, 12, 34, 1, 84, 3, 34, 1, 85, 1, 86, 7, 34 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 89 ),
         unpack( 1, 90 ),
-        unpack( 1, 91 ),
-        unpack( 1, 92, 1, 94, 4, -1, 1, 93 ),
-        unpack( 1, 95 ),
-        unpack( 1, 97, 10, -1, 1, 96 ),
+        unpack( 1, 91, 1, 93, 4, -1, 1, 92 ),
+        unpack( 1, 94 ),
+        unpack( 1, 96, 10, -1, 1, 95 ),
+        unpack( 1, 97 ),
         unpack( 1, 98 ),
         unpack( 1, 99 ),
         unpack( 1, 100 ),
-        unpack( 1, 101 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 102 ),
         unpack( 1, 103 ),
-        unpack( 1, 104 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 105 ),
         unpack( 1, 106 ),
         unpack( 1, 107 ),
         unpack( 1, 108 ),
-        unpack( 1, 109 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 110 ),
         unpack( 1, 111 ),
         unpack( 1, 112 ),
         unpack( 1, 113 ),
         unpack( 1, 114 ),
         unpack( 1, 115 ),
-        unpack( 1, 116 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
-                 19, 34, 1, 117, 6, 34 ),
+                 19, 34, 1, 116, 6, 34 ),
+        unpack( 1, 117 ),
         unpack( 1, 118 ),
         unpack( 1, 119 ),
         unpack( 1, 120 ),
         unpack( 1, 121 ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
         unpack( 1, 122 ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
         unpack( 1, 123 ),
-        unpack( 1, 124 ),
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 125 ),
         unpack( 1, 126 ),
         unpack( 1, 127 ),
+        unpack(  ),
+        unpack(  ),
         unpack( 1, 128 ),
-        unpack(  ),
-        unpack(  ),
         unpack( 1, 129 ),
         unpack( 1, 130 ),
         unpack( 1, 131 ),
-        unpack( 1, 132 ),
-        unpack( 1, 133, 14, -1, 1, 134 ),
+        unpack( 1, 132, 14, -1, 1, 133 ),
+        unpack( 1, 134 ),
         unpack( 1, 135 ),
         unpack( 1, 136 ),
         unpack( 1, 137 ),
         unpack( 1, 138 ),
         unpack( 1, 139 ),
         unpack( 1, 140 ),
-        unpack( 1, 141 ),
         unpack(  ),
-        unpack( 1, 142 ),
+        unpack( 1, 141 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
         unpack(  ),
+        unpack( 1, 142 ),
         unpack( 1, 143 ),
         unpack( 1, 144 ),
         unpack( 1, 145 ),
-        unpack( 1, 146 ),
         unpack(  ),
+        unpack( 1, 146 ),
         unpack( 1, 147 ),
         unpack( 1, 148 ),
         unpack( 1, 149 ),
-        unpack( 1, 150 ),
-        unpack( 1, 152, 3, -1, 1, 151, 13, -1, 1, 153 ),
-        unpack( 1, 154 ),
+        unpack( 1, 151, 3, -1, 1, 150, 13, -1, 1, 152 ),
+        unpack( 1, 153 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 157 ),
+        unpack( 1, 156 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 158 ),
         unpack( 1, 159 ),
-        unpack( 1, 160 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 161 ),
+        unpack( 1, 160 ),
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 162 ),
         unpack( 1, 163 ),
         unpack( 1, 164 ),
         unpack( 1, 165 ),
         unpack( 1, 166 ),
-        unpack( 1, 167 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 168 ),
         unpack( 1, 169 ),
         unpack( 1, 170 ),
         unpack( 1, 171 ),
         unpack( 1, 172 ),
         unpack( 1, 173 ),
-        unpack( 1, 174 ),
+        unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
+                 26, 34 ),
+        unpack( 1, 175 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
         unpack( 1, 176 ),
-        unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
-                 26, 34 ),
         unpack( 1, 177 ),
         unpack( 1, 178 ),
         unpack( 1, 179 ),
         unpack( 1, 180 ),
-        unpack( 1, 181 ),
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 182 ),
         unpack( 1, 183 ),
         unpack( 1, 184 ),
         unpack( 1, 185 ),
         unpack( 1, 186 ),
         unpack( 1, 187 ),
-        unpack( 1, 188 ),
         unpack(  ),
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
         unpack(  ),
+        unpack( 1, 188 ),
         unpack( 1, 189 ),
         unpack( 1, 190 ),
-        unpack( 1, 191 ),
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
@@ -3087,51 +2878,51 @@ module SFP
                  26, 34 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 194 ),
         unpack( 1, 195 ),
+        unpack(  ),
         unpack( 1, 196 ),
-        unpack(  ),
         unpack( 1, 197 ),
-        unpack( 1, 198 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 200 ),
+        unpack( 1, 199 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 202 ),
+        unpack( 1, 201 ),
         unpack(  ),
+        unpack( 1, 202 ),
         unpack( 1, 203 ),
         unpack( 1, 204 ),
         unpack( 1, 205 ),
         unpack( 1, 206 ),
-        unpack( 1, 207 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
         unpack(  ),
+        unpack( 1, 208 ),
         unpack( 1, 209 ),
         unpack( 1, 210 ),
         unpack( 1, 211 ),
         unpack( 1, 212 ),
-        unpack( 1, 213 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 213 ),
         unpack( 1, 214 ),
         unpack( 1, 215 ),
+        unpack(  ),
+        unpack(  ),
+        unpack(  ),
         unpack( 1, 216 ),
-        unpack(  ),
-        unpack(  ),
-        unpack(  ),
         unpack( 1, 217 ),
         unpack( 1, 218 ),
         unpack( 1, 219 ),
+        unpack(  ),
         unpack( 1, 220 ),
         unpack(  ),
-        unpack( 1, 221 ),
-        unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
         unpack(  ),
+        unpack( 1, 222 ),
         unpack( 1, 223 ),
-        unpack( 1, 224 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
@@ -3141,24 +2932,24 @@ module SFP
                  26, 34 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 229 ),
+        unpack( 1, 228 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 231 ),
+        unpack( 1, 230 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 233 ),
+        unpack( 1, 232 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 234 ),
         unpack( 1, 235 ),
         unpack( 1, 236 ),
         unpack( 1, 237 ),
-        unpack( 1, 238 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
         unpack(  ),
+        unpack( 1, 239 ),
         unpack( 1, 240 ),
-        unpack( 1, 241 ),
         unpack(  ),
         unpack(  ),
         unpack(  ),
@@ -3173,13 +2964,13 @@ module SFP
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
+        unpack( 1, 244 ),
         unpack( 1, 245 ),
         unpack( 1, 246 ),
-        unpack( 1, 247 ),
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 249 ),
+        unpack( 1, 248 ),
         unpack(  ),
         unpack(  ),
         unpack(  ),
@@ -3187,7 +2978,7 @@ module SFP
                  26, 34 ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
-        unpack( 1, 252 ),
+        unpack( 1, 251 ),
         unpack(  ),
         unpack( 1, 34, 2, -1, 10, 34, 7, -1, 26, 34, 4, -1, 1, 34, 1, -1, 
                  26, 34 ),
@@ -3205,7 +2996,7 @@ module SFP
         end
       end
       
-      @decision = 27
+      @decision = 17
       
 
       def description
@@ -3220,8 +3011,7 @@ module SFP
     
     def initialize_dfas
       super rescue nil
-      @dfa15 = DFA15.new( self, 15 )
-      @dfa27 = DFA27.new( self, 27 )
+      @dfa17 = DFA17.new( self, 17 )
 
     end
   end # class Lexer < ANTLR3::Lexer

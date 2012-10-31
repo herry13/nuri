@@ -612,7 +612,7 @@ total_statement
 
 comp_value returns [val]
 	:	NUMBER
-		{	$val = $NUMBER.text.to_f	}
+		{	$val = $NUMBER.text.to_i	}
 	|	reference
 		{	$val = $reference.val	}
 	;
@@ -701,7 +701,7 @@ mutation_statement returns [key, val]
 			$key = $reference.val
 			$val = { '_context' => 'mutation',
 				'_type' => $binary_op.text,
-				'_value' => $NUMBER.text.to_f
+				'_value' => $NUMBER.text.to_i
 			}
 		}
 	|	reference 'is' 'new' path
@@ -791,7 +791,7 @@ primitive_value returns [val, type]
 		}
 	|	NUMBER
 		{
-			$val = $NUMBER.text.to_f
+			$val = $NUMBER.text.to_i
 			$type = 'Number'
 		}
 	|	STRING
@@ -885,10 +885,14 @@ ID	:	('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')*
 
 NUMBER
 	:	'-'?('0'..'9')+
+	;
+
+/*NUMBER
+	:	'-'?('0'..'9')+
 	|	'-'?('0'..'9')+'.'('0'..'9')* EXPONENT?
 	|	'-'?'.'('0'..'9')+ EXPONENT?
 	|	'-'?('0'..'9')+ EXPONENT
-	;
+	;*/
 
 COMMENT
 	:	'//' ~('\n'|'\r')* {$channel=HIDDEN;}
