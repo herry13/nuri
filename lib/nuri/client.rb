@@ -22,12 +22,10 @@ module Nuri
 					@http.register("/", self)
 					Nuri::Util.log 'Start Nuri Client on port: ' + port.to_s
 					@http.run.join
+				rescue Interrupt
+					Nuri::Util.log 'Exiting.'
 				rescue Exception => e
-					if e.is_a?(Interrupt)
-						Nuri::Util.log 'Daemon is stopped with forced!'
-					else
-						Nuri::Util.log 'Client Daemon error: ' + e.to_s #backtrace.inspect
-					end
+					Nuri::Util.log 'Client Daemon error: ' + e.to_s #backtrace.inspect
 				end
 			end
 
