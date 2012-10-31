@@ -83,7 +83,6 @@ puts "exec: " + cmd.inspect
 						if params.size <= 0
 							component.send(cmd_name)
 						else
-puts 'has params'
 							component.send(cmd_name, params)
 						end
 						success = true

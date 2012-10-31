@@ -1,4 +1,5 @@
 TODO
+- enable nested namespace in constraints (see SFP.g)
 - create methods to generate "BSig-Grounded Operators"
 - distribute the "BSig-Grounded Operators" to all affected nodes
 - send the "goal-state" to each nodes
