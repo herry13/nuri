@@ -2,7 +2,7 @@ class Machine {
 	running = false
 	nuri_version = ""
 
-	procedure upgrade_nuri (version isa String) {
+	procedure upgrade_nuri (version isref String) {
 		condition { }
 		effect {
 			this.nuri_version = version
