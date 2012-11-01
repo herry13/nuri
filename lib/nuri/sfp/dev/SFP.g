@@ -547,6 +547,11 @@ constraint_statement returns [key, val]
 			$key = $reference.val
 			$val = { '_context' => 'constraint', '_type' => 'equals', '_value' => true }
 		}
+	|	'not' reference
+		{
+			$key = $reference.val
+			$val = { '_context' => 'constraint', '_type' => 'equals', '_value' => false }
+		}
 	|	reference equals_op value
 		{
 			$key = $reference.val
