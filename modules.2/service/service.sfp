@@ -37,6 +37,7 @@ class Service {
 
 	procedure set_port (target isref Integer) {
 		condition {
+			this.installed = true
 			this.running = false
 		}
 		effect {

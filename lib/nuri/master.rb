@@ -41,6 +41,9 @@ module Nuri
 					state = self.get_child_state(node['domainname'])
 					if state != nil
 						state.each { |k,v| current_state[k] = v }
+					else
+						# TODO
+						#current_state[key] = Nuri::Sfp.deep_clone(node)
 					end
 				end
 				current_state
