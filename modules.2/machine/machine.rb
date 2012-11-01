@@ -29,7 +29,8 @@ module Nuri
 				@state['running'] = true
 
 				# Nuri's version
-				@state['nuri_version'] = Nuri::Util.nuri_version
+				remote = `/usr/bin/git rev-parse origin`.chop
+				@state['nuri_latest'] = (remote == Nuri::Util.nuri_version)
 			end
 
 			def start
@@ -43,15 +44,9 @@ module Nuri
 			end
 
 			def upgrade_nuri(params)
-				remote = `git rev-parse origin`.chop
-				if (params['version'] == remote)
-					cmd = "cd " + Nuri::Util.home_dir + ";" + "/usr/bin/git pull; 2> /dev/null"
-					result = system(cmd)
-					return (result == true)
-				else
-puts 'not same: \n' + params['version'] + " == \n" + remote
-					return false
-				end
+				cmd = "cd " + Nuri::Util.home_dir + ";" + "/usr/bin/git pull; 2> /dev/null"
+				result = system(cmd)
+				return (result == true)
 			end
 		end
 	end

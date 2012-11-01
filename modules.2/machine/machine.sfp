@@ -1,11 +1,11 @@
 class Machine {
 	running = false
-	nuri_version = ""
+	nuri_latest = false
 
-	procedure upgrade_nuri (version isref String) {
+	procedure upgrade_nuri
 		condition { }
 		effect {
-			this.nuri_version = version
+			this.nuri_latest = true
 		}
 	}
 	
