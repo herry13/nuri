@@ -42,7 +42,6 @@ module Nuri
 			end
 
 			def sequential_plan_to_sfw(seq)
-puts seq
 				plan = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
 				return plan if seq == nil
 				plan['workflow'] = []
@@ -123,11 +122,13 @@ puts seq
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
 
 					if plan != nil
-						plan.each_index do |i|
-							plan.delete_at(i) if	(plan[i] =~ /op_[0-9]+\-goal_[0-9]+/) != nil
-							plan.delete_at(i) if (plan[i] =~ /op_[0-9]+\-sometime.*/) != nil
-							plan.delete_at(i) if (plan[i] =~ /op_[0-9]+\-globalop/) != nil
+						tmp = []
+						plan.each do |p|
+							_, name, _ = p.split('-', 3)
+							next if name == 'goal' or name == 'globalop' or name == 'sometime'
+							tmp.push(p)
 						end
+						plan = tmp
 					end
 
 					return plan

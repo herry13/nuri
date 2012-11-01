@@ -42,7 +42,7 @@ module Nuri
 		# - enumeration of values of particular type
 		# - SET abstract data-type, membership operators
 		module Sas
-			GlobalOperator = '-globalop'
+			GlobalOperator = '-globalop-'
 			GlobalVariable = '_global_var'
 
 			GlobalConstraintMethod = 1 # 1: proposed method, 2: patrik's, 3: concurrent-actions
@@ -275,7 +275,7 @@ end
 					var << false
 					@variables[var.name] = var
 					# dummy-operator
-					op = Operator.new('-sometime_' + k, 0)
+					op = Operator.new('-sometime-' + k, 0)
 					eff = Parameter.new(var, false, true)
 					op[eff.var.name] = eff
 					map = and_equals_constraint_to_map(v)
@@ -298,7 +298,7 @@ end
 					# normalize formula
 					
 					# dummy-operator
-					op = Operator.new('-sometime_after_activate_' + k, 0)
+					op = Operator.new('-sometime_after_activate-' + k, 0)
 					eff = Parameter.new(var, true, false)
 					op[eff.var.name] = eff
 				end
@@ -323,7 +323,7 @@ end
 
 					goal.each { |k,g|
 						next if k[0,1] == '_'
-						op = Operator.new("-goal_#{count}", 0)
+						op = Operator.new("-goal-#{count}", 0)
 						op[var.name] = eff
 						map = and_equals_constraint_to_map(g)
 						map.each { |k1,v1|
