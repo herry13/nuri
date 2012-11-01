@@ -29,6 +29,11 @@ Hash.send(:define_method, "at?") { |addr|
 	addrs = addr.split('.', 2)
 	if addrs[0] == '$'
 		return self.root.at?(addrs[1])
+	elsif addrs[0] == 'this' or addrs[0] == 'self'
+		return self.at?(addrs[1])
+	elsif addrs[0] == 'parent'
+		return nil if not self.has_key?('_parent')
+		return self['_parent'].at?(addrs[1])
 	elsif self.has_key?(addrs[0])
 		if addrs.length == 1 
 			return self[addrs[0]]

@@ -8,7 +8,7 @@ module Nuri
 			include Nuri::Resource
 
 			def initialize
-				self.load('Mysql', 'mysql')
+				self.register('Mysql', 'mysql')
 			end
 	
 			# get state of this component in JSON

@@ -3,7 +3,7 @@ module Nuri
 		attr_accessor :name, :parent
 		attr_reader :children, :state, :is_abstract, :goal
 
-		def load(class_path, name=nil, is_abstract=false)
+		def register(class_path, name=nil, is_abstract=false)
 			@name = name
 			@children = Hash.new
 			@state = self.create_instance(class_path)
@@ -163,7 +163,7 @@ module Nuri
 		include Resource
 
 		def initialize
-			load('', 'root')
+			register('', 'root')
 		end
 	end
 end

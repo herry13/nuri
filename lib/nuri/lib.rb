@@ -44,6 +44,7 @@ module Nuri
 			rescue StandardError => stderr
 				Nuri::Util.log.error "Cannot load main description"
 			end
+			nil
 		end
 
 		# Reads configuration file in '/etc/nuri/config.sfp'. If it does not

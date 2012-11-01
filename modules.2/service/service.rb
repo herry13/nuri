@@ -12,7 +12,7 @@ module Nuri
 			include Nuri::Resource
 
 			def initialize
-				self.load('Service', 'service', true)
+				self.register('Service', 'service', true)
 			end
 	
 			# get state of this component in JSON

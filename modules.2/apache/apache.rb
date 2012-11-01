@@ -9,7 +9,7 @@ module Nuri
 			include Nuri::Resource
 
 			def initialize
-				self.load('Apache', 'apache')
+				self.register('Apache', 'apache')
 			end
 	
 			# get state of this component in JSON

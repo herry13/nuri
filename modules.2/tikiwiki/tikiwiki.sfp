@@ -1,7 +1,7 @@
 include "apache.sfp"
 include "mysql.sfp"
 
-class TikiWiki {
+class Tikiwiki {
 	installed  = false
 	version = ""
 	path = "/wiki"
@@ -45,4 +45,5 @@ class TikiWiki {
 			this.version = target
 		}
 	}
+
 }

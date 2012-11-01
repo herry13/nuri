@@ -1,10 +1,8 @@
 require 'rubygems'
-require 'json'
-require 'augeas'
 
 module Nuri
 	module Module
-		class Apache
+		class Tikiwiki
 
 			include Nuri::Resource
 
@@ -12,7 +10,7 @@ module Nuri
 			ConfigFile = '/var/lib/tikiwiki/path'
 
 			def initialize
-				self.load('TikiWiki', 'tikiwiki')
+				self.register('TikiWiki', 'tikiwiki')
 			end
 	
 			# get state of this component in JSON

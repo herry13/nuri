@@ -8,7 +8,7 @@ module Nuri
 
 			def initialize
 				name = Nuri::Util.hostname.strip.sub(/\..*/,'')
-				self.load('Machine', name)
+				self.register('Machine', name)
 			end
 
 			def get_self_state
