@@ -30,6 +30,8 @@ module Nuri
 
 				# Nuri's version
 				remote = `/usr/bin/git rev-parse origin`.chop
+puts remote
+puts Nuri::Util.nuri_version
 				@state['nuri_latest'] = (remote == Nuri::Util.nuri_version)
 			end
 
