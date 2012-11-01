@@ -1,5 +1,6 @@
 TODO
 - implements modules: apache-lb, ganglia*, vm, pm, tikiwiki
+- Nuri automatic update
 
 - enable nested namespace in constraints (see SFP.g)
 - create methods to generate "BSig-Grounded Operators"
