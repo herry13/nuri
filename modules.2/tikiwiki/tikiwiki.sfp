@@ -3,7 +3,7 @@ include "mysql.sfp"
 
 class TikiWiki {
 	installed  = false
-	version = 0
+	version = ""
 	path = "/wiki"
 	webserver isref Apache
 	database isref Mysql
@@ -27,7 +27,9 @@ class TikiWiki {
 	}
 
 	procedure change_path (target isref String) {
-		condition { }
+		condition {
+			this.webserver.installed
+		}
 		effect {
 			this.path = target
 		}
