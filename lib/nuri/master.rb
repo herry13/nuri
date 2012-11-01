@@ -39,7 +39,7 @@ module Nuri
 							node['_classes'].rindex(MainComponent) == nil or
 							node['domainname'] == ''
 					state = self.get_child_state(node['domainname'])
-					if state != nil
+				if state != nil
 						state.each { |k,v| current_state[k] = v }
 					else
 						# TODO
