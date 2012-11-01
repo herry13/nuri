@@ -100,10 +100,10 @@ begin
 					@root['goal'].delete('sometime')
 					@root['sometime-after'].delete('_parent')
 				end
-#dump_types
+
 				### collect variables ###
 				@root['initial'].accept(VariableCollector.new(self))
-#dump_vars
+
 				### collect values ###
 				# collect values from goal constraint
 				value_collector = Nuri::Sfp::ValueCollector.new(@types)
@@ -119,6 +119,8 @@ begin
 				@types.each_value { |type| type.uniq! }
 				# set domain values for each variable
 				self.set_variable_values
+
+#dump_vars
 
 				# identify immutable variables
 				self.identify_immutable_variables
@@ -1256,12 +1258,16 @@ end
 				isref = (value.is_a?(String) and value.isref)
 				value = @init.at?(value) if value.is_a?(String) and value.isref
 				type = (isfinal ? self.isa?(value) : self.get_type(name, value, parent))
-				var = Variable.new(var_name, type, -1, value, nil, isfinal)
-				@vars[var.name] = var
-				if isfinal and value.is_a?(Hash)
-					value['_classes'].each { |c| add_value(c, value) }
-				elsif not isref
-					add_value(type, value)
+				if type == nil
+					Nuri::Util.log "Unrecognized type of variable: " + var_name
+				else
+					var = Variable.new(var_name, type, -1, value, nil, isfinal)
+					@vars[var.name] = var
+					if isfinal and value.is_a?(Hash)
+						value['_classes'].each { |c| add_value(c, value) }
+					elsif not isref
+						add_value(type, value)
+					end
 				end
 				return true
 			end
@@ -1269,6 +1275,8 @@ end
 			def get_type(name, value, parent)
 				# TODO -- re-evaluate this method
 				type = self.isa?(value)
+				return nil if type == nil
+
 				return type if type == '$.Boolean' or type == '$.Integer' or type == '$.String'
 
 				parent_class = @root.at?( @vars[parent.ref].type )
@@ -1382,7 +1390,8 @@ end
 			end
 
 			def to_s
-				s = @name + '|' + @type 
+puts @name.to_s + ' type: nil' if @type == nil
+				s = @name.to_s + '|' + @type.to_s
 				s += '|' + (@init == nil ? '-' : (@init.is_a?(Hash) ? @init.tostring : @init.to_s))
 				s += '|' + (@goal == nil ? '-' : (@goal.is_a?(Hash) ? @goal.tostring : @goal.to_s))
 				s += '|' + (@is_final ? 'final' : 'notfinal') + "\n"

@@ -3,7 +3,6 @@ include "modules/service/service.sfp"
 class Mysql extends Service {
 	port = 3306
 	root_password = ""
-	version = ""
 
 	procedure set_root_password (passwd isref String) {
 		condition {
