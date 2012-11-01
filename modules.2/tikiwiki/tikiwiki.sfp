@@ -1,5 +1,5 @@
 include "modules/apache/apache.sfp"
-include "modules/apache/mysql.sfp"
+include "modules/mysql/mysql.sfp"
 
 class Tikiwiki {
 	installed  = false

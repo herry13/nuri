@@ -21,8 +21,8 @@ module Nuri
 
 		def load(client=true)
 			self.read_config
-			Nuri::Resource.set_root(self.get_main)
 			self.load_modules if client
+			#Nuri::Resource.set_root(self.get_main)
 		end
 
 		def get_main

@@ -542,7 +542,12 @@ constraint_different
 	;
 
 constraint_statement returns [key, val]
-	:	reference equals_op value
+	:	reference
+		{
+			$key = $reference.val
+			$val = { '_context' => 'constraint', '_type' => 'equals', '_value' => true }
+		}
+	|	reference equals_op value
 		{
 			$key = $reference.val
 			$val = { '_context' => 'constraint', '_type' => 'equals', '_value' => $value.val }
