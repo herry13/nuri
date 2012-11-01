@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2012-11-01 23:17:26
+# Generated at: 2012-11-01 23:23:49
 # 
 
 # ~~~> start load path setup
@@ -1009,8 +1009,8 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 43:9: 'is'
-      match( "is" )
+      # at line 43:9: 'not'
+      match( "not" )
 
       
       @state.type = type
@@ -1033,8 +1033,8 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 44:9: 'in'
-      match( "in" )
+      # at line 44:9: 'is'
+      match( "is" )
 
       
       @state.type = type
@@ -1057,8 +1057,8 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 45:9: 'isnt'
-      match( "isnt" )
+      # at line 45:9: 'in'
+      match( "in" )
 
       
       @state.type = type
@@ -1081,8 +1081,8 @@ module SFP
 
       
       # - - - - main rule block - - - -
-      # at line 46:9: 'not'
-      match( "not" )
+      # at line 46:9: 'isnt'
+      match( "isnt" )
 
       
       @state.type = type
@@ -2673,9 +2673,9 @@ module SFP
                        46, 1, 49, 1, 50, 1, -1, 1, 52, 4, -1, 1, 60, 1, 
                        61, 1, 62, 1, 64, 1, 65, 1, 66, 33, -1, 1, 63, 1, 
                        51, 1, 53, 1, 55, 1, 54, 1, 57, 1, 56, 2, -1, 1, 
-                       38, 4, -1, 1, 37, 1, 11, 12, -1, 1, 13, 2, -1, 1, 
+                       39, 4, -1, 1, 38, 1, 11, 12, -1, 1, 13, 2, -1, 1, 
                        59, 4, -1, 1, 31, 14, -1, 1, 8, 21, -1, 1, 44, 7, 
-                       -1, 1, 40, 1, 42, 1, -1, 1, 58, 3, -1, 1, 39, 5, 
+                       -1, 1, 37, 1, 42, 1, -1, 1, 58, 3, -1, 1, 40, 5, 
                        -1, 1, 15, 6, -1, 1, 12, 6, -1, 1, 23, 9, -1, 1, 
                        47, 1, 48, 1, 2, 4, -1, 1, 6, 1, -1, 1, 33, 1, -1, 
                        1, 41, 4, -1, 1, 28, 13, -1, 1, 17, 2, -1, 1, 22, 
