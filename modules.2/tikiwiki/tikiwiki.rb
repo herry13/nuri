@@ -10,7 +10,7 @@ module Nuri
 			ConfigFile = '/var/lib/tikiwiki/path'
 
 			def initialize
-				self.register('TikiWiki', 'tikiwiki')
+				self.register('Tikiwiki', 'tikiwiki')
 			end
 	
 			# get state of this component in JSON
