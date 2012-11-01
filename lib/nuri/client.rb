@@ -81,11 +81,11 @@ puts "exec: " + cmd.inspect
 				if component != nil
 					begin
 						if params.size <= 0
-							component.send(cmd_name)
+							success = component.send(cmd_name)
 						else
-							component.send(cmd_name, params)
+							success = component.send(cmd_name, params)
 						end
-						success = true
+						#success = true
 					rescue Exception => e
 						Nuri::Util.log 'Cannot execute procedure: ' + procedure
 						@response.start(500) { |head,out| out.write('') }
@@ -94,7 +94,13 @@ puts "exec: " + cmd.inspect
 					Nuri::Util.log 'Cannot find procedure: ' + procedure
 					@response.start(503) { |head,out| out.write('') }
 				end
-				@response.start(200) { |head,out| out.write('') }
+
+				if success
+					@response.start(200) { |head,out| out.write('') }
+				else
+					@response.start(500) { |head,out| out.write('') }
+				end
+				return success
 			end
 
 			def http_get_state
