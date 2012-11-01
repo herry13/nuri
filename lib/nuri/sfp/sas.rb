@@ -100,10 +100,10 @@ begin
 					@root['goal'].delete('sometime')
 					@root['sometime-after'].delete('_parent')
 				end
-
+#dump_types
 				### collect variables ###
 				@root['initial'].accept(VariableCollector.new(self))
-
+#dump_vars
 				### collect values ###
 				# collect values from goal constraint
 				value_collector = Nuri::Sfp::ValueCollector.new(@types)

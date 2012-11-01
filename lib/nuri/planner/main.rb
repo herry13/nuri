@@ -37,6 +37,7 @@ module Nuri
 
 			def sequential_plan_to_json(seq)
 				sfw = self.sequential_plan_to_sfw(seq)
+				return nil if sfw['workflow'] == nil
 				return JSON.pretty_generate(sfw)
 			end
 

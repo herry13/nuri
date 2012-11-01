@@ -22,6 +22,14 @@ module Nuri
 				return planner.solve_sfp_to_json(sfp)
 			end
 
+			def debug_json
+				sfp = Nuri::Sfp.deep_clone(@main)
+				sfp.delete('system')
+				sfp['initial'] = self.get_state
+				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
+				puts Nuri::Sfp::to_pretty_json(sfp);
+			end
+
 			def get_state(path='')
 				return nil if not @main.has_key?('system')
 
@@ -130,6 +138,11 @@ puts '...FAILED'
 		def self.plan
 			master = Nuri::Master::Daemon.new
 			return master.get_plan
+		end
+
+		def self.debug_json
+			master = Nuri::Master::Daemon.new
+			master.debug_json
 		end
 	end
 end
