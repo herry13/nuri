@@ -15,10 +15,10 @@ module Nuri
 			def get_self_state
 				# installed & running
 				data = `/usr/bin/dpkg-query -W mysql-server 2> /dev/null`
-				data = data.split(' ')
+				data = data.split(' ') if data.is_a?(String)
 				@state["installed"] = (data.length > 1 and data[0] == "mysql-server")
 				if @state["installed"]
-					@state["version"] = data.split(' ')[1]
+					@state["version"] = data[1]
 					data = `/usr/bin/service mysql status`
 					@state["running"] = ((data =~ /running/) != nil)
 				else
