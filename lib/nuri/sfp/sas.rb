@@ -42,7 +42,7 @@ module Nuri
 		# - enumeration of values of particular type
 		# - SET abstract data-type, membership operators
 		module Sas
-			GlobalOperator = '_global_op'
+			GlobalOperator = '-globalop'
 			GlobalVariable = '_global_var'
 
 			GlobalConstraintMethod = 1 # 1: proposed method, 2: patrik's, 3: concurrent-actions

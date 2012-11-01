@@ -42,6 +42,7 @@ module Nuri
 			end
 
 			def sequential_plan_to_sfw(seq)
+puts seq
 				plan = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
 				return plan if seq == nil
 				plan['workflow'] = []
@@ -123,11 +124,9 @@ module Nuri
 
 					if plan != nil
 						plan.each_index do |i|
-							plan.delete_at(i) if
-								(plan[i] =~ /op_[0-9]+\-goal_[0-9]+/) != nil or
-								(plan[i] =~ /op_[0-9]+\-sometime.*/) != nil or
-								(plan[i] =~ /op_[0-9]+_global_op.*/) != nil #or
-							#	(plan[i] =~ /[a-zA-Z0-9]+\$[a-zA-Z0-9]+/) == nil
+							plan.delete_at(i) if	(plan[i] =~ /op_[0-9]+\-goal_[0-9]+/) != nil
+							plan.delete_at(i) if (plan[i] =~ /op_[0-9]+\-sometime.*/) != nil
+							plan.delete_at(i) if (plan[i] =~ /op_[0-9]+\-globalop/) != nil
 						end
 					end
 
