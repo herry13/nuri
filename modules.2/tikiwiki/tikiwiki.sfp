@@ -28,7 +28,7 @@ class Tikiwiki {
 
 	procedure change_path (target isref String) {
 		condition {
-			this.webserver.installed
+			this.webserver.installed = true
 		}
 		effect {
 			this.path = target

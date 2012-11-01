@@ -121,6 +121,8 @@ module Nuri
 					File.delete(plan_file) if File.exist?(plan_file)
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
 
+puts plan.inspect
+
 					if plan != nil
 						tmp = []
 						plan.each do |p|
