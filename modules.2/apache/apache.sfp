@@ -15,6 +15,17 @@ class Apache extends Service {
 		}
 	}
 
+	procedure uninstall {
+		condition {
+			this.running = false
+			this.php_module = false
+			this.php_mysql_module = false
+		}
+		effect {
+			this.installed = false
+		}
+	}
+
 	procedure install_php_module {
 		condition {
 			this.installed = true
@@ -28,8 +39,6 @@ class Apache extends Service {
 	procedure uninstall_php_module {
 		condition {
 			this.running = false
-			this.php_module = false
-			this.php_mysql_module = false
 		}
 		effect {
 			this.php_module = false
