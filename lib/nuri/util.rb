@@ -70,5 +70,9 @@ module Nuri
 			end
 			return @@platform
 		end
+
+		def self.nuri_version
+			return `git rev-parse HEAD`.chop
+		end
 	end
 end

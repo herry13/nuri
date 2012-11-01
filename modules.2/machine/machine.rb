@@ -27,6 +27,9 @@ module Nuri
 				@state["arch"] = `uname -p`.strip
 				@state["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i
 				@state['running'] = true
+
+				# Nuri's version
+				@state['nuri_version'] = Nuri::Util.nuri_version
 			end
 
 			def start
@@ -36,6 +39,15 @@ module Nuri
 
 			def stop
 				# TODO
+				return false
+			end
+
+			def upgrade_nuri(params)
+				remote = `git rev-parse origin HEAD`.chop
+				if (params['version'] == remote)
+					result = system('/usr/bin/git pull origin')
+					return (result == true)
+				end
 				return false
 			end
 		end

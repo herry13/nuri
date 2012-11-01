@@ -1,5 +1,13 @@
 class Machine {
 	running = false
+	nuri_version = ""
+
+	procedure upgrade_nuri (version isa String) {
+		condition { }
+		effect {
+			this.nuri_version = version
+		}
+	}
 	
 	procedure start {
 		condition { }
