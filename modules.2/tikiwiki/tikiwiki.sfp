@@ -23,11 +23,7 @@ class Tikiwiki {
 	}
 
 	procedure install {
-		condition {
-			#this.webserver.installed = true
-			#this.webserver.running = false
-			#this.mysql.running = true
-		}
+		condition { }
 		effect {
 			this.installed = true
 		}
