@@ -93,13 +93,12 @@ Hash.send(:define_method, "expanded") {
 }
 
 # copy attributes and procedures from superclass to itself
-# TODO -- implement deep copy
 Hash.send(:define_method, 'inherits') { |parent|
 	return if not parent.is_a?(Hash)
 	parent.each_pair { |key,value|
 		next if key[0,1] == '_' or self.has_key?(key)
 		if value.is_a?(Hash)
-			self[key] = Nuri::Sfp.deep_clone(value) #value.clone
+			self[key] = Nuri::Sfp.deep_clone(value)
 			self[key]['_parent'] = self
 		else
 			self[key] = value
@@ -154,8 +153,15 @@ String.send(:define_method, 'pop_ref') {
 # return true if this string is a reference, otherwise false
 String.send(:define_method, 'isref') {
 	s = self.to_s
-	return (s.length > 0 and s[0,1] == '$')
+	return true if (s.length > 0 and s[0,1] == '$')
+	#return false if self.instance_variable_defined?(:@isa_ref)
+	#return @isa_ref
+	return false
 }
+
+#String.send(:define_method, 'as_ref') { |val|
+#	@isa_ref = val
+#}
 
 # return the parent of this path
 # e.g.: if self == 'a.b.c.d', it will return 'a.b.c'
@@ -164,3 +170,5 @@ String.send(:define_method, 'to_top') {
 	parts = self.split('.')
 	return self[0, self.length - parts[parts.length-1].length - 1]
 }
+
+

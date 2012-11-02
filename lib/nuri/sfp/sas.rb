@@ -159,7 +159,7 @@ begin
 
 				#self.dump_types
 				#self.dump_operators
-				#self.dump_vars
+				self.dump_vars
 
 				return create_output
 rescue Exception => e

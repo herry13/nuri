@@ -25,9 +25,8 @@ module Nuri
 			end
 		
 			def to_ref(path)
-				first, rest = path.split('.', 2)
-				return path if first == 'parent'
-				return "$." + path
+				ref = "$." + path
+				return ref
 			end
 		
 			def to_sfp
