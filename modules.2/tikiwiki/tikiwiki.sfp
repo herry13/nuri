@@ -10,6 +10,7 @@ class Tikiwiki {
 	procedure set_path (path isref String) {
 		condition {
 			this.installed = true
+			this.webserver.running = false
 		}
 		effect {
 			this.path = path
