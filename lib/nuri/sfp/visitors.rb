@@ -35,5 +35,20 @@ module Nuri
 				return true
 			end
 		end
+
+		class ReferenceModifier
+			def visit(name, value, parent)
+				if value.is_a?(String) and value.isref and parent.isobject
+					if	value.length >= 8 and value[0,8] == '$.parent'
+						puts value
+					elsif value.length >= 6 and value[0,6] == '$.this'
+						_, _, rest = value.split('.', 3)
+						parent[name] = parent.ref + (rest == nil ? '' : '.' + rest)
+						puts value + " -- " + parent[name]
+					end
+				end
+				true
+			end
+		end
 	end
 end

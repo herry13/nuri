@@ -101,6 +101,8 @@ begin
 					@root['sometime-after'].delete('_parent')
 				end
 
+				@root['initial'].accept(ReferenceModifier.new)
+
 				### collect variables ###
 				@root['initial'].accept(VariableCollector.new(self))
 
