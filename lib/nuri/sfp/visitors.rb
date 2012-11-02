@@ -46,10 +46,11 @@ module Nuri
 						else
 							raise Exception
 						end
+						puts value + " -- " + parent[name]
 					elsif value.length >= 6 and value[0,6] == '$.this'
 						_, _, rest = value.split('.', 3)
 						parent[name] = parent.ref + (rest == nil ? '' : '.' + rest)
-						#puts value + " -- " + parent[name]
+						puts value + " -- " + parent[name]
 					end
 				end
 				true

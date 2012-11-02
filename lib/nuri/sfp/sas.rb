@@ -102,6 +102,10 @@ begin
 				end
 
 				@root['initial'].accept(ReferenceModifier.new)
+				@root['goal'].accept(ReferenceModifier.new)
+				@root['global'].accept(ReferenceModifier.new)
+				#@root['sometime'].accept(ReferenceModifier.new)
+				#@root['sometime-after'].accept(ReferenceModifier.new)
 
 				### collect variables ###
 				@root['initial'].accept(VariableCollector.new(self))
