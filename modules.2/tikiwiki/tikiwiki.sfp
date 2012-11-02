@@ -4,7 +4,7 @@ include "modules/mysql/mysql.sfp"
 class Tikiwiki {
 	installed  = false
 	path = "/wiki"
-	webserver = this.parent.apache
+	webserver = parent.apache
 
 	procedure set_webserver (ws isref Apache) {
 		condition { }
