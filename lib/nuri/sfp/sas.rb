@@ -704,9 +704,12 @@ end
 				# using recursive method
 				def ref_combinator(bucket, parent, names, last_value, last_names=nil,
 						index=0, selected=Hash.new)
+
 					return if names[index] == nil
 					var_name = parent + '.' + names[index]
-					return if not @variables.has_key?(var_name)
+					if not @variables.has_key?(var_name)
+						raise VariableNotFoundException, 'Variable not found: ' + var_name
+					end
 
 					if index >= names.length or (index >= names.length-1 and last_value != nil)
 						selected[var_name] = last_value if last_value != nil
@@ -715,9 +718,7 @@ end
 						result['_context'] = 'constraint'
 						result['_type'] = 'and'
 						bucket << result
-					elsif not @variables.has_key?(var_name)
-						raise VariableNotFoundException, 'Variable not found: ' + var_name
-					elsif index >= names.length
+					else
 						@variables[var_name].each { |v|
 							next if v.is_a?(Hash) and v.isnull
 							v = v.ref if v.is_a?(Hash) and v.isobject
@@ -781,7 +782,7 @@ end
 					#bucket1 = Array.new
 					#last_names1 = Array.new
 					#ref_combinator(bucket1, rest, names, nil, last_names1)
-
+raise Exception 'not implemented: normalized_nested_left_right'
 				end
 
 				def normalize_nested_left_only(left, right, formula)
@@ -801,9 +802,8 @@ end
 				def to_and_or_graph(formula)
 					keys = formula.keys
 					keys.each { |k|
-						v = formula[k]
-					#formula.each { |k,v|
 						next if k[0,1] == '_'
+						v = formula[k]
 						if k.isref and not @variables.has_key?(k)
 							if v.is_a?(Hash) and v.isconstraint
 								if (v['_type'] == 'equals' or v['_type'] == 'not-equals') and
@@ -1140,15 +1140,8 @@ end
 ### end of testing methods
 
 				remove_not_and_iterator_constraint(formula)
-#Nuri::Sfp::Parser.dump(formula) if dump
-#puts 'step 1' if dump
 				to_and_or_graph(formula)
-#puts 'step 2' if dump
-#puts total_element(formula) if dump
 				not_equals_statement_to_or_constraint(formula)
-#puts 'step 3' if dump
-#puts visit_and_or_graph(formula) if dump
-#Nuri::Sfp::Parser.dump(formula)
 
 				return flatten_and_or_graph(formula)
 			end
@@ -1397,7 +1390,6 @@ end
 			end
 
 			def to_s
-puts @name.to_s + ' type: nil' if @type == nil
 				s = @name.to_s + '|' + @type.to_s
 				s += '|' + (@init == nil ? '-' : (@init.is_a?(Hash) ? @init.tostring : @init.to_s))
 				s += '|' + (@goal == nil ? '-' : (@goal.is_a?(Hash) ? @goal.tostring : @goal.to_s))
