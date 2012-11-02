@@ -3,6 +3,14 @@ include "modules/mysql/mysql.sfp"
 
 class Tikiwiki {
 	installed  = false
+	path = "/wiki"
+
+	procedure set_path (path isref String) {
+		condition { }
+		effect {
+			this.path = path
+		}
+	}
 
 	procedure install {
 		condition {
