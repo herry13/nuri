@@ -19,8 +19,8 @@ module Nuri
 
 				@state['path'] = ""
 				@state['version'] = ""
-				@state['webserver'] = nil
-				@state['database'] = nil
+				#@state['webserver'] = nil
+				#@state['database'] = nil
 				if @state['installed'] and File.file?(ConfigFile)
 					File.open(ConfigFile) do |f|
 						f.split("\n").each { |k,v| @state[k] = v }

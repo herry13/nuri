@@ -5,10 +5,10 @@ class Tikiwiki {
 	installed  = false
 	version = ""
 	path = "/wiki"
-	webserver isref Apache
-	database isref Mysql
+	//webserver isref Apache
+	//database isref Mysql
 
-	procedure set_webserver (target isref Apache) {
+	/*procedure set_webserver (target isref Apache) {
 		condition { }
 		effect {
 			this.webserver = target
@@ -20,7 +20,7 @@ class Tikiwiki {
 		effect {
 			this.database = target
 		}
-	}
+	}*/
 
 	procedure install {
 		condition { }
@@ -38,7 +38,7 @@ class Tikiwiki {
 
 	procedure change_path (target isref String) {
 		condition {
-			this.webserver.installed = true
+			//this.webserver.installed = true
 		}
 		effect {
 			this.path = target
@@ -47,9 +47,9 @@ class Tikiwiki {
 
 	procedure upgrade (target isref Integer) {
 		condition {
-			this.webserver.installed = true
+			/*this.webserver.installed = true
 			this.webserver.running = false
-			this.mysql.running = true
+			this.mysql.running = true*/
 		}
 		effect {
 			this.version = target
