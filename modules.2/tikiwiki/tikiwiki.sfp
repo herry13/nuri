@@ -6,6 +6,13 @@ class Tikiwiki {
 	path = "/wiki"
 	webserver = this.parent.apache
 
+	procedure set_webserver (ws isref Apache) {
+		condition { }
+		effect {
+			this.webserver = ws
+		}
+	}
+
 	procedure set_path (path isref String) {
 		condition {
 			this.installed = true
