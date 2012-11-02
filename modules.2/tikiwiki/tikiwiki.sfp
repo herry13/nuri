@@ -3,30 +3,9 @@ include "modules/mysql/mysql.sfp"
 
 class Tikiwiki {
 	installed  = false
-	version = ""
-	path = "/wiki"
-	//webserver isref Apache
-	//database isref Mysql
-
-	/*procedure set_webserver (target isref Apache) {
-		condition { }
-		effect {
-			this.webserver = target
-		}
-	}
-
-	procedure set_database (target isref Mysql) {
-		condition { }
-		effect {
-			this.database = target
-		}
-	}*/
 
 	procedure install {
 		condition {
-			#this.webserver.installed = true
-			#this.webserver.running = false
-			#this.mysql.running = true
 		}
 		effect {
 			this.installed = true
@@ -39,25 +18,4 @@ class Tikiwiki {
 			this.installed = true
 		}
 	}
-
-	procedure change_path (target isref String) {
-		condition {
-			//this.webserver.installed = true
-		}
-		effect {
-			this.path = target
-		}
-	}
-
-	procedure upgrade (target isref Integer) {
-		condition {
-			/*this.webserver.installed = true
-			this.webserver.running = false
-			this.mysql.running = true*/
-		}
-		effect {
-			this.version = target
-		}
-	}
-
 }
