@@ -32,6 +32,7 @@ class Tikiwiki {
 
 	procedure install {
 		condition {
+			this.webserver.installed = true
 		}
 		effect {
 			this.installed = true
