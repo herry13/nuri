@@ -27,6 +27,7 @@ Hash.send(:define_method, "accept") { |visitor|
 Hash.send(:define_method, "at?") { |addr|
 	return nil if not addr.is_a?(String)
 	addrs = addr.split('.', 2)
+
 	if addrs[0] == '$'
 		return self.root.at?(addrs[1])
 	elsif addrs[0] == 'this' or addrs[0] == 'self'
