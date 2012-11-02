@@ -5,11 +5,19 @@ class Tikiwiki {
 	installed  = false
 	path = "/wiki"
 	webserver = parent.apache
+	database isref Mysql
 
 	procedure set_webserver (ws isref Apache) {
 		condition { }
 		effect {
 			this.webserver = ws
+		}
+	}
+
+	procedure set_database (db isref Mysql) {
+		condition { }
+		effect {
+			this.database = db
 		}
 	}
 
