@@ -30,6 +30,16 @@ module Nuri
 				puts Nuri::Sfp::to_pretty_json(sfp);
 			end
 
+			def debug_sas
+				sfp = Nuri::Sfp.deep_clone(@main)
+				sfp.delete('system')
+				sfp['initial'] = self.get_state
+				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
+				@parser = Nuri::Sfp::Parser.new
+				@parser.root = sfp
+				puts @parser.to_sas
+			end
+
 			def get_state(path='')
 				return nil if not @main.has_key?('system')
 
@@ -145,6 +155,11 @@ puts '...FAILED'
 		def self.debug_json
 			master = Nuri::Master::Daemon.new
 			master.debug_json
+		end
+
+		def self.debug_sas
+			master = Nuri::Master::Daemon.new
+			master.debug_sas
 		end
 	end
 end

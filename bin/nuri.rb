@@ -51,6 +51,9 @@ options:
 	elsif ARGV[1] == 'json'
 		plan = Nuri::Master.debug_json
 
+	elsif ARGV[1] == 'sas'
+		plan = Nuri::Master.debug_sas
+
 	elsif ARGV[1] == 'apply'
 		result = Nuri::Master.apply
 		puts 'Succeed: ' + result.to_s

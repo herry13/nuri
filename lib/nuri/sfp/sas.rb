@@ -120,8 +120,6 @@ begin
 				# set domain values for each variable
 				self.set_variable_values
 
-#dump_vars
-
 				# identify immutable variables
 				self.identify_immutable_variables
 
@@ -161,7 +159,8 @@ begin
 
 				#self.dump_types
 				#self.dump_operators
-				#self.dump_vars
+				self.dump_vars
+#puts @variables['$.hpvm17.tikiwiki.webserver'].to_s
 
 				return create_output
 rescue Exception => e
@@ -175,16 +174,13 @@ end
 				last = @g_operators.length-1
 				@g_operators.each_index do |i|
 					op1 = @g_operators[i]
-#puts '=> ' + op1.name + ' : ' + op1.get_pre_state.inspect
 					for j in i+1..last
 						op2 = @g_operators[j]
 						next if op1.modifier_id != op2.modifier_id or op1.conflict?(op2)
 						next if not (op1.supports?(op2) and op2.supports?(op1))
-#puts "\t" + op2.name	#+ ' : ' + op1.supports?(op2).to_s + ',' + op2.supports?(op1).to_s
 						if op1.supports?(op2) and op2.supports?(op1)
 							op = op1.merge(op2)
 							op.modifier_id = op1.modifier_id
-#puts "\t\t" + op.name + ":\n\t\t" + op.get_pre_state.inspect + "\n\t\t" + op.get_post_state.inspect
 							op1 = op
 						end
 					end
@@ -215,16 +211,16 @@ end
 								mutables[vname] = true
 							else
 								# TODO
-								#puts v1.keys.inspect
 							end
 						end
 					end
 				end
 				mutables.each do |vname, is_mutable|
-					if @variables[vname].is_final != (not is_mutable)
-						@variables[vname].clear
-						@variables[vname] << @variables[vname].init
-						#puts vname + ': ' + @variables[vname].length.to_s
+					var = @variables[vname]
+					if not var.is_final and (not is_mutable)
+						var.clear
+						var << var.init
+						var.is_final = false
 					end
 				end
 			end
@@ -598,9 +594,9 @@ end
 			# set possible values for each variable
 			def set_variable_values
 				@variables.each_value { |var|
+					var.clear
 					if not var.is_final
 						@types[var.type].each { |v| var << v }
-						var.uniq!
 					else
 						var << var.init
 					end
@@ -707,7 +703,6 @@ end
 				# using recursive method
 				def ref_combinator(bucket, parent, names, last_value, last_names=nil,
 						index=0, selected=Hash.new)
-
 					return if names[index] == nil
 					var_name = parent + '.' + names[index]
 					return if not @variables.has_key?(var_name)
@@ -721,9 +716,9 @@ end
 						bucket << result
 					elsif not @variables.has_key?(var_name)
 						raise VariableNotFoundException, 'Variable not found: ' + var_name
-					else
+					elsif index >= names.length
 						@variables[var_name].each { |v|
-							next if v.is_a?(Hash) and v.isnull and index < (names.length-1)
+							next if v.is_a?(Hash) and v.isnull
 							v = v.ref if v.is_a?(Hash) and v.isobject
 							selected[var_name] = create_equals_constraint(v)
 							ref_combinator(bucket, v, names, last_value, last_names, index+1, selected)
@@ -1259,8 +1254,10 @@ end
 				value = @init.at?(value) if value.is_a?(String) and value.isref
 				type = (isfinal ? self.isa?(value) : self.get_type(name, value, parent))
 				if type == nil
+					puts "Unrecognized type of variable: " + var_name
 					Nuri::Util.log "Unrecognized type of variable: " + var_name
 				else
+					value = null_value(type) if value == nil
 					var = Variable.new(var_name, type, -1, value, nil, isfinal)
 					@vars[var.name] = var
 					if isfinal and value.is_a?(Hash)
@@ -1272,9 +1269,17 @@ end
 				return true
 			end
 
+			def null_value(isa)
+				return {'_context' => 'null', '_isa' => isa}
+			end
+
 			def get_type(name, value, parent)
-				# TODO -- re-evaluate this method
 				type = self.isa?(value)
+				if type == nil and parent.is_a?(Hash) and parent.has_key?('_isa')
+					isa = @main.root.at?(parent['_isa'])
+					type = isa.type?(name) if isa != nil
+				end
+
 				return nil if type == nil
 
 				return type if type == '$.Boolean' or type == '$.Integer' or type == '$.String'

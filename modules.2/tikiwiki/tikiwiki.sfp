@@ -8,11 +8,25 @@ class Tikiwiki {
 	webserver isref Apache
 	database isref Mysql
 
+	procedure set_webserver (target isref Apache) {
+		condition { }
+		effect {
+			this.webserver = target
+		}
+	}
+
+	procedure set_database (target isref Mysql) {
+		condition { }
+		effect {
+			this.database = target
+		}
+	}
+
 	procedure install {
 		condition {
-			this.webserver.installed = true
-			this.webserver.running = false
-			this.mysql.running = true
+			#this.webserver.installed = true
+			#this.webserver.running = false
+			#this.mysql.running = true
 		}
 		effect {
 			this.installed = true

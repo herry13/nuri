@@ -44,6 +44,18 @@ Hash.send(:define_method, "at?") { |addr|
 	return nil
 }
 
+Hash.send(:define_method, "type?") { |name|
+	return nil if not self.has_key?(name)
+	value = self[name]
+	if value != nil
+		return '$.Boolean' if value.is_a?(TrueClass) or value.is_a?(FalseClass)
+		return '$.Integer' if value.is_a?(Numeric)
+		return '$.String' if value.is_a?(String) and not value.isref
+		return value['_isa'] if value.isobject or value.isnull
+	end
+	return nil
+}
+
 # return root context of this context
 Hash.send(:define_method, "root") {
 	return self if not self.has_key?('_parent') or self['_parent'] == nil
