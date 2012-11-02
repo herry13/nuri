@@ -74,7 +74,7 @@ module Nuri
 
 				cmd = JSON[procedure]
 				params = clean_parameters(cmd['parameters'])
-puts "exec: " + cmd.inspect
+puts "exec: " + cmd['name'] + ": " + cmd['parameters'].inspect
 				comp_name, cmd_name = cmd['name'].pop_ref
 				component = @daemon.root.get(comp_name)
 				success = false
