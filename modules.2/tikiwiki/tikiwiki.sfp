@@ -23,7 +23,7 @@ class Tikiwiki {
 	procedure uninstall {
 		condition { }
 		effect {
-			this.installed = true
+			this.installed = false
 		}
 	}
 }

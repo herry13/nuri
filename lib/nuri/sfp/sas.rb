@@ -159,8 +159,7 @@ begin
 
 				#self.dump_types
 				#self.dump_operators
-				self.dump_vars
-#puts @variables['$.hpvm17.tikiwiki.webserver'].to_s
+				#self.dump_vars
 
 				return create_output
 rescue Exception => e
