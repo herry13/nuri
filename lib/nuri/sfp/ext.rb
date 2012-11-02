@@ -155,8 +155,6 @@ String.send(:define_method, 'pop_ref') {
 String.send(:define_method, 'isref') {
 	s = self.to_s
 	return true if (s.length > 0 and s[0,1] == '$')
-	#return false if self.instance_variable_defined?(:@isa_ref)
-	#return @isa_ref
 	return false
 }
 

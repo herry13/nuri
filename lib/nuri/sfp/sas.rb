@@ -161,7 +161,7 @@ begin
 
 				#self.dump_types
 				#self.dump_operators
-				self.dump_vars
+				#self.dump_vars
 
 				return create_output
 rescue Exception => e
@@ -1252,10 +1252,10 @@ end
 				var_name = parent.ref.push(name)
 				isfinal = self.is_final(value)
 				isref = (value.is_a?(String) and value.isref)
-				value = @init.at?(value) if value.is_a?(String) and value.isref
+				value = @init.at?(value) if isref
 				type = (isfinal ? self.isa?(value) : self.get_type(name, value, parent))
 				if type == nil
-					puts "Unrecognized type of variable: " + var_name
+					puts "Unrecognized type of variable: " + var_name + " : " + isref.to_s + " -- " + value.ref + ' -- ' + value['_isa']
 					Nuri::Util.log "Unrecognized type of variable: " + var_name
 				else
 					value = null_value(type) if value == nil
@@ -1283,7 +1283,8 @@ end
 
 				return nil if type == nil
 
-				return type if type == '$.Boolean' or type == '$.Integer' or type == '$.String'
+				#return type if type == '$.Boolean' or type == '$.Integer' or type == '$.String'
+				return type if type.is_a?(String) and type.isref
 
 				parent_class = @root.at?( @vars[parent.ref].type )
 				return parent_class[name]['_isa']
@@ -1301,7 +1302,7 @@ end
 				return '$.Boolean' if value.is_a?(TrueClass) or value.is_a?(FalseClass)
 				return '$.Integer' if value.is_a?(Numeric)
 				return '$.String' if value.is_a?(String) and not value.isref
-				return value['_isa'] if value.is_a?(Hash) and value.has_key?('_isa')
+				return value['_isa'] if value.is_a?(Hash) and value.isobject #has_key?('_isa')
 				return nil
 			end
 
