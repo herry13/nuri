@@ -47,6 +47,7 @@ class Apache extends Service {
 
 	procedure install_php_mysql_module {
 		condition {
+			this.php_module = true
 			this.installed = true
 			this.running = false
 		}

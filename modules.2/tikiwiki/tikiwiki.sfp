@@ -19,6 +19,8 @@ class Tikiwiki {
 	procedure install {
 		condition {
 			this.webserver.installed = true
+			this.webserver.php_module = true
+			this.webserver.php_mysql_module = true
 			this.database.running = true
 		}
 		effect {

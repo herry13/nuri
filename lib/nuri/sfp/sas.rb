@@ -102,6 +102,7 @@ begin
 				end
 
 				@root['initial'].accept(ReferenceModifier.new)
+puts 'modify ref goal'
 				@root['goal'].accept(ReferenceModifier.new)
 				@root['global'].accept(ReferenceModifier.new)
 				#@root['sometime'].accept(ReferenceModifier.new)
@@ -225,7 +226,7 @@ end
 					if not var.is_final and (not is_mutable)
 						var.clear
 						var << var.init
-						var.is_final = false
+						var.immutable = false
 					end
 				end
 			end
@@ -310,9 +311,16 @@ end
 				if goal['_type'] == 'and'
 					map = and_equals_constraint_to_map(goal)
 					map.each { |name,value|
-						value = @types[@variables[name].type][0] if value.is_a?(Hash) and value.isnull
+						var = @variables[name]
+						value = @types[var.type][0] if value.is_a?(Hash) and value.isnull
 						value = @root['initial'].at?(value) if value.is_a?(String) and value.isref
-						@variables[name].goal = value
+						var.goal = value
+						if not var.immutable
+							#puts var.name + ' -- ' + value.class.name + ' := ' + orig
+							var.init = var.goal
+							var.clear
+							var << var.init
+						end
 					}
 				elsif goal['_type'] == 'or'
 					count = 0
@@ -328,6 +336,13 @@ end
 						op[var.name] = eff
 						map = and_equals_constraint_to_map(g)
 						map.each { |k1,v1|
+							var = @variables[k1]
+							#if not var.immutable
+							#	puts var.name + ' --- ' + v1.to_s
+							#	var.init = v1
+							#	var.clear
+							#	var << var.init
+							#end
 							op[@variables[k1].name] = Parameter.new(@variables[k1], v1, nil)
 						}
 						@operators[op.name] = op
@@ -1380,7 +1395,7 @@ raise Exception 'not implemented: normalized_nested_left_right'
 			# @layer -- axiom layer ( '-1' if this is not axiom variable, otherwise >0)
 			# @init -- initial value
 			# @goal -- goal value (desired value)
-			attr_accessor :name, :type, :layer, :init, :goal, :is_final, :id
+			attr_accessor :name, :type, :layer, :init, :goal, :is_final, :id, :immutable
 			attr_reader :is_primitive
 
 			def initialize(name, type, layer=-1, init=nil, goal=nil, is_final=false)
@@ -1391,6 +1406,7 @@ raise Exception 'not implemented: normalized_nested_left_right'
 				@goal = goal
 				@is_final = is_final
 				@is_primitive = (type == '$.String' or type == '$.Integer' or type == '$.Boolean')
+				@immutable = true
 			end
 
 			def to_s
