@@ -6,7 +6,9 @@ class Tikiwiki {
 	path = "/wiki"
 
 	procedure set_path (path isref String) {
-		condition { }
+		condition {
+			this.installed = true
+		}
 		effect {
 			this.path = path
 		}
