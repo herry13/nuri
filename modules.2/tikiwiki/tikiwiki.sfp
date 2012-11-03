@@ -4,8 +4,8 @@ include "modules/mysql/mysql.sfp"
 class Tikiwiki {
 	installed  = false
 	path = "/wiki"
-	public webserver = parent.apache
-	public database = parent.mysql
+	webserver isref Apache // = parent.apache
+	database isref Mysql // = parent.mysql
 
 	procedure set_path (path isref String) {
 		condition {
@@ -19,10 +19,13 @@ class Tikiwiki {
 
 	procedure install {
 		condition {
+			this.webserver != null
 			this.webserver.installed = true
 			this.webserver.running = false
 			this.webserver.php_module = true
 			this.webserver.php_mysql_module = true
+
+			this.database != null
 			this.database.running = true
 		}
 		effect {
