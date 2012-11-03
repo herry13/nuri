@@ -112,7 +112,7 @@ $stderr.puts e.backtrace
 					state = @daemon.get_state
 				else
 					_, _, path = path.split('/', 3)
-					puts path
+					state = @daemin.get_state(path)
 				end
 
 				if state.is_a?(Nuri::Undefined)
