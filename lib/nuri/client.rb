@@ -70,7 +70,11 @@ module Nuri
 
 			def set_state_system(state)
 				state = JSON[state]
-				puts @daemon.root.keys.inspect
+				puts state.keys.inspect
+				state.each do |key,value|
+					node = @daemon.root.get(key)
+					puts key if node = nil
+				end
 			end
 
 			def execute(procedure)

@@ -68,6 +68,10 @@ module Nuri
 			return @name
 		end
 
+		def set(key,value)
+			@state[key] = value
+		end
+
 		def set_goal(ref, value)
 			return false if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
@@ -180,6 +184,14 @@ module Nuri
 
 		def initialize
 			register('', 'root')
+		end
+	end
+
+	class Node
+		include Resource
+
+		def initialize(name)
+			register('', name)
 		end
 	end
 end
