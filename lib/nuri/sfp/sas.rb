@@ -102,7 +102,6 @@ begin
 				end
 
 				@root['initial'].accept(ReferenceModifier.new)
-puts 'modify ref goal'
 				@root['goal'].accept(ReferenceModifier.new)
 				@root['global'].accept(ReferenceModifier.new)
 				#@root['sometime'].accept(ReferenceModifier.new)

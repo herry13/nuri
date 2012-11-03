@@ -5,7 +5,7 @@ class Tikiwiki {
 	installed  = false
 	path = "/wiki"
 	webserver = parent.apache
-	database isref Mysql
+	database = parent.mysql
 
 	procedure set_path (path isref String) {
 		condition {
