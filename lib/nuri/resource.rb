@@ -141,6 +141,14 @@ module Nuri
 		end
 
 		def get(ref)
+			value = self.get_value(ref)
+			if value.is_a?(String) and value.isref
+puts 'value is ref: ' + value
+			end
+			value
+		end
+
+		def get_value(ref)
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
 			if first == '$'
