@@ -30,7 +30,7 @@ module Nuri
 				return @state
 			end
 	
-			def install(params)
+			def install(params={})
 				# TODO
 puts 'install tikiwiki'
 #puts self.root.inspect
