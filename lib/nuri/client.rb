@@ -57,12 +57,20 @@ module Nuri
 					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'POST'
+					if @request.params['REQUEST_URI'] == '/state/system'
+						self.set_state_system(@request.body.read.to_s)
+					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'PUT'
 					if check_uri(@request.params['REQUEST_URI'], 'exec')
 						self.execute(@request.body.read.to_s)
 					end
 				end
+			end
+
+			def set_state_system(state)
+				puts state.keys.inspect
+				puts @daemon.root.keys.inspect
 			end
 
 			def execute(procedure)

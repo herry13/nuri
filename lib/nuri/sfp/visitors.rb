@@ -7,6 +7,16 @@ module Nuri
 			end
 		end
 
+		class ProcedureEliminator
+			def visit(name, value, parent)
+				if value.is_a?(Hash) and value.isprocedure
+					parent.delete(name)
+					return false
+				end
+				true
+			end
+		end
+
 		class PrettyStateGenerator
 			def visit(name, value, parent)
 				if name[0,1] == '_'

@@ -76,7 +76,7 @@ module Nuri
 				state = get_state
 				sfp = Nuri::Sfp.deep_clone(@main)
 				sfp.delete('system')
-				sfp['initial'] = state
+				sfp['initial'] = Nuri::Sfp.deep_clone(state)
 				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
 				planner = Nuri::Planner::Solver.new
 				plan = planner.solve_sfp_to_sfw(sfp)
@@ -90,15 +90,16 @@ puts JSON.pretty_generate(plan)
 						if node == nil
 							succeed = false
 						else
-							succeed = self.execute(action, node['domainname'])
+							succeed = self.execute(action, node['domainname'], state)
 						end
 						break if not succeed
+						state = get_state
 					end
 				end
 				succeed
 			end
 
-			def execute(action, address)
+			def execute(action, address, current_state=nil)
 				def verify(action)
 					state = get_state
 					action['effect'].each do |key,value|
@@ -106,6 +107,8 @@ puts JSON.pretty_generate(plan)
 puts '...OK'
 					end
 				end
+
+				return false if not send_state(address, current_state)
 
 				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/exec')
 				data = JSON.generate(action)
@@ -121,6 +124,20 @@ print 'exec: ' + action['name']
 					Nuri::Util.log 'Cannot execute action: ' + action['name']
 				end
 puts '...FAILED'
+				false
+			end
+
+			def send_state(address, state)
+				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/system')
+				state.accept(Nuri::Sfp::ProcedureEliminator.new)
+				data = JSON.pretty_generate(state)
+				begin
+					req = Net::HTTP::Post.new(url.path)
+					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
+					return true if res.code == '200'
+				rescue Exception => e
+					Nuri::Util.log 'Cannot send state to ' + address
+				end
 				false
 			end
 
