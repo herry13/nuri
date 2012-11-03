@@ -72,9 +72,14 @@ module Nuri
 				state = JSON[state]
 				puts state.keys.inspect
 				state.each do |key,value|
+					next if key[0,1] == '_'
+begin
 					node = @daemon.root.get(key)
 					puts key if node = nil
 					puts node.class.name if node != nil
+rescue Exception => e
+	puts e.to_s
+end
 				end
 			end
 
