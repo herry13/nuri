@@ -15,9 +15,7 @@ module Nuri
 	
 			# get state of this component in JSON
 			def get_self_state
-				@state['installed'] = File.directory?(ConfigDir)
-
-				if @state['installed'] and File.file?(ConfigFile)
+				if File.file?(ConfigFile)
 					File.open(ConfigFile) do |f|
 						f.split("\n").each { |k,v| @state[k] = v }
 					end
