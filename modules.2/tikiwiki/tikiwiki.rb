@@ -59,6 +59,7 @@ puts self.get('database').inspect
 				config = read_config
 				config['webserver'] = params['ws']
 				write_config(config)
+puts 'finish set_webserver'
 				true
 			end
 
@@ -66,6 +67,7 @@ puts self.get('database').inspect
 				config = read_config
 				config['database'] = params['db']
 				write_config(config)
+puts 'finish set_database'
 				true
 			end
 		
