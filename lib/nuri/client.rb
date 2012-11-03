@@ -69,8 +69,9 @@ module Nuri
 				def clean_parameters(params)
 					p = {}
 					params.each { |k,v|
-						p[k[2,k.length-2]] =	(params[k].is_a?(String) and params[k].isref ?
-								params[k][2, params[k].length] : params[k])
+						p[k[2,k.length-2]] =	params[k]
+						#p[k[2,k.length-2]] =	(params[k].is_a?(String) and params[k].isref ?
+						#		params[k][2, params[k].length] : params[k])
 					}
 					return p
 				end
