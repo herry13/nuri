@@ -79,7 +79,7 @@ puts "exec: " + cmd['name'] + ": " + cmd['parameters'].inspect
 				component = @daemon.root.get(comp_name)
 				success = false
 				if component != nil
-					if not component.respond_to(cmd_name)
+					if not component.respond_to?(cmd_name)
 						puts "method is not implemented"
 					end
 
