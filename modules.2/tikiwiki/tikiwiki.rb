@@ -46,7 +46,7 @@ module Nuri
 puts 'install tikiwiki'
 puts self.get('webserver.document_root').inspect
 				config = read_config
-puts 'path: ' + config['path']
+puts 'path: ' + config.inspect
 				doc_root = self.get('webserver.document_root')
 				doc_root = doc_root + config['path']
 puts 'exec: ' + cmd
