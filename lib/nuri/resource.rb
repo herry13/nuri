@@ -144,14 +144,20 @@ module Nuri
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
 			if first == '$'
+				return self.get(rest)
+			elsif first == 'root'
 				return self.root.get(rest)
+			elsif first == 'parent'
+				return @parent.get(rest) if @parent != nil
+			elsif first == 'this' or first == 'self'
+				return self.get(rest)
 			elsif @children.has_key?(first) # sub-module
 				return @children[first].get(rest)
 			elsif @state.has_key?(first)
 				if rest == nil
 					return @state[first]
 				elsif @state[first].is_a?(Hash)
-					return @state[first].at(rest)
+					return @state[first].at?(rest)
 				end
 			end
 			return nil
