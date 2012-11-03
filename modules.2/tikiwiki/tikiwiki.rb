@@ -48,19 +48,22 @@ puts 'install tikiwiki'
 				doc_root = self.get('webserver.document_root')
 				path = self.get('path')
 				doc_root = doc_root + path
-puts 'exec1: ' + doc_root
 				system('mkdir -p ' + doc_root) if not File.directory?(doc_root)
-puts 'exec2: ' + doc_root
 				return false if not File.directory?(doc_root)
-puts 'exec3: ' + doc_root
 				if not File.file?(doc_root + '/index.php')
-					cmd = 'cd ' + doc_root + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz'
-puts 'exec: ' + cmd
+					cmd = 'cd ' + doc_root + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz 2>/dev/null 1>/dev/null'
 					return false if not system(cmd)
-					cmd = 'cd ' + doc_root + ';tar xvzf tiki-9.2.tar.gz;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
-puts 'exec: ' + cmd
+					cmd = 'cd ' + doc_root + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
 					return false if not system(cmd)
 				end
+
+				db_port = self.get('database.port')
+				db_host = self.get('database.parent.domainname')
+				db_root_passwd = self.get('database.root_password')
+
+puts 'db_port: ' + db_port.inspect
+puts 'db_host: ' + db_host.inspect
+puts 'db_root_passwd: ' + db_root_passwd.inspect
 
 # TODO -- install database
 
