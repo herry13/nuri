@@ -140,7 +140,6 @@ module Nuri
 			@children.each_value { |mod| mod.reset_goal }
 		end
 
-=begin
 		def get(ref)
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
@@ -157,11 +156,10 @@ module Nuri
 			end
 			return nil
 		end
-=end
 
-		def get(ref)
-			return @state.at?(ref)
-		end
+		#def get(ref)
+		#	return @state.at?(ref)
+		#end
 
 =begin
 		def get(ref)

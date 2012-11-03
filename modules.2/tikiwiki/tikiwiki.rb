@@ -30,10 +30,10 @@ module Nuri
 				return @state
 			end
 	
-			def install
+			def install(params)
 				# TODO
-puts 'install'
-puts self.root.inspect
+puts 'install tikiwiki'
+#puts self.root.inspect
 				#puts self.get('webserver').inspect
 				#puts self.get('webserver.document_root').inspect
 				#puts self.get('database').inspect
