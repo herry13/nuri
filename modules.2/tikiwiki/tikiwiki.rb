@@ -44,15 +44,15 @@ module Nuri
 			def install(params={})
 				# TODO
 puts 'install tikiwiki'
-puts self.get('webserver.document_root').inspect
 				config = get_self_state
-path = self.get('path')
-puts 'path: ' + path.inspect
 				doc_root = self.get('webserver.document_root')
+				path = self.get('path')
 				doc_root = doc_root + path
-puts 'exec: ' + cmd
+puts 'exec1: ' + doc_root
 				system('mkdir -p ' + doc_root) if not File.directory?(doc_root)
+puts 'exec2: ' + doc_root
 				return false if not File.directory?(doc_root)
+puts 'exec3: ' + doc_root
 				if not File.file?(doc_root + '/index.php')
 					cmd = 'cd ' + doc_root + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz'
 puts 'exec: ' + cmd
