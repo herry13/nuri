@@ -26,7 +26,7 @@ module Nuri
 			def read_config
 				config = {}
 				File.open(ConfigFile) do |f|
-					f.split("\n").each { |line|
+					f.read.split("\n").each { |line|
 						key, value = line.split('=', 2)
 						config[key] = value
 					}
