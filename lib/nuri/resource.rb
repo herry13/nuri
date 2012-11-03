@@ -160,14 +160,11 @@ module Nuri
 			elsif first == 'this' or first == 'self'
 				return self.get(rest)
 			elsif @children.has_key?(first) # sub-module
-puts '3: ' + first.inspect + ' -- ' + rest.inspect
 				return @children[first].get(rest)
 			elsif @state.has_key?(first)
 				if rest == nil
-puts '1: ' + @state[first].inspect
 					return @state[first]
 				elsif @state[first].is_a?(Hash)
-puts '2: ' + @state[first].at?(rest)
 					return @state[first].at?(rest)
 				elsif @state[first].is_a?(String) and @state[first].isref
 					return self.get( @state[first] + '.' + rest )

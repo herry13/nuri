@@ -30,6 +30,8 @@ Hash.send(:define_method, "at?") { |addr|
 
 	if addrs[0] == '$'
 		return self.root.at?(addrs[1])
+	elsif addrs[0] == 'root'
+		return self.root.at?(addrs[1])
 	elsif addrs[0] == 'this' or addrs[0] == 'self'
 		return self.at?(addrs[1])
 	elsif addrs[0] == 'parent'
