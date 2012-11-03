@@ -85,8 +85,8 @@ puts "exec: " + cmd['name'] + ": " + cmd['parameters'].inspect
 						else
 							success = component.send(cmd_name, params)
 						end
-						#success = true
 					rescue Exception => e
+$stderr.puts e.backtrace
 						Nuri::Util.log 'Cannot execute procedure: ' + procedure
 						@response.start(500) { |head,out| out.write('') }
 					end
