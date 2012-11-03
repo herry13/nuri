@@ -51,12 +51,15 @@ puts self.get('webserver.document_root').inspect
 puts 'exec: ' + cmd
 				system('mkdir -p ' + doc_root) if not File.directory?(doc_root)
 				return false if not File.directory?(doc_root)
-				cmd = 'cd ' + doc_root + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz'
+				if not File.file?(doc_root + '/index.php')
+					cmd = 'cd ' + doc_root + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz'
 puts 'exec: ' + cmd
-				return false if not system(cmd)
-				cmd = 'cd ' + doc_root + ';tar xvzf tiki-9.2.tar.gz;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
+					return false if not system(cmd)
+					cmd = 'cd ' + doc_root + ';tar xvzf tiki-9.2.tar.gz;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
 puts 'exec: ' + cmd
-				return false if not system(cmd)
+					return false if not system(cmd)
+				end
+
 # TODO -- install database
 
 				false
