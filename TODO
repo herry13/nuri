@@ -1,3 +1,7 @@
+URGENT:
+- send list of domain-names to each client
+- use it to resolve unfound path's value in : Nuri#get
+
 TODO
 - implements modules: apache-lb, ganglia*, vm, pm, tikiwiki
 - Nuri automatic update -- test
