@@ -33,8 +33,8 @@ module Nuri
 			def install(params={})
 				# TODO
 puts 'install tikiwiki'
-				puts self.get('webserver').name
 				puts self.get('webserver.document_root').inspect
+puts self.get('database').inspect
 				#puts self.get('database').inspect
 
 				false
