@@ -40,13 +40,13 @@ puts self.get('database').inspect
 
 			def set_webserver(params={})
 				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
-puts params.keys.inspect
+puts params['ws']
 				false
 			end
 
 			def set_database(params={})
 				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
-puts params['ws']
+puts params['db']
 				false
 			end
 		
