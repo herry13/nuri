@@ -143,7 +143,6 @@ module Nuri
 		def get(ref)
 			value = self.get_value(ref)
 			if value.is_a?(String) and value.isref
-puts 'value is ref: ' + value
 				value = get_value(value)
 			end
 			value
@@ -164,8 +163,10 @@ puts 'value is ref: ' + value
 				return @children[first].get(rest)
 			elsif @state.has_key?(first)
 				if rest == nil
+puts '1: ' + @state[first].inspect
 					return @state[first]
 				elsif @state[first].is_a?(Hash)
+puts '2: ' + @state[first].at?(rest)
 					return @state[first].at?(rest)
 				end
 			end
