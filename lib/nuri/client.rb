@@ -69,7 +69,7 @@ module Nuri
 			end
 
 			def set_state_system(state)
-				puts state.keys.inspect
+				state = JSON[state]
 				puts @daemon.root.keys.inspect
 			end
 
