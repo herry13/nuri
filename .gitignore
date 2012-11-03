@@ -1,3 +1,4 @@
 # exclude yard cache directory
 .yardoc
 .DS_Store
+.*
