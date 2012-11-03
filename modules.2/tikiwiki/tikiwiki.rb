@@ -45,7 +45,19 @@ module Nuri
 				# TODO
 puts 'install tikiwiki'
 puts self.get('webserver.document_root').inspect
-puts self.get('database').inspect
+				config = read_config
+				doc_root = self.get('webserver.document_root')
+				doc_root = doc_root + config['path']
+puts 'exec: ' + cmd
+				system('mkdir -p ' + doc_root) if not File.directory?(doc_root)
+				return false if not File.directory?(doc_root)
+				cmd = 'cd ' + doc_root + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz'
+puts 'exec: ' + cmd
+				return false if not system(cmd)
+				cmd = 'cd ' + doc_root + ';tar xvzf tiki-9.2.tar.gz;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
+puts 'exec: ' + cmd
+				return false if not system(cmd)
+# TODO -- install database
 
 				false
 			end
@@ -59,7 +71,6 @@ puts self.get('database').inspect
 				config = read_config
 				config['webserver'] = params['ws']
 				write_config(config)
-puts 'finish set_webserver'
 				true
 			end
 
@@ -67,12 +78,14 @@ puts 'finish set_webserver'
 				config = read_config
 				config['database'] = params['db']
 				write_config(config)
-puts 'finish set_database'
 				true
 			end
 		
 			def set_path(params={})
-				false
+				config = read_config
+				config['path'] = params['path']
+				write_config(config)
+				true
 			end
 		
 			def upgrade(params={})
