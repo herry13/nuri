@@ -1,21 +1,18 @@
 {
-  "Object": {
-    "_self": "Object",
-    "_context": "class"
-  },
-  "Machine": {
-    "_self": "Machine",
-    "_context": "class",
-    "running": false,
-    "nuri_latest": false,
+  "_context": "state",
+  "_self": "initial",
+  "hpvm16": {
+    "_self": "hpvm16",
+    "_context": "object",
+    "running": true,
+    "nuri_latest": true,
     "upgrade_nuri": {
       "_self": "upgrade_nuri",
       "_context": "procedure",
       "_cost": 1,
       "_condition": {
         "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
+        "_type": "and"
       },
       "_effect": {
         "_context": "mutation",
@@ -23,10 +20,8 @@
         "$.this.nuri_latest": {
           "_context": "mutation",
           "_type": "equals",
-          "_value": true,
-          "_self": "$.this.nuri_latest"
-        },
-        "_self": "_effect"
+          "_value": true
+        }
       }
     },
     "start": {
@@ -35,8 +30,7 @@
       "_cost": 1,
       "_condition": {
         "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
+        "_type": "and"
       },
       "_effect": {
         "_context": "mutation",
@@ -44,10 +38,8 @@
         "$.this.running": {
           "_context": "mutation",
           "_type": "equals",
-          "_value": true,
-          "_self": "$.this.running"
-        },
-        "_self": "_effect"
+          "_value": true
+        }
       }
     },
     "stop": {
@@ -56,8 +48,7 @@
       "_cost": 1,
       "_condition": {
         "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
+        "_type": "and"
       },
       "_effect": {
         "_context": "mutation",
@@ -65,867 +56,478 @@
         "$.this.running": {
           "_context": "mutation",
           "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_effect"
-      }
-    }
-  },
-  "Service": {
-    "_self": "Service",
-    "_context": "class",
-    "installed": false,
-    "running": false,
-    "port": 0,
-    "install": {
-      "_self": "install",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "_self": "_effect"
+          "_value": false
+        }
       }
     },
-    "uninstall": {
-      "_self": "uninstall",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.installed"
-        },
-        "_self": "_effect"
-      }
-    },
-    "start": {
-      "_self": "start",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.running"
-        },
-        "_self": "_effect"
-      }
-    },
-    "stop": {
-      "_self": "stop",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_effect"
-      }
-    },
-    "set_port": {
-      "_self": "set_port",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.port": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": "$.target",
-          "_self": "$.this.port"
-        },
-        "_self": "_effect"
-      },
-      "target": {
-        "_context": "null",
-        "_isa": "$.Integer",
-        "_self": "target"
-      }
-    }
-  },
-  "Apache": {
-    "_self": "Apache",
-    "_context": "class",
-    "_extends": "$.Service",
-    "port": 80,
-    "document_root": "/var/www",
-    "php_module": false,
-    "php_mysql_module": false,
-    "set_document_root": {
-      "_self": "set_document_root",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.document_root": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": "$.target",
-          "_self": "$.this.document_root"
-        },
-        "_self": "_effect"
-      },
-      "target": {
-        "_context": "null",
-        "_isa": "$.String",
-        "_self": "target"
-      }
-    },
-    "uninstall": {
-      "_self": "uninstall",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "$.this.php_module": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.php_module"
-        },
-        "$.this.php_mysql_module": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.php_mysql_module"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.installed"
-        },
-        "_self": "_effect"
-      }
-    },
-    "install_php_module": {
-      "_self": "install_php_module",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.php_module": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.php_module"
-        },
-        "_self": "_effect"
-      }
-    },
-    "uninstall_php_module": {
-      "_self": "uninstall_php_module",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.php_module": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.php_module"
-        },
-        "_self": "_effect"
-      }
-    },
-    "install_php_mysql_module": {
-      "_self": "install_php_mysql_module",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.php_mysql_module": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.php_mysql_module"
-        },
-        "_self": "_effect"
-      }
-    },
-    "uninstall_php_mysql_module": {
-      "_self": "uninstall_php_mysql_module",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.php_mysql_module": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.php_mysql_module"
-        },
-        "_self": "_effect"
-      }
-    },
-    "installed": false,
-    "running": false,
-    "install": {
-      "_self": "install",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "_self": "_effect"
-      }
-    },
-    "start": {
-      "_self": "start",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.running"
-        },
-        "_self": "_effect"
-      }
-    },
-    "stop": {
-      "_self": "stop",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_effect"
-      }
-    },
-    "set_port": {
-      "_self": "set_port",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.port": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": "$.target",
-          "_self": "$.this.port"
-        },
-        "_self": "_effect"
-      },
-      "target": {
-        "_context": "null",
-        "_isa": "$.Integer",
-        "_self": "target"
-      }
-    },
-    "_super": [
-      "$.Service"
-    ]
-  },
-  "Mysql": {
-    "_self": "Mysql",
-    "_context": "class",
-    "_extends": "$.Service",
-    "port": 3306,
-    "root_password": "",
-    "set_root_password": {
-      "_self": "set_root_password",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.root_password": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": "$.passwd",
-          "_self": "$.this.root_password"
-        },
-        "_self": "_effect"
-      },
-      "passwd": {
-        "_context": "null",
-        "_isa": "$.String",
-        "_self": "passwd"
-      }
-    },
-    "installed": false,
-    "running": false,
-    "install": {
-      "_self": "install",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "_self": "_effect"
-      }
-    },
-    "uninstall": {
-      "_self": "uninstall",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.installed"
-        },
-        "_self": "_effect"
-      }
-    },
-    "start": {
-      "_self": "start",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.running"
-        },
-        "_self": "_effect"
-      }
-    },
-    "stop": {
-      "_self": "stop",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.running": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_effect"
-      }
-    },
-    "set_port": {
-      "_self": "set_port",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "$.this.running": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.running"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.port": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": "$.target",
-          "_self": "$.this.port"
-        },
-        "_self": "_effect"
-      },
-      "target": {
-        "_context": "null",
-        "_isa": "$.Integer",
-        "_self": "target"
-      }
-    },
-    "_super": [
-      "$.Service"
-    ]
-  },
-  "Tikiwiki": {
-    "_self": "Tikiwiki",
-    "_context": "class",
-    "installed": false,
-    "path": "/wiki",
-    "webserver": "$.parent.apache",
-    "database": {
-      "_context": "null",
-      "_isa": "$.Mysql",
-      "_self": "database"
-    },
-    "set_webserver": {
-      "_self": "set_webserver",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.webserver": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": "$.ws",
-          "_self": "$.this.webserver"
-        },
-        "_self": "_effect"
-      },
-      "ws": {
-        "_context": "null",
-        "_isa": "$.Apache",
-        "_self": "ws"
-      }
-    },
-    "set_database": {
-      "_self": "set_database",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.database": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": "$.db",
-          "_self": "$.this.database"
-        },
-        "_self": "_effect"
-      },
-      "db": {
-        "_context": "null",
-        "_isa": "$.Mysql",
-        "_self": "db"
-      }
-    },
-    "set_path": {
-      "_self": "set_path",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.path": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": "$.path",
-          "_self": "$.this.path"
-        },
-        "_self": "_effect"
-      },
-      "path": {
-        "_context": "null",
-        "_isa": "$.String",
-        "_self": "path"
-      }
-    },
-    "install": {
-      "_self": "install",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "$.this.webserver.installed": {
-          "_context": "constraint",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.webserver.installed"
-        },
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": true,
-          "_self": "$.this.installed"
-        },
-        "_self": "_effect"
-      }
-    },
-    "uninstall": {
-      "_self": "uninstall",
-      "_context": "procedure",
-      "_cost": 1,
-      "_condition": {
-        "_context": "constraint",
-        "_type": "and",
-        "_self": "_condition"
-      },
-      "_effect": {
-        "_context": "mutation",
-        "_type": "and",
-        "$.this.installed": {
-          "_context": "mutation",
-          "_type": "equals",
-          "_value": false,
-          "_self": "$.this.installed"
-        },
-        "_self": "_effect"
-      }
-    }
-  },
-  "goal": {
-    "_self": "goal",
-    "_context": "constraint",
-    "_type": "and",
-    "$.hpvm17.tikiwiki.installed": {
-      "_context": "constraint",
-      "_type": "equals",
-      "_value": true,
-      "_self": "$.hpvm17.tikiwiki.installed"
-    },
-    "$.hpvm17.tikiwiki.path": {
-      "_context": "constraint",
-      "_type": "equals",
-      "_value": "/",
-      "_self": "$.hpvm17.tikiwiki.path"
-    },
-    "$.hpvm17.tikiwiki.webserver": {
-      "_context": "constraint",
-      "_type": "equals",
-      "_value": "$.parent.apache",
-      "_self": "$.hpvm17.tikiwiki.webserver"
-    },
-    "$.hpvm17.tikiwiki.database": {
-      "_context": "constraint",
-      "_type": "equals",
-      "_value": "$.hpvm16.mysql",
-      "_self": "$.hpvm17.tikiwiki.database"
-    },
-    "$.hpvm17.mysql.installed": {
-      "_context": "constraint",
-      "_type": "equals",
-      "_value": false,
-      "_self": "$.hpvm17.mysql.installed"
-    },
-    "$.hpvm16.apache.installed": {
-      "_context": "constraint",
-      "_type": "equals",
-      "_value": false,
-      "_self": "$.hpvm16.apache.installed"
-    },
-    "$.hpvm16.mysql.root_password": {
-      "_context": "constraint",
-      "_type": "equals",
-      "_value": "root",
-      "_self": "$.hpvm16.mysql.root_password"
-    }
-  },
-  "global": {
-    "_self": "global",
-    "_context": "constraint",
-    "_type": "and"
-  },
-  "initial": {
-    "_context": "state",
-    "_self": "initial",
-    "hpvm16": {
-      "_self": "hpvm16",
+    "_isa": "$.Machine",
+    "_classes": [
+      "$.Machine"
+    ],
+    "memory_total": 503456,
+    "memory_free": 43380,
+    "os": "linux",
+    "platform": "ubuntu",
+    "hostname": "hpvm16",
+    "domainname": "hpvm16.inf.ed.ac.uk",
+    "version": "3.2.0-25-generic",
+    "arch": "x86_64",
+    "cpus": 1,
+    "tikiwiki": {
+      "_self": "tikiwiki",
       "_context": "object",
+      "installed": false,
+      "path": "/wiki",
+      "webserver": "$.parent.apache",
+      "database": "$.parent.mysql",
+      "set_path": {
+        "_self": "set_path",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.webserver.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.path": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": "$.path"
+          }
+        },
+        "path": {
+          "_context": "null",
+          "_isa": "$.String"
+        }
+      },
+      "install": {
+        "_self": "install",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.webserver.installed": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.webserver.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          },
+          "$.this.webserver.php_module": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.webserver.php_mysql_module": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.database.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": true
+          }
+        }
+      },
+      "uninstall": {
+        "_self": "uninstall",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": false
+          }
+        }
+      },
+      "_isa": "$.Tikiwiki",
+      "_classes": [
+        "$.Tikiwiki"
+      ]
+    },
+    "apache": {
+      "_self": "apache",
+      "_context": "object",
+      "_extends": "$.Service",
+      "port": 0,
+      "document_root": "/var/www",
+      "php_module": false,
+      "php_mysql_module": false,
+      "set_document_root": {
+        "_self": "set_document_root",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.document_root": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": "$.target"
+          }
+        },
+        "target": {
+          "_context": "null",
+          "_isa": "$.String"
+        }
+      },
+      "uninstall": {
+        "_self": "uninstall",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          },
+          "$.this.php_module": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          },
+          "$.this.php_mysql_module": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": false
+          }
+        }
+      },
+      "install_php_module": {
+        "_self": "install_php_module",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.php_module": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": true
+          }
+        }
+      },
+      "uninstall_php_module": {
+        "_self": "uninstall_php_module",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.php_module": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": false
+          }
+        }
+      },
+      "install_php_mysql_module": {
+        "_self": "install_php_mysql_module",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.php_module": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.installed": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.php_mysql_module": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": true
+          }
+        }
+      },
+      "uninstall_php_mysql_module": {
+        "_self": "uninstall_php_mysql_module",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.php_mysql_module": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": false
+          }
+        }
+      },
+      "installed": false,
+      "running": false,
+      "install": {
+        "_self": "install",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": true
+          }
+        }
+      },
+      "start": {
+        "_self": "start",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": true
+          }
+        }
+      },
+      "stop": {
+        "_self": "stop",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": false
+          }
+        }
+      },
+      "set_port": {
+        "_self": "set_port",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.port": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": "$.target"
+          }
+        },
+        "target": {
+          "_context": "null",
+          "_isa": "$.Integer"
+        }
+      },
+      "_isa": "$.Apache",
+      "_classes": [
+        "$.Apache",
+        "$.Service"
+      ],
+      "version": "",
+      "docment_root": ""
+    },
+    "mysql": {
+      "_self": "mysql",
+      "_context": "object",
+      "_extends": "$.Service",
+      "port": 3306,
+      "root_password": "root",
+      "set_root_password": {
+        "_self": "set_root_password",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.root_password": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": "$.passwd"
+          }
+        },
+        "passwd": {
+          "_context": "null",
+          "_isa": "$.String"
+        }
+      },
+      "installed": true,
       "running": true,
-      "nuri_latest": true,
-      "upgrade_nuri": {
-        "_self": "upgrade_nuri",
+      "install": {
+        "_self": "install",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": true
+          }
+        }
+      },
+      "uninstall": {
+        "_self": "uninstall",
         "_context": "procedure",
         "_cost": 1,
         "_condition": {
           "_context": "constraint",
           "_type": "and",
-          "_self": "_condition"
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
         },
         "_effect": {
           "_context": "mutation",
           "_type": "and",
-          "$.this.nuri_latest": {
+          "$.this.installed": {
             "_context": "mutation",
             "_type": "equals",
-            "_value": true,
-            "_self": "$.this.nuri_latest"
-          },
-          "_self": "_effect"
+            "_value": false
+          }
         }
       },
       "start": {
@@ -935,7 +537,11 @@
         "_condition": {
           "_context": "constraint",
           "_type": "and",
-          "_self": "_condition"
+          "$.this.installed": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          }
         },
         "_effect": {
           "_context": "mutation",
@@ -943,10 +549,8 @@
           "$.this.running": {
             "_context": "mutation",
             "_type": "equals",
-            "_value": true,
-            "_self": "$.this.running"
-          },
-          "_self": "_effect"
+            "_value": true
+          }
         }
       },
       "stop": {
@@ -955,8 +559,7 @@
         "_cost": 1,
         "_condition": {
           "_context": "constraint",
-          "_type": "and",
-          "_self": "_condition"
+          "_type": "and"
         },
         "_effect": {
           "_context": "mutation",
@@ -964,1398 +567,657 @@
           "$.this.running": {
             "_context": "mutation",
             "_type": "equals",
-            "_value": false,
-            "_self": "$.this.running"
-          },
-          "_self": "_effect"
+            "_value": false
+          }
         }
       },
-      "_isa": "$.Machine",
-      "_classes": [
-        "$.Machine"
-      ],
-      "memory_total": 503456,
-      "memory_free": 47520,
-      "os": "linux",
-      "platform": "ubuntu",
-      "hostname": "hpvm16",
-      "domainname": "hpvm16.inf.ed.ac.uk",
-      "version": "3.2.0-25-generic",
-      "arch": "x86_64",
-      "cpus": 1,
-      "tikiwiki": {
-        "_self": "tikiwiki",
-        "_context": "object",
-        "installed": false,
-        "path": "",
-        "webserver": "$.parent.apache",
-        "database": {
+      "set_port": {
+        "_self": "set_port",
+        "_context": "procedure",
+        "_cost": 1,
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": true
+          },
+          "$.this.running": {
+            "_context": "constraint",
+            "_type": "equals",
+            "_value": false
+          }
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.port": {
+            "_context": "mutation",
+            "_type": "equals",
+            "_value": "$.target"
+          }
+        },
+        "target": {
           "_context": "null",
-          "_isa": "$.Mysql",
-          "_self": "database"
-        },
-        "set_webserver": {
-          "_self": "set_webserver",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.webserver": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": "$.ws",
-              "_self": "$.this.webserver"
-            },
-            "_self": "_effect"
-          },
-          "ws": {
-            "_context": "null",
-            "_isa": "$.Apache",
-            "_self": "ws"
-          }
-        },
-        "set_database": {
-          "_self": "set_database",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.database": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": "$.db",
-              "_self": "$.this.database"
-            },
-            "_self": "_effect"
-          },
-          "db": {
-            "_context": "null",
-            "_isa": "$.Mysql",
-            "_self": "db"
-          }
-        },
-        "set_path": {
-          "_self": "set_path",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.path": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": "$.path",
-              "_self": "$.this.path"
-            },
-            "_self": "_effect"
-          },
-          "path": {
-            "_context": "null",
-            "_isa": "$.String",
-            "_self": "path"
-          }
-        },
-        "install": {
-          "_self": "install",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.webserver.installed": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.webserver.installed"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "uninstall": {
-          "_self": "uninstall",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "_isa": "$.Tikiwiki",
-        "_classes": [
-          "$.Tikiwiki"
-        ],
-        "version": ""
+          "_isa": "$.Integer"
+        }
       },
-      "apache": {
-        "_self": "apache",
-        "_context": "object",
-        "_extends": "$.Service",
-        "port": 0,
-        "document_root": "/var/www",
-        "php_module": false,
-        "php_mysql_module": false,
-        "set_document_root": {
-          "_self": "set_document_root",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.document_root": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": "$.target",
-              "_self": "$.this.document_root"
-            },
-            "_self": "_effect"
-          },
-          "target": {
-            "_context": "null",
-            "_isa": "$.String",
-            "_self": "target"
-          }
-        },
-        "uninstall": {
-          "_self": "uninstall",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "$.this.php_module": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.php_module"
-            },
-            "$.this.php_mysql_module": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.php_mysql_module"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "install_php_module": {
-          "_self": "install_php_module",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.php_module": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.php_module"
-            },
-            "_self": "_effect"
-          }
-        },
-        "uninstall_php_module": {
-          "_self": "uninstall_php_module",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.php_module": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.php_module"
-            },
-            "_self": "_effect"
-          }
-        },
-        "install_php_mysql_module": {
-          "_self": "install_php_mysql_module",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.php_mysql_module": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.php_mysql_module"
-            },
-            "_self": "_effect"
-          }
-        },
-        "uninstall_php_mysql_module": {
-          "_self": "uninstall_php_mysql_module",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.php_mysql_module": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.php_mysql_module"
-            },
-            "_self": "_effect"
-          }
-        },
-        "installed": false,
-        "running": false,
-        "install": {
-          "_self": "install",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "start": {
-          "_self": "start",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.running"
-            },
-            "_self": "_effect"
-          }
-        },
-        "stop": {
-          "_self": "stop",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_effect"
-          }
-        },
-        "set_port": {
-          "_self": "set_port",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.port": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": "$.target",
-              "_self": "$.this.port"
-            },
-            "_self": "_effect"
-          },
-          "target": {
-            "_context": "null",
-            "_isa": "$.Integer",
-            "_self": "target"
-          }
-        },
-        "_isa": "$.Apache",
-        "_classes": [
-          "$.Service",
-          "$.Apache"
-        ],
-        "version": "",
-        "docment_root": ""
+      "_isa": "$.Mysql",
+      "_classes": [
+        "$.Mysql",
+        "$.Service"
+      ],
+      "version": "5.5.24-0ubuntu0.12.04.1"
+    }
+  },
+  "hpvm17": {
+    "nuri_latest": true,
+    "_self": "hpvm17",
+    "hostname": "hpvm17",
+    "domainname": "hpvm17.inf.ed.ac.uk",
+    "platform": "ubuntu",
+    "_context": "object",
+    "arch": "x86_64",
+    "cpus": 1,
+    "start": {
+      "_self": "start",
+      "_condition": {
+        "_context": "constraint",
+        "_type": "and"
       },
-      "mysql": {
-        "_self": "mysql",
-        "_context": "object",
-        "_extends": "$.Service",
-        "port": 3306,
-        "root_password": "root",
-        "set_root_password": {
-          "_self": "set_root_password",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.root_password": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": "$.passwd",
-              "_self": "$.this.root_password"
-            },
-            "_self": "_effect"
-          },
-          "passwd": {
-            "_context": "null",
-            "_isa": "$.String",
-            "_self": "passwd"
-          }
+      "_context": "procedure",
+      "_cost": 1,
+      "_effect": {
+        "_context": "mutation",
+        "$.this.running": {
+          "_context": "mutation",
+          "_value": true,
+          "_type": "equals"
         },
-        "installed": true,
-        "running": true,
-        "install": {
-          "_self": "install",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "uninstall": {
-          "_self": "uninstall",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "start": {
-          "_self": "start",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.running"
-            },
-            "_self": "_effect"
-          }
-        },
-        "stop": {
-          "_self": "stop",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.running": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_effect"
-          }
-        },
-        "set_port": {
-          "_self": "set_port",
-          "_context": "procedure",
-          "_cost": 1,
-          "_condition": {
-            "_context": "constraint",
-            "_type": "and",
-            "$.this.installed": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": true,
-              "_self": "$.this.installed"
-            },
-            "$.this.running": {
-              "_context": "constraint",
-              "_type": "equals",
-              "_value": false,
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_context": "mutation",
-            "_type": "and",
-            "$.this.port": {
-              "_context": "mutation",
-              "_type": "equals",
-              "_value": "$.target",
-              "_self": "$.this.port"
-            },
-            "_self": "_effect"
-          },
-          "target": {
-            "_context": "null",
-            "_isa": "$.Integer",
-            "_self": "target"
-          }
-        },
-        "_isa": "$.Mysql",
-        "_classes": [
-          "$.Service",
-          "$.Mysql"
-        ],
-        "version": "5.5.24-0ubuntu0.12.04.1"
+        "_type": "and"
       }
     },
-    "hpvm17": {
-      "os": "linux",
-      "arch": "x86_64",
-      "upgrade_nuri": {
-        "_cost": 1,
-        "_self": "upgrade_nuri",
-        "_context": "procedure",
-        "_effect": {
-          "_type": "and",
-          "$.this.nuri_latest": {
-            "_type": "equals",
-            "_value": true,
-            "_context": "mutation",
-            "_self": "$.this.nuri_latest"
-          },
+    "_classes": [
+      "$.Machine"
+    ],
+    "memory_total": 503456,
+    "stop": {
+      "_self": "stop",
+      "_condition": {
+        "_context": "constraint",
+        "_type": "and"
+      },
+      "_context": "procedure",
+      "_cost": 1,
+      "_effect": {
+        "_context": "mutation",
+        "$.this.running": {
           "_context": "mutation",
-          "_self": "_effect"
+          "_value": false,
+          "_type": "equals"
         },
+        "_type": "and"
+      }
+    },
+    "running": true,
+    "memory_free": 58632,
+    "mysql": {
+      "set_port": {
+        "_self": "set_port",
         "_condition": {
-          "_type": "and",
           "_context": "constraint",
-          "_self": "_condition"
-        }
-      },
-      "platform": "ubuntu",
-      "version": "3.2.0-25-generic",
-      "nuri_latest": true,
-      "memory_free": 82224,
-      "apache": {
-        "install_php_mysql_module": {
-          "_cost": 1,
-          "_self": "install_php_mysql_module",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "$.this.php_mysql_module": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "mutation",
-              "_self": "$.this.php_mysql_module"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
+          "$.this.installed": {
             "_context": "constraint",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.installed"
-            },
-            "_self": "_condition"
-          }
-        },
-        "install_php_module": {
-          "_cost": 1,
-          "_self": "install_php_module",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "$.this.php_module": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "mutation",
-              "_self": "$.this.php_module"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
+            "_value": true,
+            "_type": "equals"
           },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.installed"
-            },
-            "_self": "_condition"
-          }
-        },
-        "set_document_root": {
-          "_cost": 1,
-          "_self": "set_document_root",
-          "target": {
-            "_isa": "$.String",
-            "_context": "null",
-            "_self": "target"
-          },
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "$.this.document_root": {
-              "_type": "equals",
-              "_value": "$.target",
-              "_context": "mutation",
-              "_self": "$.this.document_root"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          }
-        },
-        "php_module": false,
-        "document_root": "/var/www",
-        "_extends": "$.Service",
-        "set_port": {
-          "_cost": 1,
-          "_self": "set_port",
-          "_context": "procedure",
-          "target": {
-            "_isa": "$.Integer",
-            "_context": "null",
-            "_self": "target"
-          },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.installed"
-            },
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
-            "$.this.port": {
-              "_type": "equals",
-              "_value": "$.target",
-              "_context": "mutation",
-              "_self": "$.this.port"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          }
-        },
-        "uninstall": {
-          "_cost": 1,
-          "_self": "uninstall",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "mutation",
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "$.this.php_mysql_module": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.php_mysql_module"
-            },
-            "$.this.php_module": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.php_module"
-            },
-            "_context": "constraint",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          }
-        },
-        "uninstall_php_mysql_module": {
-          "_cost": 1,
-          "_self": "uninstall_php_mysql_module",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "$.this.php_mysql_module": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "mutation",
-              "_self": "$.this.php_mysql_module"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          }
-        },
-        "install": {
-          "_cost": 1,
-          "_self": "install",
-          "_context": "procedure",
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "mutation",
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "version": "",
-        "installed": false,
-        "php_mysql_module": false,
-        "start": {
-          "_cost": 1,
-          "_self": "start",
-          "_context": "procedure",
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.installed"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "mutation",
-              "_self": "$.this.running"
-            },
-            "_self": "_effect"
-          }
-        },
-        "uninstall_php_module": {
-          "_cost": 1,
-          "_self": "uninstall_php_module",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "$.this.php_module": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "mutation",
-              "_self": "$.this.php_module"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          }
-        },
-        "_self": "apache",
-        "_isa": "$.Apache",
-        "_context": "object",
-        "stop": {
-          "_cost": 1,
-          "_self": "stop",
-          "_context": "procedure",
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "mutation",
-              "_self": "$.this.running"
-            },
-            "_self": "_effect"
-          }
-        },
-        "_classes": [
-          "$.Service",
-          "$.Apache"
-        ],
-        "running": false,
-        "port": 80
-      },
-      "start": {
-        "_cost": 1,
-        "_self": "start",
-        "_context": "procedure",
-        "_effect": {
           "_type": "and",
-          "_context": "mutation",
           "$.this.running": {
-            "_type": "equals",
-            "_value": true,
-            "_context": "mutation",
-            "_self": "$.this.running"
-          },
-          "_self": "_effect"
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          }
         },
-        "_condition": {
+        "target": {
+          "_context": "null",
+          "_isa": "$.Integer"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
           "_type": "and",
-          "_context": "constraint",
-          "_self": "_condition"
+          "$.this.port": {
+            "_context": "mutation",
+            "_value": "$.target",
+            "_type": "equals"
+          }
         }
       },
-      "_self": "hpvm17",
-      "_isa": "$.Machine",
-      "hostname": "hpvm17",
-      "cpus": 1,
-      "mysql": {
-        "set_root_password": {
-          "passwd": {
-            "_isa": "$.String",
-            "_context": "null",
-            "_self": "passwd"
-          },
-          "_cost": 1,
-          "_self": "set_root_password",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "$.this.root_password": {
-              "_type": "equals",
-              "_value": "$.passwd",
-              "_context": "mutation",
-              "_self": "$.this.root_password"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
+      "_extends": "$.Service",
+      "_self": "mysql",
+      "installed": false,
+      "uninstall": {
+        "_self": "uninstall",
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and",
+          "$.this.running": {
             "_context": "constraint",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
+            "_value": false,
+            "_type": "equals"
           }
         },
-        "_extends": "$.Service",
-        "uninstall": {
-          "_cost": 1,
-          "_self": "uninstall",
-          "_context": "procedure",
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "$.this.installed": {
             "_context": "mutation",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "mutation",
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "set_port": {
-          "_cost": 1,
-          "_self": "set_port",
-          "_context": "procedure",
-          "target": {
-            "_isa": "$.Integer",
-            "_context": "null",
-            "_self": "target"
+            "_value": false,
+            "_type": "equals"
           },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.installed"
-            },
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "constraint",
-              "_self": "$.this.running"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
-            "$.this.port": {
-              "_type": "equals",
-              "_value": "$.target",
-              "_context": "mutation",
-              "_self": "$.this.port"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          }
-        },
-        "install": {
-          "_cost": 1,
-          "_self": "install",
-          "_context": "procedure",
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "mutation",
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          }
-        },
-        "version": "",
-        "root_password": "",
-        "installed": false,
-        "start": {
-          "_cost": 1,
-          "_self": "start",
-          "_context": "procedure",
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.installed"
-            },
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "mutation",
-              "_self": "$.this.running"
-            },
-            "_self": "_effect"
-          }
-        },
-        "_self": "mysql",
-        "_isa": "$.Mysql",
-        "_context": "object",
-        "stop": {
-          "_cost": 1,
-          "_self": "stop",
-          "_context": "procedure",
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "_self": "_condition"
-          },
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.running": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "mutation",
-              "_self": "$.this.running"
-            },
-            "_self": "_effect"
-          }
-        },
-        "_classes": [
-          "$.Service",
-          "$.Mysql"
-        ],
-        "running": false,
-        "port": 3306
+          "_type": "and"
+        }
       },
       "_context": "object",
-      "memory_total": 503456,
-      "domainname": "hpvm17.inf.ed.ac.uk",
-      "tikiwiki": {
-        "set_path": {
-          "_cost": 1,
-          "_self": "set_path",
-          "_context": "procedure",
-          "path": {
-            "_isa": "$.String",
-            "_context": "null",
-            "_self": "path"
-          },
-          "_effect": {
-            "_type": "and",
-            "$.this.path": {
-              "_type": "equals",
-              "_value": "$.path",
-              "_context": "mutation",
-              "_self": "$.this.path"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.installed"
-            },
-            "_self": "_condition"
-          }
-        },
-        "uninstall": {
-          "_cost": 1,
-          "_self": "uninstall",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": false,
-              "_context": "mutation",
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "_self": "_condition"
-          }
-        },
-        "webserver": "$.parent.apache",
-        "set_webserver": {
-          "_cost": 1,
-          "_self": "set_webserver",
-          "ws": {
-            "_isa": "$.Apache",
-            "_context": "null",
-            "_self": "ws"
-          },
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "$.this.webserver": {
-              "_type": "equals",
-              "_value": "$.ws",
-              "_context": "mutation",
-              "_self": "$.this.webserver"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "_self": "_condition"
-          }
-        },
-        "install": {
-          "_cost": 1,
-          "_self": "install",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "_context": "mutation",
-            "$.this.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "mutation",
-              "_self": "$.this.installed"
-            },
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "$.this.webserver.installed": {
-              "_type": "equals",
-              "_value": true,
-              "_context": "constraint",
-              "_self": "$.this.webserver.installed"
-            },
-            "_context": "constraint",
-            "_self": "_condition"
-          }
-        },
-        "version": "",
-        "set_database": {
-          "db": {
-            "_isa": "$.Mysql",
-            "_context": "null",
-            "_self": "db"
-          },
-          "_cost": 1,
-          "_self": "set_database",
-          "_context": "procedure",
-          "_effect": {
-            "_type": "and",
-            "$.this.database": {
-              "_type": "equals",
-              "_value": "$.db",
-              "_context": "mutation",
-              "_self": "$.this.database"
-            },
-            "_context": "mutation",
-            "_self": "_effect"
-          },
-          "_condition": {
-            "_type": "and",
-            "_context": "constraint",
-            "_self": "_condition"
-          }
-        },
-        "installed": false,
-        "_self": "tikiwiki",
-        "_isa": "$.Tikiwiki",
-        "database": {
-          "_isa": "$.Mysql",
-          "_context": "null",
-          "_self": "database"
-        },
-        "_context": "object",
-        "_classes": [
-          "$.Tikiwiki"
-        ],
-        "path": ""
-      },
-      "stop": {
-        "_cost": 1,
-        "_self": "stop",
-        "_context": "procedure",
-        "_effect": {
-          "_type": "and",
-          "_context": "mutation",
-          "$.this.running": {
-            "_type": "equals",
-            "_value": false,
-            "_context": "mutation",
-            "_self": "$.this.running"
-          },
-          "_self": "_effect"
-        },
+      "set_root_password": {
+        "_self": "set_root_password",
         "_condition": {
-          "_type": "and",
           "_context": "constraint",
-          "_self": "_condition"
+          "$.this.running": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "$.this.root_password": {
+            "_context": "mutation",
+            "_value": "$.passwd",
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "passwd": {
+          "_context": "null",
+          "_isa": "$.String"
+        }
+      },
+      "start": {
+        "_self": "start",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "mutation",
+            "_value": true,
+            "_type": "equals"
+          }
         }
       },
       "_classes": [
-        "$.Machine"
+        "$.Mysql",
+        "$.Service"
       ],
-      "running": true
-    }
+      "running": false,
+      "install": {
+        "_self": "install",
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_value": true,
+            "_type": "equals"
+          },
+          "_type": "and"
+        }
+      },
+      "stop": {
+        "_self": "stop",
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "mutation",
+            "_value": false,
+            "_type": "equals"
+          }
+        }
+      },
+      "port": 3306,
+      "_isa": "$.Mysql",
+      "root_password": "",
+      "version": ""
+    },
+    "tikiwiki": {
+      "_self": "tikiwiki",
+      "webserver": "$.parent.apache",
+      "installed": false,
+      "uninstall": {
+        "_self": "uninstall",
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and"
+        }
+      },
+      "_context": "object",
+      "_classes": [
+        "$.Tikiwiki"
+      ],
+      "install": {
+        "_self": "install",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.database.running": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "$.this.webserver.installed": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "$.this.webserver.php_mysql_module": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "$.this.webserver.php_module": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "$.this.webserver.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_value": true,
+            "_type": "equals"
+          },
+          "_type": "and"
+        }
+      },
+      "set_path": {
+        "_self": "set_path",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "$.this.webserver.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "path": {
+          "_context": "null",
+          "_isa": "$.String"
+        },
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.path": {
+            "_context": "mutation",
+            "_value": "$.path",
+            "_type": "equals"
+          }
+        }
+      },
+      "path": "/wiki",
+      "_isa": "$.Tikiwiki",
+      "database": "$.parent.mysql"
+    },
+    "_isa": "$.Machine",
+    "os": "linux",
+    "apache": {
+      "set_port": {
+        "_self": "set_port",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "_type": "and",
+          "$.this.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          }
+        },
+        "target": {
+          "_context": "null",
+          "_isa": "$.Integer"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.port": {
+            "_context": "mutation",
+            "_value": "$.target",
+            "_type": "equals"
+          }
+        }
+      },
+      "_extends": "$.Service",
+      "_self": "apache",
+      "installed": true,
+      "install_php_mysql_module": {
+        "_self": "install_php_mysql_module",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "$.this.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and",
+          "$.this.php_module": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          }
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.php_mysql_module": {
+            "_context": "mutation",
+            "_value": true,
+            "_type": "equals"
+          }
+        }
+      },
+      "uninstall": {
+        "_self": "uninstall",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and",
+          "$.this.php_mysql_module": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "$.this.php_module": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          }
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and"
+        }
+      },
+      "_context": "object",
+      "set_document_root": {
+        "_self": "set_document_root",
+        "target": {
+          "_context": "null",
+          "_isa": "$.String"
+        },
+        "_condition": {
+          "_context": "constraint",
+          "$.this.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "$.this.document_root": {
+            "_context": "mutation",
+            "_value": "$.target",
+            "_type": "equals"
+          },
+          "_context": "mutation",
+          "_type": "and"
+        }
+      },
+      "php_module": true,
+      "start": {
+        "_self": "start",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "mutation",
+            "_value": true,
+            "_type": "equals"
+          }
+        }
+      },
+      "uninstall_php_mysql_module": {
+        "_self": "uninstall_php_mysql_module",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.php_mysql_module": {
+            "_context": "mutation",
+            "_value": false,
+            "_type": "equals"
+          }
+        }
+      },
+      "install_php_module": {
+        "_self": "install_php_module",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.installed": {
+            "_context": "constraint",
+            "_value": true,
+            "_type": "equals"
+          },
+          "$.this.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.php_module": {
+            "_context": "mutation",
+            "_value": true,
+            "_type": "equals"
+          }
+        }
+      },
+      "_classes": [
+        "$.Apache",
+        "$.Service"
+      ],
+      "running": false,
+      "install": {
+        "_self": "install",
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "$.this.installed": {
+            "_context": "mutation",
+            "_value": true,
+            "_type": "equals"
+          },
+          "_type": "and"
+        }
+      },
+      "stop": {
+        "_self": "stop",
+        "_condition": {
+          "_context": "constraint",
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.running": {
+            "_context": "mutation",
+            "_value": false,
+            "_type": "equals"
+          }
+        }
+      },
+      "php_mysql_module": true,
+      "port": 80,
+      "uninstall_php_module": {
+        "_self": "uninstall_php_module",
+        "_condition": {
+          "_context": "constraint",
+          "$.this.running": {
+            "_context": "constraint",
+            "_value": false,
+            "_type": "equals"
+          },
+          "_type": "and"
+        },
+        "_context": "procedure",
+        "_cost": 1,
+        "_effect": {
+          "_context": "mutation",
+          "_type": "and",
+          "$.this.php_module": {
+            "_context": "mutation",
+            "_value": false,
+            "_type": "equals"
+          }
+        }
+      },
+      "_isa": "$.Apache",
+      "document_root": "/var/www",
+      "version": "2.2.22-1ubuntu1"
+    },
+    "upgrade_nuri": {
+      "_self": "upgrade_nuri",
+      "_condition": {
+        "_context": "constraint",
+        "_type": "and"
+      },
+      "_context": "procedure",
+      "_cost": 1,
+      "_effect": {
+        "_context": "mutation",
+        "$.this.nuri_latest": {
+          "_context": "mutation",
+          "_value": true,
+          "_type": "equals"
+        },
+        "_type": "and"
+      }
+    },
+    "version": "3.2.0-25-generic"
   }
 }

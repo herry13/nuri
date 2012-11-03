@@ -172,8 +172,8 @@ object_body
 	;
 
 object_attribute
-	:	attribute
-	|	ID equals_op NULL NL+
+	:	('public' { puts 'public attr' } )? attribute
+	|	('public' { puts 'public attr' } )? ID equals_op NULL NL+
 		{	@now[$ID.text] = self.null_value	}
 	;
 
