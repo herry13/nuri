@@ -140,6 +140,7 @@ module Nuri
 			@children.each_value { |mod| mod.reset_goal }
 		end
 
+=begin
 		def get(ref)
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
@@ -156,7 +157,25 @@ module Nuri
 			end
 			return nil
 		end
+=end
 
+		def get(ref)
+			return @state.at?(ref)
+		end
+
+=begin
+		def get(ref)
+			return nil if not ref.is_a?(String)
+			paths = ref.split('.', 2)
+			if paths[0] == '$'
+				return self.root.get(paths[1])
+			elsif paths[0] == 'this' or paths[0] == 'self'
+				return self.get(paths[1])
+			elsif paths[0] == 'parent'
+				return nil if not @parent == nil
+				return @parent.get(paths[1])
+			elsif 
+=end
 	end
 
 	class Root
