@@ -35,6 +35,7 @@ module Nuri
 			end
 
 			def write_config(config={})
+				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
 				File.open(ConfigFile, 'w') do |f|
 					config.each { |k,v| f.write(k + '=' + v + "\n") }
 				end
@@ -55,7 +56,6 @@ puts self.get('database').inspect
 			end
 
 			def set_webserver(params={})
-				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
 				config = read_config
 				config['ws'] = params['ws']
 				write_config(config)
