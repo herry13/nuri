@@ -143,7 +143,7 @@ module Nuri
 		def get(ref)
 			value = self.get_value(ref)
 			if value.is_a?(String) and value.isref
-				#value = get_value(value)
+				value = get_value(value)
 			end
 			value
 		end
@@ -160,6 +160,7 @@ module Nuri
 			elsif first == 'this' or first == 'self'
 				return self.get(rest)
 			elsif @children.has_key?(first) # sub-module
+puts '3: ' + first + ' -- ' + rest
 				return @children[first].get(rest)
 			elsif @state.has_key?(first)
 				if rest == nil
