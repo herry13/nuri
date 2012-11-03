@@ -46,9 +46,10 @@ module Nuri
 puts 'install tikiwiki'
 puts self.get('webserver.document_root').inspect
 				config = get_self_state
-puts 'path: ' + config.inspect
+path = self.get('path')
+puts 'path: ' + path.inspect
 				doc_root = self.get('webserver.document_root')
-				doc_root = doc_root + config['path']
+				doc_root = doc_root + path
 puts 'exec: ' + cmd
 				system('mkdir -p ' + doc_root) if not File.directory?(doc_root)
 				return false if not File.directory?(doc_root)
@@ -75,6 +76,7 @@ puts 'exec: ' + cmd
 				config = read_config
 				config['webserver'] = params['ws']
 				write_config(config)
+				self_get_state
 				true
 			end
 
@@ -82,6 +84,7 @@ puts 'exec: ' + cmd
 				config = read_config
 				config['database'] = params['db']
 				write_config(config)
+				self_get_state
 				true
 			end
 		
@@ -89,6 +92,7 @@ puts 'exec: ' + cmd
 				config = read_config
 				config['path'] = params['path']
 				write_config(config)
+				self_get_state
 				true
 			end
 		
