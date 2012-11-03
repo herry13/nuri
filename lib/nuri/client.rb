@@ -74,6 +74,7 @@ module Nuri
 				state.each do |key,value|
 					node = @daemon.root.get(key)
 					puts key if node = nil
+					puts node.class.name if node != nil
 				end
 			end
 
