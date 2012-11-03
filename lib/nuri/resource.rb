@@ -144,6 +144,7 @@ module Nuri
 			value = self.get_value(ref)
 			if value.is_a?(String) and value.isref
 puts 'value is ref: ' + value
+				value = get_value(value)
 			end
 			value
 		end
