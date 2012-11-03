@@ -108,8 +108,6 @@ puts '...OK'
 					end
 				end
 
-				return false if not send_state(address, current_state)
-
 				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/exec')
 				data = JSON.generate(action)
 				begin
@@ -124,20 +122,6 @@ print 'exec: ' + action['name']
 					Nuri::Util.log 'Cannot execute action: ' + action['name']
 				end
 puts '...FAILED'
-				false
-			end
-
-			def send_state(address, state)
-				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/system')
-				state.accept(Nuri::Sfp::ProcedureEliminator.new)
-				data = JSON.pretty_generate(state)
-				begin
-					req = Net::HTTP::Post.new(url.path)
-					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
-					return true if res.code == '200'
-				rescue Exception => e
-					Nuri::Util.log 'Cannot send state to ' + address
-				end
 				false
 			end
 

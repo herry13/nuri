@@ -57,28 +57,10 @@ module Nuri
 					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'POST'
-					if @request.params['REQUEST_URI'] == '/state/system'
-						self.set_state_system(@request.body.read.to_s)
-					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'PUT'
 					if check_uri(@request.params['REQUEST_URI'], 'exec')
 						self.execute(@request.body.read.to_s)
-					end
-				end
-			end
-
-			def set_state_system(state)
-				state = JSON[state]
-				puts '==> ' + state.keys.inspect
-				state.each do |key,value|
-					next if key[0,1] == '_'
-					node = @daemon.root.get(key)
-					if node == nil
-						node = Nuri::Node.new(node)
-						value.each { |k,v| node.set(k,v) }
-						@daemon.root.children[node.name] = node
-						puts @daemon.root.get(key).name
 					end
 				end
 			end
