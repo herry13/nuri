@@ -32,6 +32,7 @@ module Nuri
 	
 			def install
 				# TODO
+puts 'install'
 				puts self.get('webserver').inspect
 				puts self.get('webserver.document_root').inspect
 				puts self.get('database').inspect
