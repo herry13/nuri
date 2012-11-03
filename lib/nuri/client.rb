@@ -73,14 +73,13 @@ module Nuri
 				puts '==> ' + state.keys.inspect
 				state.each do |key,value|
 					next if key[0,1] == '_'
-puts '--> ' + key
-begin
 					node = @daemon.root.get(key)
-					puts key if node == nil
-					puts node.class.name if node != nil
-rescue Exception => e
-	puts e.to_s
-end
+					if node == nil
+						node = Nuri::Node.new(node)
+						value.each { |k,v| node.set(k,v) }
+						@daemon.root.set(node.name, node)
+						puts @daemon.root.get(key + '.domainname')
+					end
 				end
 			end
 
