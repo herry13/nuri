@@ -100,9 +100,9 @@ module Nuri
 			first, nextpath = path.split('/', 2)
 			if @children[first] != nil
 				state = @children[first].get_state
-				return self.path_value(state, nextpath)
+				return self.get_path_value(state, nextpath)
 			else
-				return self.path_value(@state, path)
+				return self.get_path_value(@state, path)
 			end
 
 			# not found
