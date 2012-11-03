@@ -53,7 +53,7 @@ module Nuri
 
 				if @request.params['REQUEST_METHOD'] == 'GET'
 					if check_uri(@request.params['REQUEST_URI'], 'state')
-						self.http_get_state
+						self.http_get_state(@request.params['REQUEST_URI'])
 					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'POST'
@@ -107,7 +107,8 @@ $stderr.puts e.backtrace
 				return success
 			end
 
-			def http_get_state
+			def http_get_state(path=nil)
+puts path
 				state = @daemon.get_state
 				if state.is_a?(Nuri::Undefined)
 					res.start(404) do |head, out| out.write(''); end
