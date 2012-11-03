@@ -78,6 +78,7 @@ module Nuri
 						node = Nuri::Node.new(node)
 						value.each { |k,v| node.set(k,v) }
 						@daemon.root.set(node.name, node)
+puts @daemon.root.state.inspect
 						puts @daemon.root.get(key).name
 					end
 				end
