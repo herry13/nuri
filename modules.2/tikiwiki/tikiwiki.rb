@@ -39,8 +39,16 @@ puts self.get('database').inspect
 				# TODO
 				false
 			end
+
+			def set_webserver(params={})
+				false
+			end
+
+			def set_database(params={})
+				false
+			end
 		
-			def change_path(params={})
+			def set_path(params={})
 				false
 			end
 		
