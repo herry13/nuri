@@ -17,6 +17,24 @@ class Tikiwiki {
 		}
 	}
 
+	procedure set_webserver (ws isref Apache) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.webserver = ws
+		}
+	}
+
+	procedure set_database (db isref Mysql) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.database = db
+		}
+	}
+
 	procedure install {
 		condition {
 			this.webserver != null
