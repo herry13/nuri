@@ -108,8 +108,13 @@ $stderr.puts e.backtrace
 			end
 
 			def http_get_state(path=nil)
-puts path
-				state = @daemon.get_state
+				if path == nil
+					state = @daemon.get_state
+				else
+					_, _, path = path.split('/', 3)
+					puts path
+				end
+
 				if state.is_a?(Nuri::Undefined)
 					res.start(404) do |head, out| out.write(''); end
 				else
