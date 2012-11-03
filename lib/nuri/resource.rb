@@ -160,7 +160,7 @@ module Nuri
 			elsif first == 'this' or first == 'self'
 				return self.get(rest)
 			elsif @children.has_key?(first) # sub-module
-puts '3: ' + first + ' -- ' + rest
+puts '3: ' + first.inspect + ' -- ' + rest.inspect
 				return @children[first].get(rest)
 			elsif @state.has_key?(first)
 				if rest == nil
