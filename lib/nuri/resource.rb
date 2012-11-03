@@ -143,7 +143,7 @@ module Nuri
 		def get(ref)
 			value = self.get_value(ref)
 			if value.is_a?(String) and value.isref
-				value = get_value(value)
+				#value = get_value(value)
 			end
 			value
 		end
