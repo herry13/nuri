@@ -70,8 +70,9 @@ module Nuri
 
 			def set_state_system(state)
 				state = JSON[state]
-				puts state.keys.inspect
+				puts '==> ' + state.keys.inspect
 				state.each do |key,value|
+puts '--> ' + key
 					next if key[0,1] == '_'
 begin
 					node = @daemon.root.get(key)
