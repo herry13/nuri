@@ -24,7 +24,7 @@ module Nuri
 						f.split("\n").each { |k,v| @state[k] = v }
 					end
 				end
-puts 'state: ' + @state.inspect
+puts 'state: ' + @state.keys.inspect
 				return @state
 			end
 	
