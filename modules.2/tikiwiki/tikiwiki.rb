@@ -59,13 +59,14 @@ puts self.get('database').inspect
 				config = read_config
 				config['ws'] = params['ws']
 				write_config(config)
-				false
+				true
 			end
 
 			def set_database(params={})
-				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
-puts params['db']
-				false
+				config = read_config
+				config['db'] = params['db']
+				write_config(config)
+				true
 			end
 		
 			def set_path(params={})
