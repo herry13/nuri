@@ -57,14 +57,14 @@ puts self.get('database').inspect
 
 			def set_webserver(params={})
 				config = read_config
-				config['ws'] = params['ws']
+				config['webserver'] = params['ws']
 				write_config(config)
 				true
 			end
 
 			def set_database(params={})
 				config = read_config
-				config['db'] = params['db']
+				config['database'] = params['db']
 				write_config(config)
 				true
 			end
