@@ -152,7 +152,7 @@ module Nuri
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
 			if first == '$'
-				return self.get(rest)
+				return self.root.get(rest)
 			elsif first == 'root'
 				return self.root.get(rest)
 			elsif first == 'parent'
