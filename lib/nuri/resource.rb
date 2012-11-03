@@ -169,6 +169,8 @@ puts '1: ' + @state[first].inspect
 				elsif @state[first].is_a?(Hash)
 puts '2: ' + @state[first].at?(rest)
 					return @state[first].at?(rest)
+				elsif @state[first].is_a?(String) and @state[first].isref
+					return self.get( @state[first] + '.' + rest )
 				end
 			end
 			return nil
