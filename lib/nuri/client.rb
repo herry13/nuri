@@ -80,6 +80,7 @@ puts "exec: " + cmd['name'] + ": " + cmd['parameters'].inspect
 				success = false
 				if component != nil
 					begin
+puts component.name
 						if params.size <= 0
 							success = component.send(cmd_name)
 						else
