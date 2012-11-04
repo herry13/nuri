@@ -119,10 +119,46 @@ puts 'parent: ' + @parent.class.name
 			return self.get_all_state if path == nil or path.strip == ''
 
 			path.strip!
-			path.sub!(/\//, '.')
-			puts path
+			value = get_path_state(path)
+puts value
 
 			return Nuri::Undefined.new(path)
+		end
+
+		def get_path_state(path=nil)
+			return self.get_self_state if ref == nil or ref == ''
+
+			first, rest = path.split('/', 2)
+			if first == '$' or first == 'root'
+				return self.root.get_path_state(rest)
+
+			elsif first == 'parent'
+				return @parent.get_path_state(rest) if @parent != nil
+
+			elsif first == 'this' or first == 'self'
+				return self.get_path_state(rest)
+
+			elsif @children.has_key?(first) # sub-module
+				return @children[first].get_path_state(rest)
+
+			else
+				state = self.get_self_state
+				if state.has_key?(first)
+					if rest == nil
+						return state
+					elsif state[first].is_a?(Hash)
+						return state[first].at?(rest)
+					elsif state[first].is_a?(String) and state[first].isref
+						# TODO
+						new_path = state[first] + '/' + rest
+						return self.get_path_state(new_path)
+					else
+						puts 'not found: ' + path
+					end
+				end
+			end
+
+			return nil
 		end
 
 		def get_all_state
