@@ -4,9 +4,18 @@ module Nuri
 	class Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
 		@@logger = Logger.new(@@home_dir + "/log/message.log")
+		@@system = {}
 
 		def self.home_dir
 			return @@home_dir
+		end
+
+		def self.set_system_information(system)
+			@@system = system
+		end
+
+		def self.get_system_information
+			return @@system
 		end
 
 		def self.log(msg=nil)
@@ -73,6 +82,10 @@ module Nuri
 
 		def self.nuri_version
 			return `git rev-parse HEAD`.chop
+		end
+
+		private
+		def initialize
 		end
 	end
 end

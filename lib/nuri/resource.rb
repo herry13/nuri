@@ -173,6 +173,8 @@ module Nuri
 				elsif @state[first].is_a?(String) and @state[first].isref
 					return self.get( @state[first] + '.' + rest )
 				end
+			else
+				puts 'not found: ' + ref
 			end
 			return nil
 		end

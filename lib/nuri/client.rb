@@ -5,10 +5,7 @@ module Nuri
 		class Daemon < Mongrel::HttpHandler
 			include Nuri::Config
 
-			attr_accessor :system
-
 			def initialize
-				@system = {}
 				self.load
 			end
 
@@ -74,7 +71,7 @@ module Nuri
 
 			def process_system_information(data)
 				system = JSON[data]
-				puts system.inspect
+				Nuri::Util.set_system_information(system)
 				@response.start(200) { |head,out| out.write('') }
 			end
 
@@ -89,8 +86,7 @@ module Nuri
 
 				data = JSON[data]
 				cmd = data['action']
-				@daemon.system = data['system']
-				puts @daemon.system.inspect
+				Nuri::Util.set_system_information(data['system'])
 
 				params = clean_parameters(cmd['parameters'])
 puts "exec: " + cmd['name'] + ": " + params.inspect

@@ -15,7 +15,7 @@ require 'modules/machine/machine'
 
 module Nuri
 	module Config
-		attr_reader :config, :root
+		attr_reader :config, :root, :system
 
 		MainComponent = '$.Machine'
 
@@ -23,6 +23,10 @@ module Nuri
 			self.read_config
 			Nuri::Resource.set_root(self.get_main)
 			self.load_modules if client
+		end
+
+		def set_system_information(system)
+			@system = system
 		end
 
 		def get_main
