@@ -52,7 +52,14 @@ module Nuri
 		end
 
 		def self.domainname
-			return Socket.gethostbyname(Socket.gethostname).first
+			result = `nslookup #{self.local_ip}`
+			result = result.split("\n")
+			if result.length < 4
+				return Socket.gethostbyname(Socket.gethostname).first
+			else
+				result = result[3].split(" ")
+				return result[3]
+			end
 		end
 
 		def self.temp_dir
