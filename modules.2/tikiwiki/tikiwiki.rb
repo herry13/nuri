@@ -98,13 +98,10 @@ puts 'sql: ' + sql
 			end
 		
 			def uninstall(params={})
-				cmd = "/bin/rm -f #{tiki_dir}/*"
+				doc_root = self.get_state('webserver.document_root')
 				path = self.get_state('path')
-				if path != '/' and path != ''
-					doc_root = self.get_state('webserver.document_root')
-					tiki_dir = doc_root + path
-					cmd = "/bin/rm -rf #{tiki_dir}"
-				end
+				tiki_dir = doc_root + path
+				cmd = "/bin/rm -f #{tiki_dir}/*"
 				return false if ( system(cmd) != true )
 				config = self.read_config
 				config['installed'] = false
