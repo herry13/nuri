@@ -58,7 +58,7 @@ module Nuri
 				return Socket.gethostbyname(Socket.gethostname).first
 			else
 				result = result[3].split(" ")
-				return result[3]
+				return result[3].chop
 			end
 		end
 
