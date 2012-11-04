@@ -48,18 +48,24 @@ module Nuri
 puts self.get_state('database').inspect
 
 				web_host = self.get_state('tikiweb.parent.domainname')
-				db_port = self.get_state('database.port')
-				db_host = self.get_state('database.parent.domainname')
-				db_root_passwd = self.get_state('database.root_password')
-puts web_host.inspect
-puts db_port.inspect
-puts db_host.inspect
-puts db_root_passwd.inspect
+				mysql_port = self.get_state('database.port')
+				mysql_host = self.get_state('database.parent.domainname')
+				mysql_user = 'root'
+				mysql_password = self.get_state('database.root_password')
+				db_name = self.get_state('db_name')
+				db_user = self.get_state('db_user')
+				db_password = self.get_state('db_password')
 
-				if db_port != nil and db_host != nil and db_root_passwd != nil
-					sql = "CREATE DATABASE tikiwiki default character set 'UTF8';"
-					sql += "GRANT ALL ON tikiwiki.* TO 'tiki'@'#{localhost}' IDENTIFIED BY 'tikipassword';"
+
+				if mysql_port != nil and mysql_host != nil and mysql_user != nil and mysql_password != nil and
+						db_name != nil and db_user != nil and db_password != nil
+
+					sql = "CREATE DATABASE #{db_name} default character set 'UTF8';"
+					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{web_host}' IDENTIFIED BY '#{db_password}';"
 puts 'sql: ' + sql
+
+					cmd = "mysql --user=#{mysql_user} --password=#{mysql_password} --host=#{mysql_host} --port=#{mysql_port}"
+puts 'cmd: ' + cmd
 				end
 
 # TODO -- install database
