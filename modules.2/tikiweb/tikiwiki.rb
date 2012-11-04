@@ -2,15 +2,15 @@ require 'rubygems'
 
 module Nuri
 	module Module
-		class Tikiwiki
+		class Tikiweb
 
 			include Nuri::Resource
 
-			ConfigDir = '/var/lib/tikiwiki'
-			ConfigFile = '/var/lib/tikiwiki/config'
+			ConfigDir = '/var/lib/tikiweb'
+			ConfigFile = '/var/lib/tikiweb/config'
 
 			def initialize
-				self.register('Tikiwiki', 'tikiwiki')
+				self.register('Tikiweb', 'tikiweb')
 			end
 	
 			# get state of this component in JSON
@@ -44,7 +44,7 @@ module Nuri
 	
 			def install(params={})
 				# TODO
-puts 'install tikiwiki'
+puts 'install tikiweb'
 				# install required packages
 				# memcached
 				return false if not Nuri::Util.ensured?('mysql-client')
