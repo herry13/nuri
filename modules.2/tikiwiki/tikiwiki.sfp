@@ -51,7 +51,9 @@ class Tikiwiki {
 	}
 
 	procedure uninstall {
-		condition { }
+		condition {
+			this.webserver.running = false
+		}
 		effect {
 			this.installed = false
 		}
