@@ -20,9 +20,9 @@ class Tikidb {
 
 	procedure install (user isref String, passwd isref String, db isref String) {
 		condition {
-			user != ""
+			/*user != ""
 			passwd != ""
-			db != ""
+			db != ""*/
 			this.tikiweb.installed = false
 			this.database.running = true
 		}
