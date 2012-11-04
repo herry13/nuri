@@ -45,6 +45,8 @@ module Nuri
 			def install(params={})
 				return false if not Nuri::Util.ensured?('mysql-client')
 
+puts self.get_state('database').inspect
+
 				web_host = self.get_state('tikiweb.parent.domainname')
 				db_port = self.get_state('database.port')
 				db_host = self.get_state('database.parent.domainname')
