@@ -18,24 +18,34 @@ class Tikidb {
 		}
 	}
 
-	procedure set_password (user isref String, passwd isref String) {
+	procedure set_account (user isref String, passwd isref String, db isref String) {
 		condition {
 			this.installed = false
 		}
 		effect {
 			this.db_user = user
 			this.db_password = passwd
+			this.db_name = db
 		}
 	}
 
-	procedure set_db_name (db isref String) {
+	procedure set_database (db isref Mysql) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.database = db
+		}
+	}
+
+	/*procedure set_db_name (db isref String) {
 		condition {
 			this.installed = false
 		}
 		effect {
 			this.db_name = db
 		}
-	}
+	}*/
 
 	procedure install {
 		condition {

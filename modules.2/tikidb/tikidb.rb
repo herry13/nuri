@@ -81,7 +81,24 @@ puts 'sql: ' + sql
 				self.write_config(config)
 				true
 			end
-		
+
+			def set_account(params={})
+				config = self.read_config
+				config['db_user'] = params['user']
+				config['db_password'] = params['passwd']
+				config['db_name'] = params['db']
+				self.write_config(config)
+				true
+			end
+
+			def set_database(params={})
+				config = self.read_config
+				config['database'] = params['db']
+				self.write_config(config)
+				true
+			end
+
+	
 			def upgrade(params={})
 				false
 			end
