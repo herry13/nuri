@@ -119,15 +119,15 @@ puts 'parent: ' + @parent.class.name
 			return self.get_all_state if path == nil or path.strip == ''
 
 			path.strip!
-			value = self.root.get_path_state(path)
-puts value
+			value = get_path_state(path)
+puts '::1 ' + value
 
 			return Nuri::Undefined.new(path)
 		end
 
 		def get_path_state(path=nil)
 			return self.get_self_state if ref == nil or ref == ''
-puts path
+puts '::2 ' + path
 			first, rest = path.split('/', 2)
 			if first == '$' or first == 'root'
 				return self.root.get_path_state(rest)
