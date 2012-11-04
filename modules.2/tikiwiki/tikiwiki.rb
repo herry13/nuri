@@ -54,16 +54,16 @@ puts 'install tikiwiki'
 				# download and extract tikiwiki to destination folder
 				doc_root = self.get_state('webserver.document_root')
 				path = self.get_state('path')
-				doc_root = doc_root + path
-				system('mkdir -p ' + doc_root) if not File.directory?(doc_root)
-				return false if not File.directory?(doc_root)
-				if not File.file?(doc_root + '/index.php')
-					cmd = 'cd ' + doc_root + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz 2>/dev/null 1>/dev/null'
+				tiki_dir = doc_root + path
+				system('mkdir -p ' + tiki_dir) if not File.directory?(tiki_dir)
+				return false if not File.directory?(tiki_dir)
+				if not File.file?(tiki_dir + '/index.php')
+					cmd = 'cd ' + tiki_dir + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz 2>/dev/null 1>/dev/null'
 					return false if not system(cmd)
-					cmd = 'cd ' + doc_root + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
+					cmd = 'cd ' + tiki_dir + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
 					return false if not system(cmd)
 				end
-				return false if not system("cd #{doc_root}; sudo /bin/sh setup.sh -n 1> /dev/null")
+				return false if ( system("cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null") == true )
 				
 				localhost = self.get_state('parent.domainname')
 				db_port = self.get_state('database.port')
@@ -86,8 +86,14 @@ puts 'sql: ' + sql
 			end
 		
 			def uninstall(params={})
-				# TODO
-				false
+				cmd = "/bin/rm -rf /bin/rm -rf /var/lib/tikiwiki"
+				path = self.get_state('path')
+				if path == '/' or path == ''
+					doc_root = self.get_state('webserver.document_root')
+					tiki_dir = doc_root + path
+					cmd = "/bin/rm -rf #{tiki_dir} ; " + cmd
+				end
+				return ( system(cmd) == true )
 			end
 
 			def set_webserver(params={})
