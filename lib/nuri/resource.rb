@@ -98,7 +98,9 @@ module Nuri
 
 			path.strip!
 			first, nextpath = path.split('/', 2)
-			if @children[first] != nil
+			if first == 'parent'
+				return @parent.get_state(path) if @parent != nil
+			elsif @children[first] != nil
 				state = @children[first].get_state
 				return self.get_path_value(state, nextpath)
 			else
