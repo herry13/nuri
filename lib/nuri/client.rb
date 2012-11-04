@@ -114,8 +114,10 @@ puts e.backtrace
 				end
 
 				if success
+puts 'send code 200'
 					@response.start(200) { |head,out| out.write('') }
 				else
+puts 'send code 500'
 					@response.start(500) { |head,out| out.write('') }
 				end
 				return success
