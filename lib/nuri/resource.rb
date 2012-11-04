@@ -183,6 +183,7 @@ puts 'parent: ' + @parent.class.name
 
 		def get_remote_path_state(address, path)
 			url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
+puts 'remote: ' + url.to_s
 
 			begin
 				req = Net::HTTP::Get.new(url.path)
