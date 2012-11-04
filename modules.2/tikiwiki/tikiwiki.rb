@@ -98,32 +98,36 @@ puts 'sql: ' + sql
 			end
 		
 			def uninstall(params={})
-				cmd = "/bin/rm -rf /var/lib/tikiwiki"
+				cmd = "/bin/rm -f #{tiki_dir}/*"
 				path = self.get_state('path')
-				if path == '/' or path == ''
+				if path != '/' and path != ''
 					doc_root = self.get_state('webserver.document_root')
 					tiki_dir = doc_root + path
-					cmd = "/bin/rm -rf #{tiki_dir} ; " + cmd
+					cmd = "/bin/rm -rf #{tiki_dir}"
 				end
-				return ( system(cmd) == true )
+				return false if ( system(cmd) != true )
+				config = self.read_config
+				config['installed'] = false
+				self.write_config(config)
+				true
 			end
 
 			def set_webserver(params={})
-				config = read_config
+				config = self.read_config
 				config['webserver'] = params['ws']
 				self.write_config(config)
 				true
 			end
 
 			def set_database(params={})
-				config = read_config
+				config = self.read_config
 				config['database'] = params['db']
 				self.write_config(config)
 				return true
 			end
 		
 			def set_path(params={})
-				config = read_config
+				config = self.read_config
 				config['path'] = params['path']
 				self.write_config(config)
 				true
