@@ -60,13 +60,15 @@ module Nuri
 			end
 	
 			def install
-				success = Nuri::Util.installed?('apache2')
-				self.stop if success
-				return success
+				result = system('/usr/bin/apt-get -y install apache2')
+				result = system('/usr/bin/service apache2 stop') if result == true
+				return (result == true)
 			end
 		
 			def uninstall
-				return Nuri::Util.uninstalled?('apache2')
+				result = system('/usr/bin/apt-get -y --purge remove apache2')
+				system('/usr/bin/apt-get -y autoremove') if (result == true)
+				return (result == true)
 			end
 		
 			def start
