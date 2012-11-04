@@ -95,8 +95,13 @@ module Nuri
 			end
 
 			def set_public(params={})
-				puts params.inspect
-				false
+				if params['pub']
+					cmd = '/bin/sed "s/^bind\-address.*/bind\-address\t\t= ' + Nuri::Util.local_ip + '/g" /etc/mysql/my.cnf > /etc/mysql/my.cnf'
+				else
+					cmd = '/bin/sed "s/^bind\-address.*/bind\-address\t\t= 127.0.0.1/g" /etc/mysql/my.cnf > /etc/mysql/my.cnf'
+				end
+				return false if ( system(cmd) != true )
+				return ( system('/usr/bin/service mysql restart') == true )
 			end
 	
 			def set_root_password(params={})
