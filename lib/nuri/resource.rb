@@ -119,7 +119,7 @@ puts 'parent: ' + @parent.class.name
 			return self.get_all_state if path == nil or path.strip == ''
 
 			path.strip!
-			value = get_path_state(path)
+			value = self.root.get_path_state(path)
 puts value
 
 			return Nuri::Undefined.new(path)
