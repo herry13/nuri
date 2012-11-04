@@ -104,7 +104,7 @@ module Nuri
 		end
 
 		def self.installed?(package)
-			data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.chop
+			data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop
 			data = data.split(' ')
 			return true if (data.length > 1 and data[0] == package)
 			return ( system('/usr/bin/apt-get -y install php5-gd 2>/dev/null 1>/dev/null') == true )
