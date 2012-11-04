@@ -44,7 +44,7 @@ module Nuri
 				return @state
 			end
 	
-			def install
+			def install(params={})
 				return false if system('echo mysql-server mysql-server/root_password select mysql | debconf-set-selections') != true
 				return false if system('echo mysql-server mysql-server/root_password_again select mysql | debconf-set-selections') != true
 				if system('/usr/bin/apt-get -y install mysql-server') == true
@@ -55,7 +55,7 @@ module Nuri
 				return false
 			end
 	
-			def uninstall
+			def uninstall(params={})
 				result = system('/usr/bin/apt-get -y purge mysql-server*')
 				if result == true
 					system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
@@ -66,15 +66,15 @@ module Nuri
 				return (result == true)
 			end
 	
-			def start
+			def start(params={})
 				return (system('/usr/bin/service mysql start') == true)
 			end
 	
-			def stop
+			def stop(params={})
 				return (system('/usr/bin/service mysql stop') == true)
 			end
 	
-			def set_port(params)
+			def set_port(params={})
 				p = params['target']
 				Augeas::open do |aug|
 					paths = aug.match("/files/etc/mysql/my.cnf/*/port")
@@ -84,8 +84,13 @@ module Nuri
 					return aug.save
 				end
 			end
+
+			def set_public(params={})
+				puts params.inspect
+				false
+			end
 	
-			def set_root_password(params)
+			def set_root_password(params={})
 				passwd = params['passwd']
 				system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
 				oldpass = (`/bin/cat /etc/mysql/nuri.cnf`).sub(/\n$/,'').sub(/"/,'\"')

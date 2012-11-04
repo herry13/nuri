@@ -3,6 +3,7 @@ include "modules/service/service.sfp"
 class Mysql extends Service {
 	port = 3306
 	root_password = ""
+	public = false
 
 	procedure set_root_password (passwd isref String) {
 		condition {
@@ -10,6 +11,15 @@ class Mysql extends Service {
 		}
 		effect {
 			this.root_password = passwd
+		}
+	}
+
+	procedure set_public (pub isref Boolean) {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.public = pub
 		}
 	}
 }
