@@ -800,6 +800,9 @@ end
 					#bucket1 = Array.new
 					#last_names1 = Array.new
 					#ref_combinator(bucket1, rest, names, nil, last_names1)
+puts left.inspect + ' -- ' + @variables.has_key?(left).inspect
+puts right['_value'] + ' -- ' + @variables.has_key?(right['_value']).inspect
+
 raise Exception 'not implemented: normalized_nested_left_right'
 				end
 
@@ -825,7 +828,8 @@ raise Exception 'not implemented: normalized_nested_left_right'
 						if k.isref and not @variables.has_key?(k)
 							if v.is_a?(Hash) and v.isconstraint
 								if (v['_type'] == 'equals' or v['_type'] == 'not-equals') and
-										v['_value'].is_a?(String) and v['_value'].isref
+										v['_value'].is_a?(String) and v['_value'].isref and
+										not @variables.has_key?(v['_value'])
 									# nested left & right
 									normalize_nested_left_right(k, v, formula)
 								elsif (v['_type'] == 'or' or v['_type'] == 'and')

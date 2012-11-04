@@ -5,7 +5,7 @@ class Tikiweb {
 	installed  = false
 	path = "/wiki"
 	webserver isref Apache
-	tikidb isref Tikidb
+	database isref Tikidb
 
 	procedure set_path (path isref String) {
 		condition {
@@ -30,7 +30,7 @@ class Tikiweb {
 			this.installed = false
 		}
 		effect {
-			this.tikidb = db
+			this.database = db
 		}
 	}
 
@@ -41,7 +41,7 @@ class Tikiweb {
 			this.webserver.php_module = true
 			this.webserver.php_mysql_module = true
 
-			//this.tikidb.installed = true
+			this.tikidb.installed = true
 		}
 		effect {
 			this.installed = true
