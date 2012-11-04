@@ -62,7 +62,7 @@ puts 'install tikiwiki'
 					cmd = 'cd ' + doc_root + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
 					return false if not system(cmd)
 				end
-				result = `cd #{doc_root}; sudo /bin/sh setup.sh`
+				result = `cd #{doc_root}; sudo /bin/sh setup.sh -n`
 puts result
 				
 				localhost = self.get_state('parent.domainname')
