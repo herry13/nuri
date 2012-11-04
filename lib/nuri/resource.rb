@@ -149,15 +149,15 @@ puts '::3 to child: ' + first
 				return @children[first].get_path_state(rest)
 
 			else
-				state = self.get_self_state
-				if state.has_key?(first)
+				self.get_self_state
+				if @state.has_key?(first)
 					if rest == nil
-						return state
-					elsif state[first].is_a?(Hash)
-						return state[first].at?(rest)
-					elsif state[first].is_a?(String) and state[first].isref
+						return @state
+					elsif @state[first].is_a?(Hash)
+						return @state[first].at?(rest)
+					elsif @state[first].is_a?(String) and @state[first].isref
 						# TODO
-						new_path = state[first] + '/' + rest
+						new_path = @state[first] + '/' + rest
 						return self.get_path_state(new_path)
 					else
 						puts 'not found: ' + path
