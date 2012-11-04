@@ -76,7 +76,7 @@ module Nuri
 				Nuri::Util.log 'system information updated'
 			end
 
-			def execute(data)
+			def execute(json)
 				def clean_parameters(params)
 					p = {}
 					params.each { |k,v|
@@ -85,7 +85,7 @@ module Nuri
 					return p
 				end
 
-				data = JSON[data]
+				data = JSON[json]
 				cmd = data['action']
 				Nuri::Util.set_system_information(data['system'])
 
@@ -93,6 +93,7 @@ module Nuri
 puts "exec: " + cmd['name'] + ": " + params.inspect
 				comp_name, cmd_name = cmd['name'].pop_ref
 				component = @daemon.root.get(comp_name)
+puts component.class.name
 				success = false
 				if component != nil
 					begin
@@ -102,7 +103,7 @@ puts "exec: " + cmd['name'] + ": " + params.inspect
 							success = component.send(cmd_name, params)
 						end
 					rescue Exception => e
-						Nuri::Util.log 'Cannot execute procedure: ' + procedure
+						Nuri::Util.log 'Cannot execute procedure: ' + json
 						@response.start(500) { |head,out| out.write('') }
 					end
 				else
