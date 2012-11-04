@@ -61,7 +61,7 @@ puts self.get_state('database').inspect
 				if mysql_port != nil and mysql_host != nil and mysql_user != nil and mysql_password != nil and
 						db_name != nil and db_user != nil and db_password != nil
 
-					sql = "DROP DATABASE #{db_name}; CREATE DATABASE #{db_name} default character set 'UTF8'; "
+					sql = "DROP DATABASE #{db_name} IF EXISTS; CREATE DATABASE #{db_name} default character set 'UTF8'; "
 					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{web_host}' IDENTIFIED BY '#{db_password}';"
 					script_file = '/tmp/tikidb.sql'
 					File.open(script_file, 'w') do |file|
