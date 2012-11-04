@@ -45,8 +45,6 @@ module Nuri
 			def install(params={})
 				return false if not Nuri::Util.ensured?('mysql-client')
 
-puts self.get_state('database').inspect
-
 				web_host = self.get_state('tikiweb.parent.domainname')
 				mysql_port = self.get_state('database.port')
 				mysql_host = self.get_state('database.parent.domainname')
@@ -72,18 +70,49 @@ puts self.get_state('database').inspect
 					cmd = "mysql --user=#{mysql_user} --password=#{mysql_password} --host=#{mysql_host} --port=#{mysql_port} < #{script_file}"
 					return false if ( system(cmd) != true )
 					File.delete(script_file)
-#puts 'cmd: ' + cmd + " === " + result.inspect
 
 					config = self.read_config
 					config['installed'] = true
 					self.write_config(config)
 
+					return true
 				end
 
-				true
+				false
 			end
 		
 			def uninstall(params={})
+				return false if not Nuri::Util.ensured?('mysql-client')
+
+				mysql_port = self.get_state('database.port')
+				mysql_host = self.get_state('database.parent.domainname')
+				mysql_host = (mysql_host == Nuri::Util.domainname ? 'localhost' : mysql_host)
+				mysql_user = 'root'
+				mysql_password = self.get_state('database.root_password')
+				db_name = self.get_state('db_name')
+
+				if mysql_port != nil and mysql_host != nil and mysql_user != nil and mysql_password != nil and
+						db_name != nil and db_user != nil and db_password != nil
+
+					sql = "DROP DATABASE IF EXISTS #{db_name}"
+					script_file = '/tmp/tikidb.sql'
+					File.open(script_file, 'w') do |file|
+						file.write(sql)
+						file.flush
+					end
+
+					cmd = "mysql --user=#{mysql_user} --password=#{mysql_password} --host=#{mysql_host} --port=#{mysql_port} < #{script_file}"
+					return false if ( system(cmd) != true )
+					File.delete(script_file)
+
+					config = self.read_config
+					config['installed'] = false
+					self.write_config(config)
+
+					return true
+
+				end
+
 				false
 			end
 
