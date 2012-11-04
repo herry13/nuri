@@ -83,7 +83,7 @@ puts 'sql: ' + sql
 				self.write_config(config)
 				self.self_get_state
 
-				true
+				return true
 			end
 		
 			def uninstall(params={})
@@ -96,7 +96,7 @@ puts 'sql: ' + sql
 				config['webserver'] = params['ws']
 				write_config(config)
 				self_get_state
-				true
+				return true
 			end
 
 			def set_database(params={})
@@ -104,7 +104,7 @@ puts 'sql: ' + sql
 				config['database'] = params['db']
 				write_config(config)
 				self_get_state
-				true
+				return true
 			end
 		
 			def set_path(params={})
@@ -112,7 +112,7 @@ puts 'sql: ' + sql
 				config['path'] = params['path']
 				write_config(config)
 				self_get_state
-				true
+				return true
 			end
 		
 			def upgrade(params={})

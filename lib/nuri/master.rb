@@ -106,7 +106,6 @@ puts JSON.pretty_generate(plan)
 					state = get_state
 					action['effect'].each do |key,value|
 						v = state.at?(key)
-puts v.inspect
 						raise Nuri::ExecutionFailedException, action['name'] if state.at?(key) != value
 puts '...OK'
 					end
@@ -120,6 +119,7 @@ print 'exec: ' + action['name']
 					req = Net::HTTP::Put.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
 					verify(action) if @verify_execution
+puts res.code
 					return true if res.code == '200'
 				rescue ExecutionFailedException => efe
 					Nuri::Util.log efe.to_s
