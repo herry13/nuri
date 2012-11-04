@@ -143,7 +143,6 @@ puts 'parent: ' + @parent.class.name
 				return @state
 			end
 
-puts '@' + self.name + ' -- ' + path
 			first, rest = path.split('.', 2)
 			if first == '$' or first == 'root'
 				return self.root.get_path_state(rest)
@@ -165,7 +164,6 @@ puts '@' + self.name + ' -- ' + path
 					elsif @state[first].is_a?(Hash)
 						return @state[first].at?(rest)
 					elsif @state[first].is_a?(String) and @state[first].isref
-						# TODO
 						new_path = @state[first] + '.' + rest
 						return self.get_path_state(new_path)
 					else
@@ -184,7 +182,6 @@ puts '@' + self.name + ' -- ' + path
 
 		def get_remote_path_state(address, path)
 			url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
-puts 'remote: ' + url.to_s
 
 			begin
 				req = Net::HTTP::Get.new(url.path)
