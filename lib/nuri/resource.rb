@@ -144,6 +144,7 @@ puts 'parent: ' + @parent.class.name
 			end
 
 			first, rest = path.split('/', 2)
+puts '@' + self.name + ' -- ' + first + ' :: ' + rest.to_s
 			if first == '$' or first == 'root'
 				return self.root.get_path_state(rest)
 
