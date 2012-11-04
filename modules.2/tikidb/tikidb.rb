@@ -91,8 +91,7 @@ module Nuri
 				mysql_password = self.get_state('database.root_password')
 				db_name = self.get_state('db_name')
 
-				if mysql_port != nil and mysql_host != nil and mysql_user != nil and mysql_password != nil and
-						db_name != nil and db_user != nil and db_password != nil
+				if mysql_port != nil and mysql_host != nil and mysql_user != nil and mysql_password != nil and db_name != nil 
 
 					sql = "DROP DATABASE IF EXISTS #{db_name}"
 					script_file = '/tmp/tikidb.sql'
