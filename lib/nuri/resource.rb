@@ -143,9 +143,7 @@ puts 'parent: ' + @parent.class.name
 				return @state
 			end
 
-			path.gsub!(/\./, '/') if path.isref
-			first, rest = path.split('/', 2)
-puts '@' + self.name + ' -- ' + first + ' :: ' + rest.to_s
+			first, rest = path.split('.', 2)
 			if first == '$' or first == 'root'
 				return self.root.get_path_state(rest)
 
@@ -167,7 +165,7 @@ puts '@' + self.name + ' -- ' + first + ' :: ' + rest.to_s
 						return @state[first].at?(rest)
 					elsif @state[first].is_a?(String) and @state[first].isref
 						# TODO
-						new_path = @state[first] + '/' + rest
+						new_path = @state[first] + '.' + rest
 						return self.get_path_state(new_path)
 					else
 						puts 'not found: ' + path

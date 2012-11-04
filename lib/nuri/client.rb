@@ -34,6 +34,7 @@ module Nuri
 			end
 			
 			def get_state(path=nil)
+				path.gsub!(/\//, '.')
 				return @root.get_state(path)
 			end
 		end

@@ -57,11 +57,11 @@ puts 'install tikiwiki'
 					return false if not system(cmd)
 				end
 
-puts 'ws_doc_root: ' + self.get_state('webserver/document_root').inspect
+puts 'ws_doc_root: ' + self.get_state('webserver.document_root').inspect
 
-				db_port = self.get_state('database/port')
-				db_host = self.get_state('database/parent/domainname')
-				db_root_passwd = self.get_state('database/root_password')
+				db_port = self.get_state('database.port')
+				db_host = self.get_state('database.parent.domainname')
+				db_root_passwd = self.get_state('database.root_password')
 
 puts 'db_port: ' + db_port.inspect
 puts 'db_host: ' + db_host.inspect
