@@ -65,8 +65,9 @@ puts '::step 0'
 puts '::step 1'				
 					return false if not system(cmd)
 				end
-puts '::step 2'
-				return false if ( system("cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null") == true )
+				cmd = "cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null"
+puts '::step 2 -- ' + cmd
+				return false if ( system() == true )
 puts '::step 3'				
 				localhost = self.get_state('parent.domainname')
 				db_port = self.get_state('database.port')
