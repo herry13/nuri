@@ -184,11 +184,9 @@ puts 'parent: ' + @parent.class.name
 		def get_remote_path_state(address, path)
 			url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
 
-puts 'remote path: ' + path + ' -- ' + url.to_s
 			begin
 				req = Net::HTTP::Get.new(url.path)
 				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
-puts res.code + ' -- ' + res.body
 				if res.code == '200'
 					json = JSON.parse(res.body)
 					return json['value'] if json.is_a?(Hash) and json.has_key?('value')
@@ -223,9 +221,12 @@ puts res.code + ' -- ' + res.body
 		end
 
 		def get(ref)
-			value = self.get_value(ref)
+			#value = self.get_value(ref)
+			ref.gsub!(/\./, '/')
+			value = self.get_state(ref)
 			if value.is_a?(String) and value.isref
-				value = get_value(value)
+				#value = get_value(value)
+				value = self.get_state(value)
 			end
 			value
 		end
