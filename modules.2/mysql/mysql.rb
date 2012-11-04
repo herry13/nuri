@@ -43,8 +43,7 @@ module Nuri
 
 				# can be accessed from outside?
 				data = `grep 'bind-address' /etc/mysql/my.cnf`.split(' ')
-				data = (data.length >= 2 ? data[2].chop : nil)
-puts data.inspect + ' == ' + Nuri::Util.local_ip.inspect
+				data = (data.length >= 2 ? data[2] : nil)
 				if data == nil
 					@state['public'] = false
 				else
