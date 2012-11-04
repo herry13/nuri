@@ -27,6 +27,7 @@ module Nuri
 				config = {}
 				File.open(ConfigFile) do |f|
 					f.read.split("\n").each { |line|
+						line.chop
 						key, value = line.split('=', 2)
 						config[key] = (value == 'true' ? true : (value == 'false' ? false : value))
 					}

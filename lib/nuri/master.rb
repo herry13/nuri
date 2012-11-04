@@ -105,6 +105,8 @@ puts JSON.pretty_generate(plan)
 				def verify(action)
 					state = get_state
 					action['effect'].each do |key,value|
+						v = state.at?(key)
+puts v.inspect
 						raise Nuri::ExecutionFailedException, action['name'] if state.at?(key) != value
 puts '...OK'
 					end
