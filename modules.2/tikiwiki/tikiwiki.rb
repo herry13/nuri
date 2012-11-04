@@ -77,7 +77,7 @@ puts 'sql: ' + sql
 
 # TODO -- install database
 
-				false
+				true
 			end
 		
 			def uninstall(params={})
