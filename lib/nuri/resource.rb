@@ -221,12 +221,9 @@ puts 'parent: ' + @parent.class.name
 		end
 
 		def get(ref)
-			#value = self.get_value(ref)
-			ref.gsub!(/\./, '/')
-			value = self.get_state(ref)
+			value = self.get_value(ref)
 			if value.is_a?(String) and value.isref
-				#value = get_value(value)
-				value = self.get_state(value)
+				value = get_value(value)
 			end
 			value
 		end
