@@ -43,10 +43,17 @@ module Nuri
 			end
 	
 			def install(params={})
-				localhost = self.get_state('parent.domainname')
+				return false if not Nuri::Util.ensured?('mysql-client')
+
+				web_host = self.get_state('tikiweb.parent.domainname')
 				db_port = self.get_state('database.port')
 				db_host = self.get_state('database.parent.domainname')
 				db_root_passwd = self.get_state('database.root_password')
+puts web_host.inspect
+puts db_port.inspect
+puts db_host.inspect
+puts db_root_passwd.inspect
+
 				if db_port != nil and db_host != nil and db_root_passwd != nil
 					sql = "CREATE DATABASE tikiwiki default character set 'UTF8';"
 					sql += "GRANT ALL ON tikiwiki.* TO 'tiki'@'#{localhost}' IDENTIFIED BY 'tikipassword';"
