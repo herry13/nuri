@@ -64,8 +64,10 @@ module Nuri
 					url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state')
 					req = Net::HTTP::Get.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
-					json = JSON.parse(res.body)
-					return json['value'] if json.is_a?(Hash) and json.has_key?('value')
+					if res.code == '200'
+						json = JSON.parse(res.body)
+						return json['value'] if json.is_a?(Hash) and json.has_key?('value')
+					end
 				rescue Exception => e
 					Nuri::Util.log 'Cannot get state of node ' + address + ': ' + e.to_s
 				end
