@@ -120,7 +120,7 @@ puts 'parent: ' + @parent.class.name
 
 			path.strip!
 			value = get_path_state(path)
-puts '::1 ' + value
+#puts '::1 ' + value
 
 			return Nuri::Undefined.new(path)
 		end
