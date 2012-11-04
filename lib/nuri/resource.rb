@@ -93,6 +93,7 @@ module Nuri
 			return true
 		end
 
+=begin
 		def get_state(path=nil)
 			return self.get_all_state if path == nil or path.strip == ''
 
@@ -110,6 +111,17 @@ puts 'parent: ' + @parent.class.name
 			end
 
 			# not found
+			return Nuri::Undefined.new(path)
+		end
+=end
+
+		def get_state(path=nil)
+			return self.get_all_state if path == nil or path.strip == ''
+
+			path.strip!
+			path.sub!(/\//, '.')
+			puts path
+
 			return Nuri::Undefined.new(path)
 		end
 
