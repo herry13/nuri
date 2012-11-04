@@ -7,7 +7,7 @@ module Nuri
 			include Nuri::Resource
 
 			ConfigDir = '/var/lib/tikiwiki'
-			ConfigFile = '/var/lib/tikiwiki/path'
+			ConfigFile = '/var/lib/tikiwiki/config'
 
 			def initialize
 				self.register('Tikiwiki', 'tikiwiki')
@@ -78,7 +78,9 @@ puts 'sql: ' + sql
 # TODO -- install database
 				config = self.read_config
 				config['install'] = true
+				config['path'] = path
 				self.write_config(config)
+				self.self_get_state
 
 				true
 			end
