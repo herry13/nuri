@@ -109,8 +109,8 @@ puts '...OK'
 				end
 
 				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/exec')
-				data = { 'action' => action, 'system' => Nuri::Sfp.deep_clone(@main['system']) }
-				data = JSON.generate(action)
+				data = { 'action' => action, 'system' => self.get_system_information }
+				data = JSON.generate(data)
 				begin
 print 'exec: ' + action['name']
 					req = Net::HTTP::Put.new(url.path)
@@ -124,6 +124,17 @@ print 'exec: ' + action['name']
 				end
 puts '...FAILED'
 				false
+			end
+
+			def get_system_information
+				system = {}
+				@main['system'].each do |key,value|
+					next if key[0,1] == '_'
+					if value.is_a?(Hash) and value.isobject and value['_classes'].rindex(Nuri::Config::MainComponent) != nil
+						system[key] = value['domainname']
+					end
+				end
+				system
 			end
 
 			def send_system(address)
