@@ -127,7 +127,7 @@ puts value
 
 		def get_path_state(path=nil)
 			return self.get_self_state if ref == nil or ref == ''
-
+puts path
 			first, rest = path.split('/', 2)
 			if first == '$' or first == 'root'
 				return self.root.get_path_state(rest)
