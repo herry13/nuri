@@ -47,24 +47,14 @@ module Nuri
 puts 'install tikiwiki'
 				# install required packages
 				# memcached
-				if Nuri::Util.installed?('mysql-client')
-					return false if ( system('/usr/bin/apt-get -y install mysql-client') != true )
-				end
+				return false if not Nuri::Util.ensured?('mysql-client')
 
 				# install required PHP5 modules
 				# php5-tidy php-pear php5-xcache php5-gd php5-xmlrpc php-xml-parser phpmyadmin
-				if Nuri::Util.installed?('php5-gd')
-					return false if ( system('/usr/bin/apt-get -y install php5-gd') != true )
-				end
-				if Nuri::Util.installed?('php-pear')
-					return false if ( system('/usr/bin/apt-get -y install php-pear') != true )
-				end
-				if Nuri::Util.installed?('php5-xmlrpc')
-					return false if ( system('/usr/bin/apt-get -y install php5-xmlrpc') != true )
-				end
-				if Nuri::Util.installed?('php-xml-parser')
-					return false if ( system('/usr/bin/apt-get -y install php-xml-parser') != true )
-				end
+				return false if not Nuri::Util.ensured?('php5-gd')
+				return false if not Nuri::Util.ensured?('php-pear')
+				return false if not Nuri::Util.ensured?('php5-xmlrpc')
+				return false if not Nuri::Util.ensured?('php-xml-parser')
 
 				# download and extract tikiwiki to destination folder
 				doc_root = self.get_state('webserver.document_root')

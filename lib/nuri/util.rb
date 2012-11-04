@@ -86,11 +86,11 @@ module Nuri
 			return `git rev-parse HEAD`.chop
 		end
 
-		def self.installed?(package)
+		def self.ensured?(package)
 			data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.chop
 			data = data.split(' ')
-puts '===> ' + data.inspect
-			return (data.length > 1 and data[0] == package)
+			return true if (data.length > 1 and data[0] == package)
+			return ( system('/usr/bin/apt-get -y install php5-gd') != true )
 		end
 
 		private
