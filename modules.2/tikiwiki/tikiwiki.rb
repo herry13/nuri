@@ -28,7 +28,7 @@ module Nuri
 				File.open(ConfigFile) do |f|
 					f.read.split("\n").each { |line|
 						key, value = line.split('=', 2)
-						config[key] = value
+						config[key] = (value == 'true' ? true : (value == 'false' ? false : value))
 					}
 				end if File.file?(ConfigFile)
 				config
@@ -37,7 +37,7 @@ module Nuri
 			def write_config(config={})
 				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
 				File.open(ConfigFile, 'w') do |f|
-					config.each { |k,v| f.write(k + '=' + v + "\n") }
+					config.each { |k,v| f.write(k + '=' + v.to_s + "\n") }
 				end
 			end
 	
