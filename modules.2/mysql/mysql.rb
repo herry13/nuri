@@ -36,13 +36,13 @@ module Nuri
 
 				# root password
 				if File.file?('/etc/mysql/nuri.cnf')
-					@state["root_password"] = (`/bin/cat /etc/mysql/nuri.cnf 2> /dev/null`).sub(/\n$/,'')
+					@state["root_password"] = (`/bin/cat /etc/mysql/nuri.cnf 2>/dev/null`).sub(/\n$/,'')
 				else
 					@state['root_password'] = ''
 				end
 
 				# can be accessed from outside?
-				data = `grep 'bind-address' /etc/mysql/my.cnf`.split(' ')
+				data = `grep 'bind-address' /etc/mysql/my.cnf 2>/dev/null 1>/dev/null`.split(' ')
 				data = (data.length >= 2 ? data[2] : nil)
 				if data == nil
 					@state['public'] = false
