@@ -76,6 +76,9 @@ puts 'sql: ' + sql
 				end
 
 # TODO -- install database
+				config = self.read_config
+				config['install'] = true
+				self.write_config(config)
 
 				true
 			end
