@@ -18,11 +18,27 @@ class Tikidb {
 		}
 	}
 
-	procedure install (user isref String, passwd isref String, db isref String) {
+	procedure set_password (user isref String, passwd isref String) {
 		condition {
-			/*user != ""
-			passwd != ""
-			db != ""*/
+			this.installed = false
+		}
+		effect {
+			this.db_user = user
+			this.db_password = passwd
+		}
+	}
+
+	procedure set_db_name (db isref String) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.db_name = db
+		}
+	}
+
+	procedure install {
+		condition {
 			this.tikiweb.installed = false
 			this.database.running = true
 		}
