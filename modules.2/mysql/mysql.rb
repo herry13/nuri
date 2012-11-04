@@ -103,7 +103,11 @@ module Nuri
 					cmd += '/bin/mv -f /tmp/my.cnf /etc/mysql/my.cnf'
 				end
 				return false if ( system(cmd) != true )
-				return ( system('/usr/bin/service mysql restart') == true )
+
+				if self.get_state('running') == true
+					return ( system('/usr/bin/service mysql restart') == true )
+				end
+				true
 			end
 	
 			def set_root_password(params={})
