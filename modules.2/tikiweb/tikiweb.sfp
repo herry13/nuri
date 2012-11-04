@@ -41,7 +41,7 @@ class Tikiweb {
 			this.webserver.php_module = true
 			this.webserver.php_mysql_module = true
 
-			this.tikidb.installed = true
+			//this.tikidb.installed = true
 		}
 		effect {
 			this.installed = true
