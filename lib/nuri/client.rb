@@ -5,7 +5,10 @@ module Nuri
 		class Daemon < Mongrel::HttpHandler
 			include Nuri::Config
 
+			attr_accessor :system
+
 			def initialize
+				@system = {}
 				self.load
 			end
 
@@ -57,26 +60,37 @@ module Nuri
 					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'POST'
+					if check_uri(@request.params['REQUEST_URI'], 'system')
+						self.process_system_information(@request.body.read.to_s)
+					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'PUT'
 					if check_uri(@request.params['REQUEST_URI'], 'exec')
 						self.execute(@request.body.read.to_s)
 					end
+
 				end
 			end
 
-			def execute(procedure)
+			def process_system_information(data)
+				system = JSON[data]
+				puts system.inspect
+				@response.start(200) { |head,out| out.write('') }
+			end
+
+			def execute(data)
 				def clean_parameters(params)
 					p = {}
 					params.each { |k,v|
 						p[k[2,k.length-2]] =	params[k]
-						#p[k[2,k.length-2]] =	(params[k].is_a?(String) and params[k].isref ?
-						#		params[k][2, params[k].length] : params[k])
 					}
 					return p
 				end
 
-				cmd = JSON[procedure]
+				data = JSON[data]
+				cmd = data['action'] #JSON[procedure]
+				@daemon.system = data['system']
+
 				params = clean_parameters(cmd['parameters'])
 puts "exec: " + cmd['name'] + ": " + params.inspect
 				comp_name, cmd_name = cmd['name'].pop_ref

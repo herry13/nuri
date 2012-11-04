@@ -109,6 +109,7 @@ puts '...OK'
 				end
 
 				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/exec')
+				data = { 'action' => action, 'system' => Nuri::Sfp.deep_clone(@main['system']) }
 				data = JSON.generate(action)
 				begin
 print 'exec: ' + action['name']
@@ -122,6 +123,19 @@ print 'exec: ' + action['name']
 					Nuri::Util.log 'Cannot execute action: ' + action['name']
 				end
 puts '...FAILED'
+				false
+			end
+
+			def send_system(address)
+				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/system')
+				data = JSON.generate( Nuri::Sfp.deep_clone(@main['system']) )
+				begin
+					req = Net::HTTP::Post.new(url.path)
+					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
+					return true if res.code == '200'
+				rescue Exception => e	
+					Nuri::Util.log 'Cannot send system information to ' + address + ' -- ' + e.to_s
+				end
 				false
 			end
 
