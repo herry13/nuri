@@ -105,6 +105,7 @@ puts component.class.name
 						end
 puts "success: " + success.inspect
 					rescue Exception => e
+puts e.backtrace
 						Nuri::Util.log 'Cannot execute procedure: ' + json
 						@response.start(500) { |head,out| out.write('') }
 					end
