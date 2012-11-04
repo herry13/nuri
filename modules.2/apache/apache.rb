@@ -60,15 +60,13 @@ module Nuri
 			end
 	
 			def install
-				result = system('/usr/bin/apt-get -y install apache2')
-				result = system('/usr/bin/service apache2 stop') if result == true
-				return (result == true)
+				success = Nuri::Util.installed?('apache2')
+				self.stop if success
+				return success
 			end
 		
 			def uninstall
-				result = system('/usr/bin/apt-get -y --purge remove apache2')
-				system('/usr/bin/apt-get -y autoremove') if (result == true)
-				return (result == true)
+				return Nuri::Util.uninstalled?('apache2')
 			end
 		
 			def start
@@ -98,8 +96,8 @@ module Nuri
 				return false
 			end
 		
-			def set_document_root(params=nil)
-				return false if params == nil
+			def set_document_root(params={})
+				return false if not params.has_key?('target')
 				dir = params['target']
 				Augeas::open do |aug|
 					aug.set("/files/etc/apache2/sites-available/default/VirtualHost/*[self::directive='DocumentRoot']/arg", dir)
@@ -109,27 +107,27 @@ module Nuri
 			end
 
 			def install_php_mysql_module
-				result = system('/usr/bin/apt-get -y install php5-mysql')
-				self.stop
-				return (result == true)
+				success = Nuri::Util.installed?('php5-mysql')
+				self.stop if success
+				return success
 			end
 
 			def uninstall_php_mysql_module
-				result = system('/usr/bin/apt-get -y --purge remove php5-mysql')
-				system('/usr/bin/apt-get -y autoremove') if (result == true)
-				self.stop
-				return (result == true)
+				success = Nuri::Util.uninstalled?('php5-mysql')
+				self.stop if success
+				return success
 			end
 
 			def install_php_module
-				result = system('/usr/bin/apt-get -y install libapache2-mod-php5')
-				return (result == true)
+				success = Nuri::Util.installed?('libapache2-mod-php5')
+				self.stop if success
+				return success
 			end
 
 			def uninstall_php_module
-				result = system('/usr/bin/apt-get -y --purge remove libapache2-mod-php5')
-				system('/usr/bin/apt-get -y autoremove') if (result == true)
-				return (result == true)
+				success = Nuri::Util.uninstalled?('libapache2-mod-php5')
+				self.stop if success
+				return success
 			end
 		end
 	end

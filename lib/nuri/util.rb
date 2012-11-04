@@ -97,7 +97,13 @@ module Nuri
 			return `git rev-parse HEAD`.chop
 		end
 
-		def self.ensured?(package)
+		def self.uninstalled?(package)
+			success = ( system("/usr/bin/apt-get -y --purge remove #{package}") == true )
+			system('/usr/bin/apt-get -y autoremove') if success
+			return success
+		end
+
+		def self.installed?(package)
 			data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.chop
 			data = data.split(' ')
 			return true if (data.length > 1 and data[0] == package)
