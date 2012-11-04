@@ -186,7 +186,7 @@ puts 'parent: ' + @parent.class.name
 
 puts 'remote path: ' + path + ' -- ' + url.to_s
 			begin
-				req = Net::HTTP::Post.new(url.path)
+				req = Net::HTTP::Get.new(url.path)
 				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
 puts res.code + ' -- ' + res.body
 				if res.code == '200'
