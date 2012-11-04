@@ -89,6 +89,7 @@ module Nuri
 		def self.installed?(package)
 			data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.chop
 			data = data.split(' ')
+puts '===> ' + data
 			return (data.length > 1 and data[0] == package)
 		end
 

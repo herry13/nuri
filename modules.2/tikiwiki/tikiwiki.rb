@@ -47,6 +47,9 @@ module Nuri
 puts 'install tikiwiki'
 				# install required packages
 				# memcached
+				if Nuri::Util.installed?('mysql-client')
+					return false if ( system('/usr/bin/apt-get -y install mysql-client') != true )
+				end
 
 				# install required PHP5 modules
 				# php5-tidy php-pear php5-xcache php5-gd php5-xmlrpc php-xml-parser phpmyadmin
