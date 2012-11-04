@@ -143,6 +143,7 @@ puts 'parent: ' + @parent.class.name
 				return @state
 			end
 
+			path.gsub!(/\./, '/') if path.isref
 			first, rest = path.split('/', 2)
 puts '@' + self.name + ' -- ' + first + ' :: ' + rest.to_s
 			if first == '$' or first == 'root'
