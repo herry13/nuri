@@ -116,10 +116,7 @@ puts 'parent: ' + @parent.class.name
 =end
 
 		def get_state(path=nil)
-			if path == nil or path.strip == ''
-				self.get_self_state
-				return @state
-			end
+			return self.get_all_state if path == nil or path.strip == ''
 
 			path.strip!
 puts '@ ' + self.name
@@ -131,7 +128,10 @@ puts '@ ' + self.name
 		end
 
 		def get_path_state(path=nil)
-			return self.get_self_state if path == nil or path == ''
+			if path == nil or path == ''
+				self.get_self_state
+				return @state
+			end
 
 			first, rest = path.split('/', 2)
 puts '::2 ' + first.to_s + ' ' + rest.to_s + ' -- @ ' + self.name
