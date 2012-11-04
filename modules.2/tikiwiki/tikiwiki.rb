@@ -93,7 +93,6 @@ puts 'sql: ' + sql
 				config['installed'] = true
 				config['path'] = path
 				self.write_config(config)
-				self.get_self_state
 
 				true
 			end
@@ -113,7 +112,6 @@ puts 'sql: ' + sql
 				config = read_config
 				config['webserver'] = params['ws']
 				self.write_config(config)
-				self.get_self_state
 				true
 			end
 
@@ -121,15 +119,13 @@ puts 'sql: ' + sql
 				config = read_config
 				config['database'] = params['db']
 				self.write_config(config)
-				self.get_self_state
 				return true
 			end
 		
 			def set_path(params={})
 				config = read_config
 				config['path'] = params['path']
-				self.ite_config(config)
-				self.get_self_state
+				self.write_config(config)
 				true
 			end
 		

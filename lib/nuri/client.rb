@@ -102,6 +102,8 @@ puts "exec: " + cmd['name'] + ": " + params.inspect
 						else
 							success = component.send(cmd_name, params)
 						end
+						
+						component.get_self_state if success
 puts "success: " + success.inspect
 					rescue Exception => e
 puts e.backtrace

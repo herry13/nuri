@@ -119,6 +119,7 @@ print 'exec: ' + action['name']
 					req = Net::HTTP::Put.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
 					verify(action) if @verify_execution
+puts res.code
 					return true if res.code == '200'
 				rescue ExecutionFailedException => efe
 					Nuri::Util.log efe.to_s
@@ -151,7 +152,6 @@ puts '...FAILED'
 				begin
 					req = Net::HTTP::Post.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
-puts res.code
 					return true if res.code == '200'
 				rescue Exception => e	
 					Nuri::Util.log 'Cannot send system information to ' + address + ' -- ' + e.to_s
