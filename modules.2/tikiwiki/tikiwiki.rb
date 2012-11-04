@@ -86,7 +86,7 @@ puts 'sql: ' + sql
 			end
 		
 			def uninstall(params={})
-				cmd = "/bin/rm -rf /bin/rm -rf /var/lib/tikiwiki"
+				cmd = "/bin/rm -rf /var/lib/tikiwiki"
 				path = self.get_state('path')
 				if path == '/' or path == ''
 					doc_root = self.get_state('webserver.document_root')
