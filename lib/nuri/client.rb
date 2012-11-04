@@ -103,7 +103,7 @@ puts component.class.name
 						else
 							success = component.send(cmd_name, params)
 						end
-puts succeed.inspect
+puts "success: " + success.inspect
 					rescue Exception => e
 						Nuri::Util.log 'Cannot execute procedure: ' + json
 						@response.start(500) { |head,out| out.write('') }
