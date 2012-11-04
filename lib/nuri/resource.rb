@@ -129,8 +129,9 @@ puts '@ ' + self.name
 
 		def get_path_state(path=nil)
 			return self.get_self_state if path == nil or path == ''
-puts '::2 ' + path + ' -- @ ' + self.name
+
 			first, rest = path.split('/', 2)
+puts '::2 ' + first.to_s + ' ' + rest.to_s + ' -- @ ' + self.name
 			if first == '$' or first == 'root'
 				return self.root.get_path_state(rest)
 
@@ -141,6 +142,7 @@ puts '::2 ' + path + ' -- @ ' + self.name
 				return self.get_path_state(rest)
 
 			elsif @children.has_key?(first) # sub-module
+puts '::3 to child: ' + first
 				return @children[first].get_path_state(rest)
 
 			else
