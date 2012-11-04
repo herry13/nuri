@@ -151,8 +151,8 @@ puts '::3 to child: ' + first
 			else
 				self.get_self_state
 				if @state.has_key?(first)
-					if rest == nil
-						return @state
+					if rest == nil or rest == ''
+						return @state[first]
 					elsif @state[first].is_a?(Hash)
 						return @state[first].at?(rest)
 					elsif @state[first].is_a?(String) and @state[first].isref
