@@ -101,7 +101,7 @@ puts 'sql: ' + sql
 				doc_root = self.get_state('webserver.document_root')
 				path = self.get_state('path')
 				tiki_dir = doc_root + path
-				cmd = "/bin/rm -f #{tiki_dir}/*"
+				cmd = "/bin/rm -rf #{tiki_dir}/*"
 				return false if ( system(cmd) != true )
 				config = self.read_config
 				config['installed'] = false
