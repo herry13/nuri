@@ -173,12 +173,29 @@ puts 'parent: ' + @parent.class.name
 				else
 					system = Nuri::Util.get_system_information
 					if system.has_key?(first)
-puts 'remote path: ' + path
+						return get_remote_path_state(system[first], path)
 					end
 				end
 			end
 
 			return nil
+		end
+
+		def get_remote_path_state(address, path)
+			url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
+
+puts 'remote path: ' + path + ' -- ' + url.to_s
+			begin
+				req = Net::HTTP::Post.new(url.path)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
+				if res.code == '200'
+					json = JSON.parse(res.body)
+					return json['value'] if json.is_a?(Hash) and json.has_key?('value')
+				end
+			rescue Exception => e	
+				Nuri::Util.log 'Cannot send system information to ' + address + ' -- ' + e.to_s
+			end
+			nil
 		end
 
 		def get_all_state
