@@ -110,12 +110,14 @@ module Nuri
 
 			def install_php_mysql_module
 				result = system('/usr/bin/apt-get -y install php5-mysql')
+				self.stop
 				return (result == true)
 			end
 
 			def uninstall_php_mysql_module
 				result = system('/usr/bin/apt-get -y --purge remove php5-mysql')
 				system('/usr/bin/apt-get -y autoremove') if (result == true)
+				self.stop
 				return (result == true)
 			end
 
