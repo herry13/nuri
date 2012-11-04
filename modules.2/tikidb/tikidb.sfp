@@ -59,7 +59,7 @@ class Tikidb {
 	procedure uninstall {
 		condition {
 			this.tikiweb.installed = false
-			this.database.running = false
+			this.database.running = true
 		}
 		effect {
 			this.installed = false
