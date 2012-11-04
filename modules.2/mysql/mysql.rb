@@ -40,7 +40,16 @@ module Nuri
 				else
 					@state['root_password'] = ''
 				end
-	
+
+				# can be accessed from outside?
+				data = `grep 'bind-address' /etc/mysql/my.cnf`.split(' ')
+				data = (data.length >= 2 ? data[2].chop : nil)
+				if data == nil
+					@state['public'] = false
+				else
+					@state['public'] = (data == Nuri::Util.local_ip)
+				end
+
 				return @state
 			end
 	
