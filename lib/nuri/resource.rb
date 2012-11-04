@@ -116,7 +116,10 @@ puts 'parent: ' + @parent.class.name
 =end
 
 		def get_state(path=nil)
-			return self.get_all_state if path == nil or path.strip == ''
+			if path == nil or path.strip == ''
+				self.get_self_state
+				return @state
+			end
 
 			path.strip!
 puts '@ ' + self.name
