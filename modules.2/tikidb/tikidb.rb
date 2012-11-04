@@ -86,6 +86,12 @@ puts 'sql: ' + sql
 				config = self.read_config
 				config['db_user'] = params['user']
 				config['db_password'] = params['passwd']
+				self.write_config(config)
+				true
+			end
+
+			def set_db_name(params={})
+				config = self.read_config
 				config['db_name'] = params['db']
 				self.write_config(config)
 				true
