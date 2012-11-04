@@ -171,7 +171,10 @@ puts 'parent: ' + @parent.class.name
 						puts 'not found: ' + path
 					end
 				else
-					#system = Nuri::Util.get
+					system = Nuri::Util.get_system_information
+					if system.has_key?(first)
+puts 'remote path: ' + path
+					end
 				end
 			end
 

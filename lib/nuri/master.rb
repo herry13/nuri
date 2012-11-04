@@ -139,12 +139,12 @@ puts '...FAILED'
 
 			def update_system
 				system = get_system_information
-				system.each_value { |target| send_system(target) }
+				system.each_value { |target| send_system(target, system) }
 			end
 
-			def send_system(address)
+			def send_system(address, system)
 				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/system')
-				data = JSON.generate( Nuri::Sfp.deep_clone(@main['system']) )
+				data = JSON.generate(system)
 				begin
 					req = Net::HTTP::Post.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }

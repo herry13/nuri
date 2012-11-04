@@ -73,7 +73,7 @@ module Nuri
 				system = JSON[data]
 				Nuri::Util.set_system_information(system)
 				@response.start(200) { |head,out| out.write('') }
-				puts 'system information updated'
+				Nuri::Util.log 'system information updated'
 			end
 
 			def execute(data)
