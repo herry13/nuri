@@ -96,11 +96,12 @@ module Nuri
 
 			def set_public(params={})
 				if params['pub']
-					cmd = '/bin/sed "s/^bind\-address.*/bind\-address\t\t= ' + Nuri::Util.local_ip + '/g" /etc/mysql/my.cnf > /etc/mysql/my.cnf'
+					cmd = '/bin/sed "s/^bind\-address.*/bind\-address\t\t= ' + Nuri::Util.local_ip + '/g" /etc/mysql/my.cnf > /tmp/my.cnf;'
+					cmd += '/bin/mv -f /tmp/my.cnf /etc/mysql/my.cnf'
 				else
-					cmd = '/bin/sed "s/^bind\-address.*/bind\-address\t\t= 127.0.0.1/g" /etc/mysql/my.cnf > /etc/mysql/my.cnf'
+					cmd = '/bin/sed "s/^bind\-address.*/bind\-address\t\t= 127.0.0.1/g" /etc/mysql/my.cnf > /tmp/my.cnf;'
+					cmd += '/bin/mv -f /tmp/my.cnf /etc/mysql/my.cnf'
 				end
-puts cmd
 				return false if ( system(cmd) != true )
 				return ( system('/usr/bin/service mysql restart') == true )
 			end
