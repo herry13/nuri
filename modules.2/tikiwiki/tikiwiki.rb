@@ -44,9 +44,15 @@ module Nuri
 			def install(params={})
 				# TODO
 puts 'install tikiwiki'
-				config = get_self_state
-				doc_root = self.get('webserver.document_root')
-				path = self.get('path')
+				# install required packages
+				# memcached
+
+				# install required PHP5 modules
+				# php5-tidy php-pear php5-xcache php5-gd php5-xmlrpc php-xml-parser phpmyadmin
+
+				# download and extract tikiwiki to destination folder
+				doc_root = self.get_state('webserver.document_root')
+				path = self.get_state('path')
 				doc_root = doc_root + path
 				system('mkdir -p ' + doc_root) if not File.directory?(doc_root)
 				return false if not File.directory?(doc_root)
@@ -56,16 +62,18 @@ puts 'install tikiwiki'
 					cmd = 'cd ' + doc_root + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
 					return false if not system(cmd)
 				end
-
-puts 'ws_doc_root: ' + self.get_state('webserver.document_root').inspect
-
+				result = `cd #{doc_root}; sudo /bin/sh setup.sh`
+puts result
+				
+				localhost = self.get_state('parent.domainname')
 				db_port = self.get_state('database.port')
 				db_host = self.get_state('database.parent.domainname')
 				db_root_passwd = self.get_state('database.root_password')
-
-puts 'db_port: ' + db_port.inspect
-puts 'db_host: ' + db_host.inspect
-puts 'db_root_passwd: ' + db_root_passwd.inspect
+				if db_port != nil and db_host != nil and db_root_passwd != nil
+					sql = "CREATE DATABASE tikiwiki default character set 'UTF8';"
+					sql += "GRANT ALL ON tikiwiki.* TO 'tiki'@'#{localhost}' IDENTIFIED BY 'tikipassword';"
+puts 'sql: ' + sql
+				end
 
 # TODO -- install database
 
