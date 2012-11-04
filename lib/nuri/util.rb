@@ -51,6 +51,10 @@ module Nuri
 				nil, Socket::AI_CANONNAME)[0][2].split('.')[0]
 		end
 
+		def self.domainname
+			return Socket.gethostbyname(Socket.gethostname).first
+		end
+
 		def self.temp_dir
 			case os
 				when 'linux'

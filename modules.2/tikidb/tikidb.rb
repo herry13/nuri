@@ -50,6 +50,7 @@ puts self.get_state('database').inspect
 				web_host = self.get_state('tikiweb.parent.domainname')
 				mysql_port = self.get_state('database.port')
 				mysql_host = self.get_state('database.parent.domainname')
+				mysql_host = (mysql_host == Nuri::Util.domainname ? 'localhost' : mysql_host)
 				mysql_user = 'root'
 				mysql_password = self.get_state('database.root_password')
 				db_name = self.get_state('db_name')
