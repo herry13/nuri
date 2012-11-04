@@ -70,11 +70,17 @@ puts self.get_state('database').inspect
 					end
 
 					cmd = "mysql --user=#{mysql_user} --password=#{mysql_password} --host=#{mysql_host} --port=#{mysql_port} < #{script_file}"
-					result = system(cmd)
-puts 'cmd: ' + cmd + " === " + result.inspect
+					return false if ( system(cmd) != true )
+					File.delete(script_file)
+#puts 'cmd: ' + cmd + " === " + result.inspect
+
+					config = self.read_config
+					config['installed'] = true
+					self.write_config(config)
+
 				end
 
-				false
+				true
 			end
 		
 			def uninstall(params={})

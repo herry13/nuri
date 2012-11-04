@@ -71,17 +71,6 @@ puts 'install tikiweb'
 				cmd = "cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null"
 				return false if ( system(cmd) != true )
 
-				localhost = self.get_state('parent.domainname')
-				db_port = self.get_state('database.port')
-				db_host = self.get_state('database.parent.domainname')
-				db_root_passwd = self.get_state('database.root_password')
-				if db_port != nil and db_host != nil and db_root_passwd != nil
-					sql = "CREATE DATABASE tikiwiki default character set 'UTF8';"
-					sql += "GRANT ALL ON tikiwiki.* TO 'tiki'@'#{localhost}' IDENTIFIED BY 'tikipassword';"
-puts 'sql: ' + sql
-				end
-
-# TODO -- install database
 				config = self.read_config
 				config['installed'] = true
 				config['path'] = path
