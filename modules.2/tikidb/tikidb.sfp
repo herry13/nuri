@@ -1,0 +1,43 @@
+include "modules/apache/apache.sfp"
+include "modules/mysql/mysql.sfp"
+
+class Tikidb {
+	installed  = false
+	db_name = "tikiwiki"
+	db_user = "tiki"
+	db_password = "tikipassword"
+	tikiweb isref Tikiweb
+	database isref Mysql
+
+	procedure set_tikiweb (web isref Tikiweb) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.tikiweb = web
+		}
+	}
+
+	procedure install (user isref String, passwd isref String, db isref String) {
+		condition {
+			user != ""
+			passwd != ""
+			db != ""
+			this.tikiweb.installed = false
+			this.database.running = true
+		}
+		effect {
+			this.installed = true
+		}
+	}
+
+	procedure uninstall {
+		condition {
+			this.tikiweb.installed = false
+			this.database.running = false
+		}
+		effect {
+			this.installed = false
+		}
+	}
+}

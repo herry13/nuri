@@ -22,8 +22,13 @@ module Nuri
 				if name[0,1] == '_'
 					parent.delete(name)
 				elsif value.is_a?(Hash)
-					parent.delete(name) if value['_context'] == 'procedure' or
-							value['_context'] == 'constraint'
+					if value.isnull
+						parent[name] = nil
+						return false
+					else
+						parent.delete(name) if value['_context'] == 'procedure' or
+								value['_context'] == 'constraint'
+					end
 				end
 				true
 			end
