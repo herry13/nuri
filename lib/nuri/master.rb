@@ -137,6 +137,11 @@ puts '...FAILED'
 				system
 			end
 
+			def update_system
+				system = get_system_information
+				system.each_value { |target| send_system(target) }
+			end
+
 			def send_system(address)
 				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/system')
 				data = JSON.generate( Nuri::Sfp.deep_clone(@main['system']) )
@@ -186,6 +191,11 @@ puts '...FAILED'
 		def self.debug_sas
 			master = Nuri::Master::Daemon.new
 			master.debug_sas
+		end
+
+		def self.update_system
+			master = Nuri::Master::Daemon.new
+			master.update_system
 		end
 	end
 end

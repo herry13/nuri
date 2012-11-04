@@ -57,6 +57,12 @@ options:
 	elsif ARGV[1] == 'apply'
 		result = Nuri::Master.apply
 		puts 'Succeed: ' + result.to_s
+
+	elsif ARGV[1] == 'update'
+		if ARGV[2] == 'system'
+			Nuri::Master.update_system
+		end
+
 	else
 		print_help
 	end

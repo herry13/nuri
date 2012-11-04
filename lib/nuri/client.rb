@@ -73,6 +73,7 @@ module Nuri
 				system = JSON[data]
 				Nuri::Util.set_system_information(system)
 				@response.start(200) { |head,out| out.write('') }
+				puts 'system information updated'
 			end
 
 			def execute(data)
@@ -101,7 +102,6 @@ puts "exec: " + cmd['name'] + ": " + params.inspect
 							success = component.send(cmd_name, params)
 						end
 					rescue Exception => e
-$stderr.puts e.backtrace
 						Nuri::Util.log 'Cannot execute procedure: ' + procedure
 						@response.start(500) { |head,out| out.write('') }
 					end

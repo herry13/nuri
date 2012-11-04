@@ -113,15 +113,25 @@ puts 'parent: ' + @parent.class.name
 			# not found
 			return Nuri::Undefined.new(path)
 		end
+
+		def get_path_value(state, path)
+			return state if path == nil or path == ''
+			return Nuri::Undefined.new if not state.is_a?(Hash)
+			first, nextpath = path.split('/', 2)
+			if state.has_key?(first)
+				return self.get_path_value(state[first], nextpath)
+			else
+				# not found
+				return Nuri::Undefined.new(path)
+			end
+		end
 =end
 
 		def get_state(path=nil)
 			return self.get_all_state if path == nil or path.strip == ''
 
 			path.strip!
-puts '@ ' + self.name
 			value = get_path_state(path)
-#puts '::1 ' + value
 			return value if value != nil
 
 			return Nuri::Undefined.new(path)
@@ -134,7 +144,6 @@ puts '@ ' + self.name
 			end
 
 			first, rest = path.split('/', 2)
-puts '::2 ' + first.to_s + ' ' + rest.to_s + ' -- @ ' + self.name
 			if first == '$' or first == 'root'
 				return self.root.get_path_state(rest)
 
@@ -145,7 +154,6 @@ puts '::2 ' + first.to_s + ' ' + rest.to_s + ' -- @ ' + self.name
 				return self.get_path_state(rest)
 
 			elsif @children.has_key?(first) # sub-module
-puts '::3 to child: ' + first
 				return @children[first].get_path_state(rest)
 
 			else
@@ -162,6 +170,8 @@ puts '::3 to child: ' + first
 					else
 						puts 'not found: ' + path
 					end
+				else
+					#system = Nuri::Util.get
 				end
 			end
 
@@ -178,18 +188,6 @@ puts '::3 to child: ' + first
 
 		def get_self_state
 			# all components must implement this method
-		end
-
-		def get_path_value(state, path)
-			return state if path == nil or path == ''
-			return Nuri::Undefined.new if not state.is_a?(Hash)
-			first, nextpath = path.split('/', 2)
-			if state.has_key?(first)
-				return self.get_path_value(state[first], nextpath)
-			else
-				# not found
-				return Nuri::Undefined.new(path)
-			end
 		end
 
 		def get_goal

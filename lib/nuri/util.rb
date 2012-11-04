@@ -12,6 +12,8 @@ module Nuri
 
 		def self.set_system_information(system)
 			@@system = system
+			self_name = hostname
+			@@system.keys.each { |k| @@system.delete(k) if @@system[k] == self_name }
 		end
 
 		def self.get_system_information
