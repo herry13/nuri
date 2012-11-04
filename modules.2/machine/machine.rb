@@ -12,6 +12,7 @@ module Nuri
 			end
 
 			def get_self_state
+puts '@Machine.get_self_state'
 				# get memory info
 				mem = `free`
 				mem = mem.split("\n")[1].split(" ")
