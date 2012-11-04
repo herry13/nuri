@@ -67,6 +67,9 @@ puts 'sql: ' + sql
 			end
 
 			def set_tikiweb(params={})
+				config = self.read_config
+				config['tikiweb'] = params['web']
+				self.write_config(config)
 				false
 			end
 		
