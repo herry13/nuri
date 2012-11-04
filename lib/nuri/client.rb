@@ -88,8 +88,9 @@ module Nuri
 				end
 
 				data = JSON[data]
-				cmd = data['action'] #JSON[procedure]
+				cmd = data['action']
 				@daemon.system = data['system']
+				puts @daemon.system.inspect
 
 				params = clean_parameters(cmd['parameters'])
 puts "exec: " + cmd['name'] + ": " + params.inspect
