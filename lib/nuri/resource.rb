@@ -188,6 +188,7 @@ puts 'remote path: ' + path + ' -- ' + url.to_s
 			begin
 				req = Net::HTTP::Post.new(url.path)
 				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
+puts res.code + ' -- ' + res.body
 				if res.code == '200'
 					json = JSON.parse(res.body)
 					return json['value'] if json.is_a?(Hash) and json.has_key?('value')
