@@ -59,12 +59,15 @@ puts 'install tikiwiki'
 				return false if not File.directory?(tiki_dir)
 				if not File.file?(tiki_dir + '/index.php')
 					cmd = 'cd ' + tiki_dir + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz 2>/dev/null 1>/dev/null'
+puts '::step 0'				
 					return false if not system(cmd)
 					cmd = 'cd ' + tiki_dir + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
+puts '::step 1'				
 					return false if not system(cmd)
 				end
+puts '::step 2'
 				return false if ( system("cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null") == true )
-				
+puts '::step 3'				
 				localhost = self.get_state('parent.domainname')
 				db_port = self.get_state('database.port')
 				db_host = self.get_state('database.parent.domainname')
