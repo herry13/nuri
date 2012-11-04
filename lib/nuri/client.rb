@@ -94,7 +94,6 @@ module Nuri
 puts "exec: " + cmd['name'] + ": " + params.inspect
 				comp_name, cmd_name = cmd['name'].pop_ref
 				component = @daemon.root.get(comp_name)
-puts component.class.name
 				success = false
 				if component != nil
 					begin
@@ -131,7 +130,6 @@ puts e.backtrace
 				end
 
 				if state.is_a?(Nuri::Undefined)
-					puts state.to_s
 					@response.start(404) do |head, out| out.write(''); end
 				else
 					@response.start(200) do |head, out|

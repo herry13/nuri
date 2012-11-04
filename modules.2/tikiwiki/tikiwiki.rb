@@ -50,6 +50,18 @@ puts 'install tikiwiki'
 
 				# install required PHP5 modules
 				# php5-tidy php-pear php5-xcache php5-gd php5-xmlrpc php-xml-parser phpmyadmin
+				if Nuri::Util.installed?('php5-gd')
+					return false if ( system('/usr/bin/apt-get -y install php5-gd') != true )
+				end
+				if Nuri::Util.installed?('php-pear')
+					return false if ( system('/usr/bin/apt-get -y install php-pear') != true )
+				end
+				if Nuri::Util.installed?('php5-xmlrpc')
+					return false if ( system('/usr/bin/apt-get -y install php5-xmlrpc') != true )
+				end
+				if Nuri::Util.installed?('php-xml-parser')
+					return false if ( system('/usr/bin/apt-get -y install php-xml-parser') != true )
+				end
 
 				# download and extract tikiwiki to destination folder
 				doc_root = self.get_state('webserver.document_root')
@@ -64,9 +76,8 @@ puts 'install tikiwiki'
 					return false if ( system(cmd) != true )
 				end
 				cmd = "cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null"
-puts '::step 2 -- ' + cmd
 				return false if ( system(cmd) != true )
-puts '::step 3'				
+
 				localhost = self.get_state('parent.domainname')
 				db_port = self.get_state('database.port')
 				db_host = self.get_state('database.parent.domainname')

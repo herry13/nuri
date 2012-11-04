@@ -86,6 +86,12 @@ module Nuri
 			return `git rev-parse HEAD`.chop
 		end
 
+		def self.installed?(package)
+			data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.chop
+			data = data.split(' ')
+			return (data.length > 1 and data[0] == package)
+		end
+
 		private
 		def initialize
 		end
