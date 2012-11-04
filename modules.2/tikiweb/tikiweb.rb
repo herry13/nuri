@@ -43,18 +43,18 @@ module Nuri
 			end
 	
 			def install(params={})
-				# TODO
-puts 'install tikiweb'
+				puts 'install tikiweb...'
+
 				# install required packages
-				# memcached
-				return false if not Nuri::Util.ensured?('mysql-client')
+				# mysql-client (optional: memcached)
+				return false if not Nuri::Util.installed?('mysql-client')
 
 				# install required PHP5 modules
 				# php5-tidy php-pear php5-xcache php5-gd php5-xmlrpc php-xml-parser phpmyadmin
-				return false if not Nuri::Util.ensured?('php5-gd')
-				return false if not Nuri::Util.ensured?('php-pear')
-				return false if not Nuri::Util.ensured?('php5-xmlrpc')
-				return false if not Nuri::Util.ensured?('php-xml-parser')
+				return false if not Nuri::Util.installed?('php5-gd')
+				return false if not Nuri::Util.installed?('php-pear')
+				return false if not Nuri::Util.installed?('php5-xmlrpc')
+				return false if not Nuri::Util.installed?('php-xml-parser')
 
 				# download and extract tikiwiki to destination folder
 				doc_root = self.get_state('webserver.document_root')
@@ -80,6 +80,8 @@ puts 'install tikiweb'
 			end
 		
 			def uninstall(params={})
+				puts 'uninstall tikiweb...'
+
 				doc_root = self.get_state('webserver.document_root')
 				path = self.get_state('path')
 				tiki_dir = doc_root + path

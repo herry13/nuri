@@ -43,7 +43,7 @@ module Nuri
 			end
 	
 			def install(params={})
-				return false if not Nuri::Util.ensured?('mysql-client')
+				return false if not Nuri::Util.installed?('mysql-client')
 
 				web_host = self.get_state('tikiweb.parent.domainname')
 				mysql_port = self.get_state('database.port')
@@ -82,7 +82,7 @@ module Nuri
 			end
 		
 			def uninstall(params={})
-				return false if not Nuri::Util.ensured?('mysql-client')
+				return false if not Nuri::Util.installed?('mysql-client')
 
 				mysql_port = self.get_state('database.port')
 				mysql_host = self.get_state('database.parent.domainname')

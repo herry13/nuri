@@ -56,7 +56,7 @@ module Nuri
 			def install(params={})
 				return false if system('echo mysql-server mysql-server/root_password select mysql | debconf-set-selections') != true
 				return false if system('echo mysql-server mysql-server/root_password_again select mysql | debconf-set-selections') != true
-				if system('/usr/bin/apt-get -y install mysql-server') == true
+				if Nuri::Util.installed?('mysql-server')
 					self.stop
 					return (system('/bin/echo mysql > /etc/mysql/nuri.cnf') == true and
 						system('/bin/chmod 0400 /etc/mysql/nuri.cnf') == true)
@@ -65,7 +65,7 @@ module Nuri
 			end
 	
 			def uninstall(params={})
-				result = system('/usr/bin/apt-get -y purge mysql-server*')
+				result = Nuri::Util.uninstalled?('mysql-server')
 				if result == true
 					system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
 					system('/bin/rm /etc/mysql/nuri.cnf')
