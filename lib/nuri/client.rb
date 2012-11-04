@@ -127,7 +127,8 @@ $stderr.puts e.backtrace
 				end
 
 				if state.is_a?(Nuri::Undefined)
-					res.start(404) do |head, out| out.write(''); end
+					puts state.to_s
+					@response.start(404) do |head, out| out.write(''); end
 				else
 					@response.start(200) do |head, out|
 						head['Content-Type'] = 'application/json'

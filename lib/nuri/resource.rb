@@ -106,7 +106,7 @@ module Nuri
 			end
 
 			# not found
-			return Nuri::Undefined.new
+			return Nuri::Undefined.new(path)
 		end
 
 		def get_all_state
@@ -129,7 +129,7 @@ module Nuri
 				return self.get_path_value(state[first], nextpath)
 			else
 				# not found
-				return Nuri::Undefined.new
+				return Nuri::Undefined.new(path)
 			end
 		end
 
