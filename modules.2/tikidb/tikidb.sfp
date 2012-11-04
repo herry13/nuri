@@ -20,7 +20,6 @@ class Tikidb {
 
 	procedure set_password (user isref String, passwd isref String) {
 		condition {
-			user != ""
 			this.installed = false
 		}
 		effect {
