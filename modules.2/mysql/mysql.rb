@@ -42,7 +42,7 @@ module Nuri
 				end
 
 				# can be accessed from outside?
-				data = `grep 'bind-address' /etc/mysql/my.cnf 2>/dev/null 1>/dev/null`.split(' ')
+				data = `grep 'bind-address' /etc/mysql/my.cnf 2>/dev/null`.split(' ')
 				data = (data.length >= 2 ? data[2] : nil)
 				if data == nil
 					@state['public'] = false
