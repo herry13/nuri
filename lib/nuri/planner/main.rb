@@ -68,6 +68,12 @@ module Nuri
 				end
 			end
 
+			def solve_file_to_sfw(file)
+				plan = self.solve_file(file)
+				return nil if plan == nil
+				return sequential_plan_to_sfw(plan)
+			end
+
 			private
 			def to_partial_order(sas_plan)
 				# TODO -- transform total-order plan to partial-order plan

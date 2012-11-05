@@ -88,13 +88,20 @@ options:
 		plan = planner.solve_file(ARGV[1])
 		puts (plan != nil ? plan : 'no solution!')
 
-	elsif ARGV[1] == 'json' and ARGV.length >= 3
-		Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
+	elsif ARGV.length >= 3
+		if ARGV[1] == 'sfw'
+			planner = Nuri::Planner::Solver.new
+			plan = planner.solve_file_to_sfw(ARGV[2])
+			puts (plan != nil ? plan : 'no solution!')
 
-	elsif ARGV[1] == 'sas' and ARGV.length >= 3
-		parser = Nuri::Sfp::Parser.new
-		parser.parse_file(ARGV[2])
-		puts parser.to_sas
+		elsif ARGV[1] == 'json'
+			Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
+
+		elsif ARGV[1] == 'sas'
+			parser = Nuri::Sfp::Parser.new
+			parser.parse_file(ARGV[2])
+			puts parser.to_sas
+		end
 
 	else
 		print_help
