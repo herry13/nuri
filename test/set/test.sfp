@@ -1,0 +1,40 @@
+class Service {
+	running = false
+
+	procedure start {
+		condition { }
+		effect {
+			this.running = true
+		}
+	}
+}
+
+class Master {
+	ss isset Service
+	s2 isset Service
+	procedure set (zz isset Service) {
+		condition { }
+		effect {
+			this.ss = zz
+		}
+	}
+}
+
+initial state {
+	a isa Service
+	b isa Service
+	x = (a,b)
+	m isa Master
+}
+
+goal constraint {
+	m.ss = (a,b)
+	m.s2 = (b,a)
+	
+	foreach (x as y) {
+		y.running = true
+	}
+}
+
+global constraint {
+}

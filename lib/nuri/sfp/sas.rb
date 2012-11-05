@@ -102,8 +102,8 @@ begin
 				end
 
 				@root['initial'].accept(ReferenceModifier.new)
-				@root['goal'].accept(ReferenceModifier.new)
-				@root['global'].accept(ReferenceModifier.new)
+				@root['goal'].accept(ReferenceModifier.new) if @root.has_key?('goal')
+				@root['global'].accept(ReferenceModifier.new) if @root.has_key?('global')
 				#@root['sometime'].accept(ReferenceModifier.new)
 				#@root['sometime-after'].accept(ReferenceModifier.new)
 
@@ -112,7 +112,7 @@ begin
 
 				### collect values ###
 				# collect values from goal constraint
-				value_collector = Nuri::Sfp::ValueCollector.new(@types)
+				value_collector = Nuri::Sfp::ValueCollector.new(self)
 				@root['goal'].accept(value_collector) if @root.has_key?('goal') and
 						@root['goal'].isconstraint
 				# collect values from global constraint
@@ -128,6 +128,9 @@ begin
 
 				# identify immutable variables
 				self.identify_immutable_variables
+
+				# re-evaluate set variables and types
+				self.evaluate_set_variables_and_types
 
 				### process goal constraint ###
 				process_goal(@root['goal']) if @root.has_key?('goal') and
@@ -193,6 +196,22 @@ end
 				end
 			end
 
+			def evaluate_set_variables_and_types
+				@variables.each_value do |var|
+					next if not var.isset
+					var.delete_if { |x| x == nil }
+					var.each { |x| x.sort! }
+					var.uniq!
+				end
+
+				@types.each do |name,values|
+					next if name[0,1] != '('
+					values.delete_if { |x| x == nil }
+					values.each { |x| x.sort! }
+					values.uniq!
+				end
+			end
+
 			# Find immutable variables -- variables that will never be affected with any
 			# actions. Then reduce the size of their domain by 1 only i.e. the possible
 			# value is only their initial value.
@@ -222,7 +241,7 @@ end
 				end
 				mutables.each do |vname, is_mutable|
 					var = @variables[vname]
-					if not var.is_final and (not is_mutable)
+					if var != nil and not var.is_final and (not is_mutable)
 						var.clear
 						var << var.init
 						var.immutable = false
@@ -544,9 +563,9 @@ end
 					# then it's invalid procedure
 					return nil if not @types.has_key?( v['_isa'] )
 					params[k] = Array.new
-					@types[ v['_isa'] ].each { |val|
-						params[k] << val if not (val.is_a?(Hash) and val.isnull)
-					}
+					type = (v.isnull ? v['_isa'] : (v.isset ? "(#{v['_isa']})" : nil))
+					next if type == nil
+					@types[ type ].each { |val| params[k] << val if not (val.is_a?(Hash) and val.isnull)	}
 				}
 				# combinatorial method for all possible values of parameters
 				# using recursive method
@@ -1042,10 +1061,17 @@ raise Exception 'not implemented: normalized_nested_left_right'
 							end
 						else
 							setvalue = @root['initial'].at?(ref)
-							if setvalue != nil and setvalue.is_a?(Hash) and setvalue.isset
+							if setvalue.is_a?(Hash) and setvalue.isset
 								# substitute SET
-								grounder = ParameterGrounder.new(Hash.new)
+								grounder = ParameterGrounder.new( { } )
 								setvalue['_values'].each do |v|
+									grounder.map.clear
+									grounder.map[var] = v
+									substitute_template(grounder, formula['_template'], formula)
+								end
+							elsif setvalue.is_a?(Array)
+								grounder = ParameterGrounder.new( { } )
+								setvalue.each do |v|
 									grounder.map.clear
 									grounder.map[var] = v
 									substitute_template(grounder, formula['_template'], formula)
@@ -1261,20 +1287,26 @@ raise Exception 'not implemented: normalized_nested_left_right'
 			end
 
 			def visit(name, value, parent)
-				return false if name[0,1] == '_' or (value.is_a?(Hash) and
-						not (value.isobject or value.isnull))
+				return false if name[0,1] == '_' or value.is_a?(Array) or
+						(value.is_a?(Hash) and not (value.isobject or value.isnull or value.isset))
 
 				var_name = parent.ref.push(name)
 				isfinal = self.is_final(value)
 				isref = (value.is_a?(String) and value.isref)
+				isset = false
 				value = @init.at?(value) if isref
 				type = (isfinal ? self.isa?(value) : self.get_type(name, value, parent))
 				if type == nil
-					puts "Unrecognized type of variable: " + var_name + " : " + isref.to_s + " -- " + value.ref + ' -- ' + value['_isa']
+					puts "Unrecognized type of variable: #{var_name} #{isfinal}" #+ " : " + isref.to_s + " -- " + value.inspect.to_s + ' -- ' + value['_isa'].to_s
 					Nuri::Util.log "Unrecognized type of variable: " + var_name
 				else
 					value = null_value(type) if value == nil
+					if value.is_a?(Hash) and value.isset
+						value = value['_values']
+						isset = true
+					end
 					var = Variable.new(var_name, type, -1, value, nil, isfinal)
+					var.isset = isset
 					@vars[var.name] = var
 					if isfinal and value.is_a?(Hash)
 						value['_classes'].each { |c| add_value(c, value) }
@@ -1295,6 +1327,8 @@ raise Exception 'not implemented: normalized_nested_left_right'
 					isa = @main.root.at?(parent['_isa'])
 					type = isa.type?(name) if isa != nil
 				end
+
+				return "(#{value['_isa']})" if value.is_a?(Hash) and value.isset and value.has_key?('_isa')
 
 				return nil if type == nil
 
@@ -1322,29 +1356,60 @@ raise Exception 'not implemented: normalized_nested_left_right'
 			end
 
 			def is_final(value)
-				return true if value.is_a?(Hash) and not value.isnull
+				return true if value.is_a?(Hash) and not value.isnull and not value.isset
 				return false
 			end
 		end
 
 		# Collects all values (primitive or non-primitive)
 		class ValueCollector
-			def initialize(bucket)
-				@bucket = bucket
+			def initialize(sas)
+				@bucket = sas.types
+				@sas = sas
 			end
 
 			def visit(name, value, obj)
-				if name[0,1] == '_' and name != '_value'
-				elsif value.is_a?(String) and not value.isref
-					@bucket['$.String'] << value
-				elsif value.is_a?(Numeric)
-					@bucket['$.Integer'] << value
-				elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
-					@bucket['$.Boolean'] << value
-				elsif value.is_a?(Hash) and value.isobject
-					value['_classes'].each { |c| @bucket[c] << value }
+				return true if name[0,1] == '_' and name != '_value'
+				type = get_type(value)
+				if type != nil
+					@bucket[type] << value
+				elsif value.is_a?(Hash)
+					if value.isobject
+						value['_classes'].each { |c| @bucket[c] << value }
+					elsif value.isset
+						puts 'not implemented -- set: ' + value['_isa']
+					end
+				elsif value.is_a?(Array)
+					if value.length > 0
+						type = get_type(value[0])
+						if type != nil
+							@bucket["(#{type})"] << value
+						elsif value[0].is_a?(String) and value[0].isref
+							val = @sas.root['initial'].at?(value[0])
+							return true if val == nil
+							type = get_type(val)
+							if type != nil
+								@bucket["(#{type})"] << value
+							elsif val.is_a?(Hash) and val.isobject
+								val['_classes'].each { |c| @bucket["(#{c})"] << value }
+							end
+						end
+					end
+				else
 				end
 				return true
+			end
+
+			def get_type(value)
+				if value.is_a?(String) and not value.isref
+					'$.String'
+				elsif value.is_a?(Numeric)
+					'$.Integer'
+				elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
+					'$.Boolean'
+				else
+					nil
+				end
 			end
 		end
 
@@ -1398,7 +1463,7 @@ raise Exception 'not implemented: normalized_nested_left_right'
 			# @layer -- axiom layer ( '-1' if this is not axiom variable, otherwise >0)
 			# @init -- initial value
 			# @goal -- goal value (desired value)
-			attr_accessor :name, :type, :layer, :init, :goal, :is_final, :id, :immutable
+			attr_accessor :name, :type, :layer, :init, :goal, :is_final, :id, :immutable, :isset
 			attr_reader :is_primitive
 
 			def initialize(name, type, layer=-1, init=nil, goal=nil, is_final=false)

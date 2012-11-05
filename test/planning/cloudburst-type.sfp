@@ -2,15 +2,15 @@ class Machine {
 	running = no
 	procedure start {
 		cost = 5
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = yes
 		}
 	}
 	procedure stop {
 		cost = 10
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = no
 		}
 	}
@@ -26,26 +26,26 @@ class VM extends Machine {
 
 	procedure start {
 		cost = 5
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = true
 		}
 	}
 	procedure stop {
 		cost = 10
-		conditions {
+		condition {
 			this.has_service.running = false
 		}
-		effects {
+		effect {
 			this.running = false
 		}
 	}
 	procedure migrate(c isref Cloud) {
 		cost = 100
-		conditions {
+		condition {
 			this.running = false
 		}
-		effects {
+		effect {
 			this.on_cloud = c
 		}
 	}
@@ -58,17 +58,17 @@ class Service {
 
 	procedure start {
 		cost = 5
-		conditions {
+		condition {
 			this.vm.running = true
 		}
-		effects {
+		effect {
 			this.running = true
 		}
 	}
 	procedure stop {
 		cost = 10
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = false
 		}
 	}
@@ -79,11 +79,11 @@ class WebService extends Service {
 
 	procedure start {
 		cost = 5
-		conditions {
+		condition {
 			this.vm.running = true
 			this.app_service.running = true
 		}
-		effects {
+		effect {
 			this.running = true
 		}
 	}
@@ -95,21 +95,21 @@ class ApplicationService extends Service {
 
 	procedure start {
 		cost = 5
-		conditions {
+		condition {
 			this.vm.running = true
 			this.db_service.running = true
 		}
-		effects {
+		effect {
 			this.running = true
 		}
 	}
 
 	procedure stop {
 		cost = 10
-		conditions {
+		condition {
 			this.web_service.running = false
 		}
-		effects {
+		effect {
 			this.running = false
 		}
 	}		
@@ -120,10 +120,10 @@ class DatabaseService extends Service {
 
 	procedure stop {
 		cost = 10
-		conditions {
+		condition {
 			this.app_service.running = false
 		}
-		effects {
+		effect {
 			this.running = false
 		}
 	}
@@ -135,14 +135,14 @@ class Port {
 	opened = false
 
 	procedure open {
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.opened = true
 		}
 	}
 	procedure close {
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.opened = false
 		}
 	}
@@ -151,10 +151,10 @@ class Port {
 class Client {
 	refer isref Service
 	procedure change(s isref Service) {
-		conditions {
+		condition {
 			s.running = yes
 		}
-		effects {
+		effect {
 			this.refer = s
 		}
 	}
@@ -164,11 +164,11 @@ class WebClient {
 	refer isref WebService
 
 	procedure change(s isref WebService) {
-		conditions {
+		condition {
 			s.running = yes
 			if s.vm.on_cloud.is_private = false then s.firewall_port.opened = true
 		}
-		effects {
+		effect {
 			this.refer = s
 		}
 	}

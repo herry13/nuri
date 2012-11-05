@@ -2,7 +2,8 @@
 
 current_dir=`pwd`
 dir=$(cd "$(dirname "$0")"; pwd)
-nuri="$dir/../../bin/nuri.rb -c planner"
+#nuri="$dir/../../bin/nuri.rb -c planner"
+nuri="$dir/../../bin/nuri.rb -p"
 
 cd $dir
 files=`ls *-p*.sfp`

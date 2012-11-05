@@ -82,7 +82,7 @@ options:
 
 	if ARGV.length <= 2 #ARGV[1] == 'planner' and ARGV.length >= 3
 		planner = Nuri::Planner::Solver.new
-		plan = planner.solve_file(ARGV[2])
+		plan = planner.solve_file(ARGV[1])
 		puts (plan != nil ? plan : 'no solution!')
 
 	elsif ARGV[1] == 'json' and ARGV.length >= 3

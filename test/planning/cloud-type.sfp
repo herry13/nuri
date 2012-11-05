@@ -2,15 +2,15 @@ class Machine {
 	running = no
 	procedure start {
 		cost = 5
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = yes
 		}
 	}
 	procedure stop {
 		cost = 10
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = no
 		}
 	}
@@ -21,10 +21,10 @@ class PM extends Machine {
 
 	procedure stop {
 		cost = 10
-		conditions {
+		condition {
 			this.has_vm.running = false
 		}
-		effects {
+		effect {
 			this.running = no
 		}
 	}
@@ -36,19 +36,19 @@ class VM extends Machine {
 
 	procedure start {
 		cost = 5
-		conditions {
+		condition {
 			this.pm.running = true
 		}
-		effects {
+		effect {
 			this.running = true
 		}
 	}
 	procedure stop {
 		cost = 10
-		conditions {
+		condition {
 			this.has_service.running = false
 		}
-		effects {
+		effect {
 			this.running = false
 		}
 	}
@@ -60,17 +60,17 @@ class Service {
 
 	procedure start {
 		cost = 5
-		conditions {
+		condition {
 			this.vm.running = true
 		}
-		effects {
+		effect {
 			this.running = true
 		}
 	}
 	procedure stop {
 		cost = 10
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = false
 		}
 	}
@@ -79,10 +79,10 @@ class Service {
 class Client {
 	refer isref Service
 	procedure change(s isref Service) {
-		conditions {
+		condition {
 			s.running = yes
 		}
-		effects {
+		effect {
 			this.refer = s
 		}
 	}

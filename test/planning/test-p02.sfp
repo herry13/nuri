@@ -3,8 +3,8 @@ class Service
 class Client {
 	refer isref Service
 	procedure change(s isref Service) {
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.refer = s
 		}
 	}

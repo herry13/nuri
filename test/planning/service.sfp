@@ -4,15 +4,15 @@ class Service {
 	refer isref Service
 
 	procedure start {
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = true
 		}
 	}
 
 	procedure stop {
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running = false
 		}
 	}

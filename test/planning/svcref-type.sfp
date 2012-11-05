@@ -2,15 +2,15 @@ class Machine {
 	running is no
 	procedure start {
 		cost is 5
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running is yes
 		}
 	}
 	procedure stop {
 		cost is 10
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.running is no
 		}
 	}
@@ -23,8 +23,8 @@ class Server extends Machine {
 class Client {
 	refer isref Server
 	procedure change(s isref Server) {
-		conditions { }
-		effects {
+		condition { }
+		effect {
 			this.refer is s
 		}
 	}

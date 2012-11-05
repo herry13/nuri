@@ -283,6 +283,13 @@ parameter
 				'_value' => nil
 			}
 		}
+	|	ID 'isset' path
+		{
+			@now[$ID.text] = { '_context' => 'set',
+				'_isa' => self.to_ref($path.text),
+				'_values' => []
+			}
+		}
 	;
 
 conditions
