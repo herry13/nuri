@@ -48,9 +48,9 @@ class Tikidb {
 
 	procedure install {
 		condition {
-			foreach (this.tikiweb as tw) {
+			/*foreach (this.tikiweb as tw) {
 				tw.installed = false
-			}
+			}*/
 			this.database.running = true
 		}
 		effect {
@@ -60,9 +60,9 @@ class Tikidb {
 
 	procedure uninstall {
 		condition {
-			foreach (this.tikiweb as tw) {
+			/*foreach (this.tikiweb as tw) {
 				tw.installed = false
-			}
+			}*/
 			this.database.running = true
 		}
 		effect {

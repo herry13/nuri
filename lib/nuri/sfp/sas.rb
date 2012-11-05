@@ -1050,6 +1050,7 @@ raise Exception 'not implemented: normalized_nested_left_right'
 					elsif formula.isconstraint and formula['_type'] == 'iterator'
 						ref = formula['_value']
 						var = '$.' + formula['_variable']
+puts ref + ' : ' + var
 						if @arrays.has_key?(ref)
 							# substitute ARRAY
 							total = @arrays[ref]
@@ -1077,6 +1078,7 @@ raise Exception 'not implemented: normalized_nested_left_right'
 									substitute_template(grounder, formula['_template'], formula)
 								end
 							else
+puts setvalue.inspect + ' -- ' + formula.ref
 								raise Exception, 'Undefined'
 							end
 						end
