@@ -26,11 +26,12 @@ module Nuri
 			def read_config
 				config = {}
 				File.open(ConfigFile) do |f|
-					f.read.split("\n").each { |line|
-						line.chop
-						key, value = line.split('=', 2)
-						config[key] = (value == 'true' ? true : (value == 'false' ? false : value))
-					}
+					#f.read.split("\n").each { |line|
+					#	line.chop
+					#	key, value = line.split('=', 2)
+					#	config[key] = (value == 'true' ? true : (value == 'false' ? false : value))
+					#}
+					config = JSON[ f.read ]
 				end if File.file?(ConfigFile)
 				config
 			end
@@ -38,7 +39,8 @@ module Nuri
 			def write_config(config={})
 				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
 				File.open(ConfigFile, 'w') do |f|
-					config.each { |k,v| f.write(k + '=' + v.to_s + "\n") }
+					#config.each { |k,v| f.write(k + '=' + v.to_s + "\n") }
+					f.write( JSON.pretty_generate(config) )
 				end
 			end
 	

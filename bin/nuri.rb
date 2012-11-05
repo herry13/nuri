@@ -58,6 +58,9 @@ options:
 		result = Nuri::Master.apply
 		puts 'Succeed: ' + result.to_s
 
+	elsif ARGV[1] == 'exec' and ARGV.length >= 3
+		result = Nuri::Master.exec(ARGV[2])
+
 	elsif ARGV[1] == 'update'
 		if ARGV[2] == 'system'
 			Nuri::Master.update_system

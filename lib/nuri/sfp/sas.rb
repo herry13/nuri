@@ -131,14 +131,18 @@ begin
 
 				# re-evaluate set variables and types
 				self.evaluate_set_variables_and_types
+dump_vars
+dump_types
 
+print 'process goal...'
 				### process goal constraint ###
 				process_goal(@root['goal']) if @root.has_key?('goal') and
 						@root['goal'].isconstraint
+puts 'finish'
 
-#puts 'normalize global constraint...'
+print 'normalize global constraint...'
 				self.process_global_constraint
-#puts '...finish'
+puts '...finish'
 
 				### normalize sometime formulae ###
 				if @root.has_key?('sometime')
@@ -146,7 +150,7 @@ begin
 						not normalize_formula(@root['sometime'])
 				end
 
-#puts 'process procedures...'
+print 'process procedures...'
 				### process all procedures
 				@variables.each_value { |var|
 					if var.is_final
@@ -156,15 +160,19 @@ begin
 					end
 				}
 				self.reset_operators_name
-#puts '...finish'
+puts '...finish'
 
+print 'process sometime constraint...'
 				### process sometime modalities ###
 				self.process_sometime if @root.has_key?('sometime')
 				### process sometime-after modalities ###
 				self.process_sometime_after if @root.has_key?('sometime-after')
+puts 'finish'
 
+print 'mutually inclusive operators...'
 				# detect and merge mutually inclusive operators
 				self.search_and_merge_mutually_inclusive_operators
+puts 'finish'
 
 				#self.dump_types
 				#self.dump_operators

@@ -84,6 +84,11 @@ module Nuri
 				plan = planner.solve_sfp_to_sfw(sfp)
 
 puts JSON.pretty_generate(plan)
+				self.exec(plan)
+			end
+
+			def exec(plan)
+				state = get_state
 				# TODO -- execute the plan here
 				succeed = true
 				if plan['workflow'] != nil
@@ -195,6 +200,21 @@ puts '...FAILED'
 		def self.debug_sas
 			master = Nuri::Master::Daemon.new
 			master.debug_sas
+		end
+
+		def self.exec(sfw_file)
+			plan = nil
+			File.open(sfw_file) { |f| plan = JSON[ f.read ] }
+			if plan != nil
+				master = Nuri::Master::Daemon.new
+				if master.exec(plan)
+					puts 'Execution succeed!'
+				else
+					puts 'Execution failed!'
+				end
+			else
+				puts 'Invalid workflow (sfw) file'
+			end
 		end
 
 		def self.update_system
