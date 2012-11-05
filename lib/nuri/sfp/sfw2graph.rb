@@ -4,7 +4,7 @@ require 'rubygems'
 require 'json'
 
 def clean(value)
-	return value[0, value.length-2] if value[0,2] == '$.'
+	return value[2, value.length-2] if value[0,2] == '$.'
 	return value
 end
 
