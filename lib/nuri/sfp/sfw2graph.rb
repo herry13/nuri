@@ -3,11 +3,16 @@
 require 'rubygems'
 require 'json'
 
+def clean(value)
+	return value[0, value.length-2] if value[0,2] == '$.'
+	return value
+end
+
 def get_label(action)
-	label = action["name"] + "("
+	label = clean(action["name"]) + "("
 	if action["parameters"].length > 0
 		action["parameters"].each { |key,value|
-			label += key + "=" + value.to_s + ","
+			label += clean(key) + "=" + clean(value.to_s) + ","
 		}
 		label.chop!
 	end
