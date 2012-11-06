@@ -169,6 +169,7 @@ module Nuri
 	
 					return create_output
 				rescue Exception => e
+puts e.backtrace
 					Nuri::Util.log e.to_s
 				end
 			end
@@ -1326,7 +1327,7 @@ module Nuri
 							if type != nil
 								@bucket["(#{type})"] << value
 							elsif val.is_a?(Hash) and val.isobject
-								val['_classes'].each { |c| @bucket["(#{c})"] << value }
+								val['_classes'].each { |c| @bucket["(#{c})"] << value if @bucket.has_key?("(#{c})") }
 							end
 						end
 					end

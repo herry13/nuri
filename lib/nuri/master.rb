@@ -83,7 +83,7 @@ module Nuri
 				planner = Nuri::Planner::Solver.new
 				plan = planner.solve_sfp_to_sfw(sfp)
 
-puts JSON.pretty_generate(plan)
+				puts JSON.pretty_generate(plan)
 				self.exec(plan)
 			end
 
