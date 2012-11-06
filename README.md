@@ -97,7 +97,7 @@ SFp Language
 - non-primitive type: any user-defined Class
 - abstract data-structure: Array (1-dimension), and Set
 - example of configuration task:
-	https://github.com/herry13/nuri/tree/master/test/planning/*.sfp
+	https://github.com/herry13/nuri/tree/master/test/planning/
 
 **Class**
 - could have one or more attributes with a primitive/non-primitive type
