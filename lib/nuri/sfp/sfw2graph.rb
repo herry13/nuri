@@ -27,7 +27,7 @@ def partial2dot(json)
 	dot += "final_state [label=\"\", shape=doublecircle, style=filled, fillcolor=black, fixedsize=true, width=0.35];\n"
 	last_actions = Hash.new
 	json["workflow"].each { |action|
-		dot += action["id"].to_s + '[label="' + get_label(action) + '", shape=rect]' + ";\n"
+		dot += action["id"].to_s + '[label="' + get_label(action) + '", shape=rect, style=filled, fillcolor=blue]' + ";\n"
 		last_actions[action["id"].to_s] = action
 	}
 
