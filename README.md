@@ -101,7 +101,7 @@ SFp Language
 
 **Class**
 - could have one or more attributes with a primitive/non-primitive type
-- could have one or more procedures to make changes on the attributes
+- could have one or more procedures to make changes the value of the attributes
 
 **Procedure**
 - support cost-value
@@ -110,10 +110,10 @@ SFp Language
 		x = y
 		x is y
 
-- support the *conditions* statements as specified in *constraints* section.
+- support the *condition* statements as specified in *constraint* section.
 
-**Constraints**
-The user could define the following constraints in the procedure's **conditions**, **goal** constraints, and **global** constraints:
+**Constraint**
+The user could define the following constraints in the procedure's **condition**, **goal**, and **global** constraints:
 
 	// equality
 	x = y
