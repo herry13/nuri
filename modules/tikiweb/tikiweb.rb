@@ -8,6 +8,7 @@ module Nuri
 
 			ConfigDir = '/var/lib/tikiweb'
 			ConfigFile = '/var/lib/tikiweb/config'
+			DownloadURL = 'http://sourceforge.net/projects/tikiwiki/files/Tiki_9.x_Herbig_Haro/9.2/tiki-9.2.tar.gz'
 
 			def initialize
 				self.register('Tikiweb', 'tikiweb')
@@ -63,7 +64,7 @@ module Nuri
 				system('mkdir -p ' + tiki_dir) if not File.directory?(tiki_dir)
 				return false if not File.directory?(tiki_dir)
 				if not File.file?(tiki_dir + '/index.php')
-					cmd = 'cd ' + tiki_dir + ';/usr/bin/wget http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz 2>/dev/null 1>/dev/null'
+					cmd = 'cd ' + tiki_dir + ';/usr/bin/wget ' + DownloadURL
 					return false if ( system(cmd) != true )
 					cmd = 'cd ' + tiki_dir + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
 					return false if ( system(cmd) != true )
