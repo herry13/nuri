@@ -1,6 +1,0 @@
-class Cloud {
-	name is ""
-	pms is ()
-	vms is ()
-	private is true
-}

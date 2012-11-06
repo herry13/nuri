@@ -63,7 +63,7 @@ module Nuri
 					@parser.parse_file(file)
 					return solve_sas(@parser.to_sas)
 				rescue Exception => e
-					$stderr.puts e.to_s
+					Nuri::Util.log e.to_s
 					return nil
 				end
 			end
@@ -86,8 +86,6 @@ module Nuri
 
 			def solve_sas(sas)
 				return nil if sas == nil
-
-print 'solving sas...'
 
 				os = `uname -s`.downcase.strip
 				planner = case os
@@ -117,8 +115,7 @@ print 'solving sas...'
 					end
 
 					command = case os
-						#when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file} 1> /dev/null 2> /dev/null"
-						when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file}"
+						when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file} 1> /dev/null 2> /dev/null"
 						when 'macos', 'darwin' then "cd #{tmp_dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; #{planner}/downward #{params} --plan-file #{plan_file} < #{tmp_dir}/output 1> /dev/null;"
 						else nil
 					end
@@ -140,8 +137,6 @@ print 'solving sas...'
 						end
 						plan = tmp
 					end
-
-puts 'finish'
 
 					return plan
 				rescue Exception => exp

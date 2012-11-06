@@ -1,3 +1,0 @@
-include "Service.sfp"
-
-class Ganglia extends Service

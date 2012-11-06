@@ -1,7 +1,0 @@
-class Account {
-	username is ""
-	password is ""
-	home is "/home"
-	fullname is ""
-	group is ""
-}

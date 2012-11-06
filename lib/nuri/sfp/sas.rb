@@ -50,139 +50,127 @@ module Nuri
 			attr_accessor :root, :variables, :types, :operators, :axioms
 
 			def to_sas
-begin
-				@arrays = Hash.new
-
-				if @parser_arrays != nil
-					@parser_arrays.each do |k,v|
-						first, rest = k.explode[1].explode
-						next if rest == nil
-						@arrays['$.' + rest.to_s] = v
+				begin
+					@arrays = Hash.new
+	
+					if @parser_arrays != nil
+						@parser_arrays.each do |k,v|
+							first, rest = k.explode[1].explode
+							next if rest == nil
+							@arrays['$.' + rest.to_s] = v
+						end
 					end
-				end
-
-				return nil if @root == nil
-				return nil if not @root.has_key?('initial') or not @root.has_key?('goal')
-
-				@variables = Hash.new
-				@types = { '$.Boolean' => [true, false],
-					'$.Integer' => Array.new,
-					'$.String' => Array.new
-				}
-				@operators = Hash.new
-				@axioms = Array.new
-
-				@g_operators = []
-
-				# collect classes
-				#self.collect_classes
-			
-				# unlink 'initial', 'goal', 'global' with root
-				@root['initial'].delete('_parent')
-				@root['goal'].delete('_parent')
-				if @root['goal'].has_key?('always')
-					@root['global'] = @root['goal']['always']
-					@root['goal'].delete('always')
-					@root['global']['_self'] = 'global'
-					@root['global']['_type'] = 'and'
-				end
-				@root['global'].delete('_parent') if @root.has_key?('global')
-
-				if @root['goal'].has_key?('sometime')
-					@root['sometime'] = @root['goal']['sometime']
-					@root['goal'].delete('sometime')
-					@root['sometime']['_type'] = 'or'
-					@root['sometime'].delete('_parent')
-				end
-
-				if @root['goal'].has_key?('sometime-after')
-					@root['sometime-after'] = @root['goal']['sometime-after']
-					@root['goal'].delete('sometime')
-					@root['sometime-after'].delete('_parent')
-				end
-
-				@root['initial'].accept(ReferenceModifier.new)
-				@root['goal'].accept(ReferenceModifier.new) if @root.has_key?('goal')
-				@root['global'].accept(ReferenceModifier.new) if @root.has_key?('global')
-				#@root['sometime'].accept(ReferenceModifier.new)
-				#@root['sometime-after'].accept(ReferenceModifier.new)
-
-				### collect variables ###
-				@root['initial'].accept(VariableCollector.new(self))
-
-				### collect values ###
-				# collect values from goal constraint
-				value_collector = Nuri::Sfp::ValueCollector.new(self)
-				@root['goal'].accept(value_collector) if @root.has_key?('goal') and
-						@root['goal'].isconstraint
-				# collect values from global constraint
-				@root['global'].accept(value_collector) if @root.has_key?('global') and
-						@root['global'].isconstraint
-				# collect values from sometime constraint
-				@root['sometime'].accept(value_collector) if @root.has_key?('sometime')
-
-				# remove duplicates from type's set of value
-				@types.each_value { |type| type.uniq! }
-				# set domain values for each variable
-				self.set_variable_values
-
-				# identify immutable variables
-				self.identify_immutable_variables
-
-				# re-evaluate set variables and types
-				self.evaluate_set_variables_and_types
-dump_vars
-dump_types
-
-print 'process goal...'
-				### process goal constraint ###
-				process_goal(@root['goal']) if @root.has_key?('goal') and
-						@root['goal'].isconstraint
-puts 'finish'
-
-print 'normalize global constraint...'
-				self.process_global_constraint
-puts '...finish'
-
-				### normalize sometime formulae ###
-				if @root.has_key?('sometime')
-					raise Exception, 'Invalid sometime constraint' if
-						not normalize_formula(@root['sometime'])
-				end
-
-print 'process procedures...'
-				### process all procedures
-				@variables.each_value { |var|
-					if var.is_final
-						var.init.each { |k,v|
-							process_procedure(v, var.init) if v.is_a?(Hash) and v.isprocedure
-						}
+	
+					return nil if @root == nil
+					return nil if not @root.has_key?('initial') or not @root.has_key?('goal')
+	
+					@variables = Hash.new
+					@types = { '$.Boolean' => [true, false],
+						'$.Integer' => Array.new,
+						'$.String' => Array.new
+					}
+					@operators = Hash.new
+					@axioms = Array.new
+	
+					@g_operators = []
+	
+					# collect classes
+					#self.collect_classes
+				
+					# unlink 'initial', 'goal', 'global' with root
+					@root['initial'].delete('_parent')
+					@root['goal'].delete('_parent')
+					if @root['goal'].has_key?('always')
+						@root['global'] = @root['goal']['always']
+						@root['goal'].delete('always')
+						@root['global']['_self'] = 'global'
+						@root['global']['_type'] = 'and'
 					end
-				}
-				self.reset_operators_name
-puts '...finish'
-
-print 'process sometime constraint...'
-				### process sometime modalities ###
-				self.process_sometime if @root.has_key?('sometime')
-				### process sometime-after modalities ###
-				self.process_sometime_after if @root.has_key?('sometime-after')
-puts 'finish'
-
-print 'mutually inclusive operators...'
-				# detect and merge mutually inclusive operators
-				self.search_and_merge_mutually_inclusive_operators
-puts 'finish'
-
-				#self.dump_types
-				#self.dump_operators
-				#self.dump_vars
-
-				return create_output
-rescue Exception => e
-	$stderr.puts e.backtrace
-	$stderr.puts e
-end
+					@root['global'].delete('_parent') if @root.has_key?('global')
+	
+					if @root['goal'].has_key?('sometime')
+						@root['sometime'] = @root['goal']['sometime']
+						@root['goal'].delete('sometime')
+						@root['sometime']['_type'] = 'or'
+						@root['sometime'].delete('_parent')
+					end
+	
+					if @root['goal'].has_key?('sometime-after')
+						@root['sometime-after'] = @root['goal']['sometime-after']
+						@root['goal'].delete('sometime')
+						@root['sometime-after'].delete('_parent')
+					end
+	
+					@root['initial'].accept(ReferenceModifier.new)
+					@root['goal'].accept(ReferenceModifier.new) if @root.has_key?('goal')
+					@root['global'].accept(ReferenceModifier.new) if @root.has_key?('global')
+					#@root['sometime'].accept(ReferenceModifier.new)
+					#@root['sometime-after'].accept(ReferenceModifier.new)
+	
+					### collect variables ###
+					@root['initial'].accept(VariableCollector.new(self))
+	
+					### collect values ###
+					# collect values from goal constraint
+					value_collector = Nuri::Sfp::ValueCollector.new(self)
+					@root['goal'].accept(value_collector) if @root.has_key?('goal') and
+							@root['goal'].isconstraint
+					# collect values from global constraint
+					@root['global'].accept(value_collector) if @root.has_key?('global') and
+							@root['global'].isconstraint
+					# collect values from sometime constraint
+					@root['sometime'].accept(value_collector) if @root.has_key?('sometime')
+	
+					# remove duplicates from type's set of value
+					@types.each_value { |type| type.uniq! }
+					# set domain values for each variable
+					self.set_variable_values
+	
+					# identify immutable variables
+					self.identify_immutable_variables
+	
+					# re-evaluate set variables and types
+					self.evaluate_set_variables_and_types
+	
+					### process goal constraint ###
+					process_goal(@root['goal']) if @root.has_key?('goal') and
+							@root['goal'].isconstraint
+	
+					### process global constrait
+					self.process_global_constraint
+	
+					### normalize sometime formulae ###
+					if @root.has_key?('sometime')
+						raise Exception, 'Invalid sometime constraint' if
+							not normalize_formula(@root['sometime'])
+					end
+	
+					### process all procedures
+					@variables.each_value { |var|
+						if var.is_final
+							var.init.each { |k,v|
+								process_procedure(v, var.init) if v.is_a?(Hash) and v.isprocedure
+							}
+						end
+					}
+					self.reset_operators_name
+	
+					### process sometime modalities ###
+					self.process_sometime if @root.has_key?('sometime')
+					### process sometime-after modalities ###
+					self.process_sometime_after if @root.has_key?('sometime-after')
+	
+					# detect and merge mutually inclusive operators
+					self.search_and_merge_mutually_inclusive_operators
+	
+					#self.dump_types
+					#self.dump_operators
+					#self.dump_vars
+	
+					return create_output
+				rescue Exception => e
+					Nuri::Util.log e.to_s
+				end
 			end
 
 			def search_and_merge_mutually_inclusive_operators
@@ -342,7 +330,6 @@ end
 						value = @root['initial'].at?(value) if value.is_a?(String) and value.isref
 						var.goal = value
 						if not var.immutable
-							#puts var.name + ' -- ' + value.class.name + ' := ' + orig
 							var.init = var.goal
 							var.clear
 							var << var.init
@@ -363,12 +350,6 @@ end
 						map = and_equals_constraint_to_map(g)
 						map.each { |k1,v1|
 							var = @variables[k1]
-							#if not var.immutable
-							#	puts var.name + ' --- ' + v1.to_s
-							#	var.init = v1
-							#	var.clear
-							#	var << var.init
-							#end
 							op[@variables[k1].name] = Parameter.new(@variables[k1], v1, nil)
 						}
 						@operators[op.name] = op
@@ -806,7 +787,9 @@ end
 
 				def normalize_nested_right_values(left, right, formula)
 					# TODO
-#puts 'nested right: ' + left + ' = ' + right['_value']
+					#puts 'nested right: ' + left + ' = ' + right['_value']
+
+					raise Exception 'not implemented: normalized_nested_right'
 				end
 
 				def normalize_nested_right_only(left, right, formula)
@@ -822,15 +805,13 @@ end
 
 				def normalize_nested_left_right(left, right, formula)
 					# TODO
-#puts 'nested left-right'
+					#puts 'nested left-right'
 					#names, rest = break_nested_reference(left)
 					#bucket1 = Array.new
 					#last_names1 = Array.new
 					#ref_combinator(bucket1, rest, names, nil, last_names1)
-puts left.inspect + ' -- ' + @variables.has_key?(left).inspect
-puts right['_value'] + ' -- ' + @variables.has_key?(right['_value']).inspect
 
-raise Exception 'not implemented: normalized_nested_left_right'
+					raise Exception 'not implemented: normalized_nested_left_right'
 				end
 
 				def normalize_nested_left_only(left, right, formula)
@@ -1058,7 +1039,6 @@ raise Exception 'not implemented: normalized_nested_left_right'
 					elsif formula.isconstraint and formula['_type'] == 'iterator'
 						ref = formula['_value']
 						var = '$.' + formula['_variable']
-puts ref + ' : ' + var
 						if @arrays.has_key?(ref)
 							# substitute ARRAY
 							total = @arrays[ref]
@@ -1086,7 +1066,7 @@ puts ref + ' : ' + var
 									substitute_template(grounder, formula['_template'], formula)
 								end
 							else
-puts setvalue.inspect + ' -- ' + formula.ref
+								#puts setvalue.inspect + ' -- ' + formula.ref
 								raise Exception, 'Undefined'
 							end
 						end
@@ -1117,7 +1097,7 @@ puts setvalue.inspect + ' -- ' + formula.ref
 					end
 				end
 
-### testing methods
+				### testing/debugging methods
 				def calculate_depth(formula, depth)
 					formula.each { |k,v|
 						next if k[0,1] == '_'
@@ -1135,7 +1115,6 @@ puts setvalue.inspect + ' -- ' + formula.ref
 						elsif v['_type'] == 'and'
 							total_and += 1
 						else
-#puts v.inspect if v['_type'] == 'equals'
 						end
 						total, total_or, total_and = total_element(v, total+1, total_or, total_and)
 					}
@@ -1151,7 +1130,6 @@ puts setvalue.inspect + ' -- ' + formula.ref
 							if v['_type'] == 'equals'
 								# bad branch
 								if map.has_key?(k) and map[k] != v['_value']
-#puts 'bad branch'
 									return
 								end
 								map[k] = v['_value']
@@ -1162,8 +1140,6 @@ puts setvalue.inspect + ' -- ' + formula.ref
 
 						if is_end
 							# map is valid conjunction
-#puts '--- is end #1'
-#puts map.inspect
 						else
 							formula.each do |k,v|
 								next if k[0,1] == '_'
@@ -1171,7 +1147,6 @@ puts setvalue.inspect + ' -- ' + formula.ref
 									return visit_and_or_graph(v, map, total)
 								end
 							end
-#puts 'not end'
 						end
 
 					elsif formula['_type'] == 'or'
@@ -1180,13 +1155,10 @@ puts setvalue.inspect + ' -- ' + formula.ref
 							if v['_type'] == 'equals'
 								# bad branch
 								if map.has_key?(k) and map[k] != v['_value']
-#puts 'bad branch'
 								end
 								final_map = map.clone
 								final_map[k] = v['_value']
 								# map is valid conjunction
-#puts '--- is end #2'
-#puts final_map.inspect
 							elsif v['_type'] == 'and' or v['_type'] == 'or'
 								visit_and_or_graph(v, map, total)
 							end
@@ -1195,7 +1167,7 @@ puts setvalue.inspect + ' -- ' + formula.ref
 					end
 					total
 				end
-### end of testing methods
+				### end of testing/debugging methods
 
 				remove_not_and_iterator_constraint(formula)
 				to_and_or_graph(formula)
@@ -1205,51 +1177,6 @@ puts setvalue.inspect + ' -- ' + formula.ref
 			end
 
 		end
-
-=begin
-		class Node
-			def self.generate(constraint)
-				case constraint['_type']
-				when 'equals'
-					NodeEquals.new(constraint['_self'], constraint['_value'])
-				when 'not-equals'
-					NodeNotEquals.new(constraint['_self'], constraint['_value'])
-				when 'or'
-				when 'and'
-				end
-			end
-		end
-
-		class NodeEquals < Node
-			attr_accessor :var, :value
-			def initialize(var, value)
-				@var = var
-				@value = value
-			end
-		end
-
-		class NodeNotEquals < Node
-			attr_accessor :var, :value
-			def initialize(var, value)
-				@var = var
-				@value = value
-			end
-		end
-
-		class NodeOr < Node
-			attr_accessor :children
-			def initialize
-				@children = []
-			end
-		end
-
-		class NodeAnd < Node
-			attr_accessor :children
-			def initialize
-				@children = []
-			end
-		end
-=end
 
 		class VariableNotFoundException < Exception
 		end
@@ -1307,7 +1234,6 @@ puts setvalue.inspect + ' -- ' + formula.ref
 				value = @init.at?(value) if isref
 				type = (isfinal ? self.isa?(value) : self.get_type(name, value, parent))
 				if type == nil
-					puts "Unrecognized type of variable: #{var_name} #{isfinal}" #+ " : " + isref.to_s + " -- " + value.inspect.to_s + ' -- ' + value['_isa'].to_s
 					Nuri::Util.log "Unrecognized type of variable: " + var_name
 				else
 					value = null_value(type) if value == nil
@@ -1342,7 +1268,6 @@ puts setvalue.inspect + ' -- ' + formula.ref
 
 				return nil if type == nil
 
-				#return type if type == '$.Boolean' or type == '$.Integer' or type == '$.String'
 				return type if type.is_a?(String) and type.isref
 
 				parent_class = @root.at?( @vars[parent.ref].type )
@@ -1361,7 +1286,7 @@ puts setvalue.inspect + ' -- ' + formula.ref
 				return '$.Boolean' if value.is_a?(TrueClass) or value.is_a?(FalseClass)
 				return '$.Integer' if value.is_a?(Numeric)
 				return '$.String' if value.is_a?(String) and not value.isref
-				return value['_isa'] if value.is_a?(Hash) and value.isobject #has_key?('_isa')
+				return value['_isa'] if value.is_a?(Hash) and value.isobject
 				return nil
 			end
 
@@ -1387,7 +1312,7 @@ puts setvalue.inspect + ' -- ' + formula.ref
 					if value.isobject
 						value['_classes'].each { |c| @bucket[c] << value }
 					elsif value.isset
-						puts 'not implemented -- set: ' + value['_isa']
+						raise Exception 'not implemented -- set: ' + value['_isa']
 					end
 				elsif value.is_a?(Array)
 					if value.length > 0

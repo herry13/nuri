@@ -3,6 +3,7 @@ Nuri
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/
 - last update: 16-09-2012
+- version: 0.1 (beta)
  
 Nuri is a dynamic workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
@@ -22,48 +23,16 @@ To Install
 
 Requirements
 ------------
-These are requirements for running a **Nuri Client** service on managed node:
-- Ubuntu
-	- required packages
-		- ruby (>= 1.8.7)
-		- rubygems
-		- libz-dev
-		- libaugeas-ruby
-	- required Ruby Gems
-		- mongrel
-		- json
-		- antlr3
-- Scientific Linux
-	- required packages
-		- ruby (>= 1.8.7)
-		- ruby-devel
-		- rubygems
-		- zlib-devel
-		- augeas-devel
-	- required Ruby Gems
-		- mongrel
-		- json
-		- antlr3
-		- ruby-augeas
-
-These are requirements for running a **Nuri Master** on master node:
-- Ubuntu
-	- required packages
-		- ruby (>= 1.8.7)
-		- rubygems
-		- libz-dev
-	- required Ruby Gems
-		- json
-		- antlr3
-- Scientific Linux
-	- required packages
-		- ruby (>= 1.8.7)
-		- ruby-devel
-		- rubygems
-		- zlib-devel
-	- required Ruby Gems
-		- json
-		- antlr3
+- Linux Ubuntu 12.04
+- required packages
+	- ruby (>= 1.8.7)
+	- rubygems
+	- libz-dev
+	- libaugeas-ruby
+- required Ruby Gems
+	- mongrel
+	- json
+	- antlr3
 
 Running Nuri client on managed node
 -----------------------------------
@@ -77,35 +46,39 @@ Running Nuri client on managed node
 Controlling Nuri clients from master node
 -----------------------------------------
 1. Create main specification file *etc/main.sfp*. The following example specifies configuration of two client nodes i.e.
-   *hpvm11* and *hpvm12* where both runs apache service.
+   *host1* and *host2* where both runs apache service.
 
 		system {
-		  hpvm11 isa Node {
-		    domainname is "hpvm11.diy.inf.ed.ac.uk"
+		  host1 isa Node {
+		    domainname is "host1.domain.com"
 		  }
 		  hpvm12 isa Node {
-		    domainname is "hpvm11.diy.inf.ed.ac.uk"
+		    domainname is "host2.domain.com"
 		  }
 		}
 
 		goal constraint {
-		  // apache on 'hpvm11' is running
-		  hpvm11.apache.running is true
-		  // apache on 'hpvm12' is running
-		  hpvm12.apache.running is true
+		  // apache on 'host1' is running
+		  host1.apache.running is true
+
+		  // mysql on 'host2' is running
+		  host2.mysql.running is true
 		}
 		
 		global constraint {  // no global constraint
 		}
 
-2. Get current state of all nodes:
+2. Get current state of all nodes from master node:
 
-		$ ./bin/nuri.rb -c pull
+		$ bin/nuri.rb -c pull
 
-3. Applying the goal & global constraints specified in *etc/main.sfp* on *hpvm11* and *hpvm12*
-   by generating and executing a workflow
+3. Generate a workflow to implement the desired state
 
-		$ ./bin/nuri.rb -c apply
+		$ bin/nuri.rb -c plan
+
+4. Applying the goal & global constraints specified in *etc/main.sfp* on master node onto client nodes i.e. *host1* and *host2* by generating and executing a workflow
+
+		$ bin/nuri.rb -c apply
 
 Documentation
 -------------
@@ -120,15 +93,15 @@ To build:
 
 SFp Language
 ------------
-- primitive types: Boolean, String, Number
+- primitive types: Boolean, String, Integer
 - non-primitive type: any user-defined Class
-- abstract data-structure: Array (1-dimension)
+- abstract data-structure: Array (1-dimension), and Set
 - example of configuration task:
-	https://github.com/herry13/nuri/tree/master/test/planning
+	https://github.com/herry13/nuri/tree/master/test/planning/*.sfp
 
 **Class**
 - could have one or more attributes with a primitive/non-primitive type
-- could have one or more procedures
+- could have one or more procedures to make changes on the attributes
 
 **Procedure**
 - support cost-value
@@ -137,8 +110,7 @@ SFp Language
 		x = y
 		x is y
 
-- support the following *conditions* statements: *see constraints*.
-
+- support the *conditions* statements as specified in *constraints* section.
 
 **Constraints**
 The user could define the following constraints in the procedure's **conditions**, **goal** constraints, and **global** constraints:
@@ -148,80 +120,67 @@ The user could define the following constraints in the procedure's **conditions*
 	x is y
 	x = null
 	x is null
+
 	// inequality
 	x != y
 	x isnt y
 	x != null
 	x isnt null
+
 	// conditional
 	if x1 = y1 then x2 = y2
 	if x1 != y2 then x2 != y2
+
 	// membership
 	x is in (y1, y2, y3)
 	x isnt in (y1, y2, y3)
+
 	// array enumeration
 	foreach (my_array as x) {
 		x.attribute = y
 	}
+
+	// set enumeration
+	foreach (my_set as x) {
+		x.attribute = y
+	}
+
 	// class quantification
-	forall (ClassName as x) {  // apply for all objects of ClassName
-		x.attribute = y
-	}
-	exist (ClassName as x) {  // apply for minimal one object of ClassName
-		x.attribute = y
-	}
-	forsome (ClassName as x) >= 2 {  // apply for minimal 2 objects of ClassName
+	forall (MyClass as x) {  // apply for all objects of MyClass
 		x.attribute = y
 	}
 
 
-**Trajectory Constraints**
-- goal
+License
+-------
 
-		goal {
-		   fw.port80.opened = false
-		}
+BSD LICENSE
 
-- always (global)
+Copyright (c) 2012, Herry
+All rights reserved.
 
-		:always {
-		   fw.port80.opened = false
-		}
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met: 
 
-- sometime
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer. 
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution. 
 
-		:sometime {
-		   a.restarted = true
-		}
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-- within (deadline)
+The views and conclusions contained in the software and documentation are those
+of the authors and should not be interpreted as representing official policies, 
+either expressed or implied, of the FreeBSD Project.
 
-		:within 3 {
-		   fw.port80.opened = false
-		}
-
-- sometime-after
-
-		:after {
-		   a.port != fw.port80
-		} then {
-		   fw.port80.opened = false
-		}
-
-- sometime-before
-
-		:before {
-		   a.port = fw.port80
-		} then {
-		   fw.port80.opened = true
-		}
-
-- always-within (conditional deadline)
-
-		:after {
-		   a.port != fw.port80
-		} within 1 {
-		   fw.port80.opened = false
-		}
-
-
+The solver is an open-source software with GPL License from http://fast-downward.org
