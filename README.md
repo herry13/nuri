@@ -5,7 +5,7 @@ Nuri
 - last update: 16-09-2012
 - version: 0.1 (beta)
  
-Nuri is a dynamic workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
+Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
 Most parts of Nuri is written in Ruby except the solver which is written in C++.
 
