@@ -91,7 +91,7 @@ module Nuri
 				Nuri::Util.set_system_information(data['system'])
 
 				params = clean_parameters(cmd['parameters'])
-puts "exec: " + cmd['name'] + ": " + params.inspect
+puts "exec: " + cmd['name'] + ": " + params.inspect + '...'
 				comp_name, cmd_name = cmd['name'].pop_ref
 				component = @daemon.root.get(comp_name)
 				success = false
@@ -104,9 +104,9 @@ puts "exec: " + cmd['name'] + ": " + params.inspect
 						end
 						
 						component.get_self_state if success
-puts "success: " + success.inspect
+puts "...OK"
 					rescue Exception => e
-puts e.backtrace
+puts "..Failed"
 						Nuri::Util.log 'Cannot execute procedure: ' + json
 						@response.start(500) { |head,out| out.write('') }
 					end
@@ -116,10 +116,8 @@ puts e.backtrace
 				end
 
 				if success
-puts 'send code 200'
 					@response.start(200) { |head,out| out.write('') }
 				else
-puts 'send code 500'
 					@response.start(500) { |head,out| out.write('') }
 				end
 				return success
