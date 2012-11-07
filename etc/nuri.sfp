@@ -3,10 +3,9 @@ nuri {
 	port is 9090
 
 	secure is no
-	ssl_cert is "cert.pem"
-	ssl_key is "key.pem"
+	private_key is "public.pem"
+	public_key is "private.pem"
 
 	as_master is no
-	
-	//bsig is yes
+	master is ("nena.inf.ed.ac.uk", "localhost")
 }

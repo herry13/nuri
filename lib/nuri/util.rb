@@ -20,10 +20,13 @@ module Nuri
 			return @@system
 		end
 
+		def self.warn(msg=nil)
+			@@logger.warn msg if msg != nil
+			return @@logger
+		end
+
 		def self.log(msg=nil)
-			if msg != nil
-				@@logger.info msg
-			end
+			@@logger.info msg if msg != nil
 			return @@logger
 		end
 
@@ -51,8 +54,9 @@ module Nuri
 				nil, Socket::AI_CANONNAME)[0][2].split('.')[0]
 		end
 
-		def self.domainname
-			result = `nslookup #{self.local_ip}`
+		def self.domainname(ip=nil)
+			ip = self.local_ip if ip == nil
+			result = `nslookup #{ip}`
 			result = result.split("\n")
 			if result.length < 4
 				return Socket.gethostbyname(Socket.gethostname).first

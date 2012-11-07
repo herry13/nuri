@@ -1,11 +1,15 @@
 require 'mongrel'
+require 'base64'
 
 module Nuri
 	module Client
 		class Daemon < Mongrel::HttpHandler
 			include Nuri::Config
 
+			attr_accessor :master_keys
+
 			def initialize
+				@master_keys = {}
 				self.load
 			end
 
@@ -29,13 +33,29 @@ module Nuri
 				end
 			end
 
+			def valid_master(req)
+				return false if not @config.has_key?('master')
+				requester = Nuri::Util.domainname(req.params['REMOTE_ADDR'])
+				return ( @config['master'] == requester ) if not @config['master'].is_a?(Array)
+				@config['master'].each { |m| return true if m == requester }
+				false
+			end
+
 			def process(req, res)
-				Nuri::Client::Agent.new(self, req, res).serve
+				if not self.valid_master(req)
+					Nuri::Util.warn "An invalid master #{req.params['REMOTE_ADDR']}."
+				else
+					Nuri::Client::Agent.new(self, req, res).serve
+				end
 			end
 			
 			def get_state(path=nil)
 				path.gsub!(/\//, '.') if path != nil
 				return @root.get_state(path)
+			end
+
+			def get_public_key
+				return Nuri::SSL.get_public_key
 			end
 		end
 
@@ -55,11 +75,17 @@ module Nuri
 				if @request.params['REQUEST_METHOD'] == 'GET'
 					if check_uri(@request.params['REQUEST_URI'], 'state')
 						self.http_get_state(@request.params['REQUEST_URI'])
+					elsif @request.params['REQUEST_URI'] == '/status/secure'
+						self.secure_connection
+					elsif @request.params['REQUEST_URI'] == '/status/public_key'
+						self.get_public_key
 					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'POST'
 					if check_uri(@request.params['REQUEST_URI'], 'system')
-						self.process_system_information(@request.body.read.to_s)
+						self.process_system_information
+					elsif @request.params['REQUEST_URI'] == '/status/master'
+						self.receive_master_key
 					end
 
 				elsif @request.params['REQUEST_METHOD'] == 'PUT'
@@ -70,7 +96,37 @@ module Nuri
 				end
 			end
 
-			def process_system_information(data)
+			def receive_master_key
+				requester = Nuri::Util.domainname(@request.params['REMOTE_ADDR'])
+				data = JSON[@request.body.read]
+				key = Nuri::SSL.get_private_key
+				pass_phrase = key.private_decrypt( Base64.decode64(data['data1']) )
+				salt = key.private_decrypt( Base64.decode64(data['data2']) )
+				decrypter = OpenSSL::Cipher::Cipher.new 'AES-128-CBC'
+				decrypter.decrypt
+				decrypter.pkcs5_keyivgen pass_phrase, salt
+				master_key = decrypter.update Base64.decode64(data['data3'])
+				master_key << decrypter.final
+				@daemon.master_keys[requester] = master_key
+				@response.start(200) { |head,out| out.write('') }
+			end
+
+			def get_public_key
+				pub_key = @daemon.get_public_key
+				@response.start(200) { |head,out| out.write(pub_key.to_pem) }
+			end
+
+			def secure_connection
+				requester = Nuri::Util.domainname(@request.params['REMOTE_ADDR'])
+				if @daemon.master_keys.has_key?(requester)
+					@response.start(200) { |head,out| out.write('') }
+				else
+					@response.start(404) { |head,out| out.write('') }
+				end
+			end
+
+			def process_system_information
+				data = @request.body.read.to_s
 				system = JSON[data]
 				Nuri::Util.set_system_information(system)
 				@response.start(200) { |head,out| out.write('') }
@@ -141,11 +197,23 @@ puts "..Failed"
 					end
 				end
 			end
+
+			
+
 		end
 
+
+		@@daemon = nil
+
 		def self.start
-			daemon = Nuri::Client::Daemon.new
-			daemon.start
+			if @@daemon == nil
+				@@daemon = Nuri::Client::Daemon.new
+				@@daemon.start
+			end
+		end
+
+		def self.stop
+			@@daemon.stop if @@daemon != nil
 		end
 
 	end

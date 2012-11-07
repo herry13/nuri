@@ -1,4 +1,5 @@
 require 'net/http'
+require 'base64'
 
 module Nuri
 	module Master
@@ -58,8 +59,62 @@ module Nuri
 				end
 				current_state
 			end
+
+			def challenge_child(address)
+				begin
+					url = URI.parse("http://#{address}:#{Nuri::Port}/status/secure")
+					req = Net::HTTP::Get.new(url.path)
+					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
+					return true if res.code == '200'
+					if res.code == '404'
+						return self.send_public_key_to_child(address)
+					end
+				rescue Exception => e
+					Nuri::Util.log "Cannot challenge node #{address}: " + e.to_s
+				end
+				false
+			end
+
+			def get_child_public_key(address)
+				url = URI.parse("http://#{address}:#{Nuri::Port}/status/public_key")
+				req = Net::HTTP::Get.new(url.path)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
+				return nil if res.code != '200'
+				return res.body
+			end
 	
+			def send_public_key_to_child(address)
+				data = self.get_child_public_key(address)
+				return false if data == nil
+
+				child_pub_key = OpenSSL::PKey::RSA.new data
+				key = Nuri::SSL.public_key_to_s
+				pass_phrase = Nuri::SSL.random_string
+				salt = Nuri::SSL.random_string[0,8]
+				encrypter = OpenSSL::Cipher::Cipher.new 'AES-128-CBC'
+				encrypter.encrypt
+				encrypter.pkcs5_keyivgen pass_phrase, salt
+				encrypted = encrypter.update key
+				encrypted << encrypter.final
+
+				data = {
+					'data1' => Base64.encode64(child_pub_key.public_encrypt(pass_phrase)),
+					'data2' => Base64.encode64(child_pub_key.public_encrypt(salt)),
+					'data3' => Base64.encode64(encrypted)
+				}
+				data = JSON.generate(data)
+
+				url = URI.parse("http://#{address}:#{Nuri::Port}/status/master")
+				req = Net::HTTP::Post.new(url.path)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
+				return true if res.code == '200'
+
+				false
+			end
+
 			def get_child_state(address)
+				return nil if not self.challenge_child(address)
+
 				begin
 					url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state')
 					req = Net::HTTP::Get.new(url.path)
@@ -220,5 +275,8 @@ puts 'FAILED'
 			master = Nuri::Master::Daemon.new
 			master.update_system
 		end
+
+		
+
 	end
 end

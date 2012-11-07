@@ -10,6 +10,7 @@ require 'nuri/resource'
 require 'nuri/undefined'
 require 'nuri/sfp/main'
 require 'nuri/planner/main'
+require 'nuri/ssl'
 # Nuri modules
 require 'modules/machine/machine'
 
@@ -21,8 +22,16 @@ module Nuri
 
 		def load(client=true)
 			self.read_config
+			self.init_secure_connection
 			Nuri::Resource.set_root(self.get_main)
 			self.load_modules if client
+		end
+
+		def init_secure_connection
+			priv_key_file = Nuri::Util.home_dir + '/etc/' + @config['private_key']
+			raise Exception, 'Private key is not available: ' + priv_key_file if
+					not File.exists?(priv_key_file)
+			Nuri::SSL.get_private_key(priv_key_file)
 		end
 
 		def set_system_information(system)
@@ -59,6 +68,7 @@ module Nuri
 				cfile = '/etc/nuri/nuri.sfp'
 				cfile = Nuri::Util.home_dir + "/etc/nuri.sfp" if not File.file?(cfile)
 				@config = Nuri::Sfp::Parser.file_to_sfp(cfile)['nuri']
+
 				Nuri::Util.log 'Successfully load configuration file ' + cfile
 			rescue Exception => exp
 				Nuri::Util.log.error "Cannot load configuration file " + cfile + ' -- ' + exp.to_s

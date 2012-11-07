@@ -17,6 +17,8 @@ options:
   plan                 generate a workflow to achieve the goal state
   apply                apply a workflow to achieve the goal state
 
+  keygen [replace]     generate private & public keys for secure connection
+
 "
 	end
 	if ARGV.length <= 1
@@ -65,6 +67,21 @@ options:
 		if ARGV[2] == 'system'
 			Nuri::Master.update_system
 		end
+
+	elsif ARGV[1] == 'keygen'
+		priv = Nuri::Util.home_dir + '/etc/private.pem'
+		pub = Nuri::Util.home_dir + '/etc/public.pem'
+		if ARGV[2] != 'replace' and (File.exists?(priv) or File.exists?(pub))
+			puts "Public/private key file exist (#{priv},#{pub}). Use option 'replace' to override them."
+
+		else
+			pub, priv = (ARGV.length >= 4 ? [ARGV[2], ARGV[3]] : ['etc/private.pem','etc/public.pem'])
+			Nuri::SSL.keygen(pub, priv)
+			puts 'New keys have been generated.'
+		end
+
+	elsif ARGV[1] == 'test'
+		Nuri::SSL.test
 
 	else
 		print_help
