@@ -1,0 +1,165 @@
+{
+  "type": "sequential",
+  "version": "1",
+  "total": 14,
+  "workflow": [
+    {
+      "condition": {
+      },
+      "parameters": {
+      },
+      "name": "$.fw.port8080.open",
+      "effect": {
+        "$.fw.port8080.opened": true
+      }
+    },
+    {
+      "condition": {
+      },
+      "parameters": {
+      },
+      "name": "$.vm2.start",
+      "effect": {
+        "$.vm2.running": true
+      }
+    },
+    {
+      "condition": {
+        "$.web2.vm": "$.vm2",
+        "$.vm2.running": true
+      },
+      "parameters": {
+      },
+      "name": "$.web2.start",
+      "effect": {
+        "$.web2.running": true
+      }
+    },
+    {
+      "condition": {
+        "$.web2.running": true
+      },
+      "parameters": {
+        "$.s": "$.web2"
+      },
+      "name": "$.pc2.change",
+      "effect": {
+        "$.pc2.refer": "$.web2"
+      }
+    },
+    {
+      "condition": {
+        "$.web2.running": true
+      },
+      "parameters": {
+        "$.s": "$.web2"
+      },
+      "name": "$.pc1.change",
+      "effect": {
+        "$.pc1.refer": "$.web2"
+      }
+    },
+    {
+      "condition": {
+      },
+      "parameters": {
+      },
+      "name": "$.web1.stop",
+      "effect": {
+        "$.web1.running": false
+      }
+    },
+    {
+      "condition": {
+        "$.vm1.has_service": "$.web1",
+        "$.web1.running": false
+      },
+      "parameters": {
+      },
+      "name": "$.vm1.stop",
+      "effect": {
+        "$.vm1.running": false
+      }
+    },
+    {
+      "condition": {
+        "$.vm1.running": false
+      },
+      "parameters": {
+        "$.c": "$.public_cloud"
+      },
+      "name": "$.vm1.migrate",
+      "effect": {
+        "$.vm1.on_cloud": "$.public_cloud"
+      }
+    },
+    {
+      "condition": {
+      },
+      "parameters": {
+      },
+      "name": "$.vm1.start",
+      "effect": {
+        "$.vm1.running": true
+      }
+    },
+    {
+      "condition": {
+        "$.vm1.running": true,
+        "$.web1.vm": "$.vm1"
+      },
+      "parameters": {
+      },
+      "name": "$.web1.start",
+      "effect": {
+        "$.web1.running": true
+      }
+    },
+    {
+      "condition": {
+        "$.web1.running": true
+      },
+      "parameters": {
+        "$.s": "$.web1"
+      },
+      "name": "$.pc1.change",
+      "effect": {
+        "$.pc1.refer": "$.web1"
+      }
+    },
+    {
+      "condition": {
+        "$.web1.running": true
+      },
+      "parameters": {
+        "$.s": "$.web1"
+      },
+      "name": "$.pc2.change",
+      "effect": {
+        "$.pc2.refer": "$.web1"
+      }
+    },
+    {
+      "condition": {
+      },
+      "parameters": {
+      },
+      "name": "$.web2.stop",
+      "effect": {
+        "$.web2.running": false
+      }
+    },
+    {
+      "condition": {
+        "$.vm2.has_service": "$.web2",
+        "$.web2.running": false
+      },
+      "parameters": {
+      },
+      "name": "$.vm2.stop",
+      "effect": {
+        "$.vm2.running": false
+      }
+    }
+  ]
+}

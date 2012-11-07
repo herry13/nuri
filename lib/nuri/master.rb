@@ -116,11 +116,11 @@ puts '...OK'
 					end
 				end
 
+print 'exec: ' + action['name'] + '...'
 				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/exec')
 				data = { 'action' => action, 'system' => self.get_system_information }
 				data = JSON.generate(data)
 				begin
-print 'exec: ' + action['name']
 					req = Net::HTTP::Put.new(url.path)
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
 					verify(action) if @verify_execution
@@ -130,7 +130,7 @@ print 'exec: ' + action['name']
 				rescue Exception => e
 					Nuri::Util.log 'Cannot execute action: ' + action['name']
 				end
-puts '...FAILED'
+puts 'FAILED'
 				false
 			end
 
