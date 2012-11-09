@@ -33,6 +33,7 @@ Requirements
 	- mongrel
 	- json
 	- antlr3
+- git
 
 Running Nuri client on managed node
 -----------------------------------

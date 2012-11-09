@@ -1,0 +1,24 @@
+include "modules/apache/apache.sfp"
+
+class Apachelb extends Apache {
+	member isset Apache
+	server_name = ""
+
+	procedure set_member (member isset Apache) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.member = member
+		}
+	}
+
+	procedure set_server_name (name isref String) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.server_name = name
+		}
+	}
+}
