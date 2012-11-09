@@ -76,7 +76,7 @@ module Nuri
 					File.delete(script_file)
 
 					tikisql_file = Nuri::Util.home_dir + "/modules/tikidb/tiki.sql"
-					cmd = "#{cmd_mysql} < #{tikisql_file}"
+					cmd = "#{cmd_mysql} #{db_name} < #{tikisql_file}"
 					return false if ( system(cmd) != true )
 
 					config = self.read_config
