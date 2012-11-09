@@ -72,6 +72,28 @@ module Nuri
 				cmd = "cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null"
 				return false if ( system(cmd) != true )
 
+				cmd = "cd #{tiki_dir}; mv _htaccess .htaccess"
+				return false if ( system(cmd) != true )
+
+				mysql_host = self.get_state('database.parent.domainname')
+				mysql_host = (mysql_host == Nuri::Util.domainname ? 'localhost' : mysql_host)
+				db_name = self.get_state('database.db_name')
+				db_user = self.get_state('database.db_user')
+				db_password = self.get_state('database.db_password')
+
+				phpdb = "<?php
+$db_tiki = 'mysql';
+$dbversion_tiki = '8.0';
+$host_tiki = '#{mysql_host}';
+$user_tiki = '#{db_user}';
+$pass_tiki = '#{db_password}';
+$dbs_tiki = '#{db_name}';
+$client_charset = 'utf8';
+"
+
+				local_db_file = "#{tiki_dir}/db/local.php";
+				File.open(local_db_file, 'w') { |f| f.write(phpdb) }
+
 				config = self.read_config
 				config['installed'] = true
 				config['path'] = path

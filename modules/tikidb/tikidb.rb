@@ -69,9 +69,15 @@ module Nuri
 						file.flush
 					end
 
-					cmd = "mysql --user=#{mysql_user} --password=#{mysql_password} --host=#{mysql_host} --port=#{mysql_port} < #{script_file}"
+					cmd_mysql = "mysql --user=#{mysql_user} --password=#{mysql_password} --host=#{mysql_host} --port=#{mysql_port}"
+
+					cmd = "#{cmd_mysql} < #{script_file}"
 					return false if ( system(cmd) != true )
 					File.delete(script_file)
+
+					tikisql_file = Nuri::Util.home_dir + "/modules/tikidb/tiki.sql"
+					cmd = "#{cmd_mysql} < #{tikisql_file}"
+					return false if ( system(cmd) != true )
 
 					config = self.read_config
 					config['installed'] = true
