@@ -28,12 +28,13 @@ module Nuri
 		end
 
 		def init_secure_connection
-			if @config.has_key?('secure') and @config['secure']
-				priv_key_file = Nuri::Util.home_dir + '/etc/' + @config['private_key']
-				raise Exception, 'Private key is not available: ' + priv_key_file if
-					not File.exists?(priv_key_file)
-				Nuri::SSL.get_private_key(priv_key_file)
+			priv_key_file = Nuri::Util.home_dir + '/etc/' + @config['private_key']
+			#raise Exception, 'Private key is not available: ' + priv_key_file if
+			if not File.exists?(priv_key_file)
+				pub_key_file = Nuri::Util.home_dir + '/etc/' + @config['private_key']
+				Nuri::SSL.keygen(priv_key_file, pub_key_file)
 			end
+			Nuri::SSL.get_private_key(priv_key_file)
 		end
 
 		def set_system_information(system)
