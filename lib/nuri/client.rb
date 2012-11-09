@@ -33,17 +33,17 @@ module Nuri
 				end
 			end
 
-			def valid_master(req)
-				return false if not @config.has_key?('master')
+			def trusted(req)
+				return false if not @config.has_key?('trusted')
 				requester = Nuri::Util.domainname(req.params['REMOTE_ADDR'])
-				return ( @config['master'] == requester ) if not @config['master'].is_a?(Array)
-				@config['master'].each { |m| return true if m == requester }
+				return ( @config['trusted'] == requester ) if not @config['trusted'].is_a?(Array)
+				@config['trusted'].each { |m| return true if m == requester }
 				false
 			end
 
 			def process(req, res)
-				if not self.valid_master(req)
-					Nuri::Util.warn "An invalid master #{req.params['REMOTE_ADDR']}."
+				if not self.trusted(req)
+					Nuri::Util.warn "Untrusted request from host #{req.params['REMOTE_ADDR']}."
 				else
 					Nuri::Client::Agent.new(self, req, res).serve
 				end
