@@ -3,8 +3,8 @@ nuri {
 	port is 9090
 
 	secure is no
-	private_key is "public.pem"
-	public_key is "private.pem"
+	private_key is "private.pem"
+	public_key is "public.pem"
 
 	as_master is no
 	master is ("nena.inf.ed.ac.uk", "localhost")
