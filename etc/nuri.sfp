@@ -6,5 +6,5 @@ nuri {
 	private_key is "private.pem"
 	public_key is "public.pem"
 
-	trusted is ("localhost", "nena.inf.ed.ac.uk", "hpvm16.diy.inf.ed.ac.uk", "hpvm17.diy.inf.ed.ac.uk")
+	trusted is ("localhost", "nena.inf.ed.ac.uk", "hpvm16.diy.inf.ed.ac.uk", "hpvm17.diy.inf.ed.ac.uk", "hpvm20.diy.inf.ed.ac.uk")
 }
