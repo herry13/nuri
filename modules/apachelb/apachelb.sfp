@@ -1,6 +1,7 @@
 include "modules/apache/apache.sfp"
 
-class Apachelb extends Apache {
+class Apachelb extends Service {
+	port = 80
 	member isset Apache
 	server_name = ""
 
@@ -19,6 +20,40 @@ class Apachelb extends Apache {
 		}
 		effect {
 			this.server_name = name
+		}
+	}
+
+	procedure install {
+		condition {	}
+		effect {
+			this.installed = true
+		}
+	}
+
+	procedure uninstall {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.installed = false
+		}
+	}
+
+	procedure start {
+		condition {
+			/*exists (this.member as m) {
+				m.running = true
+			}*/
+		}
+		effect {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		condition { }
+		effect {
+			this.running = false
 		}
 	}
 }
