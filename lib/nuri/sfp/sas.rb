@@ -128,7 +128,7 @@ module Nuri
 	
 					# identify immutable variables
 					self.identify_immutable_variables
-	
+
 					# re-evaluate set variables and types
 					self.evaluate_set_variables_and_types
 	
@@ -144,7 +144,7 @@ module Nuri
 						raise Exception, 'Invalid sometime constraint' if
 							not normalize_formula(@root['sometime'])
 					end
-	
+
 					### process all procedures
 					@variables.each_value { |var|
 						if var.is_final
@@ -170,6 +170,7 @@ module Nuri
 					return create_output
 				rescue Exception => e
 puts e.backtrace
+puts e.to_s
 					Nuri::Util.log e.to_s
 				end
 			end
@@ -196,14 +197,14 @@ puts e.backtrace
 			def evaluate_set_variables_and_types
 				@variables.each_value do |var|
 					next if not var.isset
-					var.delete_if { |x| x == nil }
+					var.delete_if { |x| x == nil or x == '' }
 					var.each { |x| x.sort! }
 					var.uniq!
 				end
 
 				@types.each do |name,values|
 					next if name[0,1] != '('
-					values.delete_if { |x| x == nil }
+					values.delete_if { |x| x == nil or x == '' }
 					values.each { |x| x.sort! }
 					values.uniq!
 				end
@@ -1225,7 +1226,7 @@ puts e.backtrace
 			end
 
 			def visit(name, value, parent)
-				return false if name[0,1] == '_' or value.is_a?(Array) or
+				return false if name[0,1] == '_' or #value.is_a?(Array) or
 						(value.is_a?(Hash) and not (value.isobject or value.isnull or value.isset))
 
 				var_name = parent.ref.push(name)
@@ -1238,10 +1239,7 @@ puts e.backtrace
 					Nuri::Util.log "Unrecognized type of variable: " + var_name
 				else
 					value = null_value(type) if value == nil
-					if value.is_a?(Hash) and value.isset
-						value = value['_values']
-						isset = true
-					end
+					isset = true if type[0,1] == '('
 					var = Variable.new(var_name, type, -1, value, nil, isfinal)
 					var.isset = isset
 					@vars[var.name] = var
@@ -1263,6 +1261,7 @@ puts e.backtrace
 				if type == nil and parent.is_a?(Hash) and parent.has_key?('_isa')
 					isa = @main.root.at?(parent['_isa'])
 					type = isa.type?(name) if isa != nil
+					return type if type != nil
 				end
 
 				return "(#{value['_isa']})" if value.is_a?(Hash) and value.isset and value.has_key?('_isa')

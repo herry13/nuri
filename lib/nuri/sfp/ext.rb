@@ -55,7 +55,9 @@ Hash.send(:define_method, "type?") { |name|
 		return '$.Integer' if value.is_a?(Numeric)
 		return '$.String' if value.is_a?(String) and not value.isref
 		return value['_isa'] if value.isobject or value.isnull
+		return "(#{value['_isa']})" if value.is_a?(Hash) and value.isset and value.has_key?('_isa')
 	end
+
 	return nil
 }
 
