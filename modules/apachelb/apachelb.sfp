@@ -41,6 +41,7 @@ class Apachelb extends Service {
 
 	procedure start {
 		condition {
+			this.installed = true
 			/*exists (this.member as m) {
 				m.running = true
 			}*/
