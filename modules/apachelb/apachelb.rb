@@ -32,7 +32,7 @@ module Nuri
 					@state['running'] = false
 				end
 
-				data = `/bin/grep "ServerName" #{ConfigFile}`.chop.strip
+				data = `/bin/grep "ServerName" #{ConfigFile} 2>/dev/null`.chop.strip
 				data = data.split(' ')
 				if data[1] != nil and data[1] != '<server_name>'
 					@state['server_name'] = data[1]
