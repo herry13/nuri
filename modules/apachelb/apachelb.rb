@@ -82,7 +82,8 @@ module Nuri
 				server_name = self.get_state('server_name')
 				
 				return false if server_name == nil
-				cmd = "sed 's/<server_name>/#{server_name}/g' #{ConfigFile}"
+				cmd = "sed 's/ServerName.*/ServerName #{server_name}/g' #{ConfigFile}"
+puts cmd
 				return ( system(cmd) == true )
 			end
 
