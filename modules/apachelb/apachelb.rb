@@ -104,6 +104,7 @@ module Nuri
 					end
 					output += "#{line} \n"
 				end
+puts output
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
 
 =begin
