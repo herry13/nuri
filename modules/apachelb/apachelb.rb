@@ -42,11 +42,8 @@ module Nuri
 				result = system('/usr/sbin/a2enmod proxy_http') if result == true
 				result = system('/usr/sbin/a2enmod status') if result == true
 
-				cmd = '/bin/cp -f ' + Nuri::Util.home_dir + '/modules/apachelb/load_balancer /etc/apache2/sites-enabled/'
+				cmd = '/bin/rm -f /etc/apache2/sites-enabled/*; /bin/cp -f ' + Nuri::Util.home_dir + '/modules/apachelb/load_balancer /etc/apache2/sites-enabled/'
 				return false if ( system(cmd) != true )
-
-				member = self.get_state('member')
-				puts member.inspect
 
 				return (result == true)
 			end
