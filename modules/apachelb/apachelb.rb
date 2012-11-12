@@ -85,22 +85,44 @@ module Nuri
 			end
 
 			def set_members(params={})
-				members = '### Balancer Members ###'
+				members = ''
+				reverses
 				params['members'].each do |m|
 					members += "\n\tBalancerMember #{m}"
+					reverses += "\n\tProxyPassReverse / #{m}"
 				end
 
+				data = File.read(ConfigFile)
+				output = ''
+				data.split("\n").each do |line|
+					tuple = line.strip.split(' ')
+					next if tuple[0] == 'BalancerMember' or tuple[0] == 'ProxyPassReverse'
+					if tuple[0] == 'ProxySet'
+						output += members
+					elsif tuple[0] == '</Location>'
+						output += reverses
+					end
+					output += "#{line} \n"
+				end
+				File.open(ConfigFile, 'w') { |f| f.write(output) }
+
+=begin
 				data = `/bin/sed 's/BalancerMember.*//g' #{ConfigFile}`
 				output = ""
 				data.split("\n").each do |line|
-					if line.strip == '### Balancer Members ###'
+					line2 = line.strip
+					next if line2 == ''
+
+					if line2 == '### Balancer Members ###'
 						output += members + "\n"
-					elsif line.strip != ''
+					elsif line2.strip == '### Balancer Reverse ###'
+						output += reverses + "\n"
+					else
 						output += line + "\n"
 					end
 				end
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
-
+=end
 				true
 			end
 
