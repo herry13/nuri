@@ -41,15 +41,16 @@ module Nuri
 					@state['server_name'] = ""
 				end
 	
-				# Balancer member setting
+				# Balancer members setting
 				data =`/bin/grep "BalancerMember" #{ConfigFile} 2>/dev/null`.chop
 				members = []
 				data.split("\n").each do |line|
 					member = line.strip.split(' ')
 					next if member[1] == nil
-					members.push( member[1].sub(/http(s?):\/\//, '') )
+					#members.push( member[1].sub(/http(s?):\/\//, '') )
+					members.push( member[1] )
 				end
-				@state['member'] = members
+				@state['members'] = members
 
 				return @state
 			end
@@ -83,8 +84,13 @@ module Nuri
 				return ( system('/usr/bin/service apache2 stop') == true )
 			end
 
-			def set_member(params={})
-				false
+			def set_members(params={})
+				members = '### Balancer Members ###'
+				params['members'].each do |m|
+					members += "\n\tBalancerMember #{m}"
+				end
+				cmd = "sed 's/### Balancer Members ###/members/g' #{ConfigFile}"
+				return ( system(cmd) == true )
 			end
 
 			def set_server_name(params={})

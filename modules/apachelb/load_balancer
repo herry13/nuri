@@ -3,7 +3,7 @@
    ServerName <server_name>
 
    <Proxy balancer://nuricluster>
-		<balance_members>
+		### Balancer Members ###
       Order Deny,Allow
       Deny from none
       Allow from all

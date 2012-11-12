@@ -2,16 +2,16 @@ include "modules/apache/apache.sfp"
 
 class Apachelb extends Service {
 	port = 80
-	member isset Apache
+	members isset String
 	server_name = ""
 
-	procedure set_member (member isset Apache) {
+	procedure set_members (members isset String) {
 		condition {
 			this.installed = true
 			this.running = false
 		}
 		effect {
-			this.member = member
+			this.members = members
 		}
 	}
 
@@ -44,9 +44,6 @@ class Apachelb extends Service {
 	procedure start {
 		condition {
 			this.installed = true
-			/*exists (this.member as m) {
-				m.running = true
-			}*/
 		}
 		effect {
 			this.running = true
