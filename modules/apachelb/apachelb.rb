@@ -17,7 +17,8 @@ module Nuri
 				# TODO
 				data = `/usr/bin/dpkg-query -W apache2`
 				data = data.split(' ')
-				@state['installed'] = (data.length > 1 and data[0] == 'apache2')
+				@state['installed'] = (data.length > 1 and data[0] == 'apache2') and
+					File.exists?('/etc/apache2/sites-enabled/load_balancer')
 
 				if @state['installed']
 					@state['version'] = data[1]
