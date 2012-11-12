@@ -54,7 +54,7 @@ config = "<VirtualHost *:80>
 	ProxyPass / balancer://nuricluster/
 </VirtualHost>"
 
-				result = system('/usr/bin/apt-get -y install apache')
+				result = system('/usr/bin/apt-get -y install apache2')
 				result = system('/usr/bin/service apache2 stop') if result == true
 
 				return (result == true)
