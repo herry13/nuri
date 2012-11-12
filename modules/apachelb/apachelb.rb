@@ -32,6 +32,7 @@ module Nuri
 					@state['running'] = false
 				end
 
+				# ServerName setting
 				data = `/bin/grep "ServerName" #{ConfigFile} 2>/dev/null`.chop.strip
 				data = data.split(' ')
 				if data[1] != nil and data[1] != '<server_name>'
@@ -40,12 +41,20 @@ module Nuri
 					@state['server_name'] = ""
 				end
 	
+				# Balancer member setting
+				data =`/bin/grep "BalancerMember" #{ConfigFile} 2>/dev/null`.chop
+				members = []
+				data.split("\n").each do |line|
+					member = line.strip.split(' ')
+					next if member[1] == nil
+					members.push( member[1].sub(/http(s?):\/\//, '') )
+				end
+				@state['member'] = members
+
 				return @state
 			end
 	
 			def install(params={})
-				# TODO -- apply load-balancer configuration
-
 				result = system('/usr/bin/apt-get -y install apache2')
 				result = system('/usr/bin/service apache2 stop') if result == true
 				result = system('/usr/sbin/a2enmod proxy') if result == true
