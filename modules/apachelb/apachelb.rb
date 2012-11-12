@@ -91,6 +91,7 @@ module Nuri
 				end
 
 				data = `/bin/sed 's/BalancerMember.*//g' #{ConfigFile}`
+puts data
 				output = ""
 				data.split("\n") do |line|
 					if line.strip == '### Balancer Members ###'
