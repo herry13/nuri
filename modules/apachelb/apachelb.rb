@@ -99,9 +99,9 @@ module Nuri
 					next if tuple[0] == 'BalancerMember' or tuple[0] == 'ProxyPassReverse'
 					output += "#{line} \n"
 					if tuple[0] == 'ProxySet'
-						output += members
+						output += members + "\n"
 					elsif tuple[0] == '</Location>'
-						output += reverses
+						output += reverses + "\n"
 					end
 				end
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
