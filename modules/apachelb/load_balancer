@@ -1,0 +1,21 @@
+<VirtualHost *:80>
+   ProxyRequests off
+   ServerName <server_name>
+
+   <Proxy balancer://nuricluster>
+		<balance_members>
+      Order Deny,Allow
+      Deny from none
+      Allow from all
+      ProxySet lbmethod=byrequests
+   </Proxy>
+   <Location /balancer-manager>
+      SetHandler balancer-manager
+      Order Deny,Allow
+      Allow from all
+   </Location>
+   ProxyPass /balancer-manager !
+   ProxyPass / balancer://nuricluster/
+   #ProxyPassReverse / http://hpvm17.diy.inf.ed.ac.uk/
+</VirtualHost>
+

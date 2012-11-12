@@ -7,7 +7,7 @@ class Apachelb extends Service {
 
 	procedure set_member (member isset Apache) {
 		condition {
-			this.installed = false
+			this.running = false
 		}
 		effect {
 			this.member = member
@@ -16,7 +16,7 @@ class Apachelb extends Service {
 
 	procedure set_server_name (name isref String) {
 		condition {
-			this.installed = false
+			this.running = false
 		}
 		effect {
 			this.server_name = name

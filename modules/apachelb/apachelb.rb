@@ -34,28 +34,22 @@ module Nuri
 			def install(params={})
 				# TODO -- apply load-balancer configuration
 
-config = "<VirtualHost *:80>
-	ProxyRequests off
-	ServerName <domainname>
-	<Proxy balancer://nuricluster>
-		BalancerMember <domainname1>
-		BalancerMember <domainname2>
-		Order Deny,Allow
-		Deny from none
-		Allow from all
-		ProxySet lbmethod=byrequests
-	</Proxy>
-	<Location /balancer-manager>
-		SetHandler balancer-manager
-		Order Deny,Allow
-		Allow from all
-	</Location>
-	ProxyPass /balancer-manager !
-	ProxyPass / balancer://nuricluster/
-</VirtualHost>"
+				cmd = '/bin/cp -f ' + Nuri::Util.home_dir + '/modules/apachelb/load_balancer /etc/apache/sites-enabled/'
+				return false if ( system(cmd) != true )
+
+				server_name = self.get_state('server_name')
+				return false if server_name == nil
+				cmd = "sed 's/<server_name>/#{server_name}/g' /etc/apache2/sites-enabled/load-balancer"
+
+				member = self.get_state('member')
+				puts member.inspect
 
 				result = system('/usr/bin/apt-get -y install apache2')
 				result = system('/usr/bin/service apache2 stop') if result == true
+				result = system('/usr/sbin/a2enmod proxy') if result == true
+				result = system('/usr/sbin/a2enmod proxy_balancer') if result == true
+				result = system('/usr/sbin/a2enmod proxy_http') if result == true
+				result = system('/usr/sbin/a2enmod status') if result == true
 
 				return (result == true)
 			end
@@ -75,7 +69,18 @@ config = "<VirtualHost *:80>
 			end
 
 			def set_member(params={})
-				false
+				cmd = 'mkdir -p /var/lib/apachelb'
+				return false if ( system(cmd) != true )
+				config_file = '/var/lib/apachelb/config'
+				begin
+					File.open(config_file, 'w') do |f|
+						f.write(JSON.pretty_generate(params))
+					end
+				rescue Exception => e
+					Nuri::Util.log e.to_s
+					return false
+				end
+				true
 			end
 
 			def set_server_name(params={})
