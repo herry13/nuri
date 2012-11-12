@@ -131,7 +131,7 @@ module Nuri
 						output += "#{line} \n"
 						output += "ServerName #{server_name}\n"
 					elsif line.strip != ''
-						output += line
+						output += "#{line} \n"
 					end
 				end
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
