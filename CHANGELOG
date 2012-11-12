@@ -1,0 +1,9 @@
+12-11-2012
+- implement module "Apachelb" -- Apache Load Balancer
+- allow Set as argument of procedure
+
+06-11-2012
+- first release
+- available modules
+	- Apache
+	- Mysql

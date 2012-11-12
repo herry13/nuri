@@ -16,6 +16,5 @@
    </Location>
    ProxyPass /balancer-manager !
    ProxyPass / balancer://nuricluster/
-   #ProxyPassReverse / http://hpvm17.diy.inf.ed.ac.uk/
 </VirtualHost>
 
