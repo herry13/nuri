@@ -91,25 +91,21 @@ module Nuri
 					members += "\n\tBalancerMember #{m}"
 					reverses += "\n\tProxyPassReverse / #{m}"
 				end
-begin
+
 				data = File.read(ConfigFile)
 				output = ''
 				data.split("\n").each do |line|
 					tuple = line.strip.split(' ')
 					next if tuple[0] == 'BalancerMember' or tuple[0] == 'ProxyPassReverse'
+					output += "#{line} \n"
 					if tuple[0] == 'ProxySet'
 						output += members
 					elsif tuple[0] == '</Location>'
 						output += reverses
 					end
-					output += "#{line} \n"
 				end
-puts output
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
-rescue Exception => e
-	puts e.backtrace
-	puts e.to_s
-end
+
 =begin
 				data = `/bin/sed 's/BalancerMember.*//g' #{ConfigFile}`
 				output = ""
