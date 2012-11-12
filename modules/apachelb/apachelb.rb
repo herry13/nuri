@@ -82,7 +82,7 @@ module Nuri
 				server_name = params['name']
 				
 				return false if server_name == nil
-				cmd = "sed 's/ServerName.*/ServerName #{server_name}/g' #{ConfigFile}"
+				cmd = "sed -i 's/ServerName.*/ServerName #{server_name}/g' #{ConfigFile}"
 puts cmd
 				return ( system(cmd) == true )
 			end
