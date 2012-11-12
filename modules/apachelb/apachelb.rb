@@ -8,6 +8,8 @@ module Nuri
 
 			include Nuri::Resource
 
+			ConfigFile = '/etc/apache2/sites-enabled/load_balancer'
+
 			def initialize
 				self.register('Apachelb', 'apachelb')
 			end
@@ -15,12 +17,11 @@ module Nuri
 			# get state of this component in JSON
 			def get_self_state
 				# TODO
-				config_file = '/etc/apache2/sites-enabled/load_balance'
 
 				data = `/usr/bin/dpkg-query -W apache2`
 				data = data.split(' ')
 				@state['installed'] = (data.length > 1 and data[0] == 'apache2') and
-					File.exists?(config_file)
+					File.exists?(ConfigFile)
 
 				if @state['installed']
 					@state['version'] = data[1]
@@ -31,7 +32,7 @@ module Nuri
 					@state['running'] = false
 				end
 
-				data = `/bin/grep "ServerName" #{config_file}`.chop.strip
+				data = `/bin/grep "ServerName" #{ConfigFile}`.chop.strip
 				data = data.split(' ')
 				if data[1] != nil and data[1] != '<server_name>'
 					@state['server_name'] = data[1]
@@ -52,14 +53,14 @@ module Nuri
 				result = system('/usr/sbin/a2enmod proxy_http') if result == true
 				result = system('/usr/sbin/a2enmod status') if result == true
 
-				cmd = '/bin/rm -f /etc/apache2/sites-enabled/*; /bin/cp -f ' + Nuri::Util.home_dir + '/modules/apachelb/load_balancer /etc/apache2/sites-enabled/'
+				cmd = "/bin/rm -f /etc/apache2/sites-enabled/*; /bin/cp -f #{Nuri::Util.home_dir}/modules/apachelb/load_balancer #{ConfigFile}"
 				return false if ( system(cmd) != true )
 
 				return (result == true)
 			end
 
 			def uninstall(params={})
-				result = system('/bin/rm -f /etc/apache2/sites-enabled/load_balancer')
+				result = system("/bin/rm -f #{ConfigFile}")
 				result = system('/usr/bin/apt-get -y --purge remove apache2') if (result == true)
 				result = system('/usr/bin/apt-get -y --purge autoremove') if (result == true)
 				return (result == true)
@@ -74,25 +75,14 @@ module Nuri
 			end
 
 			def set_member(params={})
-				cmd = 'mkdir -p /var/lib/apachelb'
-				return false if ( system(cmd) != true )
-				config_file = '/var/lib/apachelb/config'
-				begin
-					File.open(config_file, 'w') do |f|
-						f.write(JSON.pretty_generate(params))
-					end
-				rescue Exception => e
-					Nuri::Util.log e.to_s
-					return false
-				end
-				true
+				false
 			end
 
 			def set_server_name(params={})
 				server_name = self.get_state('server_name')
 				
 				return false if server_name == nil
-				cmd = "sed 's/<server_name>/#{server_name}/g' /etc/apache2/sites-enabled/load-balancer"
+				cmd = "sed 's/<server_name>/#{server_name}/g' #{ConfigFile}"
 				return ( system(cmd) == true )
 			end
 
