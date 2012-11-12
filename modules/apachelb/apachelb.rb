@@ -86,7 +86,7 @@ module Nuri
 
 			def set_members(params={})
 				members = ''
-				reverses
+				reverses = ''
 				params['members'].each do |m|
 					members += "\n\tBalancerMember #{m}"
 					reverses += "\n\tProxyPassReverse / #{m}"
