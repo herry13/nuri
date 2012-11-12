@@ -37,10 +37,6 @@ module Nuri
 				cmd = '/bin/cp -f ' + Nuri::Util.home_dir + '/modules/apachelb/load_balancer /etc/apache/sites-enabled/'
 				return false if ( system(cmd) != true )
 
-				server_name = self.get_state('server_name')
-				return false if server_name == nil
-				cmd = "sed 's/<server_name>/#{server_name}/g' /etc/apache2/sites-enabled/load-balancer"
-
 				member = self.get_state('member')
 				puts member.inspect
 
@@ -84,7 +80,11 @@ module Nuri
 			end
 
 			def set_server_name(params={})
-				false
+				server_name = self.get_state('server_name')
+				
+				return false if server_name == nil
+				cmd = "sed 's/<server_name>/#{server_name}/g' /etc/apache2/sites-enabled/load-balancer"
+				return ( system(cmd) == true )
 			end
 
 		end
