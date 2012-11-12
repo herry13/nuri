@@ -128,12 +128,14 @@ module Nuri
 					if tuple[0] == 'ServerName'
 						# skip
 					elsif tuple[0] == 'DocumentRoot'
+puts 'caught DocumentRoot'
 						output += "#{line} \n"
 						output += "ServerName #{server_name}\n"
 					elsif line.strip != ''
 						output += "#{line} \n"
 					end
 				end
+puts output
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
 
 				true
