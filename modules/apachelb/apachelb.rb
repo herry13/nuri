@@ -80,10 +80,9 @@ module Nuri
 
 			def set_server_name(params={})
 				server_name = params['name']
-				
 				return false if server_name == nil
+
 				cmd = "sed -i 's/ServerName.*/ServerName #{server_name}/g' #{ConfigFile}"
-puts cmd
 				return ( system(cmd) == true )
 			end
 
