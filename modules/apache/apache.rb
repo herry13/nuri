@@ -124,19 +124,16 @@ module Nuri
 				data = File.read(ConfigFile)
 				output = ""
 				data.split("\n").each do |line|
-					tuple = data.strip.split(' ')
-puts tuple[0] if tuple[0] != nil
+					tuple = line.strip.split(' ')
 					if tuple[0] == 'ServerName'
 						# skip
 					elsif tuple[0] == 'DocumentRoot'
-puts 'caught DocumentRoot'
 						output += "#{line} \n"
 						output += "ServerName #{server_name}\n"
 					elsif line.strip != ''
 						output += "#{line} \n"
 					end
 				end
-puts output
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
 
 				true
