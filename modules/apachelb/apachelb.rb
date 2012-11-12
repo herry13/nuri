@@ -4,7 +4,7 @@ require 'augeas'
 
 module Nuri
 	module Module
-		class Apachelb < Apache
+		class Apachelb
 
 			include Nuri::Resource
 
@@ -15,12 +15,24 @@ module Nuri
 			# get state of this component in JSON
 			def get_self_state
 				# TODO
+				data = `/usr/bin/dpkg-query -W apache`
+				data = data.split(' ')
+				@state['installed'] = (data.length > 1 and data[0] == 'apache2')
+
+				if @state['installed']
+					@state['version'] = data[1]
+					data = `/usr/bin/service apache2 status`
+					@state['running'] = ((data =~ /is running/) != nil)
+				else
+					@state['version'] = ''
+					@state['running'] = false
+				end
 	
 				return @state
 			end
 	
 			def install(params={})
-				# TODO
+				# TODO -- apply load-balancer configuration
 
 config = "<VirtualHost *:80>
 	ProxyRequests off
@@ -42,7 +54,24 @@ config = "<VirtualHost *:80>
 	ProxyPass / balancer://nuricluster/
 </VirtualHost>"
 
-				false
+				result = system('/usr/bin/apt-get -y install apache')
+				result = system('/usr/bin/service apache2 stop') if result == true
+
+				return (result == true)
+			end
+
+			def uninstall(params={})
+				result = system('/usr/bin/apt-get -y --purge remove apache2')
+				result = system('/usr/bin/apa-get -y --purge autoremove') if (result == true)
+				return (result == true)
+			end
+
+			def start
+				return ( system('/usr/bin/service apache2 start') == true )
+			end
+
+			def stop
+				return ( system('/usr/bin/service apache2 stop') == true )
 			end
 
 			def set_member(params={})
