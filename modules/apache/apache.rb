@@ -125,6 +125,7 @@ module Nuri
 				output = ""
 				data.split("\n").each do |line|
 					tuple = data.strip.split(' ')
+puts tuple[0] if tuple[0] != nil
 					if tuple[0] == 'ServerName'
 						# skip
 					elsif tuple[0] == 'DocumentRoot'
