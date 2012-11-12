@@ -91,20 +91,18 @@ module Nuri
 				end
 
 				data = `/bin/sed 's/BalancerMember.*//g' #{ConfigFile}`
-puts data
 				output = ""
 				data.split("\n").each do |line|
 					if line.strip == '### Balancer Members ###'
-						output += members
+						output += members + "\n"
 					elsif line.strip != ''
 						output += line + "\n"
 					end
 				end
-puts output
-				#cmd = "sed 's/### Balancer Members ###/\"#{members}\"/g' #{ConfigFile}"
-#puts cmd
-				#return ( system(cmd) == true )
-				return false
+
+				File.open(ConfigFile, 'w') { |f| f.write(output) }
+
+				true
 			end
 
 			def set_server_name(params={})
