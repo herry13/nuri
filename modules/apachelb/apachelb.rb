@@ -15,10 +15,12 @@ module Nuri
 			# get state of this component in JSON
 			def get_self_state
 				# TODO
+				config_file = '/etc/apache2/sites-enabled/load_balance'
+
 				data = `/usr/bin/dpkg-query -W apache2`
 				data = data.split(' ')
 				@state['installed'] = (data.length > 1 and data[0] == 'apache2') and
-					File.exists?('/etc/apache2/sites-enabled/load_balancer')
+					File.exists?(config_file)
 
 				if @state['installed']
 					@state['version'] = data[1]
@@ -27,6 +29,14 @@ module Nuri
 				else
 					@state['version'] = ''
 					@state['running'] = false
+				end
+
+				data = `/bin/grep "ServerName" #{config_file}`.chop.strip
+				data = data.split(' ')
+				if data[1] != nil and data[1] != '<server_name>'
+					@state['server_name'] = data[1]
+				else
+					@state['server_name'] = ""
 				end
 	
 				return @state
