@@ -9,18 +9,6 @@ Nuri is an automated workflow configuration tool. It allows you to manage nodes'
 
 Most parts of Nuri is written in Ruby except the solver which is written in C++.
 
-To Install
-----------
-- If you do not have **git**, then install it first:
-
-		$ sudo apt-get install git
-
-
-- Clone the Nuri software from Github repository:
-
-		$ git clone https://github.com/herry13/nuri
-
-
 Requirements
 ------------
 - Linux Ubuntu 12.04
@@ -34,6 +22,24 @@ Requirements
 	- json
 	- antlr3
 - git
+
+To Install
+----------
+- If you do not have **git**, then install it first:
+
+		$ sudo apt-get install git
+
+
+- Clone the Nuri software from Github repository:
+
+		$ git clone https://github.com/herry13/nuri
+
+Available Modules
+-----------------
+- Apache
+- Mysql
+- Apache Load Balancer (Apachelb)
+- Tiki Wiki
 
 Running Nuri client on managed node
 -----------------------------------
