@@ -69,7 +69,7 @@ module Nuri
 				if result == true
 					system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
 					system('/bin/rm /etc/mysql/nuri.cnf')
-					system('/usr/bin/apt-get -y autoremove')
+					system('/usr/bin/apt-get -y --purge autoremove')
 					system("/usr/bin/dpkg -l | /bin/grep ^rc | /usr/bin/cut -d' ' -f3| /usr/bin/xargs /usr/bin/apt-get -y purge")
 				end
 				return (result == true)
