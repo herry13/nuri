@@ -15,7 +15,7 @@ module Nuri
 			# get state of this component in JSON
 			def get_self_state
 				# TODO
-				data = `/usr/bin/dpkg-query -W apache`
+				data = `/usr/bin/dpkg-query -W apache2`
 				data = data.split(' ')
 				@state['installed'] = (data.length > 1 and data[0] == 'apache2')
 
