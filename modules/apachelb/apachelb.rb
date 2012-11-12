@@ -89,7 +89,7 @@ module Nuri
 				params['members'].each do |m|
 					members += "\n\tBalancerMember #{m}"
 				end
-				cmd = "sed 's/### Balancer Members ###/#{members}/g' #{ConfigFile}"
+				cmd = "sed 's/### Balancer Members ###/\"#{members}\"/g' #{ConfigFile}"
 				return ( system(cmd) == true )
 			end
 
