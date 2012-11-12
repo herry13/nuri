@@ -89,9 +89,21 @@ module Nuri
 				params['members'].each do |m|
 					members += "\n\tBalancerMember #{m}"
 				end
-				cmd = "sed 's/### Balancer Members ###/\"#{members}\"/g' #{ConfigFile}"
-puts cmd
-				return ( system(cmd) == true )
+
+				data = `/bin/sed 's/BalancerMember.*//g' #{ConfigFile}`
+				output = ""
+				data.split("\n") do |line|
+					if line.strip == '### Balancer Members ###'
+						output += members
+					elsif line.strip != ''
+						output += line + "\n"
+					end
+				end
+puts output
+				#cmd = "sed 's/### Balancer Members ###/\"#{members}\"/g' #{ConfigFile}"
+#puts cmd
+				#return ( system(cmd) == true )
+				return false
 			end
 
 			def set_server_name(params={})
