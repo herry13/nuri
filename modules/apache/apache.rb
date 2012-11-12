@@ -121,11 +121,22 @@ module Nuri
 			def set_server_name(params={})
 				return false if not params.has_key?('target')
 				server_name = params['target']
-				Augeas::open do |aug|
-					aug.set("/files/etc/apache2/sites-available/default/VirtualHost/*[self::directive='ServerName']/arg", server_name)
-					return true if aug.save
+				data = File.read(ConfigFile)
+				output = ""
+				data.split("\n").each do |line|
+					tuple = data.strip.split(' ')
+					if tuple[0] == 'ServerName'
+						# skip
+					elsif tuple[0] == 'ServerAdmin'
+						output += "#{line} \n"
+						output += "ServerName #{server_name}\n"
+					elsif line.strip != ''
+						output += line
+					end
 				end
-				false
+				File.open(ConfigFile, 'w') { |f| f.write(output) }
+
+				true
 			end
 
 			def install_php_mysql_module
