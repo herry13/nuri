@@ -127,7 +127,7 @@ module Nuri
 					tuple = data.strip.split(' ')
 					if tuple[0] == 'ServerName'
 						# skip
-					elsif tuple[0] == 'ServerAdmin'
+					elsif tuple[0] == 'DocumentRoot'
 						output += "#{line} \n"
 						output += "ServerName #{server_name}\n"
 					elsif line.strip != ''
