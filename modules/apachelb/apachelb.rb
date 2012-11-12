@@ -99,7 +99,6 @@ module Nuri
 						output += line + "\n"
 					end
 				end
-
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
 
 				true
