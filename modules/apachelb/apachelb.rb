@@ -90,6 +90,7 @@ module Nuri
 					members += "\n\tBalancerMember #{m}"
 				end
 				cmd = "sed 's/### Balancer Members ###/\"#{members}\"/g' #{ConfigFile}"
+puts cmd
 				return ( system(cmd) == true )
 			end
 
