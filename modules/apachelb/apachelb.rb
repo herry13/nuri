@@ -52,7 +52,8 @@ module Nuri
 			end
 
 			def uninstall(params={})
-				result = system('/usr/bin/apt-get -y --purge remove apache2')
+				result = system('/bin/rm -f /etc/apache2/sites-enabled/load_balancer')
+				result = system('/usr/bin/apt-get -y --purge remove apache2') if (result == true)
 				result = system('/usr/bin/apa-get -y --purge autoremove') if (result == true)
 				return (result == true)
 			end
