@@ -5,13 +5,25 @@ class Apache extends Service {
 	document_root = "/var/www"
 	php_module = false
 	php_mysql_module = false
+	server_name = ""
 
 	procedure set_document_root (target isref String) {
 		condition {
 			this.running = false
+			this.installed = true
 		}
 		effect {
 			this.document_root = target
+		}
+	}
+
+	procedure set_server_name (target isref String) {
+		condition {
+			this.running = false
+			this.installed = true
+		}
+		effect {
+			this.server_name = target
 		}
 	}
 

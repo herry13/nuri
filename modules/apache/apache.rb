@@ -8,10 +8,12 @@ module Nuri
 
 			include Nuri::Resource
 
+			ConfigFile = '/etc/apache2/sites-available/default'
+
 			def initialize
 				self.register('Apache', 'apache')
 			end
-	
+
 			# get state of this component in JSON
 			def get_self_state
 				# php module
@@ -45,17 +47,25 @@ module Nuri
 				else
 					@state["port"] = 0
 				end
+
 				# document root
-				data = (File.file?("/etc/apache2/sites-available/default") ?
-					`/bin/grep -e "DocumentRoot " /etc/apache2/sites-available/default` : "")
+				data = (File.file?(ConfigFile) ?	`/bin/grep -e "DocumentRoot " #{ConfigFile}` : "")
 				if data.length > 0
-					data.strip!
 					data = data.strip.split(' ')
 					@state["document_root"] = data[1]
 				else
 					@state["docment_root"] = ""
 				end
-	
+
+				# ServerName
+				data = (File.file?(ConfigFile) ? `/bin/grep -e "ServerName " #{ConfigFile}` : "")
+				if data.length > 0
+					data = data.strip.split(' ')
+					@state['server_name'] = data[1]
+				else
+					@state['server_name'] = ''
+				end
+
 				return @state
 			end
 	
@@ -97,7 +107,7 @@ module Nuri
 				end
 				return false
 			end
-		
+
 			def set_document_root(params={})
 				return false if not params.has_key?('target')
 				dir = params['target']
@@ -106,6 +116,16 @@ module Nuri
 					return true if aug.save
 				end
 				return false
+			end
+
+			def set_server_name(params={})
+				return false if not params.has_key?('target')
+				server_name = params['target']
+				Augeas::open do |aug|
+					aug.set("/files/etc/apache2/sites-available/default/VirtualHost/*[self::directive='ServerName']/arg", server_name)
+					return true if aug.save
+				end
+				false
 			end
 
 			def install_php_mysql_module
