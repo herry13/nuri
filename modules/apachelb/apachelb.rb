@@ -34,18 +34,18 @@ module Nuri
 			def install(params={})
 				# TODO -- apply load-balancer configuration
 
-				cmd = '/bin/cp -f ' + Nuri::Util.home_dir + '/modules/apachelb/load_balancer /etc/apache/sites-enabled/'
-				return false if ( system(cmd) != true )
-
-				member = self.get_state('member')
-				puts member.inspect
-
 				result = system('/usr/bin/apt-get -y install apache2')
 				result = system('/usr/bin/service apache2 stop') if result == true
 				result = system('/usr/sbin/a2enmod proxy') if result == true
 				result = system('/usr/sbin/a2enmod proxy_balancer') if result == true
 				result = system('/usr/sbin/a2enmod proxy_http') if result == true
 				result = system('/usr/sbin/a2enmod status') if result == true
+
+				cmd = '/bin/cp -f ' + Nuri::Util.home_dir + '/modules/apachelb/load_balancer /etc/apache/sites-enabled/'
+				return false if ( system(cmd) != true )
+
+				member = self.get_state('member')
+				puts member.inspect
 
 				return (result == true)
 			end
