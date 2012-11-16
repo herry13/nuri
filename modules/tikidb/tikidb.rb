@@ -75,8 +75,9 @@ puts 'exec: ' + tikisql_file
 					file.flush
 				end
 				cmd = "mysql --user=#{user} --password=#{passwd} --host=#{host} --port=#{port} < #{script_file}"
+puts cmd
 				result = system(cmd)
-				File.delete(script_file)
+				#File.delete(script_file)
 				return (result == true)
 			end
 		
