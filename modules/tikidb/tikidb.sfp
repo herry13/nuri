@@ -13,7 +13,7 @@ class Tikidb {
 	//procedure set_tikiweb (web isref Tikiweb) {
 	procedure set_tikiweb (webs isset Tikiweb) {
 		condition {
-			this.installed = false
+			this.installed = true
 		}
 		effect {
 			this.tikiweb = webs
