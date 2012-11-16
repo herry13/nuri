@@ -26,14 +26,7 @@ module Nuri
 
 			def read_config
 				config = {}
-				File.open(ConfigFile) do |f|
-					#f.read.split("\n").each { |line|
-					#	line.chop
-					#	key, value = line.split('=', 2)
-					#	config[key] = (value == 'true' ? true : (value == 'false' ? false : value))
-					#}
-					config = JSON[ f.read ]
-				end if File.file?(ConfigFile)
+				File.open(ConfigFile) { |f| config = JSON[ f.read ] } if File.file?(ConfigFile)
 				config
 			end
 
@@ -126,7 +119,7 @@ module Nuri
 
 			def set_tikiweb(params={})
 				config = self.read_config
-				config['tikiweb'] = params['web']
+				config['tikiweb'] = params['webs']
 				self.write_config(config)
 				true
 			end
