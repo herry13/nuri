@@ -69,5 +69,15 @@ module Nuri
 				true
 			end
 		end
+
+		class SetModifier
+			def visit(name, value, parent)
+				if value.is_a?(Hash) and value.isset
+					parent[name] = []
+					return false
+				end
+				true
+			end
+		end
 	end
 end

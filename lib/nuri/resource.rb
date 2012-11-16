@@ -30,6 +30,7 @@ module Nuri
 							object.has_key?('_super')
 					object.delete('_super')
 					@state = object
+					@state.accept(Nuri::Sfp::SetModifier.new)
 				end
 			end
 		end
