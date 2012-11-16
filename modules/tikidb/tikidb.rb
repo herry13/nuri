@@ -116,7 +116,7 @@ puts cmd
 				}
 
 				config = self.read_config
-				if not self.execute_sql(sql)
+				if not self.execute_sql(sql, 'mysql')
 					config['tikiweb'] = []
 					self.write_config(config)
 					return false
