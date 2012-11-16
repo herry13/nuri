@@ -16,7 +16,9 @@ module Nuri
 
 		#def create_instance(class_path)
 		def reset
-			return {} if @class_path == nil or @class_path == ''
+			@state = {}
+			#return {} if @class_path == nil or @class_path == ''
+			return if @class_path == nil or @class_path == ''
 
 			@class_path = @class_path.to_s if not @class_path.is_a?(String)
 			@class_path = "$.#{@class_path}" if not @class_path.isref
@@ -32,10 +34,10 @@ module Nuri
 					object['_classes'] = object['_classes'].concat(object['_super']) if
 							object.has_key?('_super')
 					object.delete('_super')
-					return object
+					#return object
 				end
 			end
-			return {}
+			#return {}
 		end
 
 		def self.set_root(root)
