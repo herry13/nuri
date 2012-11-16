@@ -77,7 +77,7 @@ puts 'exec: ' + tikisql_file
 				cmd = "mysql --user=#{user} --password=#{passwd} --host=#{host} --port=#{port} #{db_name} < #{script_file}"
 puts cmd
 				result = system(cmd)
-				#File.delete(script_file)
+				File.delete(script_file)
 				return (result == true)
 			end
 		
@@ -90,12 +90,11 @@ puts cmd
 					sql = "DROP DATABASE IF EXISTS #{db_name};"
 					return false if not self.execute_sql(sql)
 
-					config = self.read_config
-					config['installed'] = false
-					self.write_config(config)
-
-					return true
-
+					#config = self.read_config
+					#config['installed'] = false
+					#self.write_config(config)
+					cmd = '/bin/rm -rf /var/lib/tikidb'
+					return ( system(cmd) == true )
 				end
 
 				false
