@@ -15,7 +15,8 @@ module Nuri
 	
 			# get state of this component in JSON
 			def get_self_state
-				@state['tikiweb'] = []
+				self.reset
+
 				if File.file?(ConfigFile)
 					config = read_config
 					config.each { |k,v| @state[k] = v }
@@ -90,12 +91,8 @@ puts cmd
 					sql = "DROP DATABASE IF EXISTS #{db_name};"
 					return false if not self.execute_sql(sql)
 
-					#config = self.read_config
-					#config['installed'] = false
-					#self.write_config(config)
 					cmd = '/bin/rm -rf /var/lib/tikidb/'
-
-					return ( system(cmd) == true )
+					result = system(cmd)
 				end
 
 				false
