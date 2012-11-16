@@ -6,21 +6,16 @@ module Nuri
 		def register(class_path, name=nil, is_abstract=false)
 			@name = name
 			@children = Hash.new
-			#@state = self.create_instance(class_path)
-			@class_path = class_path
+			@class_path = class_path.to_s
+			self.reset
 			@goal = {}
 			@is_abstract = is_abstract
-
-			self.reset
 		end
 
-		#def create_instance(class_path)
 		def reset
 			@state = {}
-			#return {} if @class_path == nil or @class_path == ''
 			return if @class_path == nil or @class_path == ''
 
-			@class_path = @class_path.to_s if not @class_path.is_a?(String)
 			@class_path = "$.#{@class_path}" if not @class_path.isref
 			root = Nuri::Resource.get_root
 			if root != nil
@@ -34,10 +29,9 @@ module Nuri
 					object['_classes'] = object['_classes'].concat(object['_super']) if
 							object.has_key?('_super')
 					object.delete('_super')
-					#return object
+					@state = object
 				end
 			end
-			#return {}
 		end
 
 		def self.set_root(root)
