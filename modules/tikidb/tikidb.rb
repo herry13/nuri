@@ -105,14 +105,17 @@ puts cmd
 				#sql = "REVOKE ALL ON #{db_name}.* FROM '#{db_user}'@'%';";
 				#sql = "REVOKE ALL ON #{db_name}.* FROM '#{db_user}';";
 				sql = "DELETE FROM db WHERE db = '#{db_name}';";
+				return false if not self.execute_sql(sql, 'mysql')
 
 				# 2) grant permissions from current tikiweb
+				sql = ''
 				params['webs'].each.each { |host|
 					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{host}' IDENTIFIED BY '#{db_password}';"
 				}
+puts sql
 
 				config = self.read_config
-				if not self.execute_sql(sql, 'mysql')
+				if not self.execute_sql(sql)
 					config['tikiweb'] = []
 					self.write_config(config)
 					return false
