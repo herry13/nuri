@@ -93,7 +93,7 @@ puts cmd
 					#config = self.read_config
 					#config['installed'] = false
 					#self.write_config(config)
-					cmd = '/bin/rm -rf /var/lib/tikidb'
+					cmd = '/bin/rm -rf /var/lib/tikidb/'
 puts cmd
 					return ( system(cmd) == true )
 				end
