@@ -112,7 +112,7 @@ puts cmd
 				sql = ''
 				params['webs'].each.each { |host|
 					db_host = self.get_state(host + '.parent.domainname')
-					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{host}' IDENTIFIED BY '#{db_password}';"
+					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{db_host}' IDENTIFIED BY '#{db_password}';"
 				}
 puts sql
 
