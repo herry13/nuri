@@ -106,7 +106,9 @@ puts cmd
 				db_name = self.get_state('db_name')
 				db_user = self.get_state('db_user')
 				db_password = self.get_state('db_password')
-				sql = "REVOKE ALL ON #{db_name}.* FROM '#{db_user}'@'%';";
+				#sql = "REVOKE ALL ON #{db_name}.* FROM '#{db_user}'@'%';";
+				#sql = "REVOKE ALL ON #{db_name}.* FROM '#{db_user}';";
+				sql = "DELETE FROM db WHERE db = '#{db_name}';";
 
 				# 2) grant permissions from current tikiweb
 				params['webs'].each.each { |host|
