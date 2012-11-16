@@ -49,7 +49,7 @@ puts 'exec: ' + sql
 					tikisql_file = Nuri::Util.home_dir + "/modules/tikidb/tiki.sql"
 					sql = File.read(tikisql_file)
 puts 'exec: ' + tikisql_file
-					return false if not self.execute_sql(sql)
+					return false if not self.execute_sql(sql, db_name)
 
 					config = self.read_config
 					config['installed'] = true
@@ -61,7 +61,7 @@ puts 'exec: ' + tikisql_file
 				false
 			end
 
-			def execute_sql(sql)
+			def execute_sql(sql, db_name='')
 				port = self.get_state('database.port')
 				host = self.get_state('database.parent.domainname')
 				host = (host == Nuri::Util.domainname ? 'localhost' : host)
@@ -74,7 +74,7 @@ puts 'exec: ' + tikisql_file
 					file.write(sql)
 					file.flush
 				end
-				cmd = "mysql --user=#{user} --password=#{passwd} --host=#{host} --port=#{port} < #{script_file}"
+				cmd = "mysql --user=#{user} --password=#{passwd} --host=#{host} --port=#{port} #{db_name} < #{script_file}"
 puts cmd
 				result = system(cmd)
 				#File.delete(script_file)
