@@ -62,6 +62,7 @@ puts 'exec: ' + tikisql_file
 			end
 
 			def execute_sql(sql)
+puts 'execute_sql'
 				port = self.get_state('database.port')
 				host = self.get_state('database.parent.domainname')
 				host = (mysql_host == Nuri::Util.domainname ? 'localhost' : mysql_host)
