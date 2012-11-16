@@ -43,10 +43,12 @@ module Nuri
 				if db_name != nil and db_name != ''
 
 					sql = "DROP DATABASE IF EXISTS #{db_name}; CREATE DATABASE #{db_name} default character set 'UTF8'; "
+puts 'exec: ' + sql
 					return false if not self.execute_sql(sql)
 
 					tikisql_file = Nuri::Util.home_dir + "/modules/tikidb/tiki.sql"
 					sql = File.read(tikisql_file)
+puts 'exec: ' + tikisql_file
 					return false if not self.execute_sql(sql)
 
 					config = self.read_config
