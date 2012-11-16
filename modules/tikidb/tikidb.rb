@@ -67,7 +67,7 @@ puts 'exec: ' + tikisql_file
 				host = (mysql_host == Nuri::Util.domainname ? 'localhost' : mysql_host)
 				user = 'root'
 				passwd = self.get_state('database.root_password')
-
+puts 'execute_sql'
 				script_file = '/tmp/tikidb.sql'
 				result = false
 				File.open(script_file, 'w') do |file|
