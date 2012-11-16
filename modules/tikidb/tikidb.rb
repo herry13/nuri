@@ -91,7 +91,7 @@ puts cmd
 					return false if not self.execute_sql(sql)
 
 					cmd = '/bin/rm -rf /var/lib/tikidb/'
-					result = system(cmd)
+					return ( system(cmd) == true )
 				end
 
 				false

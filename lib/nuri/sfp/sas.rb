@@ -554,10 +554,6 @@ puts e.to_s
 					next if k[0,1] == '_'
 					# if the specified parameter does not have any value,
 					# then it's invalid procedure
-puts v.class.name
-if v.is_a?(Array)
-	puts procedure.ref + ' -- ' + k
-end
 					return nil if not @types.has_key?( v['_isa'] )
 					params[k] = Array.new
 					type = (v.isnull ? v['_isa'] : (v.isset ? "(#{v['_isa']})" : nil))
