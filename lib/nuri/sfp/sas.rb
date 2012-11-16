@@ -128,6 +128,8 @@ module Nuri
 	
 					# identify immutable variables
 					self.identify_immutable_variables
+self.dump_vars
+self.dump_types
 
 					# re-evaluate set variables and types
 					self.evaluate_set_variables_and_types

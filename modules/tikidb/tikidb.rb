@@ -15,6 +15,7 @@ module Nuri
 	
 			# get state of this component in JSON
 			def get_self_state
+				@state['tikiweb'] = []
 				if File.file?(ConfigFile)
 					config = read_config
 					config.each { |k,v| @state[k] = v }
