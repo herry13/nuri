@@ -87,6 +87,9 @@ puts cmd
 				db_name = self.get_state('db_name')
 
 				if db_name != nil 
+					sql = "DELETE FROM db WHERE db = '#{db_name}';";
+					return false if not self.execute_sql(sql, 'mysql')
+
 					sql = "DROP DATABASE IF EXISTS #{db_name};"
 					return false if not self.execute_sql(sql)
 
@@ -102,14 +105,13 @@ puts cmd
 				db_name = self.get_state('db_name')
 				db_user = self.get_state('db_user')
 				db_password = self.get_state('db_password')
-				#sql = "REVOKE ALL ON #{db_name}.* FROM '#{db_user}'@'%';";
-				#sql = "REVOKE ALL ON #{db_name}.* FROM '#{db_user}';";
 				sql = "DELETE FROM db WHERE db = '#{db_name}';";
 				return false if not self.execute_sql(sql, 'mysql')
 
 				# 2) grant permissions from current tikiweb
 				sql = ''
 				params['webs'].each.each { |host|
+					db_host = self.get_state(host + '.parent.domainname')
 					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{host}' IDENTIFIED BY '#{db_password}';"
 				}
 puts sql
