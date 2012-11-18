@@ -1,0 +1,98 @@
+body, table {
+	color: #0000A8;
+	font-family: verdana, sans-serif;
+	font-size: 12px;
+	text-align: left;
+	line-height: 140%;
+}
+a:link {
+	color: #0000A8;
+	text-decoration: underline;
+}
+a:visited {
+	color: #0000A8;
+}
+a:active {
+	color: #0000A8;
+}
+a:hover {
+	color: #0000A8;
+	text-decoration: none;
+}
+
+#logos {
+	margin-top: 50px;
+	margin-bottom: 50px;
+	padding-top: 10px;
+	text-align: center;
+	border-top: 1px solid #0000A8;
+}
+
+.title, #buzzword {
+	font-size: 30px;
+	font-weight: bold;
+	color: #a80000;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	text-align: center;
+}
+
+sup {
+	color: #a80000;
+	font-style: italic;
+}
+
+#top-table td {
+	border: 1px solid #00008A;
+	padding: 0px;
+	margin: 0px;
+}
+
+.subtitle {
+	font-size: 18px;
+	font-weight: bold;
+	margin-top: 5px;
+	margin-bottom: 2px;
+}
+
+table {
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+
+ul {
+	margin: 0px;
+	padding-top: 0px;
+	padding-left: 20px;
+}
+
+#buzzword {
+	font-size: 20px;
+	font-style: italic;
+}
+
+#conversation {
+	width: 440px;
+	padding: 10px;
+	background-color: #3b3b82;
+	color: #fff;
+	line-height: 150%;
+	margin: 0px;
+	height: 100%;
+}
+
+#sidebox {
+	width: 440px;
+	padding: 10px;
+	height: 100%;
+	margin: 0px;
+}
+
+#main {
+	width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+	border: 0px;
+}
+

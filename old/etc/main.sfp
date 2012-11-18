@@ -1,0 +1,98 @@
+system {
+	hpvm16 isa Machine {
+		domainname is "hpvm16.diy.inf.ed.ac.uk"
+	}
+	hpvm17 isa Machine {
+		domainname is "hpvm17.diy.inf.ed.ac.uk"
+	}
+	hpvm18 isa Machine {
+		domainname is "hpvm18.diy.inf.ed.ac.uk"
+	}
+	hpvm19 isa Machine {
+		domainname is "hpvm19.diy.inf.ed.ac.uk"
+	}
+	hpvm20 isa Machine {
+		domainname is "hpvm20.diy.inf.ed.ac.uk"
+	}
+}
+
+goal constraint {
+	hpvm19 {
+		apache.running
+	}
+
+	/*hpvm16 {
+		mysql.public = true
+		mysql.running
+		mysql.root_password is "root"
+	
+		tikidb.tikiweb = ( hpvm17.tikiweb, hpvm18.tikiweb )
+		tikidb.db_name = "tikiwiki"
+		tikidb.db_user = "tiki"
+		tikidb.db_password = "tiki"
+		tikidb.database = hpvm16.mysql
+	}
+
+	hpvm17 {
+		apache.running
+		apache.port is 80
+		apache.php_module is true
+		apache.php_mysql_module is true
+		apache.document_root is "/var/www"
+		apache.server_name is "hpvm20.diy.inf.ed.ac.uk"
+
+		tikiweb.installed
+		tikiweb.path = "/wiki"
+		tikiweb.webserver = hpvm17.apache
+		tikiweb.database = hpvm16.tikidb
+	}
+
+	hpvm18 {
+		apache.running
+		apache.port is 80
+		apache.php_module is true
+		apache.php_mysql_module is true
+		apache.document_root is "/var/www"
+		apache.server_name is "hpvm20.diy.inf.ed.ac.uk"
+
+		tikiweb.installed
+		tikiweb.path = "/wiki"
+		tikiweb.webserver = hpvm18.apache
+		tikiweb.database = hpvm16.tikidb
+	}
+
+	hpvm20 {
+		apachelb.installed
+		apachelb.server_name = "hpvm20.diy.inf.ed.ac.uk"
+		apachelb.members = ( "http://hpvm17.diy.inf.ed.ac.uk", "http://hpvm18.diy.inf.ed.ac.uk" )
+		apachelb.running
+	}*/
+
+	/*hpvm16 {
+		not mysql.installed
+		not tikidb.installed
+	}
+	hpvm17 {
+		not apache.installed
+		not tikiweb.installed
+	}
+	hpvm18 {
+		not apache.installed
+		not tikiweb.installed
+	}
+	hpvm20 {
+		not apachelb.installed
+	}*/
+
+	/*sometime {
+		hpvm17.apache.running = false
+	}*/
+
+}
+
+global constraint {
+	if hpvm16.mysql.installed = false then hpvm16.tikidb.installed = false
+
+	if hpvm20.apachelb.running then hpvm17.apache.running
+	if hpvm20.apachelb.running then hpvm18.apache.running
+}
