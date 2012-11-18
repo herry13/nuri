@@ -123,7 +123,7 @@ a.button {
   font-size: 13px;
   padding: 12px 8px 12px 8px;
   display: block;
-  /*float: left;*/
+  float: center;
   width: 179px;
   margin-right: 14px;
   background: #fdfdfd; /* Old browsers */
