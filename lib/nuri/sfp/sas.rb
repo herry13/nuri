@@ -131,8 +131,6 @@ module Nuri
 
 					# re-evaluate set variables and types
 					self.evaluate_set_variables_and_types
-self.dump_vars
-self.dump_types
 	
 puts 'process goal'	
 					### process goal constraint ###
@@ -173,9 +171,9 @@ puts '...finish'
 					# detect and merge mutually inclusive operators
 					self.search_and_merge_mutually_inclusive_operators
 	
-					#self.dump_types
+					self.dump_types
 					#self.dump_operators
-					#self.dump_vars
+					self.dump_vars
 	
 					return create_output
 				rescue Exception => e

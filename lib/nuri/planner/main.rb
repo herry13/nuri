@@ -2,7 +2,7 @@ require 'nuri/sfp/main'
 
 module Nuri
 	module Planner
-		Heuristic = 'cg' # lmcut, cg, ff, blind
+		Heuristic = 'ff' # lmcut, cg, ff, blind
 
 		class Solver
 			attr_reader :parser

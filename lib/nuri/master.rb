@@ -139,23 +139,28 @@ module Nuri
 				plan = planner.solve_sfp_to_sfw(sfp)
 
 				puts JSON.pretty_generate(plan)
-				self.exec(plan)
+				self.execute_workflow(plan)
 			end
 
-			def exec(plan)
+			def execute_workflow(plan)
 				state = get_state
 				# TODO -- execute the plan here
 				succeed = true
 				if plan['workflow'] != nil
-					plan['workflow'].each do |action|
-						node = self.get_node(action['name'], @main['system'])
-						if node == nil
-							succeed = false
-						else
-							succeed = self.execute(action, node['domainname'], state)
+					begin
+						plan['workflow'].each do |action|
+							node = self.get_node(action['name'], @main['system'])
+							if node == nil
+								succeed = false
+							else
+								succeed = self.execute(action, node['domainname'], state)
+							end
+							break if not succeed
+							state = get_state
 						end
-						break if not succeed
-						state = get_state
+					rescue Timeout::Error
+						succeed = false
+						# TODO: retry exec workflow here
 					end
 				end
 				succeed
@@ -180,6 +185,9 @@ print 'exec: ' + action['name'] + '...'
 					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
 					verify(action) if @verify_execution
 					return true if res.code == '200'
+				rescue Timeout::Error
+					Nuri::Util.log "Timeout when executing: " + action['name']
+					raise Timeout::Error
 				rescue ExecutionFailedException => efe
 					Nuri::Util.log efe.to_s
 				rescue Exception => e
@@ -261,7 +269,7 @@ puts 'FAILED'
 			File.open(sfw_file) { |f| plan = JSON[ f.read ] }
 			if plan != nil
 				master = Nuri::Master::Daemon.new
-				if master.exec(plan)
+				if master.execute_workflow(plan)
 					puts 'Execution succeed!'
 				else
 					puts 'Execution failed!'
