@@ -1,3 +1,8 @@
+18-11-2012
+- implement modules to manage TikiWiki; separated into two modules:
+	- Tikiweb -- managing the frontend: installing PHP files, set PHP config
+	- Tikidb -- managing the backend: executing SQL to create the database, grant/revoke permissions
+
 12-11-2012
 - implement module "Apachelb" -- Apache Load Balancer
 - allow Set as argument of procedure
