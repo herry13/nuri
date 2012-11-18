@@ -1,0 +1,831 @@
+--- variables
+$.hpvm16|$.Machine|$.hpvm16|-|final
+	[$.hpvm16]
+$.hpvm16.running|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm16.nuri_latest|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm16.memory_total|$.Integer|503456|-|notfinal
+	[503456]
+$.hpvm16.memory_free|$.Integer|137012|-|notfinal
+	[137012]
+$.hpvm16.os|$.String|linux|-|notfinal
+	[linux]
+$.hpvm16.platform|$.String|ubuntu|-|notfinal
+	[ubuntu]
+$.hpvm16.hostname|$.String|hpvm16|-|notfinal
+	[hpvm16]
+$.hpvm16.domainname|$.String|hpvm16.diy.inf.ed.ac.uk|-|notfinal
+	[hpvm16.diy.inf.ed.ac.uk]
+$.hpvm16.version|$.String|3.2.0-25-generic|-|notfinal
+	[3.2.0-25-generic]
+$.hpvm16.arch|$.String|x86_64|-|notfinal
+	[x86_64]
+$.hpvm16.cpus|$.Integer|1|-|notfinal
+	[1]
+$.hpvm16.tikiweb|$.Tikiweb|$.hpvm16.tikiweb|-|final
+	[$.hpvm16.tikiweb]
+$.hpvm16.tikiweb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm16.tikiweb.path|$.String|/wiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm16.tikiweb.webserver|$.Apache|null|-|notfinal
+	[null,$.hpvm16.apache,$.hpvm17.apache,$.hpvm18.apache,$.hpvm20.apache]
+$.hpvm16.tikiweb.database|$.Tikidb|null|-|notfinal
+	[null,$.hpvm16.tikidb,$.hpvm17.tikidb,$.hpvm18.tikidb,$.hpvm20.tikidb]
+$.hpvm16.tikidb|$.Tikidb|$.hpvm16.tikidb|-|final
+	[$.hpvm16.tikidb]
+$.hpvm16.tikidb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm16.tikidb.db_name|$.String|tikiwiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm16.tikidb.db_user|$.String|tiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm16.tikidb.db_password|$.String|tikipassword|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm16.tikidb.tikiweb|($.Tikiweb)|[]|-|notfinal
+	[[],["$.hpvm17.tikiweb", "$.hpvm18.tikiweb"]]
+$.hpvm16.tikidb.database|$.Mysql|null|-|notfinal
+	[null,$.hpvm16.mysql,$.hpvm17.mysql,$.hpvm18.mysql,$.hpvm20.mysql]
+$.hpvm16.apachelb|$.Apachelb|$.hpvm16.apachelb|-|final
+	[$.hpvm16.apachelb]
+$.hpvm16.apachelb.port|$.Integer|80|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm16.apachelb.members|($.String)|[]|-|notfinal
+	[[],["http://hpvm17.diy.inf.ed.ac.uk", "http://hpvm18.diy.inf.ed.ac.uk"]]
+$.hpvm16.apachelb.server_name|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm16.apachelb.installed|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm16.apachelb.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm16.apachelb.version|$.String|2.2.22-1ubuntu1|-|notfinal
+	[2.2.22-1ubuntu1]
+$.hpvm16.apache|$.Apache|$.hpvm16.apache|-|final
+	[$.hpvm16.apache]
+$.hpvm16.apache.port|$.Integer|80|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm16.apache.document_root|$.String|/var/www|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm16.apache.php_module|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm16.apache.php_mysql_module|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm16.apache.server_name|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm16.apache.installed|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm16.apache.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm16.apache.version|$.String|2.2.22-1ubuntu1|-|notfinal
+	[2.2.22-1ubuntu1]
+$.hpvm16.apache.docment_root|$.String||-|notfinal
+	[]
+$.hpvm16.mysql|$.Mysql|$.hpvm16.mysql|-|final
+	[$.hpvm16.mysql]
+$.hpvm16.mysql.port|$.Integer|3306|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm16.mysql.root_password|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm16.mysql.public|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm16.mysql.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm16.mysql.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm16.mysql.version|$.String||-|notfinal
+	[]
+$.hpvm17|$.Machine|$.hpvm17|-|final
+	[$.hpvm17]
+$.hpvm17.memory_total|$.Integer|503456|-|notfinal
+	[503456]
+$.hpvm17.hostname|$.String|hpvm17|-|notfinal
+	[hpvm17]
+$.hpvm17.running|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm17.cpus|$.Integer|1|-|notfinal
+	[1]
+$.hpvm17.memory_free|$.Integer|159780|-|notfinal
+	[159780]
+$.hpvm17.os|$.String|linux|-|notfinal
+	[linux]
+$.hpvm17.nuri_latest|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.version|$.String|3.2.0-25-generic|-|notfinal
+	[3.2.0-25-generic]
+$.hpvm17.arch|$.String|x86_64|-|notfinal
+	[x86_64]
+$.hpvm17.mysql|$.Mysql|$.hpvm17.mysql|-|final
+	[$.hpvm17.mysql]
+$.hpvm17.mysql.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.mysql.root_password|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm17.mysql.public|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.mysql.port|$.Integer|3306|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm17.mysql.version|$.String||-|notfinal
+	[]
+$.hpvm17.mysql.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.tikidb|$.Tikidb|$.hpvm17.tikidb|-|final
+	[$.hpvm17.tikidb]
+$.hpvm17.tikidb.db_password|$.String|tikipassword|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm17.tikidb.db_user|$.String|tiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm17.tikidb.database|$.Mysql|null|-|notfinal
+	[null,$.hpvm16.mysql,$.hpvm17.mysql,$.hpvm18.mysql,$.hpvm20.mysql]
+$.hpvm17.tikidb.db_name|$.String|tikiwiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm17.tikidb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.tikidb.tikiweb|($.Tikiweb)|[]|-|notfinal
+	[[],["$.hpvm17.tikiweb", "$.hpvm18.tikiweb"]]
+$.hpvm17.apache|$.Apache|$.hpvm17.apache|-|final
+	[$.hpvm17.apache]
+$.hpvm17.apache.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.apache.php_mysql_module|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.apache.port|$.Integer|0|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm17.apache.php_module|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.apache.version|$.String||-|notfinal
+	[]
+$.hpvm17.apache.server_name|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm17.apache.document_root|$.String|/var/www|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm17.apache.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.apache.docment_root|$.String||-|notfinal
+	[]
+$.hpvm17.platform|$.String|ubuntu|-|notfinal
+	[ubuntu]
+$.hpvm17.domainname|$.String|hpvm17.diy.inf.ed.ac.uk|-|notfinal
+	[hpvm17.diy.inf.ed.ac.uk]
+$.hpvm17.apachelb|$.Apachelb|$.hpvm17.apachelb|-|final
+	[$.hpvm17.apachelb]
+$.hpvm17.apachelb.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.apachelb.port|$.Integer|80|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm17.apachelb.version|$.String||-|notfinal
+	[]
+$.hpvm17.apachelb.server_name|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm17.apachelb.members|($.String)|[]|-|notfinal
+	[[],["http://hpvm17.diy.inf.ed.ac.uk", "http://hpvm18.diy.inf.ed.ac.uk"]]
+$.hpvm17.apachelb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm17.tikiweb|$.Tikiweb|$.hpvm17.tikiweb|-|final
+	[$.hpvm17.tikiweb]
+$.hpvm17.tikiweb.webserver|$.Apache|$.hpvm17.apache|-|notfinal
+	[null,$.hpvm16.apache,$.hpvm17.apache,$.hpvm18.apache,$.hpvm20.apache]
+$.hpvm17.tikiweb.path|$.String|/wiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm17.tikiweb.database|$.Tikidb|$.hpvm16.tikidb|-|notfinal
+	[null,$.hpvm16.tikidb,$.hpvm17.tikidb,$.hpvm18.tikidb,$.hpvm20.tikidb]
+$.hpvm17.tikiweb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18|$.Machine|$.hpvm18|-|final
+	[$.hpvm18]
+$.hpvm18.memory_total|$.Integer|503456|-|notfinal
+	[503456]
+$.hpvm18.platform|$.String|ubuntu|-|notfinal
+	[ubuntu]
+$.hpvm18.tikiweb|$.Tikiweb|$.hpvm18.tikiweb|-|final
+	[$.hpvm18.tikiweb]
+$.hpvm18.tikiweb.database|$.Tikidb|$.hpvm16.tikidb|-|notfinal
+	[null,$.hpvm16.tikidb,$.hpvm17.tikidb,$.hpvm18.tikidb,$.hpvm20.tikidb]
+$.hpvm18.tikiweb.path|$.String|/wiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm18.tikiweb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.tikiweb.webserver|$.Apache|$.hpvm18.apache|-|notfinal
+	[null,$.hpvm16.apache,$.hpvm17.apache,$.hpvm18.apache,$.hpvm20.apache]
+$.hpvm18.memory_free|$.Integer|158256|-|notfinal
+	[158256]
+$.hpvm18.cpus|$.Integer|1|-|notfinal
+	[1]
+$.hpvm18.running|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm18.hostname|$.String|hpvm18|-|notfinal
+	[hpvm18]
+$.hpvm18.domainname|$.String|hpvm18.diy.inf.ed.ac.uk|-|notfinal
+	[hpvm18.diy.inf.ed.ac.uk]
+$.hpvm18.nuri_latest|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.version|$.String|3.2.0-25-generic|-|notfinal
+	[3.2.0-25-generic]
+$.hpvm18.arch|$.String|x86_64|-|notfinal
+	[x86_64]
+$.hpvm18.apachelb|$.Apachelb|$.hpvm18.apachelb|-|final
+	[$.hpvm18.apachelb]
+$.hpvm18.apachelb.port|$.Integer|80|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm18.apachelb.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.apachelb.server_name|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm18.apachelb.members|($.String)|[]|-|notfinal
+	[[],["http://hpvm17.diy.inf.ed.ac.uk", "http://hpvm18.diy.inf.ed.ac.uk"]]
+$.hpvm18.apachelb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.apachelb.version|$.String||-|notfinal
+	[]
+$.hpvm18.os|$.String|linux|-|notfinal
+	[linux]
+$.hpvm18.tikidb|$.Tikidb|$.hpvm18.tikidb|-|final
+	[$.hpvm18.tikidb]
+$.hpvm18.tikidb.database|$.Mysql|null|-|notfinal
+	[null,$.hpvm16.mysql,$.hpvm17.mysql,$.hpvm18.mysql,$.hpvm20.mysql]
+$.hpvm18.tikidb.tikiweb|($.Tikiweb)|[]|-|notfinal
+	[[],["$.hpvm17.tikiweb", "$.hpvm18.tikiweb"]]
+$.hpvm18.tikidb.db_user|$.String|tiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm18.tikidb.db_name|$.String|tikiwiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm18.tikidb.db_password|$.String|tikipassword|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm18.tikidb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.apache|$.Apache|$.hpvm18.apache|-|final
+	[$.hpvm18.apache]
+$.hpvm18.apache.port|$.Integer|0|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm18.apache.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.apache.server_name|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm18.apache.docment_root|$.String||-|notfinal
+	[]
+$.hpvm18.apache.php_module|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.apache.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.apache.document_root|$.String|/var/www|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm18.apache.version|$.String||-|notfinal
+	[]
+$.hpvm18.apache.php_mysql_module|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.mysql|$.Mysql|$.hpvm18.mysql|-|final
+	[$.hpvm18.mysql]
+$.hpvm18.mysql.port|$.Integer|3306|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm18.mysql.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.mysql.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.mysql.public|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm18.mysql.root_password|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm18.mysql.version|$.String||-|notfinal
+	[]
+$.hpvm20|$.Machine|$.hpvm20|-|final
+	[$.hpvm20]
+$.hpvm20.cpus|$.Integer|1|-|notfinal
+	[1]
+$.hpvm20.apache|$.Apache|$.hpvm20.apache|-|final
+	[$.hpvm20.apache]
+$.hpvm20.apache.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.apache.document_root|$.String|/var/www|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm20.apache.server_name|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm20.apache.php_module|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.apache.docment_root|$.String||-|notfinal
+	[]
+$.hpvm20.apache.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.apache.php_mysql_module|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.apache.port|$.Integer|0|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm20.apache.version|$.String||-|notfinal
+	[]
+$.hpvm20.tikidb|$.Tikidb|$.hpvm20.tikidb|-|final
+	[$.hpvm20.tikidb]
+$.hpvm20.tikidb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.tikidb.database|$.Mysql|null|-|notfinal
+	[null,$.hpvm16.mysql,$.hpvm17.mysql,$.hpvm18.mysql,$.hpvm20.mysql]
+$.hpvm20.tikidb.tikiweb|($.Tikiweb)|[]|-|notfinal
+	[[],["$.hpvm17.tikiweb", "$.hpvm18.tikiweb"]]
+$.hpvm20.tikidb.db_password|$.String|tikipassword|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm20.tikidb.db_name|$.String|tikiwiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm20.tikidb.db_user|$.String|tiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm20.os|$.String|linux|-|notfinal
+	[linux]
+$.hpvm20.hostname|$.String|hpvm20|-|notfinal
+	[hpvm20]
+$.hpvm20.arch|$.String|x86_64|-|notfinal
+	[x86_64]
+$.hpvm20.domainname|$.String|hpvm20.diy.inf.ed.ac.uk|-|notfinal
+	[hpvm20.diy.inf.ed.ac.uk]
+$.hpvm20.apachelb|$.Apachelb|$.hpvm20.apachelb|-|final
+	[$.hpvm20.apachelb]
+$.hpvm20.apachelb.members|($.String)|[]|-|notfinal
+	[[],["http://hpvm17.diy.inf.ed.ac.uk", "http://hpvm18.diy.inf.ed.ac.uk"]]
+$.hpvm20.apachelb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.apachelb.server_name|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm20.apachelb.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.apachelb.port|$.Integer|80|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm20.apachelb.version|$.String||-|notfinal
+	[]
+$.hpvm20.mysql|$.Mysql|$.hpvm20.mysql|-|final
+	[$.hpvm20.mysql]
+$.hpvm20.mysql.public|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.mysql.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.mysql.root_password|$.String||-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm20.mysql.running|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.mysql.port|$.Integer|0|-|notfinal
+	[503456,137012,1,80,3306,159780,0,158256,146572]
+$.hpvm20.mysql.version|$.String||-|notfinal
+	[]
+$.hpvm20.running|$.Boolean|true|-|notfinal
+	[true,false]
+$.hpvm20.memory_total|$.Integer|503456|-|notfinal
+	[503456]
+$.hpvm20.tikiweb|$.Tikiweb|$.hpvm20.tikiweb|-|final
+	[$.hpvm20.tikiweb]
+$.hpvm20.tikiweb.installed|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.tikiweb.webserver|$.Apache|null|-|notfinal
+	[null,$.hpvm16.apache,$.hpvm17.apache,$.hpvm18.apache,$.hpvm20.apache]
+$.hpvm20.tikiweb.database|$.Tikidb|null|-|notfinal
+	[null,$.hpvm16.tikidb,$.hpvm17.tikidb,$.hpvm18.tikidb,$.hpvm20.tikidb]
+$.hpvm20.tikiweb.path|$.String|/wiki|-|notfinal
+	[linux,ubuntu,hpvm16,hpvm16.diy.inf.ed.ac.uk,3.2.0-25-generic,x86_64,/wiki,tikiwiki,tiki,tikipassword,,2.2.22-1ubuntu1,/var/www,hpvm17,hpvm17.diy.inf.ed.ac.uk,hpvm18,hpvm18.diy.inf.ed.ac.uk,hpvm20,hpvm20.diy.inf.ed.ac.uk,root]
+$.hpvm20.memory_free|$.Integer|146572|-|notfinal
+	[146572]
+$.hpvm20.platform|$.String|ubuntu|-|notfinal
+	[ubuntu]
+$.hpvm20.nuri_latest|$.Boolean|false|-|notfinal
+	[true,false]
+$.hpvm20.version|$.String|3.2.0-25-generic|-|notfinal
+	[3.2.0-25-generic]
+--- types
+$.Boolean: true false | 2
+$.Integer: 503456 137012 1 80 3306 159780 0 158256 146572 | 9
+$.String: linux ubuntu hpvm16 hpvm16.diy.inf.ed.ac.uk 3.2.0-25-generic x86_64 /wiki tikiwiki tiki tikipassword  2.2.22-1ubuntu1 /var/www hpvm17 hpvm17.diy.inf.ed.ac.uk hpvm18 hpvm18.diy.inf.ed.ac.uk hpvm20 hpvm20.diy.inf.ed.ac.uk root | 20
+$.Machine: null $.hpvm16 $.hpvm17 $.hpvm18 $.hpvm20 | 5
+$.Tikiweb: null $.hpvm16.tikiweb $.hpvm17.tikiweb $.hpvm18.tikiweb $.hpvm20.tikiweb | 5
+$.Apache: null $.hpvm16.apache $.hpvm17.apache $.hpvm18.apache $.hpvm20.apache | 5
+$.Tikidb: null $.hpvm16.tikidb $.hpvm17.tikidb $.hpvm18.tikidb $.hpvm20.tikidb | 5
+($.Tikiweb): [] ["$.hpvm17.tikiweb", "$.hpvm18.tikiweb"] | 2
+$.Mysql: null $.hpvm16.mysql $.hpvm17.mysql $.hpvm18.mysql $.hpvm20.mysql | 5
+$.Service: null $.hpvm16.apachelb $.hpvm16.apache $.hpvm16.mysql $.hpvm17.mysql $.hpvm17.apache $.hpvm17.apachelb $.hpvm18.apachelb $.hpvm18.apache $.hpvm18.mysql $.hpvm20.apache $.hpvm20.apachelb $.hpvm20.mysql | 13
+$.Apachelb: null $.hpvm16.apachelb $.hpvm17.apachelb $.hpvm18.apachelb $.hpvm20.apachelb | 5
+($.String): [] ["http://hpvm17.diy.inf.ed.ac.uk", "http://hpvm18.diy.inf.ed.ac.uk"] | 2
+process goal
+...finish
+process global constriant
+...finish
+process sometime
+...finish
+process procedures
+...finish
+/home/herry/workspace/sfplanner/nuri/lib/nuri/planner/linux/preprocess < /tmp/nuri_20493/problem.sas | /home/herry/workspace/sfplanner/nuri/lib/nuri/planner/linux/downward --search "lazy_greedy(cg(), preferred=cg())" --plan-file /tmp/nuri_20493/out.plan
+Simplifying transitions... done!
+Initializing heuristic cache... done!
+Initializing heuristic cache... done!
+Conducting lazy best first search, (real) bound = 2147483647
+Initializing causal graph heuristic...
+Initializing causal graph heuristic...
+Best heuristic value: 46 [g=0, 1 evaluated, 0 expanded, t=0.04s]
+Best heuristic value: 45 [g=1, 176 evaluated, 175 expanded, t=0.06s]
+Best heuristic value: 44 [g=2, 413 evaluated, 412 expanded, t=0.1s]
+Best heuristic value: 42 [g=3, 919 evaluated, 918 expanded, t=0.14s]
+Best heuristic value: 40 [g=4, 927 evaluated, 926 expanded, t=0.14s]
+Best heuristic value: 37 [g=5, 935 evaluated, 934 expanded, t=0.14s]
+Best heuristic value: 36 [g=6, 961 evaluated, 960 expanded, t=0.16s]
+Best heuristic value: 35 [g=7, 970 evaluated, 969 expanded, t=0.16s]
+Best heuristic value: 29 [g=8, 1078 evaluated, 1077 expanded, t=0.16s]
+Best heuristic value: 28 [g=9, 1132 evaluated, 1131 expanded, t=0.16s]
+Best heuristic value: 26 [g=10, 1189 evaluated, 1188 expanded, t=0.18s]
+Best heuristic value: 24 [g=11, 1226 evaluated, 1225 expanded, t=0.18s]
+Best heuristic value: 23 [g=12, 1254 evaluated, 1253 expanded, t=0.18s]
+Best heuristic value: 22 [g=13, 1332 evaluated, 1331 expanded, t=0.18s]
+Best heuristic value: 21 [g=14, 1411 evaluated, 1410 expanded, t=0.18s]
+Best heuristic value: 15 [g=15, 1497 evaluated, 1496 expanded, t=0.2s]
+Best heuristic value: 14 [g=16, 1574 evaluated, 1573 expanded, t=0.2s]
+Best heuristic value: 12 [g=17, 1635 evaluated, 1634 expanded, t=0.2s]
+Best heuristic value: 10 [g=18, 1676 evaluated, 1675 expanded, t=0.2s]
+Best heuristic value: 9 [g=19, 1704 evaluated, 1703 expanded, t=0.2s]
+Best heuristic value: 8 [g=20, 1786 evaluated, 1785 expanded, t=0.2s]
+Best heuristic value: 7 [g=21, 1869 evaluated, 1868 expanded, t=0.2s]
+Best heuristic value: 3 [g=22, 1933 evaluated, 1932 expanded, t=0.22s]
+Best heuristic value: 2 [g=23, 1978 evaluated, 1977 expanded, t=0.22s]
+Best heuristic value: 1 [g=24, 2040 evaluated, 2039 expanded, t=0.22s]
+Best heuristic value: 0 [g=25, 2087 evaluated, 2086 expanded, t=0.22s]
+Solution found!
+Actual search time: 0.18s [t=0.22s]
+op_3-globalop-0 (0)
+op_229$.hpvm16.tikidb.set_account $.user=tiki $.passwd=tiki (1)
+op_3-globalop-0 (0)
+op_461$.hpvm16.tikidb.set_database $.db=$.hpvm16.mysql (1)
+op_3-globalop-0 (0)
+op_607$.hpvm16.mysql.install (1)
+op_7-globalop-0 (0)
+op_609$.hpvm16.mysql.start (1)
+op_7-globalop-0 (0)
+op_485$.hpvm16.tikidb.install (1)
+op_7-globalop-0 (0)
+op_604$.hpvm16.mysql.set_root_password $.passwd=root (1)
+op_7-globalop-0 (0)
+op_60$.hpvm16.tikidb.set_tikiweb $.webs=["$.hpvm17.tikiweb", "$.hpvm18.tikiweb"] (1)
+op_7-globalop-0 (0)
+op_1148$.hpvm17.apache.install (1)
+op_7-globalop-0 (0)
+op_1110$.hpvm17.apache.set_server_name $.target=hpvm20.diy.inf.ed.ac.uk (1)
+op_7-globalop-0 (0)
+op_1138$.hpvm17.apache.install_php_module (1)
+op_7-globalop-0 (0)
+op_1117$.hpvm17.apache.install_php_mysql_module (1)
+op_7-globalop-0 (0)
+op_1220$.hpvm17.tikiweb.install (1)
+op_7-globalop-0 (0)
+op_1142$.hpvm17.apache.set_port $.target=80 (1)
+op_7-globalop-0 (0)
+op_1115$.hpvm17.apache.start (1)
+op_5-globalop-0 (0)
+op_1807$.hpvm18.apache.install (1)
+op_5-globalop-0 (0)
+op_1792$.hpvm18.apache.set_server_name $.target=hpvm20.diy.inf.ed.ac.uk (1)
+op_5-globalop-0 (0)
+op_1794$.hpvm18.apache.install_php_module (1)
+op_5-globalop-0 (0)
+op_1805$.hpvm18.apache.install_php_mysql_module (1)
+op_5-globalop-0 (0)
+op_1275$.hpvm18.tikiweb.install (1)
+op_5-globalop-0 (0)
+op_1799$.hpvm18.apache.set_port $.target=80 (1)
+op_5-globalop-0 (0)
+op_1752$.hpvm18.apache.start (1)
+op_4-globalop-0 (0)
+op_2339$.hpvm20.apachelb.install (1)
+op_4-globalop-0 (0)
+op_2341$.hpvm20.apachelb.set_members $.members=["http://hpvm17.diy.inf.ed.ac.uk", "http://hpvm18.diy.inf.ed.ac.uk"] (1)
+op_4-globalop-0 (0)
+op_2371$.hpvm20.apachelb.set_server_name $.name=hpvm20.diy.inf.ed.ac.uk (1)
+op_4-globalop-0 (0)
+op_2338$.hpvm20.apachelb.start (1)
+op_4-globalop-0 (0)
+Plan length: 51 step(s).
+Plan cost: 25
+Initial state h value: 46.
+Expanded 2087 state(s).
+Reopened 0 state(s).
+Evaluated 2088 state(s).
+Evaluations: 4176
+Generated 44143 state(s).
+Dead ends: 0 state(s).
+Search time: 0.18s
+Total time: 0.22s
+Peak memory: 5144 KB
+{
+  "type": "sequential",
+  "workflow": [
+    {
+      "name": "$.hpvm16.tikidb.set_account",
+      "parameters": {
+        "$.user": "tiki",
+        "$.passwd": "tiki"
+      },
+      "condition": {
+        "$.hpvm16.tikidb.installed": false
+      },
+      "effect": {
+        "$.hpvm16.tikidb.db_user": "tiki",
+        "$.hpvm16.tikidb.db_password": "tiki"
+      }
+    },
+    {
+      "name": "$.hpvm16.tikidb.set_database",
+      "parameters": {
+        "$.db": "$.hpvm16.mysql"
+      },
+      "condition": {
+        "$.hpvm16.tikidb.installed": false
+      },
+      "effect": {
+        "$.hpvm16.tikidb.database": "$.hpvm16.mysql"
+      }
+    },
+    {
+      "name": "$.hpvm16.mysql.install",
+      "parameters": {
+      },
+      "condition": {
+      },
+      "effect": {
+        "$.hpvm16.mysql.installed": true
+      }
+    },
+    {
+      "name": "$.hpvm16.mysql.start",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm16.mysql.installed": true
+      },
+      "effect": {
+        "$.hpvm16.mysql.running": true
+      }
+    },
+    {
+      "name": "$.hpvm16.tikidb.install",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm16.tikidb.database": "$.hpvm16.mysql",
+        "$.hpvm16.mysql.running": true
+      },
+      "effect": {
+        "$.hpvm16.tikidb.installed": true
+      }
+    },
+    {
+      "name": "$.hpvm16.mysql.set_root_password",
+      "parameters": {
+        "$.passwd": "root"
+      },
+      "condition": {
+        "$.hpvm16.mysql.running": true
+      },
+      "effect": {
+        "$.hpvm16.mysql.root_password": "root"
+      }
+    },
+    {
+      "name": "$.hpvm16.tikidb.set_tikiweb",
+      "parameters": {
+        "$.webs": [
+          "$.hpvm17.tikiweb",
+          "$.hpvm18.tikiweb"
+        ]
+      },
+      "condition": {
+        "$.hpvm16.tikidb.installed": true
+      },
+      "effect": {
+        "$.hpvm16.tikidb.tikiweb": [
+          "$.hpvm17.tikiweb",
+          "$.hpvm18.tikiweb"
+        ]
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.install",
+      "parameters": {
+      },
+      "condition": {
+      },
+      "effect": {
+        "$.hpvm17.apache.installed": true
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.set_server_name",
+      "parameters": {
+        "$.target": "hpvm20.diy.inf.ed.ac.uk"
+      },
+      "condition": {
+        "$.hpvm17.apache.running": false,
+        "$.hpvm17.apache.installed": true
+      },
+      "effect": {
+        "$.hpvm17.apache.server_name": "hpvm20.diy.inf.ed.ac.uk"
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.install_php_module",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.apache.running": false,
+        "$.hpvm17.apache.installed": true
+      },
+      "effect": {
+        "$.hpvm17.apache.php_module": true
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.install_php_mysql_module",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.apache.php_module": true,
+        "$.hpvm17.apache.running": false,
+        "$.hpvm17.apache.installed": true
+      },
+      "effect": {
+        "$.hpvm17.apache.php_mysql_module": true
+      }
+    },
+    {
+      "name": "$.hpvm17.tikiweb.install",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.tikiweb.webserver": "$.hpvm17.apache",
+        "$.hpvm17.apache.running": false,
+        "$.hpvm17.apache.php_module": true,
+        "$.hpvm17.tikiweb.database": "$.hpvm16.tikidb",
+        "$.hpvm16.tikidb.installed": true,
+        "$.hpvm17.apache.php_mysql_module": true,
+        "$.hpvm17.apache.installed": true
+      },
+      "effect": {
+        "$.hpvm17.tikiweb.installed": true
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.set_port",
+      "parameters": {
+        "$.target": 80
+      },
+      "condition": {
+        "$.hpvm17.apache.running": false,
+        "$.hpvm17.apache.installed": true
+      },
+      "effect": {
+        "$.hpvm17.apache.port": 80
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.start",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.apache.installed": true
+      },
+      "effect": {
+        "$.hpvm17.apache.running": true
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.install",
+      "parameters": {
+      },
+      "condition": {
+      },
+      "effect": {
+        "$.hpvm18.apache.installed": true
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.set_server_name",
+      "parameters": {
+        "$.target": "hpvm20.diy.inf.ed.ac.uk"
+      },
+      "condition": {
+        "$.hpvm18.apache.installed": true,
+        "$.hpvm18.apache.running": false
+      },
+      "effect": {
+        "$.hpvm18.apache.server_name": "hpvm20.diy.inf.ed.ac.uk"
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.install_php_module",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm18.apache.installed": true,
+        "$.hpvm18.apache.running": false
+      },
+      "effect": {
+        "$.hpvm18.apache.php_module": true
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.install_php_mysql_module",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm18.apache.installed": true,
+        "$.hpvm18.apache.php_module": true,
+        "$.hpvm18.apache.running": false
+      },
+      "effect": {
+        "$.hpvm18.apache.php_mysql_module": true
+      }
+    },
+    {
+      "name": "$.hpvm18.tikiweb.install",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm18.tikiweb.webserver": "$.hpvm18.apache",
+        "$.hpvm18.apache.installed": true,
+        "$.hpvm18.apache.php_mysql_module": true,
+        "$.hpvm18.apache.php_module": true,
+        "$.hpvm18.apache.running": false,
+        "$.hpvm18.tikiweb.database": "$.hpvm16.tikidb",
+        "$.hpvm16.tikidb.installed": true
+      },
+      "effect": {
+        "$.hpvm18.tikiweb.installed": true
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.set_port",
+      "parameters": {
+        "$.target": 80
+      },
+      "condition": {
+        "$.hpvm18.apache.installed": true,
+        "$.hpvm18.apache.running": false
+      },
+      "effect": {
+        "$.hpvm18.apache.port": 80
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.start",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm18.apache.installed": true
+      },
+      "effect": {
+        "$.hpvm18.apache.running": true
+      }
+    },
+    {
+      "name": "$.hpvm20.apachelb.install",
+      "parameters": {
+      },
+      "condition": {
+      },
+      "effect": {
+        "$.hpvm20.apachelb.installed": true
+      }
+    },
+    {
+      "name": "$.hpvm20.apachelb.set_members",
+      "parameters": {
+        "$.members": [
+          "http://hpvm17.diy.inf.ed.ac.uk",
+          "http://hpvm18.diy.inf.ed.ac.uk"
+        ]
+      },
+      "condition": {
+        "$.hpvm20.apachelb.running": false,
+        "$.hpvm20.apachelb.installed": true
+      },
+      "effect": {
+        "$.hpvm20.apachelb.members": [
+          "http://hpvm17.diy.inf.ed.ac.uk",
+          "http://hpvm18.diy.inf.ed.ac.uk"
+        ]
+      }
+    },
+    {
+      "name": "$.hpvm20.apachelb.set_server_name",
+      "parameters": {
+        "$.name": "hpvm20.diy.inf.ed.ac.uk"
+      },
+      "condition": {
+        "$.hpvm20.apachelb.running": false,
+        "$.hpvm20.apachelb.installed": true
+      },
+      "effect": {
+        "$.hpvm20.apachelb.server_name": "hpvm20.diy.inf.ed.ac.uk"
+      }
+    },
+    {
+      "name": "$.hpvm20.apachelb.start",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm20.apachelb.installed": true
+      },
+      "effect": {
+        "$.hpvm20.apachelb.running": true
+      }
+    }
+  ],
+  "version": "1",
+  "total": 25
+}

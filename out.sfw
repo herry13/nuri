@@ -1,0 +1,177 @@
+{
+  "type": "sequential",
+  "workflow": [
+    {
+      "name": "$.hpvm20.apachelb.stop",
+      "parameters": {
+      },
+      "condition": {
+      },
+      "effect": {
+        "$.hpvm20.apachelb.running": false
+      }
+    },
+    {
+      "name": "$.hpvm20.apachelb.uninstall",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm20.apachelb.running": false
+      },
+      "effect": {
+        "$.hpvm20.apachelb.installed": false
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.stop",
+      "parameters": {
+      },
+      "condition": {
+      },
+      "effect": {
+        "$.hpvm17.apache.running": false
+      }
+    },
+    {
+      "name": "$.hpvm17.tikiweb.uninstall",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.tikiweb.webserver": "$.hpvm17.apache",
+        "$.hpvm17.apache.running": false
+      },
+      "effect": {
+        "$.hpvm17.tikiweb.installed": false
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.uninstall_php_mysql_module",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.apache.running": false
+      },
+      "effect": {
+        "$.hpvm17.apache.php_mysql_module": false
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.uninstall_php_module",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.apache.running": false
+      },
+      "effect": {
+        "$.hpvm17.apache.php_module": false
+      }
+    },
+    {
+      "name": "$.hpvm17.apache.uninstall",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.apache.php_mysql_module": false,
+        "$.hpvm17.apache.php_module": false,
+        "$.hpvm17.apache.running": false
+      },
+      "effect": {
+        "$.hpvm17.apache.installed": false
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.stop",
+      "parameters": {
+      },
+      "condition": {
+      },
+      "effect": {
+        "$.hpvm18.apache.running": false
+      }
+    },
+    {
+      "name": "$.hpvm18.tikiweb.uninstall",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm18.tikiweb.webserver": "$.hpvm18.apache",
+        "$.hpvm18.apache.running": false
+      },
+      "effect": {
+        "$.hpvm18.tikiweb.installed": false
+      }
+    },
+    {
+      "name": "$.hpvm16.tikidb.uninstall",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm17.tikiweb.installed": false,
+        "$.hpvm18.tikiweb.installed": false,
+        "$.hpvm16.tikidb.database": "$.hpvm16.mysql",
+        "$.hpvm16.mysql.running": true
+      },
+      "effect": {
+        "$.hpvm16.tikidb.installed": false
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.uninstall_php_mysql_module",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm18.apache.running": false
+      },
+      "effect": {
+        "$.hpvm18.apache.php_mysql_module": false
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.uninstall_php_module",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm18.apache.running": false
+      },
+      "effect": {
+        "$.hpvm18.apache.php_module": false
+      }
+    },
+    {
+      "name": "$.hpvm18.apache.uninstall",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm18.apache.php_mysql_module": false,
+        "$.hpvm18.apache.php_module": false,
+        "$.hpvm18.apache.running": false
+      },
+      "effect": {
+        "$.hpvm18.apache.installed": false
+      }
+    },
+    {
+      "name": "$.hpvm16.mysql.stop",
+      "parameters": {
+      },
+      "condition": {
+      },
+      "effect": {
+        "$.hpvm16.mysql.running": false
+      }
+    },
+    {
+      "name": "$.hpvm16.mysql.uninstall",
+      "parameters": {
+      },
+      "condition": {
+        "$.hpvm16.mysql.running": false
+      },
+      "effect": {
+        "$.hpvm16.mysql.installed": false
+      }
+    }
+  ],
+  "version": "1",
+  "total": 15
+}

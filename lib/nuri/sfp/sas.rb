@@ -134,19 +134,26 @@ module Nuri
 self.dump_vars
 self.dump_types
 	
+puts 'process goal'	
 					### process goal constraint ###
 					process_goal(@root['goal']) if @root.has_key?('goal') and
 							@root['goal'].isconstraint
-	
+puts '...finish'
+
+puts 'process global constriant'
 					### process global constrait
 					self.process_global_constraint
-	
+puts '...finish'
+
+puts 'process sometime'
 					### normalize sometime formulae ###
 					if @root.has_key?('sometime')
 						raise Exception, 'Invalid sometime constraint' if
 							not normalize_formula(@root['sometime'])
 					end
+puts '...finish'
 
+puts 'process procedures'
 					### process all procedures
 					@variables.each_value { |var|
 						if var.is_final
@@ -156,7 +163,8 @@ self.dump_types
 						end
 					}
 					self.reset_operators_name
-	
+puts '...finish'
+
 					### process sometime modalities ###
 					self.process_sometime if @root.has_key?('sometime')
 					### process sometime-after modalities ###
