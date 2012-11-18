@@ -158,4 +158,8 @@ a.button:hover {
 	margin-right: 0;
 }
 
-
+#downloads {
+	margin-left: auto;
+	margin-right; auto;
+	margin-bottom: 10px;
+}
