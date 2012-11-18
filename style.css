@@ -96,19 +96,6 @@ ul {
 	border: 0px;
 }
 
-#download-zip span {
-	background: transparent url(../zip-icon.png) 12px 50% no-repeat;
-}
-#download-tar-gz span {
-	background: transparent url(../tar-gz-icon.png) 12px 50% no-repeat;
-}
-#view-on-github span {
-	background: transparent url(../octocat-icon.png) 12px 50% no-repeat;
-}
-#view-on-github {
-	margin-right: 0;
-}
-
 a.button span {
 	padding-left: 50px;
 	display: block;
@@ -157,4 +144,18 @@ a.button:hover {
   background: linear-gradient(top,  #fdfdfd 0%,#f6f6f6, 100%); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fdfdfd', endColorstr='#f6f6f6',GradientType=0 ); /* IE6-9 */
 }
+
+#download-zip span {
+	background: transparent url(../zip-icon.png) 12px 50% no-repeat;
+}
+#download-tar-gz span {
+	background: transparent url(../tar-gz-icon.png) 12px 50% no-repeat;
+}
+#view-on-github span {
+	background: transparent url(../octocat-icon.png) 12px 50% no-repeat;
+}
+#view-on-github {
+	margin-right: 0;
+}
+
 
