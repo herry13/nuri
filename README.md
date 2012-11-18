@@ -36,10 +36,10 @@ To Install
 
 Available Modules
 -----------------
-- Apache
-- Mysql
+- Apache (Apache)
+- Mysql (Mysql)
 - Apache Load Balancer (Apachelb)
-- Tiki Wiki
+- Tiki Wiki (Tikiweb & Tikidb)
 
 Running Nuri client on managed node
 -----------------------------------
@@ -51,11 +51,11 @@ Running Nuri client on managed node
 			...
 		}
 
-	You must put all managed nodes' domain in trusted set if you want the nodes to communicate each others, e.g. exchanging their status.
+	You must put all client nodes' domain in trusted set if you want a node to share its states with other nodes. This may require by some components, e.g. TikiWiki component.
 
 2. Start client daemon:
 
-		$ ./bin/nuri.rb &
+		$ sudo ./bin/nuri.rb &
 
 3. To check whether the daemon has run, open the following URL in your browser: *http://localhost:9090/state*.
    If you get an error, you may need to reconfigure your firewall to open port 9090. 
@@ -200,4 +200,4 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies, 
 either expressed or implied, of the FreeBSD Project.
 
-The solver is an open-source software with GPL License from http://fast-downward.org
+The solver binaries are under GPL License from http://fast-downward.org.

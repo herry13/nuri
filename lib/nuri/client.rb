@@ -142,6 +142,7 @@ module Nuri
 					return p
 				end
 
+				Nuri::Util.log "executing: #{json}..."
 				data = JSON[json]
 				cmd = data['action']
 				Nuri::Util.set_system_information(data['system'])
@@ -173,8 +174,10 @@ puts "..Failed"
 
 				if success
 					@response.start(200) { |head,out| out.write('') }
+					Nuri::Util.log "...execution success!"
 				else
 					@response.start(500) { |head,out| out.write('') }
+					Nuri::Util.log "...execution failed!"
 				end
 				return success
 			end

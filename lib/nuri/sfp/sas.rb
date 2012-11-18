@@ -132,19 +132,26 @@ module Nuri
 					# re-evaluate set variables and types
 					self.evaluate_set_variables_and_types
 	
+puts 'process goal'	
 					### process goal constraint ###
 					process_goal(@root['goal']) if @root.has_key?('goal') and
 							@root['goal'].isconstraint
-	
+puts '...finish'
+
+puts 'process global constriant'
 					### process global constrait
 					self.process_global_constraint
-	
+puts '...finish'
+
+puts 'process sometime'
 					### normalize sometime formulae ###
 					if @root.has_key?('sometime')
 						raise Exception, 'Invalid sometime constraint' if
 							not normalize_formula(@root['sometime'])
 					end
+puts '...finish'
 
+puts 'process procedures'
 					### process all procedures
 					@variables.each_value { |var|
 						if var.is_final
@@ -154,7 +161,8 @@ module Nuri
 						end
 					}
 					self.reset_operators_name
-	
+puts '...finish'
+
 					### process sometime modalities ###
 					self.process_sometime if @root.has_key?('sometime')
 					### process sometime-after modalities ###
@@ -163,9 +171,9 @@ module Nuri
 					# detect and merge mutually inclusive operators
 					self.search_and_merge_mutually_inclusive_operators
 	
-					#self.dump_types
+					self.dump_types
 					#self.dump_operators
-					#self.dump_vars
+					self.dump_vars
 	
 					return create_output
 				rescue Exception => e

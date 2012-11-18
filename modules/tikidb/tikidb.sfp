@@ -6,15 +6,15 @@ class Tikidb {
 	db_name = "tikiwiki"
 	db_user = "tiki"
 	db_password = "tikipassword"
-	tikiweb isref Tikiweb
+	tikiweb isset Tikiweb
 	database isref Mysql
 
-	procedure set_tikiweb (web isref Tikiweb) {
+	procedure set_tikiweb (webs isset Tikiweb) {
 		condition {
-			this.installed = false
+			this.installed = true
 		}
 		effect {
-			this.tikiweb = web
+			this.tikiweb = webs
 		}
 	}
 
@@ -48,7 +48,9 @@ class Tikidb {
 
 	procedure install {
 		condition {
-			this.tikiweb.installed = false
+			foreach (this.tikiweb as t) {
+				t.installed = false
+			}
 			this.database.running = true
 		}
 		effect {
@@ -58,7 +60,9 @@ class Tikidb {
 
 	procedure uninstall {
 		condition {
-			this.tikiweb.installed = false
+			foreach (this.tikiweb as t) {
+				t.installed = false
+			}
 			this.database.running = true
 		}
 		effect {

@@ -2,7 +2,7 @@ require 'nuri/sfp/main'
 
 module Nuri
 	module Planner
-		Heuristic = 'lmcut'
+		Heuristic = 'ff' # lmcut, cg, ff, blind
 
 		class Solver
 			attr_reader :parser
@@ -95,7 +95,7 @@ module Nuri
 				end
 				raise UnsupportedPlatformException, os + ' is not supported' if planner == nil
 
-				params = case
+				params = case Heuristic
 					when 'lmcut' then '--search "astar(lmcut())"'
 					when 'blind' then '--search "astar(blind())"'
 					when 'cg' then '--search "lazy_greedy(cg(), preferred=cg())"'
@@ -115,10 +115,12 @@ module Nuri
 					end
 
 					command = case os
-						when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file} 1> /dev/null 2> /dev/null"
+						#when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file} 1> /dev/null 2> /dev/null"
+						when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file}"
 						when 'macos', 'darwin' then "cd #{tmp_dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; #{planner}/downward #{params} --plan-file #{plan_file} < #{tmp_dir}/output 1> /dev/null;"
 						else nil
 					end
+puts command
 
 					Kernel.system(command)
 					plan = (File.exist?(plan_file) ? File.read(plan_file) : nil)

@@ -1,0 +1,29 @@
+State Trajectory Constraints
+
+1) global constraint = p1
+remove all actions that falsifies p1
+
+2) global constraint = p1 OR p2 OR p3
+foreach action a
+- keep a if makes true p1, p2, or p3 (pre-post)
+- keep a if it has p1, p2, or p3 as precondition and doesn't falsify (prevail)
+- if a falsify p1, then create two copies a1 & a2
+then add p2 as precondition of a1, add p3 as precondition of a2
+then remove a
+
+3) global constraint = p1 -> p2 = (not p1) OR p2
+go to step #2
+
+4) global constraint = complex formula
+use Fast-Downward translation technique in his paper
+
+Thanks to Patrik Haslum
+
+Issues
+1) immediate effect (with deadline) after another effect occurs
+"if a port of firewall is not used, it should be closed immediately"
+
+(sometime-after (not (used port80)) (within 1 (closed port80)))
+
+2) counting constraint (?)
+"for anytime, there must be two running servers"
