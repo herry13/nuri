@@ -28,10 +28,16 @@ To Install
 
 		$ sudo apt-get install git
 
+- Install required packages and gems
+
+		$ sudo apt-get update
+		$ sudo apt-get install make ruby ruby-dev rubygems libz-dev libaugeas-ruby
+		$ sudo gem install mongrel json antlr3
 
 - Clone the Nuri software from Github repository:
 
 		$ git clone https://github.com/herry13/nuri
+
 
 Available Modules
 -----------------

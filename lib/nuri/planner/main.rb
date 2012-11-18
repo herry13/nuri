@@ -5,9 +5,11 @@ module Nuri
 		Heuristic = 'cg' # lmcut, cg, ff, blind
 
 		class Solver
+			attr_accessor :debug
 			attr_reader :parser
 
 			def initialize
+				@debug = false
 			end
 	
 			# solve given configuration problem
@@ -115,12 +117,12 @@ module Nuri
 					end
 
 					command = case os
-						#when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file} 1> /dev/null 2> /dev/null"
 						when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file}"
 						when 'macos', 'darwin' then "cd #{tmp_dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; #{planner}/downward #{params} --plan-file #{plan_file} < #{tmp_dir}/output 1> /dev/null;"
 						else nil
 					end
-puts command
+
+					command = "#{command} 1> /dev/null 2>/dev/null" if not debug and os == 'linux'
 
 					Kernel.system(command)
 					plan = (File.exist?(plan_file) ? File.read(plan_file) : nil)
@@ -162,6 +164,9 @@ puts command
 		end
 	
 		class UnsupportedPlatformException < Exception
+		end
+
+		class NoSolutionException < Exception
 		end
 	end
 end

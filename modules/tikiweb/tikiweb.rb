@@ -8,8 +8,7 @@ module Nuri
 
 			ConfigDir = '/var/lib/tikiweb'
 			ConfigFile = '/var/lib/tikiweb/config'
-			DownloadURL = 'http://nena.inf.ed.ac.uk/tikiwiki/tiki-9.2.tar.gz'
-			#DownloadURL = 'http://sourceforge.net/projects/tikiwiki/files/Tiki_9.x_Herbig_Haro/9.2/tiki-9.2.tar.gz'
+			DownloadURL = 'http://sourceforge.net/projects/tikiwiki/files/Tiki_9.x_Herbig_Haro/9.2/tiki-9.2.tar.gz'
 
 			def initialize
 				self.register('Tikiweb', 'tikiweb')
