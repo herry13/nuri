@@ -115,6 +115,7 @@ a.button span {
 	height: 23px;
 }
 a.button {
+	display: block;
 	float: left;
 }
 
