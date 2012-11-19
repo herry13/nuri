@@ -22,7 +22,7 @@ module Nuri
 
 		def load(client=true)
 			self.read_config
-			#self.init_secure_connection
+			self.init_secure_connection
 			Nuri::Resource.set_root(self.get_main)
 			self.load_modules if client
 		end
@@ -70,6 +70,10 @@ module Nuri
 				cfile = '/etc/nuri/nuri.sfp'
 				cfile = Nuri::Util.home_dir + "/etc/nuri.sfp" if not File.file?(cfile)
 				@config = Nuri::Sfp::Parser.file_to_sfp(cfile)['nuri']
+
+				# default public/private key
+				@config['public_key'] = 'public.pem'
+				@config['private_key'] = 'private.pem'
 
 				Nuri::Util.log 'Successfully load configuration file ' + cfile
 			rescue Exception => exp
