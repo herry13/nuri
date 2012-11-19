@@ -22,7 +22,7 @@ module Nuri
 
 		def load(client=true)
 			self.read_config
-			self.init_secure_connection
+			#self.init_secure_connection
 			Nuri::Resource.set_root(self.get_main)
 			self.load_modules if client
 		end
