@@ -1,23 +1,13 @@
 system {
-	nena isa Node {
-		domainname is "nena.inf.ed.ac.uk"
+	node1 isa Machine {
+		domainname is "node1.domain.com"
 	}
-	hpvm11 isa Node {
-		domainname is "hpvm11.diy.inf.ed.ac.uk"
-	}
-	hpvm12 isa Node {
-		domainname is "hpvm12.diy.inf.ed.ac.uk"
-	}
-	hpvm13 isa Node {
-		domainname is "hpvm13.diy.inf.ed.ac.uk"
+	node2 isa Machine {
+		domainname is "node2.domain.com"
 	}
 }
 
 goal constraint {
-	nena.apache.running = true
-	hpvm11.apache.running = false
-	hpvm12.apache.running = true
-	hpvm13.apache.running = true
 }
 
 global constraint {

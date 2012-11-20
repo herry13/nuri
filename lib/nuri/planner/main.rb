@@ -2,14 +2,15 @@ require 'nuri/sfp/main'
 
 module Nuri
 	module Planner
-		Heuristic = 'cg' # lmcut, cg, ff, blind
+		Heuristic = 'ff' # lmcut, cg, ff, blind
+		Debugging = false
 
 		class Solver
 			attr_accessor :debug
 			attr_reader :parser
 
 			def initialize
-				@debug = false
+				@debug = Debugging
 			end
 	
 			# solve given configuration problem
