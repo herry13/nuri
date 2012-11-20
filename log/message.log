@@ -1,0 +1,122 @@
+# Logfile created on Mon Nov 05 03:06:45 +0000 2012 by logger.rb/1.2.6
+I, [2012-11-05T03:06:47.886880 #27816]  INFO -- : Read configuration file...
+I, [2012-11-05T03:06:47.905325 #27816]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-05T03:06:48.744936 #27816]  INFO -- : Load modules...
+E, [2012-11-05T03:06:48.882406 #27816] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-05T03:06:48.994046 #27816] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-05T03:06:49.024082 #27816]  INFO -- : Successfully load module service
+I, [2012-11-05T03:06:49.082415 #27816]  INFO -- : Successfully load module tikidb
+I, [2012-11-05T03:06:49.120535 #27816]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T15:39:07.943394 #32379]  INFO -- : Read configuration file...
+I, [2012-11-06T15:39:07.992969 #32379]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T15:39:08.694880 #32379]  INFO -- : Load modules...
+E, [2012-11-06T15:39:08.891638 #32379] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T15:39:08.897405 #32379] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T15:39:08.934586 #32379]  INFO -- : Successfully load module service
+I, [2012-11-06T15:39:08.937910 #32379]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T15:39:08.940931 #32379]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T15:39:31.195441 #32383]  INFO -- : Read configuration file...
+I, [2012-11-06T15:39:31.203747 #32383]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T15:39:31.886339 #32383]  INFO -- : Load modules...
+E, [2012-11-06T15:39:31.899099 #32383] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T15:39:31.903969 #32383] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T15:39:31.907717 #32383]  INFO -- : Successfully load module service
+I, [2012-11-06T15:39:31.913105 #32383]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T15:39:31.948986 #32383]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T15:39:44.163134 #32391]  INFO -- : Read configuration file...
+I, [2012-11-06T15:39:44.171399 #32391]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T15:39:44.853948 #32391]  INFO -- : Load modules...
+E, [2012-11-06T15:39:44.868175 #32391] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T15:39:44.872980 #32391] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T15:39:44.876741 #32391]  INFO -- : Successfully load module service
+I, [2012-11-06T15:39:44.880775 #32391]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T15:39:44.916740 #32391]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T15:48:05.248455 #32537]  INFO -- : Read configuration file...
+I, [2012-11-06T15:48:05.257257 #32537]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T15:48:06.163804 #32537]  INFO -- : Load modules...
+E, [2012-11-06T15:48:06.179693 #32537] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T15:48:06.184585 #32537] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T15:48:06.190945 #32537]  INFO -- : Successfully load module service
+I, [2012-11-06T15:48:06.195646 #32537]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T15:48:06.231228 #32537]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T15:48:36.031828 #32542]  INFO -- : Read configuration file...
+I, [2012-11-06T15:48:36.040057 #32542]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T15:48:36.743569 #32542]  INFO -- : Load modules...
+E, [2012-11-06T15:48:36.758502 #32542] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T15:48:36.764035 #32542] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T15:48:36.800127 #32542]  INFO -- : Successfully load module service
+I, [2012-11-06T15:48:36.803407 #32542]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T15:48:36.806385 #32542]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T15:48:54.431631 #32550]  INFO -- : Read configuration file...
+I, [2012-11-06T15:48:54.439779 #32550]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T15:48:55.140829 #32550]  INFO -- : Load modules...
+E, [2012-11-06T15:48:55.154946 #32550] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T15:48:55.160498 #32550] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T15:48:55.196499 #32550]  INFO -- : Successfully load module service
+I, [2012-11-06T15:48:55.199727 #32550]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T15:48:55.202674 #32550]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T15:50:24.997655 #32567]  INFO -- : Read configuration file...
+I, [2012-11-06T15:50:25.005983 #32567]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T15:50:25.695134 #32567]  INFO -- : Load modules...
+E, [2012-11-06T15:50:25.708001 #32567] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T15:50:25.713051 #32567] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T15:50:25.718323 #32567]  INFO -- : Successfully load module service
+I, [2012-11-06T15:50:25.722429 #32567]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T15:50:25.759140 #32567]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T18:23:17.823038 #33195]  INFO -- : Read configuration file...
+I, [2012-11-06T18:23:17.856449 #33195]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T18:23:18.551739 #33195]  INFO -- : Load modules...
+E, [2012-11-06T18:23:18.608243 #33195] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T18:23:18.613820 #33195] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T18:23:18.619634 #33195]  INFO -- : Successfully load module service
+I, [2012-11-06T18:23:18.623765 #33195]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T18:23:18.660557 #33195]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T18:23:23.120973 #33198]  INFO -- : Read configuration file...
+I, [2012-11-06T18:23:23.129434 #33198]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T18:23:23.817987 #33198]  INFO -- : Load modules...
+E, [2012-11-06T18:23:23.831029 #33198] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T18:23:23.837427 #33198] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T18:23:23.841158 #33198]  INFO -- : Successfully load module service
+I, [2012-11-06T18:23:23.845265 #33198]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T18:23:23.882418 #33198]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T18:23:44.057121 #33207]  INFO -- : Read configuration file...
+I, [2012-11-06T18:23:44.065453 #33207]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T18:23:44.782092 #33207]  INFO -- : Load modules...
+E, [2012-11-06T18:23:44.797402 #33207] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T18:23:44.803069 #33207] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T18:23:44.842056 #33207]  INFO -- : Successfully load module service
+I, [2012-11-06T18:23:44.845474 #33207]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T18:23:44.849585 #33207]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T18:26:33.155809 #33224]  INFO -- : Read configuration file...
+I, [2012-11-06T18:26:33.164013 #33224]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T18:26:33.872207 #33224]  INFO -- : Load modules...
+E, [2012-11-06T18:26:33.886680 #33224] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T18:26:33.892115 #33224] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T18:26:33.927870 #33224]  INFO -- : Successfully load module service
+I, [2012-11-06T18:26:33.931125 #33224]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T18:26:33.934074 #33224]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T18:26:55.044193 #33232]  INFO -- : Read configuration file...
+I, [2012-11-06T18:26:55.052409 #33232]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T18:26:55.764399 #33232]  INFO -- : Load modules...
+E, [2012-11-06T18:26:55.778082 #33232] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T18:26:55.783597 #33232] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T18:26:55.819838 #33232]  INFO -- : Successfully load module service
+I, [2012-11-06T18:26:55.823071 #33232]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T18:26:55.826035 #33232]  INFO -- : Successfully load module tikiweb
+I, [2012-11-06T18:58:57.916459 #33418]  INFO -- : Read configuration file...
+I, [2012-11-06T18:58:57.977339 #33418]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-06T18:58:58.734007 #33418]  INFO -- : Load modules...
+E, [2012-11-06T18:58:58.992470 #33418] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-06T18:58:59.001233 #33418] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-06T18:58:59.040276 #33418]  INFO -- : Successfully load module service
+I, [2012-11-06T18:58:59.044675 #33418]  INFO -- : Successfully load module tikidb
+I, [2012-11-06T18:58:59.048269 #33418]  INFO -- : Successfully load module tikiweb
+I, [2012-11-07T17:22:15.948712 #37754]  INFO -- : Read configuration file...
+I, [2012-11-07T17:22:16.041526 #37754]  INFO -- : Successfully load configuration file /Users/macbac/Documents/sfplanner/nuri/etc/nuri.sfp
+I, [2012-11-07T17:22:16.874214 #37754]  INFO -- : Load modules...
+E, [2012-11-07T17:22:17.035790 #37754] ERROR -- : Cannot load module apache -- no such file to load -- augeas
+E, [2012-11-07T17:22:17.045673 #37754] ERROR -- : Cannot load module mysql -- no such file to load -- augeas
+I, [2012-11-07T17:22:17.088388 #37754]  INFO -- : Successfully load module service
+I, [2012-11-07T17:22:17.096887 #37754]  INFO -- : Successfully load module tikidb
+I, [2012-11-07T17:22:17.103315 #37754]  INFO -- : Successfully load module tikiweb
+I, [2012-11-07T17:22:26.494202 #37754]  INFO -- : Cannot get state of node hpvm17.diy.inf.ed.ac.uk: 
