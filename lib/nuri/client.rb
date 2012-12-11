@@ -1,9 +1,10 @@
-require 'mongrel'
 require 'base64'
+require 'pp'
+require 'webrick'
 
 module Nuri
 	module Client
-		class Daemon < Mongrel::HttpHandler
+		class Daemon
 			include Nuri::Config
 
 			attr_accessor :master_keys
@@ -11,6 +12,25 @@ module Nuri
 			def initialize
 				@master_keys = {}
 				self.load
+			end
+
+			def trusted_address(requester)
+				return false if not @config.has_key?('trusted')
+				if not @config['trusted'].is_a?(Array)
+					return (@config['trusted'] == requester)
+				else
+					@config['trusted'].each { |addr| return true if addr == requester }
+				end
+				false
+			end
+
+			def process_request(request, stream)
+				if not self.trusted_address(stream.socket.peeraddr[2])
+					Nuri::Util.warn "Untrusted request from host ..."
+					[403, {}, ['']]
+				else
+					Nuri::Client::Agent.new(self, request, stream).serve_request
+				end
 			end
 
 			def start(address=nil, port=nil)
@@ -22,10 +42,11 @@ module Nuri
 				port = @config['port'].to_i if port == nil
 
 				begin
-					@http = Mongrel::HttpServer.new(address, port)
-					@http.register("/", self)
+					@server = WEBrick::HTTPServer.new(:Host => address, :Port => port)
+					@server.mount("/", Agent, self)
+					trap("INT") { @server.shutdown }
+					@server.start
 					Nuri::Util.log 'Start Nuri Client on port: ' + port.to_s
-					@http.run.join
 				rescue Interrupt
 					Nuri::Util.log 'Exiting.'
 				rescue Exception => e
@@ -33,22 +54,6 @@ module Nuri
 				end
 			end
 
-			def trusted(req)
-				return false if not @config.has_key?('trusted')
-				requester = Nuri::Util.domainname(req.params['REMOTE_ADDR'])
-				return ( @config['trusted'] == requester ) if not @config['trusted'].is_a?(Array)
-				@config['trusted'].each { |m| return true if m == requester }
-				false
-			end
-
-			def process(req, res)
-				if not self.trusted(req)
-					Nuri::Util.warn "Untrusted request from host #{req.params['REMOTE_ADDR']}."
-				else
-					Nuri::Client::Agent.new(self, req, res).serve
-				end
-			end
-			
 			def get_state(path=nil)
 				path.gsub!(/\//, '.') if path != nil
 				return @root.get_state(path)
@@ -59,7 +64,72 @@ module Nuri
 			end
 		end
 
-		class Agent
+		class Agent < WEBrick::HTTPServlet::AbstractServlet
+			def initialize(server, daemon)
+				@daemon = daemon
+			end
+
+			def do_GET(request, response)
+				path = request.path
+				path.chop! if path[path.length-1,1] == '/'
+				if path[0,6] == '/state'
+					status, content_type, body = self.get_state(:path => path)
+				else
+					status = 400
+					content_type = body = ''
+				end
+				response.status = status
+				response['Content-Type'] = content_type
+				response.body = body
+			end
+
+			def do_POST(request, response)
+				#pp request.query
+				path = request.path
+				path.chop! if path[path.length-1,1] == '/'
+				if path == '/system'
+					status, content_type, body = self.set_system_information(request.query)
+				else
+					status = 400
+					content_type = body = ''
+				end
+				response.status = status
+				response['Content-Type'] = content_type
+				response.body = body
+			end
+
+			def get_state(options={})
+				if not options.has_key?(:path)
+					state = @daemon.get_state
+				else
+					_, _, path = options[:path].split('/', 3)
+					state = @daemon.get_state(path)
+				end
+
+				if state.is_a?(Nuri::Undefined)
+					return 404, '', ''
+				else
+					data = Nuri::Sfp.to_json({'value' => state})
+					return 200, 'application/json', data
+				end
+			end
+
+			def set_system_information(data)
+				# TODO -- POST data has been parsed by WEBrick
+				begin
+					#system = JSON[data]
+					#Nuri::Util.set_system_information(system)
+					return 200, '', ''
+					Nuri::Util.log 'system information updated'
+				rescue
+					return 404, '', ''
+				end
+			end
+
+		end
+
+		# DEPRECATED
+		class Agent2
 			def initialize(daemon, request, response)
 				@daemon = daemon
 				@request = request
