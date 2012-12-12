@@ -1,7 +1,7 @@
 Nuri
 ====
 - author: Herry (herry13@gmail.com)
-- website: http://homepages.inf.ed.ac.uk/s0978621/
+- website: http://homepages.inf.ed.ac.uk/s0978621/nuri
 - last update: 12-12-2012
 - version: 0.1.3
  
