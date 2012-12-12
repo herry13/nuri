@@ -4,14 +4,14 @@ require 'base64'
 module Nuri
 	module Master
 		class Daemon
-			attr_accessor :verify_execution
+			attr_accessor :do_verify_execution
 
 			include Nuri::Config
 
 			def initialize
 				self.load
 				@main = self.get_main
-				@verify_execution = true
+				@do_verify_execution = true
 			end
 
 			def get_plan(state=nil)
@@ -47,10 +47,10 @@ module Nuri
 				current_state = {'_context'=>'state', '_self'=>'initial'}
 				@main['system'].each do |key,node|
 					next if key[0,1] == '_' or
-							node['_classes'].rindex(MainComponent) == nil or
-							node['domainname'] == ''
+					        node['_classes'].rindex(MainComponent) == nil or
+					        node['domainname'] == ''
 					state = self.get_child_state(node['domainname'])
-				if state != nil
+					if state != nil
 						state.each { |k,v| current_state[k] = v }
 					else
 						# TODO
@@ -60,6 +60,7 @@ module Nuri
 				current_state
 			end
 
+=begin
 			def challenge_child(address)
 				begin
 					url = URI.parse("http://#{address}:#{Nuri::Port}/status/secure")
@@ -111,16 +112,15 @@ module Nuri
 
 				false
 			end
+=end
 
 			def get_child_state(address)
-				return nil if not self.challenge_child(address)
+				#return nil if not self.challenge_child(address)
 
 				begin
-					url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state')
-					req = Net::HTTP::Get.new(url.path)
-					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
-					if res.code == '200'
-						json = JSON.parse(res.body)
+					code, body = self.get_data(address, Nuri::Port, '/state')
+					if code == '200'
+						json = JSON.parse(body)
 						return json['value'] if json.is_a?(Hash) and json.has_key?('value')
 					end
 				rescue Exception => e
@@ -144,7 +144,6 @@ module Nuri
 
 			def execute_workflow(plan)
 				state = get_state
-				# TODO -- execute the plan here
 				succeed = true
 				if plan['workflow'] != nil
 					begin
@@ -160,7 +159,7 @@ module Nuri
 						end
 					rescue Timeout::Error
 						succeed = false
-						# TODO: retry exec workflow here
+						# TODO: retry exec the workflow here
 					end
 				end
 				succeed
@@ -172,19 +171,19 @@ module Nuri
 					action['effect'].each do |key,value|
 						v = state.at?(key)
 						raise Nuri::ExecutionFailedException, action['name'] if state.at?(key) != value
-puts '...OK'
+						puts 'OK'
 					end
 				end
 
-print 'exec: ' + action['name'] + '...'
-				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/exec')
+				print 'exec: ' + action['name'] + '...'
 				data = { 'action' => action, 'system' => self.get_system_information }
-				data = JSON.generate(data)
+				data = "json=" + JSON.generate(data)
 				begin
-					req = Net::HTTP::Put.new(url.path)
-					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
-					verify(action) if @verify_execution
-					return true if res.code == '200'
+					code, _ = put_data(address, Nuri::Port, '/exec', data)
+					if code == '200'
+						verify(action) if @do_verify_execution
+						return true
+					end
 				rescue Timeout::Error
 					Nuri::Util.log "Timeout when executing: " + action['name']
 					raise Timeout::Error
@@ -193,7 +192,7 @@ print 'exec: ' + action['name'] + '...'
 				rescue Exception => e
 					Nuri::Util.log 'Cannot execute action: ' + action['name']
 				end
-puts 'FAILED'
+				puts 'FAILED'
 				false
 			end
 
@@ -201,7 +200,9 @@ puts 'FAILED'
 				system = {}
 				@main['system'].each do |key,value|
 					next if key[0,1] == '_'
-					if value.is_a?(Hash) and value.isobject and value['_classes'].rindex(Nuri::Config::MainComponent) != nil
+					if value.is_a?(Hash) and value.isobject and
+						value['_classes'].rindex(Nuri::Config::MainComponent) != nil
+
 						system[key] = value['domainname']
 					end
 				end
@@ -210,20 +211,36 @@ puts 'FAILED'
 
 			def update_system
 				system = get_system_information
-				system.each_value { |target| send_system(target, system) }
+				system.each_value do |target|
+					begin
+						send_data(target, Nuri::Port, '/system', system)
+					rescue Exception => e
+						Nuri::Util.log 'Cannot send system information to ' + target.to_s + ' (' + e.to_s + ')'
+					end
+				end
 			end
 
-			def send_system(address, system)
-				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/system')
-				data = JSON.generate(system)
-				begin
-					req = Net::HTTP::Post.new(url.path)
-					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
-					return true if res.code == '200'
-				rescue Exception => e	
-					Nuri::Util.log 'Cannot send system information to ' + address + ' -- ' + e.to_s
-				end
-				false
+			# Send data to remote address in JSON format
+			def post_data(address, port, path, data)
+				url = URI.parse('http://' + address + ':' + port.to_s + path)
+				data = "json=" + JSON.generate(data)
+				req = Net::HTTP::Post.new(url.path)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
+				return res.code, res.body
+			end
+
+			def get_data(address, port, path)
+				url = URI.parse('http://' + address + ':' + port.to_s + path)
+				req = Net::HTTP::Get.new(url.path)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
+				return res.code, res.body
+			end
+
+			def put_data(address, port, path, data)
+				url = URI.parse('http://' + address + ':' + port.to_s + path)
+				req = Net::HTTP::Put.new(url.path)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
+				return res.code, res.body
 			end
 
 			def get_node(path, root)
@@ -283,8 +300,6 @@ puts 'FAILED'
 			master = Nuri::Master::Daemon.new
 			master.update_system
 		end
-
-		
 
 	end
 end

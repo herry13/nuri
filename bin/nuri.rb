@@ -8,18 +8,19 @@ require "nuri/main"
 
 def cli
 	def print_help
-		puts "Usage: nuri.rb -c <options>
+		puts 'Usage: nuri.rb -c <command>
 
-options:
-  main                 print the content of 'main.sfp'
-  state [details]      print the current state of this node
-  pull [details]       pull and print the current state of all managed nodes
-  plan                 generate a workflow to achieve the goal state
-  apply                apply a workflow to achieve the goal state
+commands:
+  main                  print the content of "main.sfp"
+  state [details]       print the current state of this node
+  pull [details]        pull and print the current state of all managed nodes
+  plan                  generate a workflow to achieve the goal state
+  apply [sfw-file]      apply a workflow to achieve the goal state; the workflow
+                        is specified in "sfw-file", otherwise it is auto-generate
+                        by the planner
+  update-system         push system information to all managed nodes
 
-  keygen [replace]     generate private & public keys for secure connection
-
-"
+'
 	end
 	if ARGV.length <= 1
 		print_help
@@ -63,10 +64,8 @@ options:
 	elsif ARGV[1] == 'exec' and ARGV.length >= 3
 		result = Nuri::Master.exec(ARGV[2])
 
-	elsif ARGV[1] == 'update'
-		if ARGV[2] == 'system'
-			Nuri::Master.update_system
-		end
+	elsif ARGV[1] == 'update-system'
+		Nuri::Master.update_system
 
 	elsif ARGV[1] == 'keygen'
 		priv = Nuri::Util.home_dir + '/etc/private.pem'
