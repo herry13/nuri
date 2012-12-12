@@ -98,6 +98,69 @@ module Nuri
 				response.body = body
 			end
 
+			def do_PUT(request, response)
+				path = request.path
+				path.chop! if path[path.length-1,1] == '/'
+				if path == '/exec'
+					status, content_type, body = self.execute_action(request.query)
+				else
+					status = 400
+					content_type = body = ''
+				end
+				response.status = status
+				response['Content-Type'] = content_type
+				response.body = body
+			end
+
+			def execute_action(data)
+				def clean_parameters(params)
+					p = {}
+					params.each { |k,v|
+						p[k[2,k.length-2]] =	params[k]
+					}
+					return p
+				end
+
+				Nuri::Util.log "executing: #{data['json']}..."
+				data = JSON[data['json']]
+				cmd = data['action']
+				Nuri::Util.set_system_information(data['system'])
+
+				params = clean_parameters(cmd['parameters'])
+				puts "exec: " + cmd['name'] + " (" + params.inspect + ')'
+				comp_name, cmd_name = cmd['name'].pop_ref
+				component = @daemon.root.get(comp_name)
+				success = false
+				if component != nil
+					begin
+						if params.size <= 0
+							success = component.send(cmd_name)
+						else
+							success = component.send(cmd_name, params)
+						end
+						
+						component.get_self_state if success
+						puts "exec: OK"
+					rescue Exception => e
+						puts "exec: Failed"
+						Nuri::Util.log 'exec: Failed -- cannot execute procedure: ' + json
+						return 500, '', ''
+					end
+				else
+					Nuri::Util.log 'exec: Failed -- cannot find procedure: ' + procedure
+					return 503, '', ''
+				end
+
+				if success
+					Nuri::Util.log "exec: OK"
+					return 200, '', ''
+				else
+					Nuri::Util.log "exec: Failed"
+					return 500, '', ''
+				end
+				return success
+			end
+
 			def get_state(options={})
 				if not options.has_key?(:path)
 					state = @daemon.get_state
@@ -115,19 +178,18 @@ module Nuri
 			end
 
 			def set_system_information(data)
-				# TODO -- POST data has been parsed by WEBrick
 				begin
-					#system = JSON[data]
-					#Nuri::Util.set_system_information(system)
-					return 200, '', ''
+					system = JSON[data['json']]
+					Nuri::Util.set_system_information(system)
 					Nuri::Util.log 'system information updated'
+					return 200, '', ''
 				rescue
 					return 404, '', ''
 				end
 			end
-
 		end
 
+=begin
 		# DEPRECATED
 		class Agent2
 			def initialize(daemon, request, response)
@@ -270,11 +332,8 @@ puts "..Failed"
 					end
 				end
 			end
-
-			
-
 		end
-
+=end
 
 		@@daemon = nil
 
