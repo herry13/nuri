@@ -1,3 +1,7 @@
+12-12-2012
+- replace mongrel with WEBrick
+- disable secure connection due to immature implementations (buggy)
+
 18-11-2012
 - implement modules to manage TikiWiki; separated into two modules:
 	- Tikiweb -- managing the frontend: installing PHP files, set PHP config

@@ -2,8 +2,8 @@ Nuri
 ====
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/
-- last update: 16-09-2012
-- version: 0.1.2
+- last update: 12-12-2012
+- version: 0.1.3
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
@@ -18,7 +18,7 @@ Requirements
 	- libz-dev
 	- libaugeas-ruby
 - required Ruby Gems
-	- mongrel
+	- webrick
 	- json
 	- antlr3
 
@@ -32,7 +32,7 @@ To Install
 
 		$ sudo apt-get update
 		$ sudo apt-get install make ruby ruby-dev rubygems libz-dev libaugeas-ruby
-		$ sudo gem install mongrel json antlr3
+		$ sudo gem install webrick json antlr3
 
 - Clone the Nuri software from Github repository:
 
