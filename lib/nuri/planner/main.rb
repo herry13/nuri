@@ -1,8 +1,9 @@
 require 'nuri/sfp/main'
+require 'nuri/planner/sas'
 
 module Nuri
 	module Planner
-		Heuristic = 'ff' # lmcut, cg, ff, blind
+		Heuristic = 'ff' # lmcut, cg, cea, ff, blind
 		Debugging = false
 
 		class Solver
@@ -14,48 +15,40 @@ module Nuri
 			end
 	
 			# solve given configuration problem
-			# return JSON representation of plan if solution is found, otherwise nil
+			# return an SAS plan if solution is found, otherwise nil
 			def solve(problem)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.parse(problem)
-				return solve_sas(@parser.to_sas)
+				@plan, @sas_task = solve_sas(@parser.to_sas)
+				return @plan
 			end
 
 			def solve_sfp(root)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.root = root
-
-				return solve_sas(@parser.to_sas)
+				@plan, @sas_task = solve_sas(@parser.to_sas)
+				return @plan
 			end
 
-			def solve_sfp_to_json(root)
-				plan = self.solve_sfp(root)
-				return sequential_plan_to_json(plan)
-			end
-
-			def solve_sfp_to_sfw(root)
-				plan = self.solve_sfp(root)
-				return sequential_plan_to_sfw(plan)
-			end
-
-			def sequential_plan_to_json(seq)
-				sfw = self.sequential_plan_to_sfw(seq)
-				return nil if sfw['workflow'] == nil
+			def solve_sfp_to_json(root, options={:parallel=>false})
+				sfw = solve_sfp_to_sfw(root, options)
+				return nil if sfw == nil or sfw['workflow'] == nil
 				return JSON.pretty_generate(sfw)
 			end
 
-			def sequential_plan_to_sfw(seq)
-				plan = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
-				return plan if seq == nil
-				plan['workflow'] = []
-				seq.each do |line|
-					op_name = line[1, line.length-2].split(' ')[0]
-					operator = @parser.operators[op_name]
-					raise Exception, 'Cannot find operator: ' + op_name if operator == nil
-					plan['workflow'] << operator.to_sfw
+			def solve_sfp_to_bsig(root, options={:parallel=>true})
+				sfw = solve_sfp_to_sfw(root, options)
+				# TODO -- remove parameters from each action
+				return JSON.pretty_generate(sfw)
+			end
+
+			def solve_sfp_to_sfw(root, options={:parallel=>false})
+				plan = self.solve_sfp(root)
+				if options[:parallel]
+					return parallel_plan_to_sfw
+				else
+					return sequential_plan_to_sfw
 				end
-				plan['total'] = plan['workflow'].length
-				return plan
 			end
 
 			# solve the configuration problem in given file
@@ -64,27 +57,49 @@ module Nuri
 				begin
 					@parser = Nuri::Sfp::Parser.new
 					@parser.parse_file(file)
-					return solve_sas(@parser.to_sas)
+					@plan, @sas_task = solve_sas(@parser.to_sas)
+					return @plan
 				rescue Exception => e
 					Nuri::Util.log e.to_s
-					return nil
 				end
+				nil
 			end
 
-			def solve_file_to_sfw(file)
-				plan = self.solve_file(file)
-				return nil if plan == nil
-				return sequential_plan_to_sfw(plan)
+			def solve_file_to_sfw(file, options={:parallel=>false})
+				self.solve_file(file)
+				return nil if @plan == nil
+				return parallel_plan_to_sfw if options[:parallel]
+				return sequential_plan_to_sfw
 			end
 
 			private
-			def to_partial_order(sas_plan)
-				# TODO -- transform total-order plan to partial-order plan
+			def sequential_plan_to_sfw
+				sfw = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
+				return sfw if @plan == nil
+				sfw['workflow'] = []
+				@plan.each do |line|
+					op_name = line[1, line.length-2].split(' ')[0]
+					operator = @parser.operators[op_name]
+					raise Exception, 'Cannot find operator: ' + op_name if operator == nil
+					sfw['workflow'] << operator.to_sfw
+				end
+				sfw['total'] = sfw['workflow'].length
+				return sfw
+			end
+
+			def parallel_plan_to_sfw
+				sfw = {'type'=>'parallel', 'workflow'=>nil, 'init'=>nil, 'version'=>'1', 'total'=>0}
+				return sfw if @plan == nil
+				sfw['workflow'], sfw['init'], sfw['total'] = @sas_task.get_partial_order_workflow(@parser)
+				return sfw
+			end
+
+			def extract_sas_plan(sas_plan)
 				actions = Array.new
-				sas_plan.split("\n").each { |a|
-					op_name = a[1,a.length-2].split(' ')[0]
+				sas_plan.split("\n").each do |sas_operator|
+					op_name = sas_operator[1,sas_operator.length-2].split(' ')[0]
 					actions << Action.new(@parser.operators[op_name])
-				}
+				end
 			end
 
 			def solve_sas(sas)
@@ -101,8 +116,9 @@ module Nuri
 				params = case Heuristic
 					when 'lmcut' then '--search "astar(lmcut())"'
 					when 'blind' then '--search "astar(blind())"'
-					when 'cg' then '--search "lazy_greedy(cg(), preferred=cg())"'
-					else '--heuristic "hff=ff()" --search "lazy_greedy(hff, preferred=hff)"'
+					when 'cg' then '--search "lazy_greedy(cg(cost_type=2))"'
+					when 'cea' then '--search "lazy_greedy(cea(cost_type=2))"'
+					else '--search "lazy_greedy(ff(cost_type=0))"'
 				end
 
 				begin
@@ -127,13 +143,12 @@ module Nuri
 
 					Kernel.system(command)
 					plan = (File.exist?(plan_file) ? File.read(plan_file) : nil)
-					plan = to_partial_order(plan) if plan != nil
-
-					File.delete(sas_file)
-					File.delete(plan_file) if File.exist?(plan_file)
-					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
 
 					if plan != nil
+						plan = extract_sas_plan(plan)
+						sas_task = Nuri::Sas::Task.new(sas_file)
+						sas_task.sas_plan = plan
+
 						tmp = []
 						plan.each do |p|
 							_, name, _ = p.split('-', 3)
@@ -143,16 +158,16 @@ module Nuri
 						plan = tmp
 					end
 
-					return plan
+					return plan, sas_task
 				rescue Exception => exp
 					raise Exception, exp.to_s
 				ensure
+					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
 					system 'rm -rf ' + tmp_dir
 				end
 
-				nil
+				return nil, nil
 			end
-
 		end
 
 		class Action

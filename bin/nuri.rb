@@ -20,6 +20,8 @@ commands:
                         by the planner
   update-system         push system information to all managed nodes
 
+  bsig                  generate a Behavioural Signature model
+
 '
 	end
 	if ARGV.length <= 1
@@ -50,6 +52,10 @@ commands:
 	elsif ARGV[1] == 'plan'
 		plan = Nuri::Master.plan
 		puts (plan == nil || plan['workflow'] == nil ? 'no solution' : plan)
+
+	elsif ARGV[1] == 'bsig'
+		bsig = Nuri::Master.get_bsig
+		puts (bsig == nil ? 'no solution' : bsig)
 
 	elsif ARGV[1] == 'json'
 		plan = Nuri::Master.debug_json
@@ -93,8 +99,10 @@ def planner
 
 options:
   [no-option]      solve an SFp planning problem in <file> and print the solution
-  sas              generate SAS+ representation of the SFp planning problem in <file>
-  json             generate JSON representation of the SFp planning problem in <file>
+  sas              print SAS+ representation of the SFp planning problem in <file>
+  json             print JSON representation of the SFp planning problem in <file>
+  sfw              print the sequential workflow in JSON
+  sfw-par          print the parallel workflow in JSON
 
 "
 	end
@@ -108,6 +116,11 @@ options:
 		if ARGV[1] == 'sfw'
 			planner = Nuri::Planner::Solver.new
 			plan = planner.solve_file_to_sfw(ARGV[2])
+			puts (plan != nil ? JSON.pretty_generate(plan) : 'no solution!')
+
+		elsif ARGV[1] == 'sfw-par'
+			planner = Nuri::Planner::Solver.new
+			plan = planner.solve_file_to_sfw(ARGV[2], {:parallel=>true})
 			puts (plan != nil ? JSON.pretty_generate(plan) : 'no solution!')
 
 		elsif ARGV[1] == 'json'

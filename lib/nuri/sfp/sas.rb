@@ -631,9 +631,7 @@ module Nuri
 			end
 
 			def apply_global_constraint_method_1(operator)
-				return true if not @root.has_key?('global') or #@root['global'] == nil or
-					not @root['global'].isconstraint
-				
+				return true if not @root.has_key?('global') or not @root['global'].isconstraint
 				operator[@global_var.name] = Parameter.new(@global_var, true, false)
 			end
 

@@ -9,9 +9,18 @@ module Nuri
 			include Nuri::Config
 
 			def initialize
-				self.load
+				self.load(false)
 				@main = self.get_main
 				@do_verify_execution = true
+			end
+
+			def get_bsig(state=nil)
+				sfp = Nuri::Sfp.deep_clone(@main)
+				sfp.delete('system')
+				sfp['initial'] = (state == nil ? self.get_state : Nuri::Sfp.deep_clone(state))
+				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
+				planner = Nuri::Planner::Solver.new
+				return planner.solve_sfp_to_json(sfp, {:parallel => true})
 			end
 
 			def get_plan(state=nil)
@@ -269,6 +278,11 @@ module Nuri
 		def self.plan
 			master = Nuri::Master::Daemon.new
 			return master.get_plan
+		end
+
+		def self.get_bsig
+			master = Nuri::Master::Daemon.new
+			return master.get_bsig
 		end
 
 		def self.debug_json

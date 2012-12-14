@@ -21,8 +21,8 @@ module Nuri
 		MainComponent = '$.Machine'
 
 		def load(client=true)
-			self.read_config
-			self.init_secure_connection
+			self.read_config if client
+			#self.init_secure_connection
 			Nuri::Resource.set_root(self.get_main)
 			self.load_modules if client
 		end
