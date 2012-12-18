@@ -11,17 +11,17 @@ initial state {
 	pc1 isa Client {
 		refer is a
 	}
-	/*pc2 isa Client {
+	pc2 isa Client {
 		refer is a
-	}*/
+	}
 }
 goal constraint {
 	a.running is false
 	pc1.refer is b
-	//pc2.refer is b
+	pc2.refer is b
 	b.running is true
 }
 global constraint {
 	pc1.refer.running is true
-	//pc2.refer.running is true
+	pc2.refer.running is true
 }

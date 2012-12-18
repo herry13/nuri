@@ -44,6 +44,8 @@ module Nuri
 		module Sas
 			GlobalOperator = '-globalop-'
 			GlobalVariable = '_global_var'
+			GoalOperator = '-goal-'
+			GoalVariable = '-goal-'
 
 			GlobalConstraintMethod = 1 # 1: proposed method, 2: patrik's, 3: concurrent-actions
 
@@ -337,7 +339,7 @@ module Nuri
 					}
 				elsif goal['_type'] == 'or'
 					count = 0
-					var = Variable.new("goal", '$.Boolean', -1, false, true)
+					var = Variable.new(GoalVariable, '$.Boolean', -1, false, true)
 					var << true
 					var << false
 					@variables[var.name] = var
@@ -345,7 +347,7 @@ module Nuri
 
 					goal.each { |k,g|
 						next if k[0,1] == '_'
-						op = Operator.new("-goal-#{count}", 0)
+						op = Operator.new("#{GoalOperator}#{count}", 0)
 						op[var.name] = eff
 						map = and_equals_constraint_to_map(g)
 						map.each { |k1,v1|

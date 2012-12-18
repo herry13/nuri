@@ -107,33 +107,37 @@ options:
 "
 	end
 
-	if ARGV.length <= 2 #ARGV[1] == 'planner' and ARGV.length >= 3
-		planner = Nuri::Planner::Solver.new
-		plan = planner.solve_file(ARGV[1])
-		puts (plan != nil ? plan : 'no solution!')
-
-	elsif ARGV.length >= 3
-		if ARGV[1] == 'sfw'
+	begin
+		if ARGV.length <= 2 #ARGV[1] == 'planner' and ARGV.length >= 3
 			planner = Nuri::Planner::Solver.new
-			plan = planner.solve_file_to_sfw(ARGV[2])
-			puts (plan != nil ? JSON.pretty_generate(plan) : 'no solution!')
-
-		elsif ARGV[1] == 'sfw-par'
-			planner = Nuri::Planner::Solver.new
-			plan = planner.solve_file_to_sfw(ARGV[2], {:parallel=>true})
-			puts (plan != nil ? JSON.pretty_generate(plan) : 'no solution!')
-
-		elsif ARGV[1] == 'json'
-			Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
-
-		elsif ARGV[1] == 'sas'
-			parser = Nuri::Sfp::Parser.new
-			parser.parse_file(ARGV[2])
-			puts parser.to_sas
+			plan = planner.solve_file(ARGV[1])
+			puts (plan != nil ? plan : 'no solution!')
+	
+		elsif ARGV.length >= 3
+			if ARGV[1] == 'sfw'
+				planner = Nuri::Planner::Solver.new
+				plan = planner.solve_file_to_sfw(ARGV[2])
+				puts (plan != nil ? JSON.pretty_generate(plan) : 'no solution!')
+	
+			elsif ARGV[1] == 'sfw-par'
+				planner = Nuri::Planner::Solver.new
+				plan = planner.solve_file_to_sfw(ARGV[2], {:parallel=>true})
+				puts (plan != nil ? JSON.pretty_generate(plan) : 'no solution!')
+	
+			elsif ARGV[1] == 'json'
+				Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
+	
+			elsif ARGV[1] == 'sas'
+				parser = Nuri::Sfp::Parser.new
+				parser.parse_file(ARGV[2])
+				puts parser.to_sas
+			end
+	
+		else
+			print_help
 		end
-
-	else
-		print_help
+	rescue Exception => e
+		$stderr.puts e.to_s
 	end
 end
 
