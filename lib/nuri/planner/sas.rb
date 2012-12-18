@@ -92,6 +92,7 @@ module Nuri
 					operator = parser.operators[op_name]
 					raise Exception, 'Cannot find operator: ' + op_name if operator.nil?
 					op_sfw = operator.to_sfw
+					op_sfw['id'] = i
 					op_sfw['successors'] = []
 					op_sfw['predecessors'] = []
 					sfw << op_sfw
@@ -187,7 +188,7 @@ module Nuri
 				end
 			end
 
-			def remove_transitive_predecessors(plan)
+			def remove_transitive_predecessors2(plan)
 				# remove duplicates in predecessors list
 				@operators.each { |op| op.predecessors.uniq! }
 
@@ -206,6 +207,20 @@ module Nuri
 						valid_predecessors << op2 if valid
 					end
 					op1.predecessors = valid_predecessors
+				end
+			end
+
+			def remove_transitive_predecessors(plan)
+				# foreach operator, remove duplicates in predecessors list
+				@operators.each { |op| op.predecessors.uniq! }
+
+				# remove "transitive" predecessor link
+				plan.each do |op|
+					valid_predecessors = []
+					op.predecessors.each do |pred_op|
+						valid_predecessors << pred_op if not op.has_transitive_predecessors?(pred_op)
+					end
+					op.predecessors = valid_predecessors
 				end
 			end
 
@@ -264,6 +279,9 @@ begin
 				#	puts "-- stage -- "
 				#	stage.each { |op| puts op.name }
 				#}
+
+				remove_transitive_predecessors(plan)
+
 				return plan
 
 rescue Exception => e
@@ -509,6 +527,23 @@ end
 				end
 				@predecessors = []
 				@is_global = Task.is_global_operator?(@name)
+			end
+
+			def has_transitive_predecessors?(operator)
+				@predecessors.each do |pre_op|
+					return true if pre_op != operator and
+					               pre_op.has_predecessor?(operator)
+				end
+				return false
+			end
+
+			def has_predecessor?(operator)
+				if not @predecessors.index(operator).nil?
+					return true
+				else
+					@predecessors.each { |op| return true if op.has_predecessor?(operator) }
+				end
+				return false
 			end
 
 			def support?(operator)
