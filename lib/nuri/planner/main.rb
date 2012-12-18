@@ -15,83 +15,83 @@ module Nuri
 			end
 	
 			# solve given configuration problem
-			# return an SAS plan if solution is found, otherwise nil
-			def solve(problem)
+			# return a plan either in JSON or SFW format, or nil if there is no solution
+			def solve(problem, json=false, parallel=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.parse(problem)
-				@plan, @sas_task = solve_sas(@parser.to_sas)
-				return @plan
+				@plan, @sas_task = self.solve_sas(@parser.to_sas)
+				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
+				return (json ? JSON.pretty_generate(plan) : plan)
 			end
 
-			def solve_sfp(root)
+			# solve given configuration problem in SFP data structure
+			# return a plan either in JSON or SFW format, or nil if there is no solution
+			def solve_sfp(root, json=false, parallel=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.root = root
-				@plan, @sas_task = solve_sas(@parser.to_sas)
-				return @plan
-			end
-
-			def solve_sfp_to_json(root, options={:parallel=>false})
-				sfw = solve_sfp_to_sfw(root, options)
-				return nil if sfw == nil or sfw['workflow'] == nil
-				return JSON.pretty_generate(sfw)
-			end
-
-			def solve_sfp_to_bsig(root, options={:parallel=>true})
-				sfw = solve_sfp_to_sfw(root, options)
-				# TODO -- remove parameters from each action
-				return JSON.pretty_generate(sfw)
-			end
-
-			def solve_sfp_to_sfw(root, options={:parallel=>false})
-				plan = self.solve_sfp(root)
-				if options[:parallel]
-					return parallel_plan_to_sfw
-				else
-					return sequential_plan_to_sfw
-				end
+				@plan, @sas_task = self.solve_sas(@parser.to_sas)
+				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
+				return (json ? JSON.pretty_generate(plan) : plan)
 			end
 
 			# solve the configuration problem in given file
-			# return JSON representation of plan if solution is found, otherwise nil
-			def solve_file(file)
-				begin
-					@parser = Nuri::Sfp::Parser.new
-					@parser.parse_file(file)
-					@plan, @sas_task = solve_sas(@parser.to_sas)
-					return @plan
-				rescue Exception => e
-					Nuri::Util.log e.to_s
+			# return a plan either in JSON or SFW format, or nil if there is no solution
+			def solve_file(file, json=false, parallel=false, sas=false)
+				@parser = Nuri::Sfp::Parser.new
+				@parser.parse_file(file)
+				@plan, @sas_task = self.solve_sas(@parser.to_sas)
+				return @plan if sas
+				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
+				return (json ? JSON.pretty_generate(plan) : plan)
+			end
+
+			def to_bsig(json=false, parallel=true)
+				bsig = (parallel ? self.to_parallel_bsig : self.to_sequential_bsig)
+				return (json ? JSON.pretty_generate(bsig) : bsig)
+			end
+
+			protected
+			def to_sequential_bsig
+				plan = self.get_sequential_plan
+				(plan.length-1).downto(1) do |i|
+					op = plan[i]
+					prev_op = plan[i-1]
+					prev_op['effect'].each { |k,v| op['condition'][k] = v }
 				end
-				nil
+				return plan
 			end
 
-			def solve_file_to_sfw(file, options={:parallel=>false})
-				self.solve_file(file)
-				return nil if @plan == nil
-				return parallel_plan_to_sfw if options[:parallel]
-				return sequential_plan_to_sfw
+			def to_parallel_bsig
+				plan = self.get_parallel_plan
+				# foreach operator's predecessors, add its effects to operator's conditions
+				plan['workflow'].each do |op|
+					op['predecessors'].each do |pred|
+						pred_op = plan['workflow'][pred]
+						pred_op['effect'].each { |k,v| op['condition'][k] = v }
+					end
+				end
+				return plan
 			end
 
-			private
-			def sequential_plan_to_sfw
-				sfw = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
-				return sfw if @plan == nil
-				sfw['workflow'] = []
+			def get_sequential_plan
+				json = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
+				return json if @plan == nil
+				json['workflow'] = []
 				@plan.each do |line|
 					op_name = line[1, line.length-2].split(' ')[0]
 					operator = @parser.operators[op_name]
 					raise Exception, 'Cannot find operator: ' + op_name if operator == nil
-					sfw['workflow'] << operator.to_sfw
+					json['workflow'] << operator.to_sfw
 				end
-				sfw['total'] = sfw['workflow'].length
-				return sfw
+				json['total'] = json['workflow'].length
+				return json
 			end
 
-			def parallel_plan_to_sfw
-				sfw = {'type'=>'parallel', 'workflow'=>nil, 'init'=>nil, 'version'=>'1', 'total'=>0}
-				return sfw if @plan == nil
-				sfw['workflow'], sfw['init'], sfw['total'] = @sas_task.get_partial_order_workflow(@parser)
-				return sfw
+			def get_parallel_plan
+				json = {'type'=>'parallel', 'workflow'=>nil, 'init'=>nil, 'version'=>'1', 'total'=>0}
+				return json if @plan == nil
+				json['workflow'], json['init'], json['total'] = @sas_task.get_partial_order_workflow(@parser)
+				return json
 			end
 
 			def extract_sas_plan(sas_plan)

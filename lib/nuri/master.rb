@@ -14,24 +14,6 @@ module Nuri
 				@do_verify_execution = true
 			end
 
-			def get_bsig(state=nil)
-				sfp = Nuri::Sfp.deep_clone(@main)
-				sfp.delete('system')
-				sfp['initial'] = (state == nil ? self.get_state : Nuri::Sfp.deep_clone(state))
-				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
-				planner = Nuri::Planner::Solver.new
-				return planner.solve_sfp_to_json(sfp, {:parallel => true})
-			end
-
-			def get_plan(state=nil)
-				sfp = Nuri::Sfp.deep_clone(@main)
-				sfp.delete('system')
-				sfp['initial'] = (state == nil ? self.get_state : Nuri::Sfp.deep_clone(state))
-				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
-				planner = Nuri::Planner::Solver.new
-				return planner.solve_sfp_to_json(sfp)
-			end
-
 			def debug_json
 				sfp = Nuri::Sfp.deep_clone(@main)
 				sfp.delete('system')
@@ -138,16 +120,31 @@ module Nuri
 				nil
 			end
 
-			def apply
-				state = get_state
-				sfp = Nuri::Sfp.deep_clone(@main)
-				sfp.delete('system')
-				sfp['initial'] = Nuri::Sfp.deep_clone(state)
-				sfp.accept(Nuri::Sfp::SfpGenerator.new(sfp))
-				planner = Nuri::Planner::Solver.new
-				plan = planner.solve_sfp_to_sfw(sfp)
+			def create_task(state=nil)
+				sfp_task = Nuri::Sfp.deep_clone(@main)
+				sfp_task.delete('system')
+				sfp_task['initial'] = (state == nil ? self.get_state : Nuri::Sfp.deep_clone(state))
+				sfp_task.accept(Nuri::Sfp::SfpGenerator.new(sfp_task))
+				return sfp_task
+			end
 
-				puts JSON.pretty_generate(plan)
+			def get_bsig(state=nil)
+				sfp_task = create_task(state)
+				planner = Nuri::Planner::Solver.new
+				plan = planner.solve_sfp(sfp_task, false, true)
+				return plan
+			end
+
+			def get_plan(state=nil, json=false, parallel=false)
+				sfp_task = create_task(state)
+				planner = Nuri::Planner::Solver.new
+				return planner.solve_sfp(sfp_task, json, parallel)
+			end
+
+			def apply(parallel=false, debug=false)
+				state = get_state
+				plan = self.get_plan(state, false, parallel)
+				puts JSON.pretty_generate(plan) if debug
 				self.execute_workflow(plan)
 			end
 
@@ -265,9 +262,9 @@ module Nuri
 			# TODO -- start Nuri master
 		end
 
-		def self.apply
+		def self.apply(debug=false)
 			master = Nuri::Master::Daemon.new
-			master.apply
+			master.apply(false, debug)
 		end
 
 		def self.pull
@@ -275,9 +272,9 @@ module Nuri
 			return master.get_state
 		end
 
-		def self.plan
+		def self.plan(parallel=false)
 			master = Nuri::Master::Daemon.new
-			return master.get_plan
+			return master.get_plan(nil, true, parallel)
 		end
 
 		def self.get_bsig

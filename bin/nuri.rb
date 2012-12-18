@@ -5,21 +5,23 @@ $: << File.expand_path(File.dirname(__FILE__) + "/..")
 
 require "nuri/planner/main"
 require "nuri/main"
+require "trollop"
+
+Version = '0.1.4'
 
 def cli
 	def print_help
-		puts 'Usage: nuri.rb -c <command>
+		puts 'Usage: nuri.rb console <command>
 
 commands:
   main                  print the content of "main.sfp"
   state [details]       print the current state of this node
   pull [details]        pull and print the current state of all managed nodes
   plan                  generate a workflow to achieve the goal state
-  apply [sfw-file]      apply a workflow to achieve the goal state; the workflow
-                        is specified in "sfw-file", otherwise it is auto-generate
-                        by the planner
+  apply [debug]         auto-generate the workflow and execute it to achieve
+                        the goal state; if "debug" is provided, then the workflow
+                        will be printed to the screen
   update-system         push system information to all managed nodes
-
   bsig                  generate a Behavioural Signature model
 
 '
@@ -50,7 +52,8 @@ commands:
 		end
 
 	elsif ARGV[1] == 'plan'
-		plan = Nuri::Master.plan
+		parallel = (ARGV[2] == 'par')
+		plan = Nuri::Master.plan(parallel)
 		puts (plan == nil || plan['workflow'] == nil ? 'no solution' : plan)
 
 	elsif ARGV[1] == 'bsig'
@@ -64,7 +67,8 @@ commands:
 		plan = Nuri::Master.debug_sas
 
 	elsif ARGV[1] == 'apply'
-		result = Nuri::Master.apply
+		debug = (ARGV[2] == 'debug')
+		result = Nuri::Master.apply(debug)
 		puts 'Succeed: ' + result.to_s
 
 	elsif ARGV[1] == 'exec' and ARGV.length >= 3
@@ -95,34 +99,35 @@ end
 
 def planner
 	def print_help
-		puts "Usage: nuri.rb -p [option] <file>
+		puts "Usage: nuri.rb planner [option] <file>
 
 options:
-  [no-option]      solve an SFp planning problem in <file> and print the solution
-  sas              print SAS+ representation of the SFp planning problem in <file>
-  json             print JSON representation of the SFp planning problem in <file>
-  sfw              print the sequential workflow in JSON
-  sfw-par          print the parallel workflow in JSON
+  [no-option]    solve an SFp planning problem in <file> and print the solution
+  sas            print SAS+ representation of the SFp planning problem in <file>
+  json           print JSON representation of the SFp planning problem in <file>
+  seq            print the sequential workflow in JSON
+  par            print the parallel workflow in JSON
+  bsig           print the BSig model of the SFp planning problem in <file>
 
 "
 	end
 
 	begin
-		if ARGV.length <= 2 #ARGV[1] == 'planner' and ARGV.length >= 3
+		if ARGV.length == 2 #ARGV[1] == 'planner' and ARGV.length >= 3
 			planner = Nuri::Planner::Solver.new
-			plan = planner.solve_file(ARGV[1])
+			plan = planner.solve_file(ARGV[1], false, false, true)
 			puts (plan != nil ? plan : 'no solution!')
 	
 		elsif ARGV.length >= 3
-			if ARGV[1] == 'sfw'
+			if ARGV[1] == 'seq'
 				planner = Nuri::Planner::Solver.new
-				plan = planner.solve_file_to_sfw(ARGV[2])
-				puts (plan != nil ? JSON.pretty_generate(plan) : 'no solution!')
+				plan = planner.solve_file(ARGV[2], true)
+				puts (plan != nil ? plan : 'no solution!')
 	
-			elsif ARGV[1] == 'sfw-par'
+			elsif ARGV[1] == 'par'
 				planner = Nuri::Planner::Solver.new
-				plan = planner.solve_file_to_sfw(ARGV[2], {:parallel=>true})
-				puts (plan != nil ? JSON.pretty_generate(plan) : 'no solution!')
+				plan = planner.solve_file(ARGV[2], true, true)
+				puts (plan != nil ? plan : 'no solution!')
 	
 			elsif ARGV[1] == 'json'
 				Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
@@ -131,6 +136,13 @@ options:
 				parser = Nuri::Sfp::Parser.new
 				parser.parse_file(ARGV[2])
 				puts parser.to_sas
+
+			elsif ARGV[1] == 'bsig'
+				planner = Nuri::Planner::Solver.new
+				plan = planner.solve_file(ARGV[2])
+				bsig = (plan.nil? ? nil : planner.to_bsig(true))
+				puts (bsig.nil? ? 'no solution!' : bsig)
+
 			end
 	
 		else
@@ -138,6 +150,7 @@ options:
 		end
 	rescue Exception => e
 		$stderr.puts e.to_s
+		$stderr.puts e.backtrace
 	end
 end
 
@@ -160,12 +173,27 @@ def master
 	Nuri::Master.start
 end
 
-if ARGV.length > 0 and ARGV[0] == '-c'
-	cli
-elsif ARGV.length > 0 and ARGV[0] == '-p'
-	planner
-elsif ARGV.length > 0 and ARGV[0] == '-m'
-	master
-else
-	client
+if __FILE__ == $0
+	if ARGV[0] == 'console'
+		cli
+	elsif ARGV[0] == 'planner'
+		planner
+	elsif ARGV[0] == 'master'
+		master
+	elsif ARGV.length <= 0
+		client
+	elsif ARGV[0] == 'version'
+		puts "Nuri #{Version} (c) 2012 Herry\n\n"
+	else
+		puts "Usage: nuri.rb [command]
+
+commands:
+    <none>      start Nuri client daemon
+    console     managing clients through command line
+    planner     solve planning problem in SFP language
+    master      start Nuri master daemon
+    version     print version
+
+"
+	end
 end
