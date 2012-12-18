@@ -1,3 +1,10 @@
+18-12-2012
+- enable partial-order workflow
+- generate BSig model
+- modify CLI parameters in 'bin/nuri.rb'
+  -c => console
+  -p => planner
+
 12-12-2012
 - replace mongrel with WEBrick
 - disable secure connection due to immature implementations (buggy)

@@ -3,7 +3,7 @@ Nuri
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/nuri
 - last update: 12-12-2012
-- version: 0.1.3
+- version: 0.1.4
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
@@ -95,15 +95,15 @@ Controlling Nuri clients from master node
 
 2. Get current state of all nodes from master node:
 
-		$ bin/nuri.rb -c pull
+		$ bin/nuri.rb console pull
 
 3. Generate a workflow to implement the desired state
 
-		$ bin/nuri.rb -c plan
+		$ bin/nuri.rb console plan
 
 4. Applying the goal & global constraints specified in *etc/main.sfp* on master node onto client nodes i.e. *host1* and *host2* by generating and executing a workflow
 
-		$ bin/nuri.rb -c apply
+		$ bin/nuri.rb console apply
 
 Documentation
 -------------

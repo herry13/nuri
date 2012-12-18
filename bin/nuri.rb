@@ -5,7 +5,6 @@ $: << File.expand_path(File.dirname(__FILE__) + "/..")
 
 require "nuri/planner/main"
 require "nuri/main"
-require "trollop"
 
 Version = '0.1.4'
 
