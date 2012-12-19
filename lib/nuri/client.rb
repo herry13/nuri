@@ -42,7 +42,9 @@ module Nuri
 					Nuri::Util.log 'Stopped Nuri client daemon'
 				rescue Exception => e
 					Nuri::Util.log 'Cannot stop Nuri client: ' + e.to_s
+					return false
 				end
+				return true
 			end
 
 			def start(address=nil, port=nil, daemon=false)
@@ -87,8 +89,10 @@ module Nuri
 				rescue Interrupt
 					Nuri::Util.log 'Exiting.'
 				rescue Exception => e
-					Nuri::Util.log 'Client Daemon error: ' + e.to_s #backtrace.inspect
+					Nuri::Util.log 'Client Daemon error: ' + e.to_s
+					return false
 				end
+				return true
 			end
 
 			def get_state(path=nil)
@@ -191,10 +195,12 @@ module Nuri
 				begin
 					bsig = JSON[data['json']]
 					bsig_file = Nuri::Util.home_dir + '/var/bsig_' + bsig['id'].to_s
-					target = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : [])
-					target << bsig['rule']
+					local = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {'rules' => [], 'goal' => nil})
+					local['rules'] << bsig['rule'] if bsig.has_key?('rule')
+					bsig['rules'].each { |r| local['rules'] << r } if bsig.has_key?('rules')
+					local['goal'] = bsig['goal'] if bsig.has_key?('goal')
 					f = File.open(bsig_file, 'w')
-					f.write(JSON.generate(target))
+					f.write(JSON.generate(local))
 					f.close
 				rescue Exception => e
 					Nuri::Util.log 'Failed to save BSig: ' + e.to_s
