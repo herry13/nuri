@@ -101,6 +101,7 @@ module Nuri
 			def do_PUT(request, response)
 				path = request.path
 				path.chop! if path[path.length-1,1] == '/'
+puts 'path: ' + path
 				if path == '/exec'
 					status, content_type, body = self.execute_action(request.query)
 				elsif path == '/bsig'
@@ -115,6 +116,7 @@ module Nuri
 			end
 
 			def save_bsig(data)
+puts 'save_bsig'
 				begin
 					bsig = JSON[data['json']]
 					id = bsig['id']
