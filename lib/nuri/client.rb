@@ -1,6 +1,7 @@
 require 'base64'
 require 'pp'
 require 'webrick'
+require 'thread'
 
 module Nuri
 	module Client
@@ -8,9 +9,11 @@ module Nuri
 			include Nuri::Config
 
 			attr_accessor :master_keys
+			attr_reader :bsig_executor
 
 			def initialize
 				@master_keys = {}
+				@bsig_executor = nil
 				self.load
 			end
 
@@ -70,6 +73,7 @@ module Nuri
 						end
 					end
 
+					# dump some logs and PID
 					fork do
 						Nuri::Util.log "Start Nuri client on port #{port}"
 						if daemon
@@ -83,6 +87,9 @@ module Nuri
 							end
 						end
 					end
+
+					# BSig executor
+					self.start_bsig_executor
 
 					@server.start
 
@@ -103,11 +110,64 @@ module Nuri
 			def get_public_key
 				return Nuri::SSL.get_public_key
 			end
+
+			def start_bsig_executor
+				@bsig_executor = BSigExecutor.new(self) if @bsig_executor.nil?
+				@bsig_executor.start if not @bsig_executor.running
+			end
+		end
+
+		class BSigExecutor
+			attr_reader :running
+
+			def initialize(owner)
+				@owner = owner
+				@lock = Mutex.new
+				@lock.synchronize { @running = false; @active = false }
+			end
+
+			def start
+				@main_threat = Threat.new {
+					@lock.synchronize { @running = true; @active = true }
+					begin
+						# 1) load active BSig
+						if not self.load
+							sleep 1
+						else
+							# 2) compare current and goal
+							if not self.at_goal
+								# 3) if not same, execute BSig
+								self.execute
+							end
+						end
+					end while @running
+					@active = false
+				}
+			end
+
+			def stop
+				@lock.synchronize { @running = false }
+				while @active; sleep 1; end
+			end
+
+			def load
+				# TODO
+puts 'load bsig'
+				return false
+			end
+
+			def at_goal
+				# TODO
+			end
+
+			def execute
+				# TODO
+			end
 		end
 
 		class Agent < WEBrick::HTTPServlet::AbstractServlet
-			def initialize(server, daemon)
-				@daemon = daemon
+			def initialize(server, owner)
+				@owner = owner
 			end
 
 			def do_GET(request, response)
@@ -226,7 +286,7 @@ module Nuri
 				params = clean_parameters(cmd['parameters'])
 				puts "exec: " + cmd['name'] + " (" + params.inspect + ')'
 				comp_name, cmd_name = cmd['name'].pop_ref
-				component = @daemon.root.get(comp_name)
+				component = @owner.root.get(comp_name)
 				success = false
 				if component != nil
 					begin
@@ -260,10 +320,10 @@ module Nuri
 
 			def get_state(options={})
 				if not options.has_key?(:path)
-					state = @daemon.get_state
+					state = @owner.get_state
 				else
 					_, _, path = options[:path].split('/', 3)
-					state = @daemon.get_state(path)
+					state = @owner.get_state(path)
 				end
 
 				if state.is_a?(Nuri::Undefined)

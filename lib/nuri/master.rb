@@ -154,7 +154,7 @@ module Nuri
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
 						if code != '200'
-							raise Exception, "Failed-sending BSig rule:#{code},#{address}"
+							raise Exception, "sending BSig rule:#{code},#{address}"
 						end
 						nodes << address
 					end
@@ -168,8 +168,8 @@ module Nuri
 						json = {'id' => bsig['id'], 'goal' => {var_name => value}}
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
-						if code != 200
-							raise Exception, "Failed sending BSig goal:#{code},#{address}"
+						if code != '200'
+							raise Exception, "sending BSig goal:#{code},#{address}"
 						end
 						nodes << address
 					end
