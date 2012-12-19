@@ -1,3 +1,7 @@
+19-12-2012
+- from master node, sending BSig model to each client nodes
+- on client node, saving the BSig model
+
 18-12-2012
 - enable partial-order workflow
 - generate BSig model
