@@ -119,11 +119,12 @@ module Nuri
 			def deactivate_bsig(current_id)
 				# 1) stopped thread which deploys BSig model -- TODO
 
-				# list old-BSig models and delete them
-				Dir.entries(Nuri::Util.home_dir + '/var').each do |fname|
+				# 2) list old-BSig models and delete them
+				dir = Nuri::Util.home_dir + '/var'
+				Dir.entries(dir).each do |fname|
 					head, id = fname.split('_')
 					next if head != 'bsig' and id.to_i < current_id.to_i
-					File.delete(fname)
+					File.delete("#{dir}/#{fname}")
 				end
 			end
 
