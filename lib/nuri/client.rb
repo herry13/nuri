@@ -195,7 +195,7 @@ module Nuri
 				begin
 					bsig = JSON[data['json']]
 					bsig_file = Nuri::Util.home_dir + '/var/bsig_' + bsig['id'].to_s
-					local = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {'rules' => [], 'goal' => nil})
+					local = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {'rules' => [], 'goal' => {}})
 					local['rules'] << bsig['rule'] if bsig.has_key?('rule')
 					bsig['rules'].each { |r| local['rules'] << r } if bsig.has_key?('rules')
 					bsig['goal'].each { |k,v| local['goal'][k] = v } if bsig.has_key?('goal')
