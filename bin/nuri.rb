@@ -157,17 +157,37 @@ options:
 end
 
 def client
-	Nuri::Util.log 'Start Nuri Client...'
-	# set as daemon if it's defined in configuration file
-	#if nuri.config != nil and nuri.config.has_key?('daemon') and nuri.config['daemon']
-	#	exit if fork
-	#	Process.setsid
-	#	exit if fork
-	#	puts "Nuri is running with PID=" + Process.pid.to_s
-	#end
+	def print_help
+		puts "Usage: nuri.rb client <command> <file>
 
-	# start Nuri Client
-	Nuri::Client.start
+options:
+  start     start the Nuri client daemon
+  stop      stop the Nuri client daemon
+  debug     start the Nuri client but not as a daemon
+
+"
+	end
+
+	if ARGV[1] == 'start'
+		Nuri::Util.log 'Start Nuri client daemon'
+		# set as daemon if it's defined in configuration file
+		#if nuri.config != nil and nuri.config.has_key?('daemon') and nuri.config['daemon']
+		#	exit if fork
+		#	Process.setsid
+		#	exit if fork
+		#	puts "Nuri is running with PID=" + Process.pid.to_s
+		#end
+
+		# start Nuri Client
+		Nuri::Client.start(true)
+
+	elsif ARGV[1] == 'stop'
+		Nuri::Client.stop
+
+	elsif ARGV[1] == 'debug'
+		Nuri::Client.start
+
+	end
 end
 
 def master
@@ -182,10 +202,12 @@ if __FILE__ == $0
 		planner
 	elsif ARGV[0] == 'master'
 		master
-	elsif ARGV.length <= 0
-		client
 	elsif ARGV[0] == 'version'
 		puts "Nuri #{Version} (c) 2012 Herry\n\n"
+	elsif ARGV[0] == 'client'
+		client
+	#elsif ARGV.length <= 0
+	#	client
 	else
 		puts "Usage: nuri.rb [command]
 
@@ -193,7 +215,7 @@ commands:
     <none>      start Nuri client daemon
     console     managing clients through command line
     planner     solve planning problem in SFP language
-    master      start Nuri master daemon
+    client      send command to Nuri client
     version     print version
 
 "

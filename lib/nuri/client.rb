@@ -33,7 +33,19 @@ module Nuri
 				end
 			end
 
-			def start(address=nil, port=nil)
+			def stop
+				begin
+					pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
+					return if not File.exist?(pid_file)
+					pid = File.read(pid_file).to_i
+					Process.kill('INT', pid)
+					Nuri::Util.log 'Stopped Nuri client daemon'
+				rescue Exception => e
+					Nuri::Util.log 'Cannot stop Nuri client: ' + e.to_s
+				end
+			end
+
+			def start(address=nil, port=nil, daemon=false)
 				if address == nil
 					address = @config['host'] if @config['host'] != '' and
 							@config['host'] != '0.0.0.0'
@@ -42,11 +54,36 @@ module Nuri
 				port = @config['port'].to_i if port == nil
 
 				begin
-					@server = WEBrick::HTTPServer.new(:Host => address, :Port => port)
+					server_type = (daemon ? WEBrick::Daemon : WEBrick::SimpleServer)
+					pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
+					@server = WEBrick::HTTPServer.new(:Host => address,
+					                                  :Port => port,
+					                                  :ServerType => server_type)
 					@server.mount("/", Agent, self)
-					trap("INT") { @server.shutdown }
+
+					['INT', 'TERM'].each do |signal|
+						trap(signal) do
+							@server.shutdown
+							File.delete(pid_file) if File.exist?(pid_file)
+						end
+					end
+
+					fork do
+						Nuri::Util.log "Start Nuri client on port #{port}"
+						if daemon
+							data = `ps x | grep "nuri.rb client" | grep -v grep | awk '{print $1}'`.split("\n")
+							if data.length > 0
+								pid = data[1].to_i
+								Nuri::Util.log "Nuri client daemon is running with PID ##{pid}"
+								f = File.open(pid_file, 'w')
+								f.write(pid)
+								f.close
+							end
+						end
+					end
+
 					@server.start
-					Nuri::Util.log 'Start Nuri Client on port: ' + port.to_s
+
 				rescue Interrupt
 					Nuri::Util.log 'Exiting.'
 				rescue Exception => e
@@ -243,163 +280,18 @@ module Nuri
 			end
 		end
 
-=begin
-		# DEPRECATED
-		class Agent2
-			def initialize(daemon, request, response)
-				@daemon = daemon
-				@request = request
-				@response = response
-			end
-
-			def serve
-				def check_uri(uri, value)
-					parts = uri.split('/')
-					return (parts.length >= 2 and parts[1] == value)
-				end
-
-				if @request.params['REQUEST_METHOD'] == 'GET'
-					if check_uri(@request.params['REQUEST_URI'], 'state')
-						self.http_get_state(@request.params['REQUEST_URI'])
-					elsif @request.params['REQUEST_URI'] == '/status/secure'
-						self.secure_connection
-					elsif @request.params['REQUEST_URI'] == '/status/public_key'
-						self.get_public_key
-					end
-
-				elsif @request.params['REQUEST_METHOD'] == 'POST'
-					if check_uri(@request.params['REQUEST_URI'], 'system')
-						self.process_system_information
-					elsif @request.params['REQUEST_URI'] == '/status/master'
-						self.receive_master_key
-					end
-
-				elsif @request.params['REQUEST_METHOD'] == 'PUT'
-					if check_uri(@request.params['REQUEST_URI'], 'exec')
-						self.execute(@request.body.read.to_s)
-					end
-
-				end
-			end
-
-			def receive_master_key
-				requester = Nuri::Util.domainname(@request.params['REMOTE_ADDR'])
-				data = JSON[@request.body.read]
-				key = Nuri::SSL.get_private_key
-				pass_phrase = key.private_decrypt( Base64.decode64(data['data1']) )
-				salt = key.private_decrypt( Base64.decode64(data['data2']) )
-				decrypter = OpenSSL::Cipher::Cipher.new 'AES-128-CBC'
-				decrypter.decrypt
-				decrypter.pkcs5_keyivgen pass_phrase, salt
-				master_key = decrypter.update Base64.decode64(data['data3'])
-				master_key << decrypter.final
-				@daemon.master_keys[requester] = master_key
-				@response.start(200) { |head,out| out.write('') }
-			end
-
-			def get_public_key
-				pub_key = @daemon.get_public_key
-				@response.start(200) { |head,out| out.write(pub_key.to_pem) }
-			end
-
-			def secure_connection
-				requester = Nuri::Util.domainname(@request.params['REMOTE_ADDR'])
-				if @daemon.master_keys.has_key?(requester)
-					@response.start(200) { |head,out| out.write('') }
-				else
-					@response.start(404) { |head,out| out.write('') }
-				end
-			end
-
-			def process_system_information
-				data = @request.body.read.to_s
-				system = JSON[data]
-				Nuri::Util.set_system_information(system)
-				@response.start(200) { |head,out| out.write('') }
-				Nuri::Util.log 'system information updated'
-			end
-
-			def execute(json)
-				def clean_parameters(params)
-					p = {}
-					params.each { |k,v|
-						p[k[2,k.length-2]] =	params[k]
-					}
-					return p
-				end
-
-				Nuri::Util.log "executing: #{json}..."
-				data = JSON[json]
-				cmd = data['action']
-				Nuri::Util.set_system_information(data['system'])
-
-				params = clean_parameters(cmd['parameters'])
-puts "exec: " + cmd['name'] + ": " + params.inspect + '...'
-				comp_name, cmd_name = cmd['name'].pop_ref
-				component = @daemon.root.get(comp_name)
-				success = false
-				if component != nil
-					begin
-						if params.size <= 0
-							success = component.send(cmd_name)
-						else
-							success = component.send(cmd_name, params)
-						end
-						
-						component.get_self_state if success
-puts "...OK"
-					rescue Exception => e
-puts "..Failed"
-						Nuri::Util.log 'Cannot execute procedure: ' + json
-						@response.start(500) { |head,out| out.write('') }
-					end
-				else
-					Nuri::Util.log 'Cannot find procedure: ' + procedure
-					@response.start(503) { |head,out| out.write('') }
-				end
-
-				if success
-					@response.start(200) { |head,out| out.write('') }
-					Nuri::Util.log "...execution success!"
-				else
-					@response.start(500) { |head,out| out.write('') }
-					Nuri::Util.log "...execution failed!"
-				end
-				return success
-			end
-
-			def http_get_state(path=nil)
-				if path == nil
-					state = @daemon.get_state
-				else
-					_, _, path = path.split('/', 3)
-					state = @daemon.get_state(path)
-				end
-
-				if state.is_a?(Nuri::Undefined)
-					@response.start(404) do |head, out| out.write(''); end
-				else
-					@response.start(200) do |head, out|
-						head['Content-Type'] = 'application/json'
-						data = { 'value' => state }
-						out.write(Nuri::Sfp.to_json(data))
-					end
-				end
-			end
-		end
-=end
-
 		@@daemon = nil
 
-		def self.start
+		def self.start(daemon=false)
 			if @@daemon == nil
 				@@daemon = Nuri::Client::Daemon.new
-				@@daemon.start
+				@@daemon.start(nil, nil, daemon)
 			end
 		end
 
 		def self.stop
-			@@daemon.stop if @@daemon != nil
+			@@daemon = Nuri::Client::Daemon.new
+			@@daemon.stop
 		end
 
 	end
