@@ -1,5 +1,5 @@
 module Nuri
-	Port = 9090
+	Port = 1313
 
 	class Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
