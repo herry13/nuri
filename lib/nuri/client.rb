@@ -119,11 +119,9 @@ puts 'path: ' + path
 puts 'save_bsig'
 				begin
 					bsig = JSON[data['json']]
-					id = bsig['id']
-					rule = bsig['rule']
-					bsig_file = Nuri::Util.home_dir + '/var/bsig_' + bsig['id']
+					bsig_file = Nuri::Util.home_dir + '/var/bsig_' + bsig['id'].to_s
 					target = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : [])
-					target << rule
+					target << bsig['rule']
 					f = File.open(bsig_file, 'w')
 					f.write(JSON.generate(target))
 					f.close
