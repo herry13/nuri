@@ -123,7 +123,7 @@ module Nuri
 				dir = Nuri::Util.home_dir + '/var'
 				Dir.entries(dir).each do |fname|
 					head, id = fname.split('_')
-					next if head != 'bsig' or id.to_i < current_id.to_i
+					next if head != 'bsig' or id.to_i >= current_id.to_i
 puts 'delete ' + fname
 					File.delete("#{dir}/#{fname}")
 				end
