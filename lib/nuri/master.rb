@@ -139,10 +139,11 @@ module Nuri
 			def apply_bsig(debug=false)
 				bsig = self.get_bsig
 				puts JSON.pretty_generate(bsig) if debug
-				# send bsig to clients
 				return true if bsig['bsig'].nil? or bsig['bsig'].length <= 0
 				begin
+					# send bsig to clients
 					Nuri::Util.log "Sending BSig: #{bsig['id']}"
+					nodes = []
 					bsig['bsig'].each do |rule|
 						node = self.get_node(rule['name'], @main['system'])
 						return false if node.nil?
@@ -152,15 +153,32 @@ module Nuri
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
 						if code != '200'
-							puts 'failed: ' + code + ' :: ' + address + ' -- ' + data
-							return false
+							raise Exception, "Failed-sending BSig:#{code},#{address}"
+						end
+						nodes << address
+					end
+					nodes.uniq!
+
+					# send deployment signal to all clients
+					Nuri::Util.log "Activate BSig ID #" + bsig['id'].to_s
+					json = {'id' => bsig['id']}
+					data = "json=" + JSON.generate(json)
+					nodes.each do |address|
+						code, _ = put_data(address, Nuri::Port, '/bsig/activate', data)
+						if code != '200'
+							raise Exception, "Failed-activate BSig:#{code},#{address}"
 						end
 					end
+
 				rescue Timeout::Error
 					Nuri::Util.log 'Timeout on sending BSig to clients'
 					return false
+				rescue Exception => exp
+					Nuri::Util.log 'Failed: ' + exp.to_s
+					return false
 				end
-				# send deployment signal to all clients
+
+				return true
 			end
 
 			def get_plan(state=nil, json=false, parallel=false)

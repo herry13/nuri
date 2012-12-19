@@ -101,11 +101,12 @@ module Nuri
 			def do_PUT(request, response)
 				path = request.path
 				path.chop! if path[path.length-1,1] == '/'
-puts 'path: ' + path
 				if path == '/exec'
 					status, content_type, body = self.execute_action(request.query)
 				elsif path == '/bsig'
 					status, content_type, body = self.save_bsig(request.query)
+				elsif path == '/bsig/activate'
+					status, content_type, body = self.activate_bsig(request.query)
 				else
 					status = 400
 					content_type = body = ''
@@ -115,8 +116,40 @@ puts 'path: ' + path
 				response.body = body
 			end
 
+			def deactivate_bsig(current_id)
+				# 1) stopped thread which deploys BSig model -- TODO
+
+				# list old-BSig models and delete them
+				Dir.entries(Nuri::Util.home_dir + '/var').each do |fname|
+					head, id = fname.split('_')
+					next if head != 'bsig' and id.to_i < current_id.to_i
+					File.delete(fname)
+				end
+			end
+
+			def activate_bsig(data)
+				begin
+					bsig = JSON[data['json']]
+					bsig_id = bsig['id']
+
+					# 1) deactivate old-bsig
+					self.deactivate_bsig(bsig_id)
+
+					# 2) save current BSig's ID
+					bsig_id_file = Nuri::Util.home_dir + '/var/bsig_id'
+					f = File.open(bsig_id_file, 'w')
+					f.write(bsig_id)
+					f.close
+
+					# 3) load and deploy BSig -- TODO
+				rescue Exception => e
+					Nuri::Util.log 'Failed to activate BSig: ' + e.to_s
+					return 500, '', ''
+				end
+				return 200, '', ''
+			end
+
 			def save_bsig(data)
-puts 'save_bsig'
 				begin
 					bsig = JSON[data['json']]
 					bsig_file = Nuri::Util.home_dir + '/var/bsig_' + bsig['id'].to_s
