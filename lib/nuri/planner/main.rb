@@ -51,26 +51,38 @@ module Nuri
 			end
 
 			protected
+			def bsig_template
+				return {'version' => 1, 'bsig' => [], 'id' => Time.now.getutc.to_i}
+			end
+
 			def to_sequential_bsig
+				bsig = self.bsig_template
+				return bsig if @plan.length <= 0
 				plan = self.get_sequential_plan
-				(plan.length-1).downto(1) do |i|
-					op = plan[i]
-					prev_op = plan[i-1]
+				workflow = plan['workflow']
+				(workflow.length-1).downto(1) do |i|
+					op = workflow[i]
+					prev_op = workflow[i-1]
 					prev_op['effect'].each { |k,v| op['condition'][k] = v }
 				end
-				return plan
+				bsig['bsig'] = workflow
+				return bsig
 			end
 
 			def to_parallel_bsig
+				bsig = self.bsig_template
+				return bsig if @plan.length <= 0
 				plan = self.get_parallel_plan
 				# foreach operator's predecessors, add its effects to operator's conditions
-				plan['workflow'].each do |op|
+				workflow = plan['workflow']
+				workflow.each do |op|
 					op['predecessors'].each do |pred|
-						pred_op = plan['workflow'][pred]
+						pred_op = workflow[pred]
 						pred_op['effect'].each { |k,v| op['condition'][k] = v }
 					end
 				end
-				return plan
+				bsig['bsig'] = workflow
+				return bsig
 			end
 
 			def get_sequential_plan

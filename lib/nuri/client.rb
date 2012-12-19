@@ -103,6 +103,8 @@ module Nuri
 				path.chop! if path[path.length-1,1] == '/'
 				if path == '/exec'
 					status, content_type, body = self.execute_action(request.query)
+				elsif path == '/bsig'
+					status, content_type, body = self.save_bsig(request.query)
 				else
 					status = 400
 					content_type = body = ''
@@ -110,6 +112,24 @@ module Nuri
 				response.status = status
 				response['Content-Type'] = content_type
 				response.body = body
+			end
+
+			def save_bsig(data)
+				begin
+					bsig = JSON[data['json']]
+					id = bsig['id']
+					rule = bsig['rule']
+					bsig_file = Nuri::Util.home_dir + '/var/bsig_' + bsig['id']
+					target = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : [])
+					target << rule
+					f = File.open(bsig_file, 'w')
+					f.write(JSON.generate(target))
+					f.close
+				rescue Exception => e
+					Nuri::Util.log 'Failed to save BSig: ' + e.to_s
+					return 500, '', ''
+				end
+				return 200, '', ''
 			end
 
 			def execute_action(data)

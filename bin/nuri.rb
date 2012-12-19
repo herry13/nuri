@@ -22,7 +22,7 @@ commands:
                         will be printed to the screen
   update-system         push system information to all managed nodes
   bsig                  generate a Behavioural Signature model
-
+  apply-bsig            generate and deploy the Behavioural Signature model
 '
 	end
 	if ARGV.length <= 1
@@ -57,7 +57,10 @@ commands:
 
 	elsif ARGV[1] == 'bsig'
 		bsig = Nuri::Master.get_bsig
-		puts (bsig == nil ? 'no solution' : bsig)
+		puts (bsig == nil ? 'no solution' : JSON.pretty_generate(bsig))
+
+	elsif ARGV[1] == 'apply-bsig'
+		puts (Nuri::Master.apply_bsig(true) ? 'succeed' : 'failed')
 
 	elsif ARGV[1] == 'json'
 		plan = Nuri::Master.debug_json
@@ -101,12 +104,12 @@ def planner
 		puts "Usage: nuri.rb planner [option] <file>
 
 options:
-  [no-option]    solve an SFp planning problem in <file> and print the solution
-  sas            print SAS+ representation of the SFp planning problem in <file>
-  json           print JSON representation of the SFp planning problem in <file>
-  seq            print the sequential workflow in JSON
-  par            print the parallel workflow in JSON
-  bsig           print the BSig model of the SFp planning problem in <file>
+  <none>    solve an SFp planning problem in <file> and print the solution
+  sas       print SAS+ representation of the SFp planning problem in <file>
+  json      print JSON representation of the SFp planning problem in <file>
+  seq       print the sequential workflow in JSON
+  par       print the parallel workflow in JSON
+  bsig      print the BSig model of the SFp planning problem in <file>
 
 "
 	end

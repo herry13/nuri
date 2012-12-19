@@ -131,8 +131,36 @@ module Nuri
 			def get_bsig(state=nil)
 				sfp_task = create_task(state)
 				planner = Nuri::Planner::Solver.new
-				plan = planner.solve_sfp(sfp_task, false, true)
-				return plan
+				plan = planner.solve_sfp(sfp_task)
+				bsig = (plan.nil? ? nil : planner.to_bsig)
+				return bsig
+			end
+
+			def apply_bsig(debug=false)
+				bsig = self.get_bsig
+				puts JSON.pretty_generate(bsig) if debug
+				# send bsig to clients
+				return true if bsig['bsig'].nil? or bsig['bsig'].length <= 0
+				begin
+					Nuri::Util.log "Sending BSig: #{bsig['id']}"
+					bsig['bsig'].each do |rule|
+						node = self.get_node(rule['name'], @main['system'])
+						return false if node.nil?
+
+						address = node['domainname']
+						json = {'id' => bsig['id'], 'rule' => rule}
+						data = "json=" + JSON.generate(json)
+						code, _ = put_data(address, Nuri::Port, '/bsig', data)
+						if code != '200'
+							puts 'failed: ' + code + ' :: ' + address + ' -- ' + data
+							return false
+						end
+					end
+				rescue Timeout::Error
+					Nuri::Util.log 'Timeout on sending BSig to clients'
+					return false
+				end
+				# send deployment signal to all clients
 			end
 
 			def get_plan(state=nil, json=false, parallel=false)
@@ -280,6 +308,11 @@ module Nuri
 		def self.get_bsig
 			master = Nuri::Master::Daemon.new
 			return master.get_bsig
+		end
+
+		def self.apply_bsig(debug=false)
+			master = Nuri::Master::Daemon.new
+			return master.apply_bsig(debug)
 		end
 
 		def self.debug_json
