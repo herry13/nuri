@@ -139,12 +139,13 @@ module Nuri
 			def apply_bsig(debug=false)
 				bsig = self.get_bsig
 				puts JSON.pretty_generate(bsig) if debug
-				return true if bsig['bsig'].nil? or bsig['bsig'].length <= 0
+				return true if bsig['rules'].nil? or bsig['rules'].length <= 0
 				begin
-					# send bsig to clients
 					Nuri::Util.log "Sending BSig: #{bsig['id']}"
+
+					# send BSig rules to clients
 					nodes = []
-					bsig['bsig'].each do |rule|
+					bsig['rules'].each do |rule|
 						node = self.get_node(rule['name'], @main['system'])
 						return false if node.nil?
 
@@ -153,13 +154,28 @@ module Nuri
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
 						if code != '200'
-							raise Exception, "Failed-sending BSig:#{code},#{address}"
+							raise Exception, "Failed-sending BSig rule:#{code},#{address}"
 						end
 						nodes << address
 					end
-					nodes.uniq!
+
+					# send BSig goal to clients
+					bsig['goal'].each do |var_name,value|
+						node = self.get_node(var_name, @main['system'])
+						return false if node.nil?
+
+						address = node['domainname']
+						json = {'id' => bsig['id'], 'goal' => {var_name => value}}
+						data = "json=" + JSON.generate(json)
+						code, _ = put_data(address, Nuri::Port, '/bsig', data)
+						if code != 200
+							raise Exception, "Failed sending BSig goal:#{code},#{address}"
+						end
+						nodes << address
+					end
 
 					# send deployment signal to all clients
+					nodes.uniq!
 					Nuri::Util.log "Activate BSig ID #" + bsig['id'].to_s
 					json = {'id' => bsig['id']}
 					data = "json=" + JSON.generate(json)

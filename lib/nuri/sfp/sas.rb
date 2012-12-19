@@ -169,9 +169,26 @@ module Nuri
 					#self.dump_operators
 					#self.dump_vars
 	
+					@vars = @variables.values
+
 					return create_output
 				rescue Exception => e
 					Nuri::Util.log e.to_s
+				end
+			end
+
+			def variable_name_and_value(var_id, value_index)
+				i = @vars.index { |v| v.id == var_id }
+				var = @vars[i]
+				return nil, nil if var.nil?
+				return var.name, nil if value_index >= var.length or
+				                        value_index < 0
+				value = var[value_index]
+				if value.is_a?(Hash)
+					return var.name, value.ref if value.isobject
+					return var.name, nil
+				else
+					return var.name, value
 				end
 			end
 

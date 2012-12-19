@@ -198,7 +198,7 @@ module Nuri
 					local = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {'rules' => [], 'goal' => nil})
 					local['rules'] << bsig['rule'] if bsig.has_key?('rule')
 					bsig['rules'].each { |r| local['rules'] << r } if bsig.has_key?('rules')
-					local['goal'] = bsig['goal'] if bsig.has_key?('goal')
+					bsig['goal'].each { |k,v| local['goal'][k] = v } if bsig.has_key?('goal')
 					f = File.open(bsig_file, 'w')
 					f.write(JSON.generate(local))
 					f.close

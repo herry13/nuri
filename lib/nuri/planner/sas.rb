@@ -110,6 +110,16 @@ module Nuri
 				return sfw, init, sfw.length
 			end
 
+			def final_state
+				state = @init.clone
+				self.collect_operators.each { |op| state.apply!(op) }
+				final = []
+				for i in 0..(state.length-1)
+					final <<  {:id => i, :value => state[i]} if state[i] != @init[i]
+				end
+				return final
+			end
+
 			protected
 			def self.is_global_variable?(variable_name)
 				return variable_name.split('_')[2] == GlobalVariable

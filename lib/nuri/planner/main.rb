@@ -50,22 +50,28 @@ module Nuri
 				return (json ? JSON.pretty_generate(bsig) : bsig)
 			end
 
+			def final_state(json=false)
+				return nil if @plan.nil?
+				state = @sas_task.final_state
+				return (json ? JSON.pretty_generate(state) : state)
+			end
+
 			protected
 			def bsig_template
-				return {'version' => 1, 'bsig' => [], 'id' => Time.now.getutc.to_i}
+				return {'version' => 1, 'rules' => [], 'id' => Time.now.getutc.to_i, 'goal' => []}
 			end
 
 			def to_sequential_bsig
 				bsig = self.bsig_template
 				return bsig if @plan.length <= 0
 				plan = self.get_sequential_plan
-				workflow = plan['workflow']
+				bsig['rules'] = workflow = plan['workflow']
 				(workflow.length-1).downto(1) do |i|
 					op = workflow[i]
 					prev_op = workflow[i-1]
 					prev_op['effect'].each { |k,v| op['condition'][k] = v }
 				end
-				bsig['bsig'] = workflow
+				bsig['goal'] = self.bsig_goal
 				return bsig
 			end
 
@@ -74,15 +80,24 @@ module Nuri
 				return bsig if @plan.length <= 0
 				plan = self.get_parallel_plan
 				# foreach operator's predecessors, add its effects to operator's conditions
-				workflow = plan['workflow']
+				bsig['rules'] = workflow = plan['workflow']
 				workflow.each do |op|
 					op['predecessors'].each do |pred|
 						pred_op = workflow[pred]
 						pred_op['effect'].each { |k,v| op['condition'][k] = v }
 					end
 				end
-				bsig['bsig'] = workflow
+				bsig['goal'] = self.bsig_goal
 				return bsig
+			end
+
+			def bsig_goal
+				goal = {}
+				@sas_task.final_state.each do |g|
+					var_name, var_value = @parser.variable_name_and_value(g[:id], g[:value])
+					goal[var_name] = var_value
+				end
+				return goal
 			end
 
 			def get_sequential_plan
