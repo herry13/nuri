@@ -114,7 +114,7 @@ module Nuri
 
 			def start_bsig_executor
 				@bsig_executor = BSigExecutor.new(self) if @bsig_executor.nil?
-				@bsig_executor.start if not @bsig_executor.running
+				@bsig_executor.start if not @bsig_executor.active
 			end
 
 			def stop_bsig_executor; @bsig_executor.stop if not @bsig_executor.nil?; end
@@ -141,7 +141,7 @@ module Nuri
 		class BSigExecutor
 			SleepTime = 2
 
-			attr_reader :running, :flaws, :goal
+			attr_reader :running, :active, :flaws, :goal
 
 			def initialize(owner, goal=nil)
 				@owner = owner
