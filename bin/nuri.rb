@@ -187,6 +187,7 @@ commands:
 		Nuri::Client.stop
 
 	elsif ARGV[1] == 'debug'
+		Nuri::Util.set_debug(true)
 		Nuri::Client.start
 
    elsif ARGV[1] == 'reset'

@@ -175,7 +175,7 @@ module Nuri
 							Nuri::Util.log 'Cannot load BSig'
 							break
 						elsif self.at_goal?
-							Nuri::Util.log 'Reach goal state'
+							Nuri::Util.log 'At goal state'
 							break
 						else
 							if not self.execute_one
@@ -240,22 +240,42 @@ module Nuri
 
 				puts 'execute'
 				candidates, selected_operators = self.search_candidates
+				subgoals, operator = select_operator(candidates, selected_operators)
+				# return false if goal cannot be reached
+				return false if operator.nil?
 
-				# select an operator to be executed
-				candidates.each do |path,operators|
-					return false if operators.length <= 0
+				# check and satisfy the precondition of selected operator
+				return false if not check_and_satisfy_precondition(operator)
 
-					## TODO
-					# 1) check local-precondition
-					# 2) check remote-precondition
-					# 3) execute the operator
-					op = operators.pop
-					@owner.execute(op)
+				# execute the operator
+				return false if not @owner.execute(operator)
+				# if execution is succeed, remove the flaw from the goal stack
+				subgoals.each { |path| @flaws[path].pop }
 
-					## execution OK, then pop the goal
-					@flaws[path].pop
+				return true
+			end
+
+			def check_and_satisfy_precondition(operator)
+				operator['condition'].each do |path,pre|
+					value = @owner.get_state(path)
+puts path + ': ' + pre.to_s + ' == ' + value.to_s
+					return false if value != pre
+					#return false if @owner.get_state(path) != value
 				end
 				return true
+			end
+
+			# Return an operator to be executed and the path of subgoal reached by the operator
+			def select_operator(candidates, selected_operators)
+				return nil if candidates.nil? or selected_operators.nil? or selected_operators.length <= 0
+				# Select the operator that has the highest ID value. Each operator
+				# has an ID which represents its index in total-order plan
+				selected_operators.uniq!
+				selected_operators.sort! { |x,y| x.id <=> y.id } 
+				operator = selected_operators.last
+				subgoals = []
+				candidates.each { |path,operators| subgoals << path if not operators.index(operator).nil? }
+				return subgoals, operator
 			end
 
 			def search_candidates
@@ -274,9 +294,15 @@ module Nuri
 							end
 						}
 					end
+					# return if a flaw cannot be reached by any operator
+					# which also means that the goal cannot be achieved
+					return nil, nil if matched_operators.length <= 0
+
 					candidates[path] = matched_operators
 				end
 
+				# candidates: selected operators which are classified by the flaw
+				# selected_operators: all selected operators
 				return candidates, selected_operators
 			end
 		end

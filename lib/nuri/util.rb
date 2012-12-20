@@ -5,10 +5,11 @@ module Nuri
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
 		@@logger = Logger.new(@@home_dir + "/log/message.log")
 		@@system = {}
+		@@debug = false
 
-		def self.home_dir
-			return @@home_dir
-		end
+		def self.set_debug(debug=false); @@debug = debug; end
+
+		def self.home_dir; return @@home_dir; end
 
 		def self.set_system_information(system)
 			@@system = system
@@ -16,17 +17,17 @@ module Nuri
 			@@system.keys.each { |k| @@system.delete(k) if @@system[k] == self_name }
 		end
 
-		def self.get_system_information
-			return @@system
-		end
+		def self.get_system_information; return @@system; end
 
 		def self.warn(msg=nil)
 			@@logger.warn msg if msg != nil
+			puts msg if @@debug
 			return @@logger
 		end
 
 		def self.log(msg=nil)
 			@@logger.info msg if msg != nil
+			puts msg if @@debug
 			return @@logger
 		end
 
@@ -97,9 +98,7 @@ module Nuri
 			return @@platform
 		end
 
-		def self.nuri_version
-			return `git rev-parse HEAD`.chop
-		end
+		def self.nuri_version; return `git rev-parse HEAD`.chop; end
 
 		def self.uninstalled?(package)
 			success = ( system("/usr/bin/apt-get -y --purge remove #{package}") == true )
@@ -120,7 +119,6 @@ module Nuri
 		end
 
 		private
-		def initialize
-		end
+		def initialize; end
 	end
 end
