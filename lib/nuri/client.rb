@@ -239,17 +239,17 @@ module Nuri
 				@flaws.each { |path,values| puts path + ': ' + values.length.to_s }
 
 				puts 'execute'
-				candidates, selected_rules = self.search_candidates
+				candidates, selected_operators = self.search_candidates
 
-				# select a rule to be executed
-				candidates.each do |path,rules|
-					return false if rules.length <= 0
+				# select an operator to be executed
+				candidates.each do |path,operators|
+					return false if operators.length <= 0
 
 					## TODO
 					# 1) check local-precondition
 					# 2) check remote-precondition
 					# 3) execute the operator
-					op = rules.pop
+					op = operators.pop
 					@owner.execute(op)
 
 					## execution OK, then pop the goal
@@ -260,24 +260,24 @@ module Nuri
 
 			def search_candidates
 				candidates = {}
-				selected_rules = []
+				selected_operators = []
 				@flaws.each do |path,values|
 					next if values.length <= 0
 					value = values.last
-					matched_rules = []
-					@bsig['rules'].each do |rule|
-						rule['effect'].each { |k,v|
+					matched_operators = []
+					@bsig['operators'].each do |operator|
+						operator['effect'].each { |k,v|
 							if path == k and value == v
-								matched_rules << rule
-								selected_rules << rule
+								matched_operators << operator
+								selected_operators << operator
 								break
 							end
 						}
 					end
-					candidates[path] = matched_rules
+					candidates[path] = matched_operators
 				end
 
-				return candidates, selected_rules
+				return candidates, selected_operators
 			end
 		end
 
@@ -373,9 +373,9 @@ module Nuri
 				begin
 					bsig = JSON[data['json']]
 					bsig_file = Nuri::Util.home_dir + '/var/bsig_' + bsig['id'].to_s
-					local = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {'rules' => [], 'goal' => {}})
-					local['rules'] << bsig['rule'] if bsig.has_key?('rule')
-					bsig['rules'].each { |r| local['rules'] << r } if bsig.has_key?('rules')
+					local = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {'operators' => [], 'goal' => {}})
+					local['operators'] << bsig['operator'] if bsig.has_key?('operator')
+					bsig['operators'].each { |r| local['operators'] << r } if bsig.has_key?('operators')
 					bsig['goal'].each { |k,v| local['goal'][k] = v } if bsig.has_key?('goal')
 					f = File.open(bsig_file, 'w')
 					f.write(JSON.generate(local))

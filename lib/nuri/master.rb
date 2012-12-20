@@ -139,22 +139,22 @@ module Nuri
 			def apply_bsig(debug=false)
 				bsig = self.get_bsig
 				puts JSON.pretty_generate(bsig) if debug
-				return true if bsig['rules'].nil? or bsig['rules'].length <= 0
+				return true if bsig['operators'].nil? or bsig['operators'].length <= 0
 				begin
 					Nuri::Util.log "Sending BSig: #{bsig['id']}"
 
-					# send BSig rules to clients
+					# send BSig operators to clients
 					nodes = []
-					bsig['rules'].each do |rule|
-						node = self.get_node(rule['name'], @main['system'])
+					bsig['operators'].each do |operator|
+						node = self.get_node(operator['name'], @main['system'])
 						return false if node.nil?
 
 						address = node['domainname']
-						json = {'id' => bsig['id'], 'rule' => rule}
+						json = {'id' => bsig['id'], 'operator' => operator}
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
 						if code != '200'
-							raise Exception, "sending BSig rule:#{code},#{address}"
+							raise Exception, "sending BSig operator:#{code},#{address}"
 						end
 						nodes << address
 					end
