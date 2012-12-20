@@ -454,5 +454,19 @@ module Nuri
 			@@daemon.stop
 		end
 
+		def self.reset
+			begin
+				dir = Nuri::Util.home_dir + '/var'
+				Dir.entries(dir).each do |fname|
+					path = dir + '/' + fname
+					if fname[0, 5] == 'bsig_' and File.file?(path)
+						File.delete(path)
+					end
+				end
+			rescue Exception => exp
+				$stderr.puts exp.to_s
+			end
+		end
+
 	end
 end
