@@ -17,6 +17,8 @@ module Nuri
 				self.load
 			end
 
+			# Check if the HTTP requester is from any trusted host
+			# @return true if trusted, otherwise false
 			def trusted_address(requester)
 				return false if not @config.has_key?('trusted')
 				if not @config['trusted'].is_a?(Array)
@@ -27,6 +29,8 @@ module Nuri
 				false
 			end
 
+			# Process HTTP request by creating an agent and delegating the request
+			# to the agent
 			def process_request(request, stream)
 				if not self.trusted_address(stream.socket.peeraddr[2])
 					Nuri::Util.warn "Untrusted request from host ..."
@@ -36,6 +40,7 @@ module Nuri
 				end
 			end
 
+			# stop client's HTTP server gracefully
 			def stop
 				begin
 					pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
@@ -50,6 +55,7 @@ module Nuri
 				return true
 			end
 
+			# start client's HTTP server to accept connection
 			def start(address=nil, port=nil, daemon=false)
 				if address == nil
 					address = @config['host'] if @config['host'] != '' and
@@ -66,9 +72,12 @@ module Nuri
 					                                  :ServerType => server_type)
 					@server.mount("/", Agent, self)
 
+					# caught the terminate signals
 					['INT', 'TERM'].each do |signal|
 						trap(signal) do
+							# stop any BSig executor
 							@bsig_executor.stop if not @bsig_executor.nil?
+							# shutdown the HTTP server
 							@server.shutdown
 							File.delete(pid_file) if File.exist?(pid_file)
 						end
@@ -103,23 +112,27 @@ module Nuri
 				return true
 			end
 
+			# Return the state of this node
 			def get_state(path=nil)
 				path.gsub!(/\//, '.') if path != nil
 				return @root.get_state(path)
 			end
 
-			def get_public_key
-				return Nuri::SSL.get_public_key
-			end
-
+			# create and start BSig executor in separate thread
 			def start_bsig_executor
 				@bsig_executor = BSigExecutor.new(self) if @bsig_executor.nil?
 				@bsig_executor.start if not @bsig_executor.active
 			end
 
+			# stop BSig executor
 			def stop_bsig_executor; @bsig_executor.stop if not @bsig_executor.nil?; end
 
-			def execute(action)
+			# Execute a procedure specified in the argument
+			# @param procedure : the description of the procedure
+			# @return nil if the component or the procedure is not found
+			#         false if the execution is failed
+			#         true if the execution is succeed
+			def execute(procedure)
 				def clean_parameters(params)
 					p = {}
 					params.each { |k,v|
@@ -128,13 +141,13 @@ module Nuri
 					return p
 				end
 
-				params = clean_parameters(action['parameters'])
-				puts 'exec: ' + action['name'] + ' (' + params.inspect + ')'
-				comp_name, action_name = action['name'].pop_ref
+				params = clean_parameters(procedure['parameters'])
+				puts 'exec: ' + procedure['name'] + ' (' + params.inspect + ')'
+				comp_name, procedure_name = procedure['name'].pop_ref
 				component = @root.get(comp_name)
-				return false if component.nil?
-				return component.send(action_name) if params.size <= 0
-				return component.send(action_name, params)
+				return nil if component.nil? or not component.respond_to?(procedure_name)
+				return component.send(procedure_name) if params.size <= 0
+				return component.send(procedure_name, params)
 			end
 		end
 
@@ -171,24 +184,6 @@ module Nuri
 							end
 						end
 					end
-=begin
-					begin
-						# 1) load active BSig
-						if not self.load
-							sleep SleepTime
-						else
-							# 2) compare current and goal
-							if not self.at_goal?
-								# 3) if not same, execute BSig
-								if not self.execute_one
-									Nuri::Util.log 'Failed executing BSig'
-								else
-									Nuri::Util.log 'Succeed executing BSig'
-								end
-							end
-						end
-					end while @running
-=end
 
 					@active = false
 				}
@@ -393,52 +388,28 @@ module Nuri
 			end
 
 			def execute_action(data)
-				def clean_parameters(params)
-					p = {}
-					params.each { |k,v|
-						p[k[2,k.length-2]] =	params[k]
-					}
-					return p
-				end
-
 				Nuri::Util.log "executing: #{data['json']}..."
 				data = JSON[data['json']]
 				cmd = data['action']
 				Nuri::Util.set_system_information(data['system'])
 
-				params = clean_parameters(cmd['parameters'])
-				puts "exec: " + cmd['name'] + " (" + params.inspect + ')'
-				comp_name, cmd_name = cmd['name'].pop_ref
-				component = @owner.root.get(comp_name)
-				success = false
-				if component != nil
-					begin
-						if params.size <= 0
-							success = component.send(cmd_name)
-						else
-							success = component.send(cmd_name, params)
-						end
-						
-						component.get_self_state if success
-						puts "exec: OK"
-					rescue Exception => e
+				begin
+					status = @owner.execute(cmd)
+					if status.nil?
 						puts "exec: Failed"
-						Nuri::Util.log 'exec: Failed -- cannot execute procedure: ' + json
-						return 500, '', ''
+						Nuri::Util.log 'exec: Failed -- cannot find procedure: ' + procedure
+						return 503, '', ''
+					elsif status == true
+						puts "exec: OK"
+						Nuri::Util.log "exec: OK"
+						return 200, '', ''
 					end
-				else
-					Nuri::Util.log 'exec: Failed -- cannot find procedure: ' + procedure
-					return 503, '', ''
+				rescue Exception => e
+					Nuri::Util.log e.to_s
 				end
-
-				if success
-					Nuri::Util.log "exec: OK"
-					return 200, '', ''
-				else
-					Nuri::Util.log "exec: Failed"
-					return 500, '', ''
-				end
-				return success
+				puts "exec: Failed"
+				Nuri::Util.log 'exec: Failed -- cannot execute procedure: ' + json
+				return 500, '', ''
 			end
 
 			def get_state(options={})
