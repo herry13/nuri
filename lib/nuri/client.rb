@@ -116,15 +116,34 @@ module Nuri
 				@bsig_executor = BSigExecutor.new(self) if @bsig_executor.nil?
 				@bsig_executor.start if not @bsig_executor.running
 			end
+
+			def execute(action)
+				def clean_parameters(params)
+					p = {}
+					params.each { |k,v|
+						p[k[2,k.length-2]] =	params[k]
+					}
+					return p
+				end
+
+				params = clean_parameters(action['parameters'])
+				puts 'exec: ' + action['name'] + ' (' + params.inspect + ')'
+				comp_name, action_name = action['name'].pop_ref
+				component = @root.get(comp_name)
+				return false if component.nil?
+				return component.send(action_name) if params.size <= 0
+				return component.send(action_name, params)
+			end
 		end
 
 		class BSigExecutor
 			SleepTime = 2
 
-			attr_reader :running, :flaws
+			attr_reader :running, :flaws, :goal
 
-			def initialize(owner)
+			def initialize(owner, goal=nil)
 				@owner = owner
+				@goal = goal
 				@flaws = {}
 				@lock_running = Mutex.new
 				@lock_running.synchronize { @running = false; @active = false }
@@ -135,6 +154,22 @@ module Nuri
 				Nuri::Util.log 'Starting BSig executor'
 				@main_thread = Thread.new {
 					@lock_running.synchronize { @running = true; @active = true }
+
+					while @running
+						if not self.load_bsig
+							Nuri::Util.log 'Cannot load BSig'
+							break
+						elsif self.at_goal?
+							Nuri::Util.log 'Reach goal state'
+							break
+						else
+							if not self.execute_one
+								Nuri::Util.log 'Failed executing BSig'
+								break
+							end
+						end
+					end
+=begin
 					begin
 						# 1) load active BSig
 						if not self.load
@@ -143,7 +178,7 @@ module Nuri
 							# 2) compare current and goal
 							if not self.at_goal?
 								# 3) if not same, execute BSig
-								if not self.execute
+								if not self.execute_one
 									Nuri::Util.log 'Failed executing BSig'
 								else
 									Nuri::Util.log 'Succeed executing BSig'
@@ -151,6 +186,8 @@ module Nuri
 							end
 						end
 					end while @running
+=end
+
 					@active = false
 				}
 			end
@@ -161,7 +198,7 @@ module Nuri
 				while @active; sleep 1; end
 			end
 
-			def load
+			def load_bsig
 				begin
 					# 1) get latest BSig's ID
 					bsig_id_file = Nuri::Util.home_dir + '/var/bsig_id'
@@ -188,28 +225,36 @@ module Nuri
 
 			def at_goal?
 				begin
-					@bsig['goal'].each do |path,value|
+					goal = (@goal.nil? ? @bsig['goal'] : @goal)
+					goal.each do |path,value|
 						self.add_new_flaw(path, value) if value != @owner.get_state(path)
 					end
-					return (@flaws.length <= 0)
+
+					@flaws.each { |path,values| return false if values.length > 0 }
 				rescue Exception => exp
 					Nuri::Util.log 'Failed: ' + exp.to_s
 				end
 				return true
 			end
 
-			def execute
+			def execute_one
 				# TODO
 				@flaws.each { |path,values| puts path + ': ' + values.length.to_s }
 
 				puts 'execute'
-				candidates = self.search_candidates
+				candidates, selected_rules = self.search_candidates
+
+				# select a rule to be executed
 				candidates.each do |path,rules|
 					return false if rules.length <= 0
 
 					## TODO
 					# 1) check local-precondition
 					# 2) check remote-precondition
+					# 3) execute the operator
+					op = rules.pop
+					@owner.execute(op)
+
 					## execution OK, then pop the goal
 					@flaws[path].pop
 				end
@@ -227,6 +272,7 @@ module Nuri
 						rule['effect'].each { |k,v|
 							if path == k and value == v
 								matched_rules << rule
+								selected_rules << rule
 								break
 							end
 						}
@@ -234,7 +280,7 @@ module Nuri
 					candidates[path] = matched_rules
 				end
 
-				return candidates
+				return candidates, selected_rules
 			end
 		end
 
