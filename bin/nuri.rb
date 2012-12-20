@@ -23,6 +23,7 @@ commands:
   update-system         push system information to all managed nodes
   bsig                  generate a Behavioural Signature model
   apply-bsig            generate and deploy the Behavioural Signature model
+
 '
 	end
 	if ARGV.length <= 1
@@ -158,12 +159,13 @@ end
 
 def client
 	def print_help
-		puts "Usage: nuri.rb client <command> <file>
+		puts "Usage: nuri.rb client <command>
 
-options:
+commands:
   start     start the Nuri client daemon
   stop      stop the Nuri client daemon
   debug     start the Nuri client but not as a daemon
+  reset     clear all caches e.g. BSig model
 
 "
 	end
@@ -187,6 +189,12 @@ options:
 	elsif ARGV[1] == 'debug'
 		Nuri::Client.start
 
+   elsif ARGV[1] == 'reset'
+		Nuri::Client.reset
+
+	else
+		print_help
+
 	end
 end
 
@@ -209,14 +217,13 @@ if __FILE__ == $0
 	#elsif ARGV.length <= 0
 	#	client
 	else
-		puts "Usage: nuri.rb [command]
+		puts "Usage: nuri.rb [mode]
 
-commands:
-    <none>      start Nuri client daemon
-    console     managing clients through command line
-    planner     solve planning problem in SFP language
-    client      send command to Nuri client
-    version     print version
+modes:
+  console     managing clients through command line
+  planner     solve planning problem in SFP language
+  client      send command to Nuri client
+  version     print version
 
 "
 	end
