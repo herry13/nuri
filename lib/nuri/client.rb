@@ -258,7 +258,7 @@ module Nuri
 			def check_and_satisfy_precondition(operator)
 				operator['condition'].each do |path,pre|
 					value = @owner.get_state(path)
-puts path + ': ' + pre.to_s + ' == ' + value.to_s
+#puts path + ': ' + pre.to_s + ' == ' + value.to_s
 					return false if value != pre
 					#return false if @owner.get_state(path) != value
 				end

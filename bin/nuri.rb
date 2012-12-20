@@ -54,14 +54,14 @@ commands:
 	elsif ARGV[1] == 'plan'
 		parallel = (ARGV[2] == 'par')
 		plan = Nuri::Master.plan(parallel)
-		puts (plan == nil || plan['workflow'] == nil ? 'no solution' : plan)
+		puts (plan == nil || plan['workflow'] == nil ? 'There is no solution for the task.' : plan)
 
 	elsif ARGV[1] == 'bsig'
 		bsig = Nuri::Master.get_bsig
 		puts (bsig == nil ? 'no solution' : JSON.pretty_generate(bsig))
 
 	elsif ARGV[1] == 'apply-bsig'
-		puts (Nuri::Master.apply_bsig(true) ? 'succeed' : 'failed')
+		puts (Nuri::Master.apply_bsig(true) ? 'BSig model was successfully deployed.' : 'Failed to deploy the BSig model.')
 
 	elsif ARGV[1] == 'json'
 		plan = Nuri::Master.debug_json
@@ -72,7 +72,7 @@ commands:
 	elsif ARGV[1] == 'apply'
 		debug = (ARGV[2] == 'debug')
 		result = Nuri::Master.apply(debug)
-		puts 'Succeed: ' + result.to_s
+		puts (result ? 'The workflow is successfully executed.' : 'Failed to execute the workflow.')
 
 	elsif ARGV[1] == 'exec' and ARGV.length >= 3
 		result = Nuri::Master.exec(ARGV[2])
@@ -80,6 +80,7 @@ commands:
 	elsif ARGV[1] == 'update-system'
 		Nuri::Master.update_system
 
+=begin
 	elsif ARGV[1] == 'keygen'
 		priv = Nuri::Util.home_dir + '/etc/private.pem'
 		pub = Nuri::Util.home_dir + '/etc/public.pem'
@@ -94,6 +95,7 @@ commands:
 
 	elsif ARGV[1] == 'test'
 		Nuri::SSL.test
+=end
 
 	else
 		print_help
@@ -119,18 +121,18 @@ options:
 		if ARGV.length == 2 #ARGV[1] == 'planner' and ARGV.length >= 3
 			planner = Nuri::Planner::Solver.new
 			plan = planner.solve_file(ARGV[1], false, false, true)
-			puts (plan != nil ? plan : 'no solution!')
+			puts (plan != nil ? plan : 'There is no solution.')
 	
 		elsif ARGV.length >= 3
 			if ARGV[1] == 'seq'
 				planner = Nuri::Planner::Solver.new
 				plan = planner.solve_file(ARGV[2], true)
-				puts (plan != nil ? plan : 'no solution!')
+				puts (plan != nil ? plan : 'There is no solution.')
 	
 			elsif ARGV[1] == 'par'
 				planner = Nuri::Planner::Solver.new
 				plan = planner.solve_file(ARGV[2], true, true)
-				puts (plan != nil ? plan : 'no solution!')
+				puts (plan != nil ? plan : 'There is no solution.')
 	
 			elsif ARGV[1] == 'json'
 				Nuri::Sfp::Parser.dump( Nuri::Sfp::Parser.file_to_sfp(ARGV[2]) )
@@ -144,7 +146,7 @@ options:
 				planner = Nuri::Planner::Solver.new
 				plan = planner.solve_file(ARGV[2])
 				bsig = (plan.nil? ? nil : planner.to_bsig(true))
-				puts (bsig.nil? ? 'no solution!' : bsig)
+				puts (bsig.nil? ? 'There is no solution.' : bsig)
 
 			end
 	
@@ -171,26 +173,20 @@ commands:
 	end
 
 	if ARGV[1] == 'start'
-		Nuri::Util.log 'Start Nuri client daemon'
-		# set as daemon if it's defined in configuration file
-		#if nuri.config != nil and nuri.config.has_key?('daemon') and nuri.config['daemon']
-		#	exit if fork
-		#	Process.setsid
-		#	exit if fork
-		#	puts "Nuri is running with PID=" + Process.pid.to_s
-		#end
-
-		# start Nuri Client
+		Nuri::Util.log 'Start Nuri client daemon...'
 		Nuri::Client.start(true)
 
 	elsif ARGV[1] == 'stop'
+		Nuri::Util.log 'Stop Nuri client daemon...'
 		Nuri::Client.stop
 
 	elsif ARGV[1] == 'debug'
+		Nuri::Util.log 'Start Nuri client in debugging mode...'
 		Nuri::Util.set_debug(true)
 		Nuri::Client.start
 
    elsif ARGV[1] == 'reset'
+		Nuri::Util.log 'Reset Nuri client...'
 		Nuri::Client.reset
 
 	else
