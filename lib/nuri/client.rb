@@ -117,6 +117,8 @@ module Nuri
 				@bsig_executor.start if not @bsig_executor.running
 			end
 
+			def stop_bsig_executor; @bsig_executor.stop if not @bsig_executor.nil?; end
+
 			def execute(action)
 				def clean_parameters(params)
 					p = {}
@@ -362,7 +364,9 @@ module Nuri
 					f.write(bsig_id)
 					f.close
 
-					# 3) load and deploy BSig -- TODO
+					# 3) load and deploy BSig by starting the executor -- TODO
+					@owner.start_bsig_executor
+
 				rescue Exception => e
 					Nuri::Util.log 'Failed to activate BSig: ' + e.to_s
 					return 500, '', ''
