@@ -20,9 +20,13 @@ module Nuri
 				self_name = hostname
 				@@system.keys.each { |k| @@system.delete(k) if @@system[k] == self_name }
 				# save to file
-				f = File.open(@@home_dir + '/var/system.info')
-				f.write(JSON.generate(@@system))
-				f.close
+				begin
+					f = File.open(@@home_dir + '/var/system.info', 'w')
+					f.write(JSON.generate(@@system))
+					f.close
+				rescue Exception => exp
+					Nuri::Util.log 'Failed saving system information: ' + exp.to_s
+				end
 			}
 		end
 
