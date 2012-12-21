@@ -168,7 +168,6 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 
 			def remove_goal(goals={})
 				@lock_goal.synchronize {
-puts '===> remove goal: ' + goals.to_s
 					exist = false
 					goals.each do |path,value|
 						if @goals.has_key?(path) and @goals[path].length > 0 and @goals[path].last == value

@@ -99,13 +99,13 @@ module Nuri
 
 			def at_goal?
 				@flaws = {}
-puts '===> goal: ' + @owner.get_goal.inspect
+				Nuri::Util.log 'goal: ' + @owner.get_goal.inspect
 				@owner.get_goal.each { |path,value| @flaws[path] = value if value != @owner.get_state(path) }
 				return (@flaws.length <= 0)
 			end
 
 			def execute_operator
-				puts 'execute'
+				puts 'select and execute an operator'
 				candidates = self.search_candidates
 				operator = select_operator(candidates)
 				# return false if goal cannot be reached
