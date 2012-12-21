@@ -161,6 +161,7 @@ puts '==> #2'
 						@goals[path] = [] if not @goals.has_key?(path)
 						@goals[path] << value
 					}
+					self.start_bsig_executor
 					return true
 				}
 			end
