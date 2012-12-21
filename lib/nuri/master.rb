@@ -291,28 +291,6 @@ module Nuri
 				end
 			end
 
-			# Send data to remote address in JSON format
-			def post_data(address, port, path, data)
-				url = URI.parse('http://' + address + ':' + port.to_s + path)
-				data = "json=" + JSON.generate(data)
-				req = Net::HTTP::Post.new(url.path)
-				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
-				return res.code, res.body
-			end
-
-			def get_data(address, port, path)
-				url = URI.parse('http://' + address + ':' + port.to_s + path)
-				req = Net::HTTP::Get.new(url.path)
-				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
-				return res.code, res.body
-			end
-
-			def put_data(address, port, path, data)
-				url = URI.parse('http://' + address + ':' + port.to_s + path)
-				req = Net::HTTP::Put.new(url.path)
-				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
-				return res.code, res.body
-			end
 		end
 
 		def self.start

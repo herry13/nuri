@@ -118,6 +118,11 @@ module Nuri
 				return @root.get_state(path)
 			end
 
+			def new_subgoal(subgoal)
+				# TODO
+				return -1
+			end
+
 			# create and start BSig executor in separate thread
 			def start_bsig_executor
 				@bsig_executor = BSigExecutor.new(self) if @bsig_executor.nil?
@@ -275,19 +280,51 @@ module Nuri
 			end
 
 			def check_and_satisfy_precondition(operator)
+				remote_conditions = {}
+				local_conditions = []
+
 				operator['condition'].each do |path,pre|
 					value = @owner.get_state(path)
-puts path + ': ' + pre.to_s + ' == ' + value.to_s
 					if value != pre
 						component_path, variable_name = path.extract
-						node = get_node(component_path)
-puts component_path
-puts node.inspect
+						if not @owner.local?(component_path)
+							address = @owner.domainname?(component_path)
+							return false if address.nil? # remote address cannot be found
+							remote_conditions[address] = [] if not remote_conditions.has_key?(address)
+							remote_conditions[address] << {:path => path, :goal => pre}
+						else
+							local_conditions = {:path => path, :goal => pre}
+						end
+					end
+				end
 
+				return false if not satisfy_remote_conditions(remote_conditions)
+				return false if not satisfy_local_conditions(local_conditions)
+
+				return true
+			end
+
+			def satisfy_remote_conditions(remote_conditions)
+				remote_conditions.each do |address,conditions|
+					begin
+						data = "json=" + JSON.generate(conditions)
+						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/subgoal', data)
+puts code
+						return false if code != '200'
+					rescue Timeout::Error
+						Nuri::Util.log "Timeout when satisfying condition: " + address.to_s
+						return false
+					rescue Exception => exp
+						Nuri::Util.log exp.to_s
+						Nuri::Util.log "Timeout when satisfying condition: " + address.to_s
 						return false
 					end
 				end
 				return true
+			end
+
+			def satisfy_local_conditiosn(conditions)
+				return false
 			end
 
 			# Return an operator to be executed and the path of subgoal reached by the operator
@@ -377,6 +414,8 @@ puts node.inspect
 					status, content_type, body = self.save_bsig(request.query)
 				elsif path == '/bsig/activate'
 					status, content_type, body = self.activate_bsig(request.query)
+				elsif path == '/bsig/subgoal'
+					status, content_type, body = self.new_bsig_subgoal(request.query)
 				else
 					status = 400
 					content_type = body = ''
@@ -384,6 +423,23 @@ puts node.inspect
 				response.status = status
 				response['Content-Type'] = content_type
 				response.body = body
+			end
+
+			def new_bsig_subgoal(data)
+				begin
+					subgoal = JSON[data['json']]
+					case @owner.new_subgoal(subgoal)
+					when -1
+						return 412, '', ''
+					when 0
+						return 100, '', ''
+					when 1
+						return 200, '', ''
+					end
+				rescue Exception => exp
+					Nuri::Util.log 'Failed to achieve subgoal: ' + exp.to_s
+				end
+				return 500, '', ''
 			end
 
 			def deactivate_bsig(current_id)

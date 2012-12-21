@@ -134,6 +134,45 @@ module Nuri
 				return n if n != nil and n['_classes'].rindex(MainComponent) != nil
 			end
 		end
+
+		def domainname?(path)
+			part1, part2, _ = path.split('.', 3) # HACK!
+			node_name = (part1 == '$' ? part2 : part1)
+			system = Nuri::Util.get_system_information
+			return (system.has_key?(node_name) ? system[node_name] : nil)
+		end
+
+		# @return true if given path is local, otherwise false
+		def local?(path)
+			domainname = self.domainname?(path)
+			return (domainname == Nuri::Util.domainname)
+		end
+
+		# Request data with GET method
+		def get_data(address, port, path, timeout=300)
+			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			req = Net::HTTP::Get.new(url.path)
+			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req) }
+			return res.code, res.body
+		end
+
+		# Send data with POST method to a remote address in JSON format
+		def post_data(address, port, path, data, timeout=300)
+			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			data = "json=" + JSON.generate(data)
+			req = Net::HTTP::Post.new(url.path)
+			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
+			return res.code, res.body
+		end
+
+		# Send data with PUT method to a remote address in JSON format
+		def put_data(address, port, path, data, timeout=300)
+			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			req = Net::HTTP::Put.new(url.path)
+			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
+			return res.code, res.body
+		end
+
 	end
 
 	class ExecutionFailedException < Exception
