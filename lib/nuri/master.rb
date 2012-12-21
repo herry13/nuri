@@ -143,6 +143,9 @@ module Nuri
 				begin
 					Nuri::Util.log "Sending BSig: #{bsig['id']}"
 
+					# update system information
+					self.update_system
+
 					# send BSig operators to clients
 					nodes = []
 					bsig['operators'].each do |operator|
