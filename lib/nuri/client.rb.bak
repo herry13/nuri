@@ -9,14 +9,12 @@ module Nuri
 			include Nuri::Config
 
 			attr_accessor :master_keys
+			attr_reader :main_executor, :executors
 
 			def initialize
 				@master_keys = {}
-
-				@bsig_executor = Nuri::BSig::Executor.new(self)
-				@lock_goal = Mutex.new
-				@goals = {}
-
+				@main_executor = BSigExecutor.new(self)
+				@executors = []
 				self.load
 			end
 
@@ -81,7 +79,8 @@ module Nuri
 						trap(signal) do
 							@stopped = true
 							# stop any BSig executor
-							stop_bsig_executor
+							#@bsig_executor.stop if not @bsig_executor.nil?
+							stop_all_bsig_executors
 							# shutdown the HTTP server
 							@server.shutdown
 							File.delete(pid_file) if File.exist?(pid_file)
@@ -107,7 +106,7 @@ module Nuri
 						# BSig executor
 						begin
 							self.start_bsig_executor
-							sleep 600 # 10 mins
+							sleep 5#600 # 10 mins
 						end while not @stopped
 					}
 
@@ -128,51 +127,29 @@ module Nuri
 				return @root.get_state(path)
 			end
 
-			def get_goal
-				@lock_goal.synchronize {
-					pre_goals = {}
-					@goals.each { |path,values| pre_goals[path] = values.last if values.length > 0 }
-					return pre_goals if pre_goals.length > 0 or @bsig_executor.bsig.nil?
-					return @bsig_executor.bsig['goal']
-				}
-			end
-
-			def add_goal(new_goals={})
-				@lock_goal.synchronize {
-					new_goals.each do |path,value|
-						# check if the new goal has been requested before to avoid livelock
-						return false if not @bsig_executor.nil? and
-						                @bsig_executor.bsig['goal'].has_key?(path) and
-						                @bsig_executor.bsig['goal'][path] == value
-						return false if @goals.has_key?(path) and
-						                not @goals[path].index(value).nil?
+			def new_subgoal(subgoal)
+				# TODO
+				subgoal.each do |path,value|
+					if not @main_executor.goal.nil? and
+					   @main_executor.goal.has_key?(path)
 					end
-					new_goals.each { |path,value| @goals[path] << value }
-					return true
-				}
-			end
+				end
 
-			def remove_goal(goals={})
-				@lock_goal.synchronize {
-					exist = false
-					goals.each do |path,value|
-						if @goals.has_key?(path) and @goals[path].length > 0 and @goals[path].last == value
-							@goals[path].pop
-							exist = true
-						end
-					end
-					return exist
-				}
+				return 0
 			end
 
 			# create and start BSig executor in separate thread
-			def start_bsig_executor
-				@bsig_executor.start if not @bsig_executor.active
+			def start_bsig_executor(goal=nil)
+				if goal.nil?
+					@main_executor.start if not @main_executor.active
+				else
+				end
 			end
 
 			# stop BSig executor
-			def stop_bsig_executor
-				@bsig_executor.stop
+			def stop_all_bsig_executors
+				@main_executor.stop
+				@executors.each { |exec| exec.stop }
 			end
 
 			# Execute a procedure specified in the argument
@@ -196,6 +173,223 @@ module Nuri
 				return nil if component.nil? or not component.respond_to?(procedure_name)
 				return component.send(procedure_name) if params.size <= 0
 				return component.send(procedure_name, params)
+			end
+		end
+
+		class BSigExecutor
+			SleepTime = 2
+
+			#@@client_goal = {}
+			#@@client_mutex = Mutex.new
+
+			attr_reader :running, :active, :goal, :flaws, :@lock_flaws
+
+			def initialize(owner, goal=nil)
+				@owner = owner
+				@goal = goal
+
+				@flaws = {}
+				@lock_running = Mutex.new
+				@running = false
+				@active = false
+				@lock_flaws = Mutex.new
+			end
+
+			def start
+				Nuri::Util.log 'Starting BSig executor'
+				@main_thread = Thread.new {
+					@lock_running.synchronize { @running = true; @active = true }
+
+					begin
+						while @running
+							if not self.load_bsig
+								break
+							elsif self.at_goal?
+								Nuri::Util.log 'At goal state'
+								break
+							else
+								if not self.execute_one
+									Nuri::Util.log 'Failed executing BSig'
+									break
+								end
+							end
+						end
+					rescue Exception => exp
+						Nuri::Util.log exp.to_s
+						Nuri::Util.log exp.backtrace
+					ensure
+						@lock_flaws.synchronize { @flaws.clear }
+						@active = false
+					end
+				}
+			end
+
+			def stop
+				Nuri::Util.log 'Send stop-signal to BSig executor'
+				@lock_running.synchronize { @running = false }
+				while @active; sleep 1; end
+			end
+
+			def load_bsig
+				begin
+					# 1) get latest BSig's ID
+					bsig_id_file = Nuri::Util.home_dir + '/var/bsig_id'
+					return false if not File.exist?(bsig_id_file)
+					bsig_id = File.read(bsig_id_file).to_i
+	
+					# 2) read BSig
+					bsig_file = Nuri::Util.home_dir + "/var/bsig_#{bsig_id}"
+					#return false if not File.exist?(bsig_file)
+					@bsig = JSON[File.read(bsig_file)]
+
+					return true
+
+				rescue Exception => exp
+					Nuri::Util.log 'Cannot load BSig'
+					Nuri::Util.log 'Failed: ' + exp.to_s
+				end
+				return false
+			end
+
+			def add_new_flaw(path, value)
+				@lock_flaws.synchronize {
+					@flaws[path] = [] if not @flaws.has_key?(path)
+					@flaws[path] << value
+				}
+			end
+
+			def at_goal?
+				begin
+					goal = (@goal.nil? ? @bsig['goal'] : @goal)
+					goal.each do |path,value|
+						self.add_new_flaw(path, value) if value != @owner.get_state(path)
+					end
+
+					@lock_flaws.synchronize {
+						@flaws.each { |path,values| return false if values.length > 0 }
+					}
+				rescue Exception => exp
+					Nuri::Util.log 'Failed: ' + exp.to_s
+				end
+				return true
+			end
+
+			def execute_one
+				# TODO
+				@lock_flaws.synchronize {
+					@flaws.each { |path,values| puts path + ': ' + values.length.to_s }
+				}
+
+				puts 'execute'
+				candidates, selected_operators = self.search_candidates
+				subgoals, operator = select_operator(candidates, selected_operators)
+				# return false if goal cannot be reached
+				return false if operator.nil?
+
+				# check and satisfy the precondition of selected operator
+				return false if not check_and_satisfy_precondition(operator)
+
+				# execute the operator
+				return false if not @owner.execute(operator)
+
+				# if execution is succeed, remove the flaw from the goal stack
+				@lock_flaws.synchronize {
+					subgoals.each { |path| @flaws[path].pop }
+				}
+
+				return true
+			end
+
+			def check_and_satisfy_precondition(operator)
+				remote_conditions = {}
+				local_conditions = []
+
+				operator['condition'].each do |path,pre|
+					value = @owner.get_state(path)
+					if value != pre
+						component_path, variable_name = path.extract
+						if not @owner.local?(component_path)
+							address = @owner.domainname?(component_path)
+							return false if address.nil? # remote address cannot be found
+							remote_conditions[address] = [] if not remote_conditions.has_key?(address)
+							remote_conditions[address] << {:path => path, :goal => pre}
+						else
+							local_conditions = {:path => path, :goal => pre}
+						end
+					end
+				end
+
+				return false if not satisfy_remote_conditions(remote_conditions)
+				return false if not satisfy_local_conditions(local_conditions)
+
+				return true
+			end
+
+			def satisfy_remote_conditions(remote_conditions)
+				remote_conditions.each do |address,conditions|
+					begin
+						data = "json=" + JSON.generate(conditions)
+						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/subgoal', data)
+puts code
+						return false if code != '200'
+					rescue Timeout::Error
+						Nuri::Util.log "Timeout when satisfying remote condition: " + address.to_s
+						return false
+					rescue Exception => exp
+						Nuri::Util.log exp.to_s
+						Nuri::Util.log "Timeout when satisfying remote condition: " + address.to_s
+						return false
+					end
+				end
+				return true
+			end
+
+			def satisfy_local_conditions(conditions)
+				# TODO
+				return true
+			end
+
+			# Return an operator to be executed and the path of subgoal reached by the operator
+			def select_operator(candidates, selected_operators)
+				return nil if candidates.nil? or selected_operators.nil? or selected_operators.length <= 0
+				# Select the operator that has the highest ID value. Each operator
+				# has an ID which represents its index in total-order plan
+				selected_operators.uniq!
+				selected_operators.sort! { |x,y| x.id <=> y.id }
+				operator = selected_operators.last
+				subgoals = []
+				candidates.each { |path,operators| subgoals << path if not operators.index(operator).nil? }
+				return subgoals, operator
+			end
+
+			def search_candidates
+				@lock_flaws.synchronize {
+					candidates = {}
+					selected_operators = []
+					@flaws.each do |path,values|
+						next if values.length <= 0
+						value = values.last
+						matched_operators = []
+						@bsig['operators'].each do |operator|
+							operator['effect'].each { |k,v|
+								if path == k and value == v
+									matched_operators << operator
+									selected_operators << operator
+									break
+								end
+							}
+						end
+						# return if a flaw cannot be reached by any operator
+						# which also means that the goal cannot be achieved
+						return nil, nil if matched_operators.length <= 0
+	
+						candidates[path] = matched_operators
+					end
+	
+					# candidates: selected operators which are classified by the flaw
+					# selected_operators: all selected operators
+					return candidates, selected_operators
+				}
 			end
 		end
 
@@ -242,8 +436,8 @@ module Nuri
 					status, content_type, body = self.save_bsig(request.query)
 				elsif path == '/bsig/activate'
 					status, content_type, body = self.activate_bsig(request.query)
-				elsif path == '/bsig/goal'
-					status, content_type, body = self.new_bsig_pre_goal(request.query)
+				elsif path == '/bsig/subgoal'
+					status, content_type, body = self.new_bsig_subgoal(request.query)
 				else
 					status = 400
 					content_type = body = ''
@@ -253,18 +447,17 @@ module Nuri
 				response.body = body
 			end
 
-			def new_bsig_pre_goal(data)
+			def new_bsig_subgoal(data)
 				begin
-					goal = JSON[data['json']]
-#					case @owner.add_goal(goal)
-#					when -1
-#						return 412, '', ''
-#					when 0
-#						return 202, '', ''
-#					when 1
-#						return 200, '', ''
-#					end
-					return 202, '', '' if @owner.add_goal(goal)
+					subgoal = JSON[data['json']]
+					case @owner.new_subgoal(subgoal)
+					when -1
+						return 412, '', ''
+					when 0
+						return 202, '', ''
+					when 1
+						return 200, '', ''
+					end
 				rescue Exception => exp
 					Nuri::Util.log 'Failed to achieve subgoal: ' + exp.to_s
 				end
