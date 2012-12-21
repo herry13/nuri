@@ -1,3 +1,6 @@
+21-12-2012
+- enable distributed execution, but only tested on a system with 3 nodes
+
 19-12-2012
 - from master node, sending BSig model to each client nodes
 - on client node, saving the BSig model

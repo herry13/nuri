@@ -6,7 +6,7 @@ $: << File.expand_path(File.dirname(__FILE__) + "/..")
 require "nuri/planner/main"
 require "nuri/main"
 
-Version = '0.1.4'
+Version = '0.2.0 (alpha)'
 
 def cli
 	def print_help

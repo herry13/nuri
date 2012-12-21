@@ -3,7 +3,7 @@ Nuri
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/nuri
 - last update: 18-12-2012
-- version: 0.1.4
+- version: 0.2.0 (alpha)
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
@@ -70,8 +70,7 @@ Running Nuri client on managed node
 
 Controlling Nuri clients from master node
 -----------------------------------------
-1. Create main specification file *etc/main.sfp*. The following example specifies configuration of two client nodes i.e.
-   *host1* and *host2* where both runs apache service.
+1. Create main specification file *etc/main.sfp*. The following example specifies configuration of two client nodes i.e. *host1* and *host2* where both runs apache service.
 
 		system {
 		  host1 isa Node {
@@ -101,9 +100,19 @@ Controlling Nuri clients from master node
 
 		$ bin/nuri.rb console plan
 
-4. Applying the goal & global constraints specified in *etc/main.sfp* on master node onto client nodes i.e. *host1* and *host2* by generating and executing a workflow
+4. Achieving the goal and global constraints specified in *etc/main.sfp* of master node by automatically generating and executing a workflow. The workflow execution is scheduled centrally by master node where each step sends a command to target client node. See *Distributed Execution* if you want to use distributed approach.
 
 		$ bin/nuri.rb console apply
+
+
+Distributed Execution
+---------------------
+In this approach, the goal and the global constraints are achieved by generating the workflow by master node. Then, the workflow is splitted-up and distributed to the clients where each client will receive only related parts. To start the execution, master node will send activation commands to all clients. This will enable the clients to execution their parts independently and cooperate each other whenever some dependencies between the actions exist. The communication between clients does not depend on master node.
+
+This approach can be used using command:
+
+	$ bin/nuri.rb console apply-bsig
+
 
 Documentation
 -------------
