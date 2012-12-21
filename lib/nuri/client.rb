@@ -183,7 +183,6 @@ module Nuri
 					begin
 						while @running
 							if not self.load_bsig
-								Nuri::Util.log 'Cannot load BSig'
 								break
 							elsif self.at_goal?
 								Nuri::Util.log 'At goal state'
@@ -219,12 +218,13 @@ module Nuri
 	
 					# 2) read BSig
 					bsig_file = Nuri::Util.home_dir + "/var/bsig_#{bsig_id}"
-					return false if not File.exist?(bsig_file)
+					#return false if not File.exist?(bsig_file)
 					@bsig = JSON[File.read(bsig_file)]
 
 					return true
 
 				rescue Exception => exp
+					Nuri::Util.log 'Cannot load BSig'
 					Nuri::Util.log 'Failed: ' + exp.to_s
 				end
 				return false
@@ -312,11 +312,11 @@ module Nuri
 puts code
 						return false if code != '200'
 					rescue Timeout::Error
-						Nuri::Util.log "Timeout when satisfying condition: " + address.to_s
+						Nuri::Util.log "Timeout when satisfying remote condition: " + address.to_s
 						return false
 					rescue Exception => exp
 						Nuri::Util.log exp.to_s
-						Nuri::Util.log "Timeout when satisfying condition: " + address.to_s
+						Nuri::Util.log "Timeout when satisfying remote condition: " + address.to_s
 						return false
 					end
 				end
