@@ -141,19 +141,12 @@ module Nuri
 				@lock_goal.synchronize {
 					new_goals.each do |path,value|
 						# check if the new goal has been requested before to avoid livelock
-						#return false if not @bsig_executor.nil? and
-						#                @bsig_executor.bsig['goal'].has_key?(path) and
-						#                @bsig_executor.bsig['goal'][path] == value
-						#return false if @goals.has_key?(path) and
-						#                not @goals[path].index(value).nil?
 						if @goals.has_key?(path) and not @goals[path].index(value).nil?
-puts '==> #1'
 							return false if @goals[path].last != value
 
 						elsif not @bsig_executor.nil? and
 						      @bsig_executor.bsig['goal'].has_key?(path) and
 								@bsig_executor.bsig['goal'][path] == value
-puts '==> #2'
 							return false if @goals.has_key?(path) and @goals.length > 0
 						end
 					end
@@ -270,14 +263,7 @@ puts '==> #2'
 			def new_bsig_pre_goal(data)
 				begin
 					goal = JSON[data['json']]
-#					case @owner.add_goal(goal)
-#					when -1
-#						return 412, '', ''
-#					when 0
-#						return 202, '', ''
-#					when 1
-#						return 200, '', ''
-#					end
+					# add new pre-goal
 					return 202, '', '' if @owner.add_goal(goal)
 				rescue Exception => exp
 					Nuri::Util.log 'Failed to achieve subgoal: ' + exp.to_s
@@ -286,7 +272,8 @@ puts '==> #2'
 			end
 
 			def deactivate_bsig(current_id)
-				# 1) stopped thread which deploys BSig model -- TODO
+				# 1) stopped thread which deploys BSig model
+				@owner.stop_bsig_executor
 
 				# 2) list old-BSig models and delete them
 				dir = Nuri::Util.home_dir + '/var'
@@ -311,7 +298,7 @@ puts '==> #2'
 					f.write(bsig_id)
 					f.close
 
-					# 3) load and deploy BSig by starting the executor -- TODO
+					# 3) load and deploy BSig by starting the executor
 					@owner.start_bsig_executor
 
 				rescue Exception => e
@@ -408,13 +395,18 @@ puts '==> #2'
 
 		def self.reset
 			begin
+				# Delete all cache files
 				dir = Nuri::Util.home_dir + '/var'
+				# 1) delete BSig files
 				Dir.entries(dir).each do |fname|
 					path = dir + '/' + fname
 					if fname[0, 5] == 'bsig_' and File.file?(path)
 						File.delete(path)
 					end
 				end
+				# 2) delete system information file
+				fpath = Nuri::Util.home_dir + '/var/system.info'
+				File.delete(fpath) if File.exist?(fpath)
 			rescue Exception => exp
 				$stderr.puts exp.to_s
 			end

@@ -1,23 +1,40 @@
+require 'thread'
+
 module Nuri
 	Port = 1313
 
 	class Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
 		@@logger = Logger.new(@@home_dir + "/log/message.log")
-		@@system = {}
+		@@system = nil #{}
 		@@debug = false
+		@@lock_util = Mutex.new
 
 		def self.set_debug(debug=false); @@debug = debug; end
 
 		def self.home_dir; return @@home_dir; end
 
 		def self.set_system_information(system)
-			@@system = system
-			self_name = hostname
-			@@system.keys.each { |k| @@system.delete(k) if @@system[k] == self_name }
+			@@lock_util.synchronize {
+				@@system = system
+				self_name = hostname
+				@@system.keys.each { |k| @@system.delete(k) if @@system[k] == self_name }
+				# save to file
+				f = File.open(@@home_dir + '/var/system.info')
+				f.write(JSON.generate(@@system))
+				f.close
+			}
 		end
 
-		def self.get_system_information; return @@system; end
+		def self.get_system_information
+			@@lock_util.synchronize {
+				if @@system.nil?
+					fpath = @@home_dir + '/var/system.info'
+					@@system = (File.exist?(fpath) ? JSON[File.read(fpath)] : {})
+				end
+				return @@system
+			}
+		end
 
 		def self.warn(msg=nil)
 			@@logger.warn msg if msg != nil
