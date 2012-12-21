@@ -57,6 +57,7 @@ module Nuri
 						while @enabled
 							if self.at_goal?
 								Nuri::Util.log 'At goal state'
+								@owner.clear_goal
 								break
 							elsif not self.execute_operator
 								Nuri::Util.log 'Failed executing BSig operator'
@@ -98,7 +99,7 @@ module Nuri
 
 			def at_goal?
 				@flaws = {}
-puts @owner.get_goal.inspect
+puts '===> goal: ' + @owner.get_goal.inspect
 				@owner.get_goal.each { |path,value| @flaws[path] = value if value != @owner.get_state(path) }
 				return (@flaws.length <= 0)
 			end

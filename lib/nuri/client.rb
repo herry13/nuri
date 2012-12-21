@@ -107,7 +107,7 @@ module Nuri
 						# BSig executor
 						begin
 							self.start_bsig_executor
-							sleep 600 # 10 mins
+							sleep 30 #600 # 10 mins
 						end while not @stopped
 					}
 
@@ -142,12 +142,19 @@ module Nuri
 					new_goals.each do |path,value|
 						# check if the new goal has been requested before to avoid livelock
 						if @goals.has_key?(path) and not @goals[path].index(value).nil?
-							return false if @goals[path].last != value
+							if @goals[path].last != value
+Nuri::Util.log 'new goal not at the top of goal-stack' + path + '=' + value.to_s
+								return false
+							end
 
 						elsif not @bsig_executor.nil? and
 						      @bsig_executor.bsig['goal'].has_key?(path) and
 								@bsig_executor.bsig['goal'][path] == value
-							return false if @goals.has_key?(path) and @goals.length > 0
+							if @goals.has_key?(path) and @goals.length > 0
+Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_s
+								return false
+							end
+
 						end
 					end
 					new_goals.each { |path,value|
@@ -161,6 +168,7 @@ module Nuri
 
 			def remove_goal(goals={})
 				@lock_goal.synchronize {
+puts '===> remove goal: ' + goals.to_s
 					exist = false
 					goals.each do |path,value|
 						if @goals.has_key?(path) and @goals[path].length > 0 and @goals[path].last == value
@@ -171,6 +179,8 @@ module Nuri
 					return exist
 				}
 			end
+
+			def clear_goal; @lock_goal.synchronize { @goals.clear }; end
 
 			# create and start BSig executor in separate thread
 			def start_bsig_executor
