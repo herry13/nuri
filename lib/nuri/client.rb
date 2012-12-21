@@ -7,7 +7,6 @@ module Nuri
 	module Client
 		class Daemon
 			include Nuri::Config
-			include Nuri::Helper
 
 			attr_accessor :master_keys
 			attr_reader :bsig_executor

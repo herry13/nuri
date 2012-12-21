@@ -127,10 +127,6 @@ module Nuri
 			end
 		end
 
-
-	end
-
-	module Helper
 		def get_node(path, root)
 			while path != '$'
 				path = path.to_top
