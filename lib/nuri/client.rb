@@ -141,11 +141,19 @@ module Nuri
 				@lock_goal.synchronize {
 					new_goals.each do |path,value|
 						# check if the new goal has been requested before to avoid livelock
-						return false if not @bsig_executor.nil? and
-						                @bsig_executor.bsig['goal'].has_key?(path) and
-						                @bsig_executor.bsig['goal'][path] == value
-						return false if @goals.has_key?(path) and
-						                not @goals[path].index(value).nil?
+						#return false if not @bsig_executor.nil? and
+						#                @bsig_executor.bsig['goal'].has_key?(path) and
+						#                @bsig_executor.bsig['goal'][path] == value
+						#return false if @goals.has_key?(path) and
+						#                not @goals[path].index(value).nil?
+						if @goals.has_key?(path) and not @goals[path].index(value).nil?
+							return false if @goals[path].last != value
+
+						elsif not @bsig_executor.nil? and
+						      @bsig_executor.bsig['goal'].has_key?(path) and
+								@bsig_executor.bsig['goal'][path] == value
+							return false
+						end
 					end
 					new_goals.each { |path,value| @goals[path] << value }
 					return true
