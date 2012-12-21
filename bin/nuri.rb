@@ -55,14 +55,14 @@ commands:
 		parallel = (ARGV[2] == 'par')
 		print 'Generating the workflow...'
 		plan = Nuri::Master.plan(parallel)
-		puts (plan == nil || plan['workflow'] == nil ? 'No solution' : "\n" + plan.to_s)
+		puts ((plan.nil? or plan['workflow'].nil?) ? 'no solution' : "\n" + plan.to_s)
 
 	elsif ARGV[1] == 'bsig'
 		bsig = Nuri::Master.get_bsig
 		puts (bsig == nil ? 'no solution' : JSON.pretty_generate(bsig))
 
 	elsif ARGV[1] == 'apply-bsig'
-		print 'Deploying BSig model...'
+		puts 'Deploying BSig model...'
 		puts (Nuri::Master.apply_bsig(true) ? 'OK' : 'Failed')
 
 	elsif ARGV[1] == 'json'
@@ -73,7 +73,7 @@ commands:
 
 	elsif ARGV[1] == 'apply'
 		debug = (ARGV[2] == 'debug')
-		print 'Generating and executing the workflow...'
+		puts 'Generating and executing the workflow...'
 		result = Nuri::Master.apply(debug)
 		puts (result ? 'OK' : 'Failed')
 
@@ -82,6 +82,9 @@ commands:
 
 	elsif ARGV[1] == 'update-system'
 		Nuri::Master.update_system
+
+	elsif ARGV[1] == 'reset'
+		Nuri::Master.reset
 
 =begin
 	elsif ARGV[1] == 'keygen'
