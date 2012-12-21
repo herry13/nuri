@@ -170,13 +170,14 @@ module Nuri
 					remote_flaws.each do |address,goals|
 						data = "json=" + JSON.generate(goals)
 						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
+puts '==>> req remote flaws: ' + code
 						raise Exception if code != '202'
 					end
 					return 0
 				rescue Timeout::Error
-					Nuri::Util.log "Timeout when satisfying remote condition: " + address.to_s
+					Nuri::Util.log "Timeout when satisfying remote condition"
 				rescue Exception => exp
-					Nuri::Util.log "Failed satisfying remote condition: " + address.to_s + ' -- ' + exp.to_s
+					Nuri::Util.log "Failed satisfying remote condition: " + exp.to_s
 				end
 				return -1
 			end
