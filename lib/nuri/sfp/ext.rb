@@ -147,6 +147,11 @@ String.send(:define_method, 'explode') {
 
 # return an array of [ parent, last_element]
 String.send(:define_method, 'pop_ref') {
+	return self.extract
+}
+
+# return an array of [ parent, last_element ]
+String.send(:define_method, 'extract') {
 	return self if not self.isref
 	parts = self.split('.')
 	return self if parts.length <= 1
@@ -154,6 +159,7 @@ String.send(:define_method, 'pop_ref') {
 	len = self.length - last.length - 1
 	return [self[0, len], last]
 }
+
 
 # return true if this string is a reference, otherwise false
 String.send(:define_method, 'isref') {

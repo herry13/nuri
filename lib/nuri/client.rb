@@ -7,6 +7,7 @@ module Nuri
 	module Client
 		class Daemon
 			include Nuri::Config
+			include Nuri::Helper
 
 			attr_accessor :master_keys
 			attr_reader :bsig_executor
@@ -143,7 +144,7 @@ module Nuri
 
 				params = clean_parameters(procedure['parameters'])
 				puts 'exec: ' + procedure['name'] + ' (' + params.inspect + ')'
-				comp_name, procedure_name = procedure['name'].pop_ref
+				comp_name, procedure_name = procedure['name'].extract
 				component = @root.get(comp_name)
 				return nil if component.nil? or not component.respond_to?(procedure_name)
 				return component.send(procedure_name) if params.size <= 0
@@ -154,14 +155,19 @@ module Nuri
 		class BSigExecutor
 			SleepTime = 2
 
-			attr_reader :running, :active, :flaws, :goal
+			@@client_goal = {}
+			@@client_mutex = Mutex.new
+
+			attr_reader :running, :active, :goal, :flaws
 
 			def initialize(owner, goal=nil)
 				@owner = owner
 				@goal = goal
+
 				@flaws = {}
 				@lock_running = Mutex.new
-				@lock_running.synchronize { @running = false; @active = false }
+				@running = false
+				@active = false
 				@lock_flaws = Mutex.new
 			end
 
@@ -170,22 +176,27 @@ module Nuri
 				@main_thread = Thread.new {
 					@lock_running.synchronize { @running = true; @active = true }
 
-					while @running
-						if not self.load_bsig
-							Nuri::Util.log 'Cannot load BSig'
-							break
-						elsif self.at_goal?
-							Nuri::Util.log 'At goal state'
-							break
-						else
-							if not self.execute_one
-								Nuri::Util.log 'Failed executing BSig'
+					begin
+						while @running
+							if not self.load_bsig
+								Nuri::Util.log 'Cannot load BSig'
 								break
+							elsif self.at_goal?
+								Nuri::Util.log 'At goal state'
+								break
+							else
+								if not self.execute_one
+									Nuri::Util.log 'Failed executing BSig'
+									break
+								end
 							end
 						end
+					rescue Exception => exp
+						Nuri::Util.log exp.to_s
+						Nuri::Util.log exp.backtrace
+					ensure
+						@active = false
 					end
-
-					@active = false
 				}
 			end
 
@@ -216,8 +227,10 @@ module Nuri
 			end
 
 			def add_new_flaw(path, value)
-				@flaws[path] = [] if not @flaws.has_key?(path)
-				@flaws[path] << value
+				@lock_flaws.synchronize {
+					@flaws[path] = [] if not @flaws.has_key?(path)
+					@flaws[path] << value
+				}
 			end
 
 			def at_goal?
@@ -227,7 +240,9 @@ module Nuri
 						self.add_new_flaw(path, value) if value != @owner.get_state(path)
 					end
 
-					@flaws.each { |path,values| return false if values.length > 0 }
+					@lock_flaws.synchronize {
+						@flaws.each { |path,values| return false if values.length > 0 }
+					}
 				rescue Exception => exp
 					Nuri::Util.log 'Failed: ' + exp.to_s
 				end
@@ -236,7 +251,9 @@ module Nuri
 
 			def execute_one
 				# TODO
-				@flaws.each { |path,values| puts path + ': ' + values.length.to_s }
+				@lock_flaws.synchronize {
+					@flaws.each { |path,values| puts path + ': ' + values.length.to_s }
+				}
 
 				puts 'execute'
 				candidates, selected_operators = self.search_candidates
@@ -249,8 +266,11 @@ module Nuri
 
 				# execute the operator
 				return false if not @owner.execute(operator)
+
 				# if execution is succeed, remove the flaw from the goal stack
-				subgoals.each { |path| @flaws[path].pop }
+				@lock_flaws.synchronize {
+					subgoals.each { |path| @flaws[path].pop }
+				}
 
 				return true
 			end
@@ -258,9 +278,15 @@ module Nuri
 			def check_and_satisfy_precondition(operator)
 				operator['condition'].each do |path,pre|
 					value = @owner.get_state(path)
-#puts path + ': ' + pre.to_s + ' == ' + value.to_s
-					return false if value != pre
-					#return false if @owner.get_state(path) != value
+puts path + ': ' + pre.to_s + ' == ' + value.to_s
+					if value != pre
+						component_path, variable_name = path.extract
+						node = get_node(component_path)
+puts component_path
+puts node.inspect
+
+						return false
+					end
 				end
 				return true
 			end
@@ -271,7 +297,7 @@ module Nuri
 				# Select the operator that has the highest ID value. Each operator
 				# has an ID which represents its index in total-order plan
 				selected_operators.uniq!
-				selected_operators.sort! { |x,y| x.id <=> y.id } 
+				selected_operators.sort! { |x,y| x.id <=> y.id }
 				operator = selected_operators.last
 				subgoals = []
 				candidates.each { |path,operators| subgoals << path if not operators.index(operator).nil? }
@@ -279,31 +305,33 @@ module Nuri
 			end
 
 			def search_candidates
-				candidates = {}
-				selected_operators = []
-				@flaws.each do |path,values|
-					next if values.length <= 0
-					value = values.last
-					matched_operators = []
-					@bsig['operators'].each do |operator|
-						operator['effect'].each { |k,v|
-							if path == k and value == v
-								matched_operators << operator
-								selected_operators << operator
-								break
-							end
-						}
+				@lock_flaws.synchronize {
+					candidates = {}
+					selected_operators = []
+					@flaws.each do |path,values|
+						next if values.length <= 0
+						value = values.last
+						matched_operators = []
+						@bsig['operators'].each do |operator|
+							operator['effect'].each { |k,v|
+								if path == k and value == v
+									matched_operators << operator
+									selected_operators << operator
+									break
+								end
+							}
+						end
+						# return if a flaw cannot be reached by any operator
+						# which also means that the goal cannot be achieved
+						return nil, nil if matched_operators.length <= 0
+	
+						candidates[path] = matched_operators
 					end
-					# return if a flaw cannot be reached by any operator
-					# which also means that the goal cannot be achieved
-					return nil, nil if matched_operators.length <= 0
-
-					candidates[path] = matched_operators
-				end
-
-				# candidates: selected operators which are classified by the flaw
-				# selected_operators: all selected operators
-				return candidates, selected_operators
+	
+					# candidates: selected operators which are classified by the flaw
+					# selected_operators: all selected operators
+					return candidates, selected_operators
+				}
 			end
 		end
 

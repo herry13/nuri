@@ -4,9 +4,10 @@ require 'base64'
 module Nuri
 	module Master
 		class Daemon
-			attr_accessor :do_verify_execution
-
 			include Nuri::Config
+			include Nuri::Helper
+
+			attr_accessor :do_verify_execution
 
 			def initialize
 				self.load(false)
@@ -281,7 +282,7 @@ module Nuri
 				system = get_system_information
 				system.each_value do |target|
 					begin
-						send_data(target, Nuri::Port, '/system', system)
+						post_data(target, Nuri::Port, '/system', system)
 					rescue Exception => e
 						Nuri::Util.log 'Cannot send system information to ' + target.to_s + ' (' + e.to_s + ')'
 					end
@@ -309,14 +310,6 @@ module Nuri
 				req = Net::HTTP::Put.new(url.path)
 				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
 				return res.code, res.body
-			end
-
-			def get_node(path, root)
-				while path != '$'
-					path = path.to_top
-					n = root.at?(path)
-					return n if n != nil and n['_classes'].rindex(MainComponent) != nil
-				end
 			end
 		end
 

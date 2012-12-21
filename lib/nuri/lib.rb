@@ -126,8 +126,19 @@ module Nuri
 				end
 			end
 		end
+
+
 	end
 
+	module Helper
+		def get_node(path, root)
+			while path != '$'
+				path = path.to_top
+				n = root.at?(path)
+				return n if n != nil and n['_classes'].rindex(MainComponent) != nil
+			end
+		end
+	end
 
 	class ExecutionFailedException < Exception
 	end
