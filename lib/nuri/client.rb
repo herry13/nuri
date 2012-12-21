@@ -323,8 +323,9 @@ puts code
 				return true
 			end
 
-			def satisfy_local_conditiosn(conditions)
-				return false
+			def satisfy_local_conditions(conditions)
+				# TODO
+				return true
 			end
 
 			# Return an operator to be executed and the path of subgoal reached by the operator
