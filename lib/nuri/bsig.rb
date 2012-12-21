@@ -48,7 +48,7 @@ module Nuri
 				@thread = Thread.new {
 					begin
 						@lock.synchronize {
-							if self.load_bsig
+							if self.load
 								@active = true
 								@enabled = true
 							end
@@ -78,7 +78,7 @@ module Nuri
 				while @active; sleep 1; end
 			end
 
-			def load_bsig
+			def load
 				begin
 					# 1) get latest BSig's ID
 					bsig_id_file = Nuri::Util.home_dir + '/var/bsig_id'
@@ -98,6 +98,7 @@ module Nuri
 
 			def at_goal?
 				@flaws = {}
+puts @owner.get_goal.inspect
 				@owner.get_goal.each { |path,value| @flaws[path] = value if value != @owner.get_state(path) }
 				return (@flaws.length <= 0)
 			end
@@ -172,7 +173,7 @@ module Nuri
 					remote_flaws.each do |address,goals|
 						data = "json=" + JSON.generate(goals)
 						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
-puts '==>> req remote flaws: ' + code
+puts '==>> request remote condition: ' + code
 						raise Exception if code != '202'
 					end
 					return 0

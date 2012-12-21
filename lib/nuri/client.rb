@@ -182,6 +182,10 @@ module Nuri
 				@bsig_executor.stop
 			end
 
+			def update_bsig_executor
+				@bsig_executor.load
+			end
+
 			# Execute a procedure specified in the argument
 			# @param procedure : the description of the procedure
 			# @return nil if the component or the procedure is not found
@@ -251,6 +255,8 @@ module Nuri
 					status, content_type, body = self.activate_bsig(request.query)
 				elsif path == '/bsig/goal'
 					status, content_type, body = self.new_bsig_pre_goal(request.query)
+				elsif path == 'reset'
+					status, content_type, body = self.reset
 				else
 					status = 400
 					content_type = body = ''
@@ -258,6 +264,12 @@ module Nuri
 				response.status = status
 				response['Content-Type'] = content_type
 				response.body = body
+			end
+
+			def reset
+				@owner.stop_bsig_executor
+				Nuri::Client.reset
+				return 200, '', ''
 			end
 
 			def new_bsig_pre_goal(data)
@@ -319,6 +331,7 @@ module Nuri
 					f = File.open(bsig_file, 'w')
 					f.write(JSON.generate(local))
 					f.close
+					@owner.update_bsig_executor
 				rescue Exception => e
 					Nuri::Util.log 'Failed to save BSig: ' + e.to_s
 					return 500, '', ''

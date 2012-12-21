@@ -136,6 +136,17 @@ module Nuri
 				return bsig
 			end
 
+			def reset
+				system = get_system_information
+				system.each_value do |address|
+					begin
+						put_data(address, Nuri::Port, '/reset', '')
+					rescue Exception => e
+						Nuri::Util.log 'Cannot reset ' + address.to_s + ' (' + e.to_s + ')'
+					end
+				end
+			end
+
 			def apply_bsig(debug=false)
 				bsig = self.get_bsig
 				puts JSON.pretty_generate(bsig) if debug
@@ -345,6 +356,11 @@ module Nuri
 			else
 				puts 'Invalid workflow (sfw) file'
 			end
+		end
+
+		def self.reset
+			master = Nuri::Master::Daemon.new
+			master.reset
 		end
 
 		def self.update_system
