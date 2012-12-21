@@ -110,8 +110,10 @@ module Nuri
 				return false if operator.nil?
 				# check and satisfy the precondition of selected operator
 				status = verify_condition(operator)
-				return false if status <= 0
-				if status >= 1
+				return false if status < 0
+				if status == 0
+					sleep 5
+				elsif status >= 1
 					# execute the operator
 					return false if not @owner.execute(operator)
 					@owner.remove_goal(operator['effect'])

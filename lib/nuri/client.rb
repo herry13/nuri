@@ -147,15 +147,20 @@ module Nuri
 						#return false if @goals.has_key?(path) and
 						#                not @goals[path].index(value).nil?
 						if @goals.has_key?(path) and not @goals[path].index(value).nil?
+puts '==> #1'
 							return false if @goals[path].last != value
 
 						elsif not @bsig_executor.nil? and
 						      @bsig_executor.bsig['goal'].has_key?(path) and
 								@bsig_executor.bsig['goal'][path] == value
-							return false
+puts '==> #2'
+							return false if @goals.has_key?(path) and @goals.length > 0
 						end
 					end
-					new_goals.each { |path,value| @goals[path] << value }
+					new_goals.each { |path,value|
+						@goals[path] = [] if not @goals.has_key?(path)
+						@goals[path] << value
+					}
 					return true
 				}
 			end
