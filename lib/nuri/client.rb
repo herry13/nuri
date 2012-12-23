@@ -43,19 +43,14 @@ module Nuri
 				end
 			end
 
-			# stop client's HTTP server gracefully
 			def stop
-				begin
-					pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
-					return if not File.exist?(pid_file)
-					pid = File.read(pid_file).to_i
-					Process.kill('INT', pid)
-					Nuri::Util.log 'Stopped Nuri client daemon'
-				rescue Exception => e
-					Nuri::Util.log 'Cannot stop Nuri client: ' + e.to_s
-					return false
-				end
-				return true
+				Nuri::Util.log 'Terminate request received. Stopping Nuri client...'
+				@stopped = true
+				# stop any BSig executor
+				stop_bsig_executor
+				# shutdown the HTTP server
+				@server.shutdown
+				File.delete(pid_file) if File.exist?(pid_file)
 			end
 
 			# start client's HTTP server to accept connection
@@ -77,40 +72,41 @@ module Nuri
 
 					@stopped = false
 					# caught the terminate signals
-					['INT', 'TERM'].each do |signal|
-						trap(signal) do
-							@stopped = true
-							# stop any BSig executor
-							stop_bsig_executor
-							# shutdown the HTTP server
-							@server.shutdown
-							File.delete(pid_file) if File.exist?(pid_file)
-						end
+					['HUP', 'TERM', 'KILL'].each do |signal|
+						trap(signal) { self.stop }
 					end
 
-					# dump some logs and PID
-					fork do
-						Nuri::Util.log "Start Nuri client on port #{port}"
-						if daemon
-							data = `ps x | grep "nuri.rb client" | grep -v grep | awk '{print $1}'`.split("\n")
-							if data.length > 0
-								pid = data[1].to_i
-								Nuri::Util.log "Nuri client daemon is running with PID ##{pid}"
-								f = File.open(pid_file, 'w')
-								f.write(pid)
-								f.close
-							end
-						end
-					end
-
+					# Spawn a new process for write some logs, processes' PID, and
+					# BSig reminder
 					fork {
-						# BSig executor
+						Nuri::Util.log "Start Nuri client on port #{port}"
+						begin
+							if daemon
+								# get and save process' PIDs in file "var/nuri.pid"
+								data = `ps x|grep "nuri.rb client"|grep -v grep|awk '{print $1}'`
+								data = data.split("\n")
+								if data.length > 0
+									pid = data[1].to_i.to_s + "," + $$.to_s
+									Nuri::Util.log "Nuri client daemon is running with PID ##{pid}"
+									f = File.open(pid_file, 'w')
+									f.write(pid)
+									f.close
+								end
+							end
+						rescue Exception => exp
+							Nuri::Util.log "Cannot get process' PID: " + exp.to_s
+						end
+
+						# Start BSig reminder
+						Nuri::Util.log 'Start BSig reminder'
 						begin
 							self.start_bsig_executor
 							sleep 30 #600 # 10 mins
 						end while not @stopped
 					}
 
+					# Nuri client is ready to accept any request, then
+					# start the HTTP server
 					@server.start
 
 				rescue Interrupt
@@ -128,15 +124,22 @@ module Nuri
 				return @root.get_state(path)
 			end
 
+			# Return the latest goal for this agent to be achieved
 			def get_goal
 				@lock_goal.synchronize {
 					pre_goals = {}
 					@goals.each { |path,values| pre_goals[path] = values.last if values.length > 0 }
-					return pre_goals if pre_goals.length > 0 or @bsig_executor.bsig.nil?
-					return @bsig_executor.bsig['goal']
+					return pre_goals if pre_goals.length > 0
+					return (@bsig_executor.bsig.nil? ? {} : @bsig_executor.bsig['goal'])
 				}
 			end
 
+			# Verify and add a new-goal to the goal-stacks.
+			# - New-goal is a set of variables, where each variable has a value.
+			# - In new-goal, each variable exactly has one value.
+			# - Foreach pair (variable,value), it can be added to the goal-stacks iff
+			#   the value does not exist in the stack of the variable. This will avoid
+			#   live-lock situation.
 			def add_goal(new_goals={})
 				@lock_goal.synchronize {
 					new_goals.each do |path,value|
@@ -166,19 +169,25 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				}
 			end
 
+			# Foreach given pair (variable,value) in parameter "goals", remote
+			# the value from the goal-stack iff the value is at the top.
 			def remove_goal(goals={})
 				@lock_goal.synchronize {
 					exist = false
 					goals.each do |path,value|
-						if @goals.has_key?(path) and @goals[path].length > 0 and @goals[path].last == value
+						if @goals.has_key?(path) and @goals[path].length > 0 and
+						   @goals[path].last == value
+
 							@goals[path].pop
 							exist = true
+
 						end
 					end
 					return exist
 				}
 			end
 
+			# Clear all goal-stacks.
 			def clear_goal; @lock_goal.synchronize { @goals.clear }; end
 
 			# create and start BSig executor in separate thread
@@ -191,6 +200,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				@bsig_executor.stop
 			end
 
+			# Load BSig from cached file if such file exists
 			def update_bsig_executor
 				@bsig_executor.load
 			end
@@ -410,9 +420,24 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 			end
 		end
 
+		#def self.stop
+		#	@@daemon = Nuri::Client::Daemon.new
+		#	@@daemon.stop
+		#end
+
 		def self.stop
-			@@daemon = Nuri::Client::Daemon.new
-			@@daemon.stop
+			begin
+				pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
+				if File.exist?(pid_file)
+					pids = File.read(pid_file).split(',')
+					cmd1 = "/usr/bin/sudo /bin/kill -9 #{pids[1]}"
+					cmd2 = "/usr/bin/sudo /bin/kill -1 #{pids[0]}"
+					puts cmd1, cmd2
+					Nuri::Util.log 'Nuri client daemon was stopped'
+				end
+			rescue Exception => e
+				Nuri::Util.log 'Cannot stop Nuri client: ' + e.to_s
+			end
 		end
 
 		def self.reset
