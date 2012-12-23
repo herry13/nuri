@@ -127,9 +127,12 @@ module Nuri
 			def select_operator(candidates)
 				return nil if candidates.nil? or candidates.length <= 0
 				# Select the operator that has the highest ID value. Each operator
-				# has an ID which represents its index in total-order plan
+				# has a distace which represents its distance to the goal state
+				# in total-order plan
 				candidates.uniq!
-				candidates.sort! { |x,y| y['id'] <=> x['id'] }
+				#candidates.sort! { |x,y| y['id'] <=> x['id'] }
+				 # sort in decending order
+				candidates.sort! { |x,y| y['distance'] <=> x['distance'] }
 				return candidates.last
 			end
 
@@ -168,15 +171,31 @@ module Nuri
 						end
 					end
 				end
-				return 1 if remote_flaws.length <= 0 # HACK! -- local_flaws are ignored
+
+				# Operator's conditions are satisfied
+				#return 1 if remote_flaws.length <= 0 # HACK! -- local_flaws are ignored
+				return 1 if remote_flaws.length <= 0 and
+				            local_flaws.length <= 0
 
 				begin
+					# Send request to remote node to satisfy the preconditions.
+					# Possible response codes:
+					# - '202': the node is under process to satisfy the preconditions
+					# - '500': the node cannot satisfy the preconditions
 					remote_flaws.each do |address,goals|
 						data = "json=" + JSON.generate(goals)
 						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
 puts '==>> request remote condition: ' + code
 						raise Exception if code != '202'
 					end
+
+					# Send request to localhost to satisfy the preconditions.
+					if local_flaws.length > 0
+						data = "json=" + JSON.generate(local_flaws)
+						code, _ = @owner.put_data('localhost', Nuri::Port, '/bsig/goal', data)
+						raise Exception if code != '202'
+					end
+
 					return 0
 				rescue Timeout::Error
 					Nuri::Util.log "Timeout when satisfying remote condition"
@@ -190,57 +209,3 @@ puts '==>> request remote condition: ' + code
 
 	end
 end
-
-=begin
-			def check_and_satisfy_precondition(operator)
-				remote_conditions = {}
-				local_conditions = []
-
-				operator['condition'].each do |path,pre|
-					value = @owner.get_state(path)
-					if value != pre
-						component_path, variable_name = path.extract
-						if not @owner.local?(component_path)
-							address = @owner.domainname?(component_path)
-							return false if address.nil? # remote address cannot be found
-							remote_conditions[address] = [] if not remote_conditions.has_key?(address)
-							remote_conditions[address] << {:path => path, :goal => pre}
-						else
-							local_conditions = {:path => path, :goal => pre}
-						end
-					end
-				end
-
-				return false if not satisfy_remote_conditions(remote_conditions)
-				return false if not satisfy_local_conditions(local_conditions)
-
-				return true
-			end
-
-			def satisfy_remote_conditions(remote_conditions)
-				remote_conditions.each do |address,conditions|
-					begin
-						data = "json=" + JSON.generate(conditions)
-						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/subgoal', data)
-puts code
-						return false if code != '200'
-					rescue Timeout::Error
-						Nuri::Util.log "Timeout when satisfying remote condition: " + address.to_s
-						return false
-					rescue Exception => exp
-						Nuri::Util.log exp.to_s
-						Nuri::Util.log "Timeout when satisfying remote condition: " + address.to_s
-						return false
-					end
-				end
-				return true
-			end
-
-			def satisfy_local_conditions(conditions)
-				# TODO
-				return true
-			end
-
-
-		end
-=end
