@@ -50,6 +50,7 @@ module Nuri
 				stop_bsig_executor
 				# shutdown the HTTP server
 				@server.shutdown
+				pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
 				File.delete(pid_file) if File.exist?(pid_file)
 			end
 
