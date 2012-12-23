@@ -130,9 +130,8 @@ module Nuri
 				# has a distace which represents its distance to the goal state
 				# in total-order plan
 				candidates.uniq!
-				#candidates.sort! { |x,y| y['id'] <=> x['id'] }
-				 # sort in decending order
-				candidates.sort! { |x,y| y['distance'] <=> x['distance'] }
+				# sort in ascending order
+				candidates.sort! { |x,y| x['distance'] <=> y['distance'] }
 				return candidates.last
 			end
 
