@@ -19,21 +19,12 @@ module Nuri
 		attr_reader :config, :root, :system
 
 		MainComponent = '$.Machine'
+		DefaultReadTimeout = 1800 # 30 mins
 
 		def load(client=true)
 			self.read_config if client
-			#self.init_secure_connection
 			Nuri::Resource.set_root(self.get_main)
 			self.load_modules if client
-		end
-
-		def init_secure_connection
-			priv_key_file = Nuri::Util.home_dir + '/etc/' + @config['private_key']
-			if not File.exists?(priv_key_file)
-				pub_key_file = Nuri::Util.home_dir + '/etc/' + @config['public_key']
-				Nuri::SSL.keygen(priv_key_file, pub_key_file)
-			end
-			Nuri::SSL.get_private_key(priv_key_file)
 		end
 
 		def set_system_information(system)
@@ -71,9 +62,8 @@ module Nuri
 				cfile = Nuri::Util.home_dir + "/etc/nuri.sfp" if not File.file?(cfile)
 				@config = Nuri::Sfp::Parser.file_to_sfp(cfile)['nuri']
 
-				# default public/private key
-				@config['public_key'] = 'public.pem'
-				@config['private_key'] = 'private.pem'
+				@read_timeout = (@config.has_key?('read_timeout') ?
+				                 @config['read_timeout'].to_i : DefaultReadTimeout)
 
 				Nuri::Util.log 'Successfully load configuration file ' + cfile
 			rescue Exception => exp
@@ -149,7 +139,7 @@ module Nuri
 		end
 
 		# Request data with GET method
-		def get_data(address, port, path, timeout=300)
+		def get_data(address, port, path, timeout=@read_timeout)
 			url = URI.parse('http://' + address + ':' + port.to_s + path)
 			req = Net::HTTP::Get.new(url.path)
 			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req) }
@@ -157,7 +147,7 @@ module Nuri
 		end
 
 		# Send data with POST method to a remote address in JSON format
-		def post_data(address, port, path, data, timeout=300)
+		def post_data(address, port, path, data, timeout=@read_timeout)
 			url = URI.parse('http://' + address + ':' + port.to_s + path)
 			data = "json=" + JSON.generate(data)
 			req = Net::HTTP::Post.new(url.path)
@@ -166,7 +156,7 @@ module Nuri
 		end
 
 		# Send data with PUT method to a remote address in JSON format
-		def put_data(address, port, path, data, timeout=300)
+		def put_data(address, port, path, data, timeout=@read_timeout)
 			url = URI.parse('http://' + address + ':' + port.to_s + path)
 			req = Net::HTTP::Put.new(url.path)
 			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
