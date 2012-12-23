@@ -1,3 +1,7 @@
+23-12-2012
+- enable BSig executor to send request to itself (localhost) for satisfying an operator's precondition
+- fix bugs on start/stop nuri client
+
 21-12-2012
 - enable distributed execution, but only tested on a system with 3 nodes
 
