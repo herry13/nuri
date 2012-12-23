@@ -432,7 +432,8 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					pids = File.read(pid_file).split(',')
 					cmd1 = "/usr/bin/sudo /bin/kill -9 #{pids[1]}"
 					cmd2 = "/usr/bin/sudo /bin/kill -1 #{pids[0]}"
-					puts cmd1, cmd2
+					system(cmd1)
+					system(cmd2)
 					Nuri::Util.log 'Nuri client daemon was stopped'
 				end
 			rescue Exception => e
