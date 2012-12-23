@@ -87,17 +87,20 @@ module Nuri
 				sfw = []
 				init = []
 				name_index = {}
+				distance = plan.length
 				plan.each_index do |i|
 					op_name = plan[i].name.split(' ')[0]
 					operator = parser.operators[op_name]
 					raise Exception, 'Cannot find operator: ' + op_name if operator.nil?
 					op_sfw = operator.to_sfw
-					op_sfw['id'] = i
+					#op_sfw['id'] = i
+					op_sfw['distance'] = distance
 					op_sfw['successors'] = []
 					op_sfw['predecessors'] = []
 					sfw << op_sfw
 					name_index[op_name] = i
 					init << i if plan[i].predecessors.length <= 0
+					distance -= 1
 				end
 				plan.each_index do |i|
 					plan[i].predecessors.each do |op|
