@@ -73,7 +73,7 @@ module Nuri
 
 					@stopped = false
 					# caught the terminate signals
-					['HUP', 'TERM', 'KILL'].each do |signal|
+					['INT', 'HUP', 'TERM', 'KILL'].each do |signal|
 						trap(signal) { self.stop }
 					end
 
