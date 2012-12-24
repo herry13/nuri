@@ -230,7 +230,7 @@ puts '==>> request remote condition: ' + code
 						end
 						sleep WaitingTime
 						# check whether the remote-flaws have been repaired
-						remote_flaws.keys.keys do |address|
+						remote_flaws.keys.each do |address|
 							flaws = get_flaws(remote_flaws[address])
 							if flaws.length <= 0
 								remote_flaws.delete(address)
@@ -248,9 +248,9 @@ puts '==>> request remote condition: ' + code
 
 					return true
 				rescue Timeout::Error
-					Nuri::Util.log "Timeout when satisfying remote condition"
+					Nuri::Util.log "Timeout when achieving the condition"
 				rescue Exception => exp
-					Nuri::Util.log "Failed satisfying remote condition: " + exp.to_s
+					Nuri::Util.log "Failed achieving the condition: " + exp.to_s
 				end
 
 				return false
