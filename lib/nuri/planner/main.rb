@@ -76,6 +76,7 @@ module Nuri
 			end
 
 			def to_parallel_bsig
+				return nil if @plan.nil?
 				bsig = self.bsig_template
 				return bsig if @plan.length <= 0
 				plan = self.get_parallel_plan
