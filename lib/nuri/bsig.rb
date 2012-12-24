@@ -185,6 +185,7 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 					# Possible response codes:
 					# - '202': the node is under process repairing the remote flaws
 					# - '500': the node cannot repair the remote flaws
+					timeout = 1800 / WaitingTime
 					begin
 						remote_flaws.each do |address,flaws|
 							data = "json=" + JSON.generate(flaws)
@@ -202,12 +203,15 @@ puts '==>> request remote condition: ' + code
 								remote_flaws[address] = flaws
 							end
 						end
-						# all remote-flaws have been repaired
-					end while remote_flaws.length > 0
+						timeout -= WaitingTime
+						# all remote-flaws have been repaired, and not timeout (30m)
+					end while remote_flaws.length > 0 and timeout >= 0
 
 					# Recursively call itself to repair the local flaws.
-					if local_flaws.length > 0
+					timeout = 10
+					if local_flaws.length > 0 and timeout >= 0
 						raise Exception if not self.repair_goal_flaws(local_flaws)
+						timeout -= 1
 					end
 
 					return true
