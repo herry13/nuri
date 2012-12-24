@@ -101,19 +101,10 @@ module Nuri
 
 			def get_goal_flaws(goal)
 				flaws = {}
-				Nuri::Util.log 'goal: ' + goal.inspect
+Nuri::Util.log 'Goal: ' + goal.inspect
 				goal.each { |path,value| flaws[path] = value if value != @owner.get_state(path) }
 				return flaws
 			end
-
-=begin
-			def at_goal?
-				@flaws = {}
-				Nuri::Util.log 'goal: ' + @owner.get_goal.inspect
-				@owner.get_goal.each { |path,value| @flaws[path] = value if value != @owner.get_state(path) }
-				return (@flaws.length <= 0)
-			end
-=end
 
 			def repair_goal_flaws(goal_flaws)
 Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
@@ -129,27 +120,6 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 				@owner.remove_goal(operator['effect'])
 				return true
 			end
-
-=begin
-			def execute_operator
-				puts 'select and execute an operator'
-				candidates = self.search_candidates
-				operator = select_operator(candidates)
-				# return false if goal cannot be reached
-				return false if operator.nil?
-				# check and satisfy the precondition of selected operator
-				status = verify_condition(operator)
-				return false if status < 0
-				if status == 0
-					sleep 5
-				elsif status >= 1
-					# execute the operator
-					return false if not @owner.execute(operator)
-					@owner.remove_goal(operator['effect'])
-				end
-				return true
-			end
-=end
 
 			# Return an operator to be executed and the path of subgoal reached by the operator
 			def select_operator(candidates)
@@ -181,28 +151,22 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 			end
 
 			def get_condition_flaws(condition)
+				flaws = get_goal_flaws(condition)
+
 				remote_flaws = {}
 				local_flaws = {}
-				condition.each do |path,value|
-					if @owner.get_state(path) != value
-						component_path, variable_name = path.extract
-						if not @owner.local?(component_path)
-							address = @owner.domainname?(component_path)
-							raise Exception, 'Cannot find component: ' + component_path if address.nil?
-							remote_flaws[address] = {} if not remote_flaws.has_key?(address)
-							remote_flaws[address][path] = value
-						else
-							local_flaws[path] = value
-						end
+				flaws.each do |path,value|
+					component_path, variable_name = path.extract
+					if not @owner.local?(component_path)
+						address = @owner.domainname?(component_path)
+						raise Exception, 'Cannot find component: ' + component_path if address.nil?
+						remote_flaws[address] = {} if not remote_flaws.has_key?(address)
+						remote_flaws[address][path] = value
+					else
+						local_flaws[path] = value
 					end
 				end
 				return remote_flaws, local_flaws
-			end
-
-			def get_flaws(goal)
-				flaws = {}
-				goal.each { |path,value| flaws[path] = value if @owner.get_state(path) != value }
-				return flaws
 			end
 
 			# @return true if the operator's conditon can be achieved, otherwise false
@@ -231,7 +195,7 @@ puts '==>> request remote condition: ' + code
 						sleep WaitingTime
 						# check whether the remote-flaws have been repaired
 						remote_flaws.keys.each do |address|
-							flaws = get_flaws(remote_flaws[address])
+							flaws = get_goal_flaws(remote_flaws[address])
 							if flaws.length <= 0
 								remote_flaws.delete(address)
 							else
