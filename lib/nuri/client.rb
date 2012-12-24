@@ -143,24 +143,29 @@ module Nuri
 			#   live-lock situation.
 			def add_goal(new_goals={})
 				@lock_goal.synchronize {
+					possible_livelock = false
 					new_goals.each do |path,value|
 						# check if the new goal has been requested before to avoid livelock
 						if @goals.has_key?(path) and not @goals[path].index(value).nil?
 							if @goals[path].last != value
 Nuri::Util.log 'new goal not at the top of goal-stack' + path + '=' + value.to_s
-								return false
+								possible_livelock = true
 							end
 
 						elsif not @bsig_executor.nil? and
 						      @bsig_executor.bsig['goal'].has_key?(path) and
 								@bsig_executor.bsig['goal'][path] == value
-							if @goals.has_key?(path) and @goals.length > 0
+							if @goals.has_key?(path) and @goals[path].length > 0
 Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_s
-								return false
+								possible_livelock = true
 							end
 
 						end
 					end
+
+					# return false livelock is possible to be occured
+					return false if possible_livelock
+
 					new_goals.each { |path,value|
 						@goals[path] = [] if not @goals.has_key?(path)
 						@goals[path] << value

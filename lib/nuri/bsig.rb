@@ -43,36 +43,6 @@ module Nuri
 				@lock = Mutex.new
 			end
 
-			def start
-				Nuri::Util.log 'Starting BSig executor'
-				@thread = Thread.new {
-					begin
-						@lock.synchronize {
-							if self.load
-								@active = true
-								@enabled = true
-							end
-						}
-
-						while @enabled
-							if self.at_goal?
-								Nuri::Util.log 'At goal state'
-								@owner.clear_goal
-								break
-							elsif not self.execute_operator
-								Nuri::Util.log 'Failed executing BSig operator'
-								break
-							end
-						end
-					rescue Exception => exp
-						Nuri::Util.log exp.to_s
-						Nuri::Util.log exp.backtrace
-					ensure
-						@active = false
-					end
-				}
-			end
-
 			def stop
 				Nuri::Util.log 'Send stop-signal to BSig executor'
 				@lock.synchronize { @enabled = false }
@@ -97,13 +67,70 @@ module Nuri
 				return false
 			end
 
+			def start
+				Nuri::Util.log 'Starting BSig executor'
+				@thread = Thread.new {
+					begin
+						@lock.synchronize {
+							if self.load
+								@active = true
+								@enabled = true
+							end
+						}
+
+						while @enabled
+							goal = @owner.get_goal
+							goal_flaws = self.get_goal_flaws(goal)
+							if goal_flaws.length <= 0 # no goal-flaw => at goal state
+								Nuri::Util.log 'At goal state'
+								@owner.clear_goal
+								break
+							elsif not repair_goal_flaws(goal_flaws)
+								Nuri::Util.log 'Failed repairing goal-flaws: ' + goal_flaws.inspect
+								break
+							end
+						end
+					rescue Exception => exp
+						Nuri::Util.log exp.to_s
+						Nuri::Util.log exp.backtrace
+					ensure
+						@active = false
+					end
+				}
+			end
+
+			def get_goal_flaws(goal)
+				flaws = {}
+				Nuri::Util.log 'goal: ' + goal.inspect
+				goal.each { |path,value| flaws[path] = value if value != @owner.get_state(path) }
+				return flaws
+			end
+
+=begin
 			def at_goal?
 				@flaws = {}
 				Nuri::Util.log 'goal: ' + @owner.get_goal.inspect
 				@owner.get_goal.each { |path,value| @flaws[path] = value if value != @owner.get_state(path) }
 				return (@flaws.length <= 0)
 			end
+=end
 
+			def repair_goal_flaws(goal_flaws)
+Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
+				candidates = self.search_operator_candidates(goal_flaws)
+				operator = self.select_operator(candidates)
+				# return false if:
+				# 1) the flaw cannot be repaired
+				# 2) operator's condition cannot be achieved
+				# 3) the operator cannot be executed
+				return false if operator.nil? or
+				                not achieve_condition(operator)
+				                not @owner.execute(operator)
+				@owner.remove_goal(operator['effect'])
+				return true
+			end
+
+=begin
 			def execute_operator
 				puts 'select and execute an operator'
 				candidates = self.search_candidates
@@ -122,22 +149,25 @@ module Nuri
 				end
 				return true
 			end
+=end
 
 			# Return an operator to be executed and the path of subgoal reached by the operator
 			def select_operator(candidates)
 				return nil if candidates.nil? or candidates.length <= 0
 				# Select the operator that has the highest ID value. Each operator
-				# has a distace which represents its distance to the goal state
+				# has a distance which represents its distance to the goal state
 				# in total-order plan
 				candidates.uniq!
 				# sort in ascending order
-				candidates.sort! { |x,y| x['distance'] <=> y['distance'] }
+				#candidates.sort! { |x,y| x['distance'] <=> y['distance'] }
+				# sort in decending order
+				candidates.sort! { |x,y| y['distance'] <=> x['distance'] }
 				return candidates.last
 			end
 
-			def search_candidates
+			def search_operator_candidates(flaws)
 				candidates = []
-				@flaws.each do |path,value|
+				flaws.each do |path,value|
 					@bsig['operators'].each do |operator|
 						operator['effect'].each { |k,v|
 							if path == k and value == v
@@ -150,60 +180,81 @@ module Nuri
 				return candidates
 			end
 
-			# @return -1: if there is a flaw on the conditions and cannot be fix
-			#          0: if there is a flaw, but new goal request has been sent
-			#          1: if there is no flaw
-			def verify_condition(operator)
-				# TODO
+			def get_condition_flaws(condition)
 				remote_flaws = {}
 				local_flaws = {}
-				operator['condition'].each do |path,pre|
-					if @owner.get_state(path) != pre
+				condition.each do |path,value|
+					if @owner.get_state(path) != value
 						component_path, variable_name = path.extract
 						if not @owner.local?(component_path)
 							address = @owner.domainname?(component_path)
 							raise Exception, 'Cannot find component: ' + component_path if address.nil?
 							remote_flaws[address] = {} if not remote_flaws.has_key?(address)
-							remote_flaws[address][path] = pre
+							remote_flaws[address][path] = value
 						else
-							local_flaws[path] = pre
+							local_flaws[path] = value
 						end
 					end
 				end
+				return remote_flaws, local_flaws
+			end
+
+			def get_flaws(goal)
+				flaws = {}
+				goal.each { |path,value| flaws[path] = value if @owner.get_state(path) != value }
+				return flaws
+			end
+
+			# @return true if the operator's conditon can be achieved, otherwise false
+			def achieve_condition(operator)
+				# check flaws of operator's condition, and
+				# separate then between local and remote flaws
+				remote_flaws, local_flaws = get_condition_flaws(operator['condition'])
 
 				# Operator's conditions are satisfied
-				#return 1 if remote_flaws.length <= 0 # HACK! -- local_flaws are ignored
-				return 1 if remote_flaws.length <= 0 and
-				            local_flaws.length <= 0
+				return true if remote_flaws.length <= 0 and
+				               local_flaws.length <= 0
 
 				begin
-					# Send request to remote node to satisfy the preconditions.
+					# Send request to remote node to repair the remote flaws periodically until
+					# no such flaws exists.
 					# Possible response codes:
-					# - '202': the node is under process to satisfy the preconditions
-					# - '500': the node cannot satisfy the preconditions
-					remote_flaws.each do |address,goals|
-						data = "json=" + JSON.generate(goals)
-						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
+					# - '202': the node is under process repairing the remote flaws
+					# - '500': the node cannot repair the remote flaws
+					begin
+						remote_flaws.each do |address,flaws|
+							data = "json=" + JSON.generate(flaws)
+							code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
 puts '==>> request remote condition: ' + code
-						raise Exception if code != '202'
-					end
+							raise Exception if code != '202'
+						end
+						sleep WaitingTime
+						# check whether the remote-flaws have been repaired
+						remote_flaws.keys.keys do |address|
+							flaws = get_flaws(remote_flaws[address])
+							if flaws.length <= 0
+								remote_flaws.delete(address)
+							else
+								remote_flaws[address] = flaws
+							end
+						end
+						# all remote-flaws have been repaired
+					end while remote_flaws.length > 0
 
-					# Send request to localhost to satisfy the preconditions.
+					# Recursively call itself to repair the local flaws.
 					if local_flaws.length > 0
-						data = "json=" + JSON.generate(local_flaws)
-						code, _ = @owner.put_data('localhost', Nuri::Port, '/bsig/goal', data)
-						raise Exception if code != '202'
+						raise Exception if not self.repair_goal_flaws(local_flaws)
 					end
 
-					return 0
+					return true
 				rescue Timeout::Error
 					Nuri::Util.log "Timeout when satisfying remote condition"
 				rescue Exception => exp
 					Nuri::Util.log "Failed satisfying remote condition: " + exp.to_s
 				end
-				return -1
-			end
 
+				return false
+			end
 		end
 
 	end
