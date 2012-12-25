@@ -71,10 +71,12 @@ module Nuri
 					                                 WEBrick::BasicLog::FATAL ||
 					                                 WEBrick::BasicLog::DEBUG ||
 					                                 WEBrick::BasicLog::WARN)
+					access_log = [nil, nil]
 					@server = WEBrick::HTTPServer.new(:Host => address,
 					                                  :Port => port,
 					                                  :ServerType => server_type,
-					                                  :Logger => log)
+					                                  :Logger => log,
+					                                  :AccessLog: access_log)
 					@server.mount("/", Agent, self)
 
 					@stopped = false
