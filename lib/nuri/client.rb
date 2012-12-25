@@ -94,9 +94,7 @@ module Nuri
 								if data.length > 0
 									pid = data[1].to_i.to_s + "," + $$.to_s
 									Nuri::Util.log "Nuri client daemon is running with PID ##{pid}"
-									f = File.open(Nuri::Util.pid_file, 'w')
-									f.write(pid)
-									f.close
+									File.open(Nuri::Util.pid_file, 'w') { |f| f.write(pid) }
 								end
 							end
 						rescue Exception => exp
@@ -336,9 +334,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 
 					# 2) save current BSig's ID
 					bsig_id_file = Nuri::Util.home_dir + '/var/bsig_id'
-					f = File.open(bsig_id_file, 'w')
-					f.write(bsig_id)
-					f.close
+					File.open(bsig_id_file, 'w') { |f| f.write(bsig_id) }
 
 					# 3) load and deploy BSig by starting the executor
 					@owner.start_bsig_executor
@@ -358,9 +354,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					local['operators'] << bsig['operator'] if bsig.has_key?('operator')
 					bsig['operators'].each { |r| local['operators'] << r } if bsig.has_key?('operators')
 					bsig['goal'].each { |k,v| local['goal'][k] = v } if bsig.has_key?('goal')
-					f = File.open(bsig_file, 'w')
-					f.write(JSON.generate(local))
-					f.close
+					File.open(bsig_file, 'w') { |f| f.write(JSON.generate(local)) }
 					@owner.update_bsig_executor
 				rescue Exception => e
 					Nuri::Util.log 'Failed to save BSig: ' + e.to_s
