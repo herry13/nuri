@@ -283,7 +283,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					status, content_type, body = self.activate_bsig(request.query)
 				elsif path == '/bsig/goal'
 					status, content_type, body = self.new_bsig_pre_goal(request.query)
-				elsif path == 'reset'
+				elsif path == '/reset'
 					status, content_type, body = self.reset
 				else
 					status = 400
@@ -462,7 +462,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				fpath = Nuri::Util.home_dir + '/var/system.info'
 				File.delete(fpath) if File.exist?(fpath)
 			rescue Exception => exp
-				$stderr.puts exp.to_s
+				Nuri::Util.log exp.to_s + "\n" + exp.backtrace.to_s
 			end
 		end
 
