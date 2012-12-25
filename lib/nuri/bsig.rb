@@ -219,6 +219,7 @@ puts '==>> request remote condition: ' + code
 					Nuri::Util.log "Timeout when achieving the condition"
 				rescue Exception => exp
 					Nuri::Util.log "Failed achieving the condition: " + exp.to_s
+					Nuri::Util.log exp.backtrace
 				end
 
 				return false
