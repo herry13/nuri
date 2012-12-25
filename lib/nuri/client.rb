@@ -66,22 +66,28 @@ module Nuri
 				begin
 					server_type = (daemon ? WEBrick::Daemon : WEBrick::SimpleServer)
 					pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
+					log_file = (daemon ? Nuri::Util.home_dir + '/log/http.log' : nil)
+					log = WEBrick::Log.new(log_file, WEBrick::BasicLog::INFO ||
+					                                 WEBrick::BasicLog::ERROR ||
+					                                 WEBrick::BasicLog::FATAL ||
+					                                 WEBrick::BasicLog::DEBUG ||
+					                                 WEBrick::BasicLog::WARN)
 					@server = WEBrick::HTTPServer.new(:Host => address,
 					                                  :Port => port,
-					                                  :ServerType => server_type)
+					                                  :ServerType => server_type,
+					                                  :Logger => log)
 					@server.mount("/", Agent, self)
 
 					@stopped = false
 					# caught the terminate signals
-					['INT', 'HUP', 'TERM', 'KILL'].each do |signal|
-						trap(signal) { self.stop }
-					end
+					['INT', 'HUP', 'TERM', 'KILL'].each { |signal| trap(signal) { self.stop } }
 
 					# Spawn a new process for write some logs, processes' PID, and
 					# BSig reminder
 					fork {
 						Nuri::Util.log "Start Nuri client on port #{port}"
 						begin
+							sleep 1
 							if daemon
 								# get and save process' PIDs in file "var/nuri.pid"
 								data = `ps x|grep "nuri.rb client"|grep -v grep|awk '{print $1}'`

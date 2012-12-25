@@ -1,5 +1,6 @@
 24-12-2012 -- 0.2.0 (beta)
 - enable synchronous BSig execution (replacing the asynchronous version)
+- redirect webrick logs (all levels) to "log/http.log"
 
 23-12-2012
 - enable BSig executor to send request to itself (localhost) for satisfying an operator's precondition
