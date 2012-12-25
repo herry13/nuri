@@ -111,12 +111,20 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 				candidates = self.search_operator_candidates(goal_flaws)
 				operator = self.select_operator(candidates)
 				# return false if:
-				# 1) the flaw cannot be repaired
-				# 2) operator's condition cannot be achieved
-				# 3) the operator cannot be executed
-				return false if operator.nil? or
-				                not achieve_condition(operator)
-				                not @owner.execute(operator)
+				if operator.nil?
+					# 1) the flaw cannot be repaired -- no operator is applicable
+					Nuri::Util.log 'No applicable operator: ' + goal_flaws.inspect
+					return false
+				elsif not achieve_condition(operator)
+					# 2) operator's condition cannot be achieved
+					Nuri::Util.log "Operator's condition cannot be achieved: " +
+						operator.inspect
+					return false
+				elsif not @owner.execute(operator)
+					# 3) the operator cannot be executed
+					Nuri::Util.log "Cannot execute selected operator: " + operator.inspect
+					return false
+				end
 				@owner.remove_goal(operator['effect'])
 				return true
 			end
@@ -209,7 +217,7 @@ puts '==>> request remote condition: ' + code
 
 					# Recursively call itself to repair the local flaws.
 					timeout = 10
-					if local_flaws.length > 0 and timeout >= 0
+					while local_flaws.length > 0 and timeout >= 0
 						raise Exception if not self.repair_goal_flaws(local_flaws)
 						timeout -= 1
 					end
