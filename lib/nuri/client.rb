@@ -230,7 +230,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				end
 
 				params = clean_parameters(procedure['parameters'])
-				puts 'exec: ' + procedure['name'] + ' (' + params.inspect + ')'
+				Nuri::Util.log 'exec: ' + procedure['name'] + ' (' + params.inspect + ')'
 				comp_name, procedure_name = procedure['name'].extract
 				component = @root.get(comp_name)
 				return nil if component.nil? or not component.respond_to?(procedure_name)
@@ -373,18 +373,15 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				begin
 					status = @owner.execute(cmd)
 					if status.nil?
-						puts "exec: Failed"
 						Nuri::Util.log 'exec: Failed -- cannot find procedure: ' + procedure
 						return 503, '', ''
 					elsif status == true
-						puts "exec: OK"
-						Nuri::Util.log "exec: OK"
+						Nuri::Util.log "exec: Succed -- " + cmd.inspect
 						return 200, '', ''
 					end
 				rescue Exception => e
 					Nuri::Util.log e.to_s
 				end
-				puts "exec: Failed"
 				Nuri::Util.log 'exec: Failed -- cannot execute procedure: ' + json
 				return 500, '', ''
 			end
