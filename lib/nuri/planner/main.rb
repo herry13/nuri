@@ -3,7 +3,7 @@ require 'nuri/planner/sas'
 
 module Nuri
 	module Planner
-		Heuristic = 'cg' # lmcut, cg, cea, ff, blind
+		Heuristic = 'lmcut' # lmcut, cg, cea, ff, blind
 		Debugging = false
 
 		class Solver

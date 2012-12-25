@@ -124,7 +124,7 @@ module Nuri
 
 			# Return the state of this node
 			def get_state(path=nil)
-				path.gsub!(/\//, '.') if path != nil
+				path = path.gsub(/\//, '.') if path != nil
 				return @root.get_state(path)
 			end
 
@@ -450,10 +450,12 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 			begin
 				# Delete all cache files
 				dir = Nuri::Util.home_dir + '/var'
-				# 1) delete BSig files
+				# 1) delete BSig files and log files
 				Dir.entries(dir).each do |fname|
 					path = dir + '/' + fname
-					if fname[0, 5] == 'bsig_' and File.file?(path)
+					next if not File.file?(path)
+					if fname[0, 5] == 'bsig_' or
+						File.extname(fname) == '.log'
 						File.delete(path)
 					end
 				end
