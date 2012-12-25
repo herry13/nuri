@@ -71,7 +71,7 @@ module Nuri
 	
 			def install
 				result = system('/usr/bin/apt-get -y install apache2')
-				result = system('sudo /usr/bin/service apache2 stop') if result == true
+				result = system('/usr/bin/sudo /usr/bin/service apache2 stop') if result == true
 				return (result == true)
 			end
 		
@@ -84,7 +84,7 @@ module Nuri
 		
 			def start
 				print 'Start apache2...'
-				result = system('sudo /usr/bin/service apache2 start')
+				result = system('/usr/bin/sudo /usr/bin/service apache2 start')
 				puts 'OK'
 				return (result == true)
 			end

@@ -77,11 +77,11 @@ module Nuri
 			end
 
 			def start
-				return ( system('/usr/bin/service apache2 start') == true )
+				return ( system('/usr/bin/sudo /usr/bin/service apache2 start') == true )
 			end
 
 			def stop
-				return ( system('/usr/bin/service apache2 stop') == true )
+				return ( system('/usr/bin/sudo /usr/bin/service apache2 stop') == true )
 			end
 
 			def set_members(params={})
