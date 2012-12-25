@@ -76,7 +76,7 @@ module Nuri
 					                                  :Port => port,
 					                                  :ServerType => server_type,
 					                                  :Logger => log,
-					                                  :AccessLog: access_log)
+					                                  :AccessLog => access_log)
 					@server.mount("/", Agent, self)
 
 					@stopped = false
