@@ -217,7 +217,7 @@ puts '==>> request remote condition: ' + code + ' -- from: ' + address
 
 					# Recursively call itself to repair the local flaws.
 					timeout = 10
-					while @enabled local_flaws.length > 0 and timeout >= 0
+					while @enabled and local_flaws.length > 0 and timeout >= 0
 						local_flaws.clear if self.repair_goal_flaws(local_flaws)
 						timeout -= 1
 					end
