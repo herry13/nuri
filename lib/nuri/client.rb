@@ -454,8 +454,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				Dir.entries(dir).each do |fname|
 					path = dir + '/' + fname
 					next if not File.file?(path)
-					if fname[0, 5] == 'bsig_' or
-						File.extname(fname) == '.log'
+					if fname[0, 5] == 'bsig_'
 						File.delete(path)
 					end
 				end
