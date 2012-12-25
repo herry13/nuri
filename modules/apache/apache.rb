@@ -76,7 +76,7 @@ module Nuri
 			end
 		
 			def uninstall
-				result = system('/usr/bin/apt-get -y --purge remove apache2')
+				result = system('/usr/bin/apt-get -y --purge remove apache2*')
 				system('/usr/bin/apt-get -y --purge autoremove') if (result == true)
 				system('/bin/rm -rf /etc/apache2') if File.directory?('/etc/apache2')
 				return (result == true)
