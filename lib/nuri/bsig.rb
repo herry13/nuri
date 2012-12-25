@@ -198,7 +198,7 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 						remote_flaws.each do |address,flaws|
 							data = "json=" + JSON.generate(flaws)
 							code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
-puts '==>> request remote condition: ' + code
+puts '==>> request remote condition: ' + code + ' -- from: ' + address
 							raise Exception if code != '202'
 						end
 						sleep WaitingTime
@@ -213,14 +213,16 @@ puts '==>> request remote condition: ' + code
 						end
 						timeout -= WaitingTime
 						# all remote-flaws have been repaired, and not timeout (30m)
-					end while remote_flaws.length > 0 and timeout >= 0
+					end while @enabled and remote_flaws.length > 0 and timeout >= 0
 
 					# Recursively call itself to repair the local flaws.
 					timeout = 10
-					while local_flaws.length > 0 and timeout >= 0
-						raise Exception if not self.repair_goal_flaws(local_flaws)
+					while @enabled local_flaws.length > 0 and timeout >= 0
+						local_flaws.clear if self.repair_goal_flaws(local_flaws)
 						timeout -= 1
 					end
+					raise Exception, 'Local flaws cannot be repaired: ' + local_flaws.inspect if
+						local_flaws.length > 0
 
 					return true
 				rescue Timeout::Error
