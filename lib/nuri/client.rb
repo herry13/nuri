@@ -85,8 +85,8 @@ module Nuri
 					# BSig reminder
 					fork {
 						Nuri::Util.log "Start Nuri client on port #{port}"
+						sleep 1
 						begin
-							sleep 1
 							if daemon
 								# get and save process' PIDs in file "var/nuri.pid"
 								data = `ps x|grep "nuri.rb client"|grep -v grep|awk '{print $1}'`
