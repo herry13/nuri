@@ -69,9 +69,8 @@ module Nuri
 					log = WEBrick::Log.new(log_file, WEBrick::BasicLog::INFO ||
 					                                 WEBrick::BasicLog::ERROR ||
 					                                 WEBrick::BasicLog::FATAL ||
-					                                 WEBrick::BasicLog::DEBUG ||
 					                                 WEBrick::BasicLog::WARN)
-					access_log = [nil, nil]
+					access_log = [[log, WEBrick::AccessLog::COMBINED_LOG_FORMAT]]
 					@server = WEBrick::HTTPServer.new(:Host => address,
 					                                  :Port => port,
 					                                  :ServerType => server_type,
