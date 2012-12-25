@@ -50,7 +50,7 @@ module Nuri
 				stop_bsig_executor
 				# shutdown the HTTP server
 				@server.shutdown
-				pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
+				pid_file = Nuri::Util.pid_file
 				File.delete(pid_file) if File.exist?(pid_file)
 			end
 
@@ -65,8 +65,7 @@ module Nuri
 
 				begin
 					server_type = (daemon ? WEBrick::Daemon : WEBrick::SimpleServer)
-					pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
-					log_file = (daemon ? Nuri::Util.home_dir + '/log/http.log' : nil)
+					log_file = (daemon ? Nuri::Util::http_log_file : nil)
 					log = WEBrick::Log.new(log_file, WEBrick::BasicLog::INFO ||
 					                                 WEBrick::BasicLog::ERROR ||
 					                                 WEBrick::BasicLog::FATAL ||
@@ -95,7 +94,7 @@ module Nuri
 								if data.length > 0
 									pid = data[1].to_i.to_s + "," + $$.to_s
 									Nuri::Util.log "Nuri client daemon is running with PID ##{pid}"
-									f = File.open(pid_file, 'w')
+									f = File.open(Nuri::Util.pid_file, 'w')
 									f.write(pid)
 									f.close
 								end
@@ -439,7 +438,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 
 		def self.stop
 			begin
-				pid_file = Nuri::Util.home_dir + '/var/nuri.pid'
+				pid_file = Nuri::Util.pid_file
 				if File.exist?(pid_file)
 					pids = File.read(pid_file).split(',')
 					cmd1 = "/usr/bin/sudo /bin/kill -9 #{pids[1]}"

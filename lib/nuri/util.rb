@@ -5,14 +5,18 @@ module Nuri
 
 	class Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
-		@@logger = Logger.new(@@home_dir + "/log/message.log")
-		@@system = nil #{}
+		@@logger = Logger.new(@@home_dir + "/var/message.log")
+		@@system = nil
 		@@debug = false
 		@@lock_util = Mutex.new
 
 		def self.set_debug(debug=false); @@debug = debug; end
 
 		def self.home_dir; return @@home_dir; end
+
+		def self.http_log_file; return @@home_dir + "/var/http.log"; end
+
+		def self.pid_file; return @@home_dir + "/var/nuri.pid"; end
 
 		def self.set_system_information(system)
 			@@lock_util.synchronize {
