@@ -46,7 +46,7 @@ module Nuri
 			def stop
 				Nuri::Util.log 'Send stop-signal to BSig executor'
 				@lock.synchronize { @enabled = false }
-				while @active; sleep 1; end
+				while self.is_active; sleep 1; end
 			end
 
 			def reset
@@ -71,8 +71,12 @@ module Nuri
 				return false
 			end
 
+			def is_active; @lock.synchronize { return @active }; end
+
 			def start
+				return if self.is_active
 				Nuri::Util.log 'Starting BSig executor'
+
 				@thread = Thread.new {
 					begin
 						@lock.synchronize {
@@ -89,16 +93,22 @@ module Nuri
 								Nuri::Util.log 'At goal state'
 								@owner.clear_goal
 								break
-							elsif not repair_goal_flaws(goal_flaws)
-								Nuri::Util.log 'Failed repairing goal-flaws: ' + goal_flaws.inspect
-								break
+							else
+								succeed, effects = repair_goal_flaws(goal_flaws)
+								if not succeed
+									Nuri::Util.log 'Failed repairing goal-flaws: ' + goal_flaws.inspect
+									break
+								else
+									# some goal flaws have been repaired
+									@owner.remove_goal(effects)
+								end
 							end
 						end
 					rescue Exception => exp
 						Nuri::Util.log exp.to_s
 						Nuri::Util.log exp.backtrace
 					ensure
-						@active = false
+						@lock.synchronize { @active = false }
 					end
 				}
 			end
@@ -118,19 +128,20 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 				if operator.nil?
 					# 1) the flaw cannot be repaired -- no operator is applicable
 					Nuri::Util.log 'No applicable operator: ' + goal_flaws.inspect
-					return false
+					return false, nil
 				elsif not achieve_condition(operator)
 					# 2) operator's condition cannot be achieved
 					Nuri::Util.log "Operator's condition cannot be achieved: " +
 						operator.inspect
-					return false
+					return false, nil
 				elsif not @owner.execute(operator)
 					# 3) the operator cannot be executed
 					Nuri::Util.log "Cannot execute selected operator: " + operator.inspect
-					return false
+					return false, nil
 				end
-				@owner.remove_goal(operator['effect'])
-				return true
+				#@owner.remove_goal(operator['effect'])
+				#operator['effect'].each { |p| goal_flaws.delete(p) if goal_flaws.has_key?(p) }
+				return true, operator['effect']
 			end
 
 			# Return an operator to be executed and the path of subgoal reached by the operator
@@ -216,14 +227,23 @@ puts '==>> request remote condition: ' + code + ' -- from: ' + address
 							end
 						end
 						timeout -= WaitingTime
-						# all remote-flaws have been repaired, and not timeout (30m)
+						# all remote-flaws have been repaired, and no timeout (timeout: 30m)
 					end while @enabled and remote_flaws.length > 0 and timeout >= 0
 
 					# Recursively call itself to repair the local flaws.
 					timeout = 10
 					while @enabled and local_flaws.length > 0 and timeout >= 0
-						local_flaws.clear if self.repair_goal_flaws(local_flaws)
-						timeout -= 1
+						succeed, effects = self.repair_goal_flaws(local_flaws)
+						if succeed
+							effects.each { |var, value|
+								local_flaws.delete(var) if local_flaws.has_key?(var) and local_flaws[var] == value
+							}
+						else
+							timeout -= 1
+						end
+						sleep 0.5
+						#local_flaws.clear if self.repair_goal_flaws(local_flaws)
+						#timeout -= 1
 					end
 					raise Exception, 'Local flaws cannot be repaired: ' + local_flaws.inspect if
 						local_flaws.length > 0

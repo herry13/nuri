@@ -56,7 +56,7 @@ module Nuri
 			def install(params={})
 				return false if system('echo mysql-server mysql-server/root_password select mysql | debconf-set-selections') != true
 				return false if system('echo mysql-server mysql-server/root_password_again select mysql | debconf-set-selections') != true
-				if system('/usr/bin/apt-get -y install mysql-server') == true
+				if system('/usr/bin/apt-get -y install mysql-server 1>/dev/null 2>/dev/null') == true
 					self.stop
 					return (system('/bin/echo mysql > /etc/mysql/nuri.cnf') == true and
 						system('/bin/chmod 0400 /etc/mysql/nuri.cnf') == true)
@@ -65,22 +65,22 @@ module Nuri
 			end
 	
 			def uninstall(params={})
-				result = system('/usr/bin/apt-get -y purge mysql-server*')
+				result = system('/usr/bin/apt-get -y purge mysql-server* 1>/dev/null 2>/dev/null')
 				if result == true
 					system('/bin/chmod 0600 /etc/mysql/nuri.cnf')
 					system('/bin/rm /etc/mysql/nuri.cnf')
-					system('/usr/bin/apt-get -y --purge autoremove')
-					system("/usr/bin/dpkg -l | /bin/grep ^rc | /usr/bin/cut -d' ' -f3| /usr/bin/xargs /usr/bin/apt-get -y purge")
+					system('/usr/bin/apt-get -y --purge autoremove 1>/dev/null 2>/dev/null')
+					system("/usr/bin/dpkg -l | /bin/grep ^rc | /usr/bin/cut -d' ' -f3| /usr/bin/xargs /usr/bin/apt-get -y purge 1>/dev/null 2>/dev/null")
 				end
 				return (result == true)
 			end
 	
 			def start(params={})
-				return (system('/usr/bin/service mysql start') == true)
+				return (system('/usr/bin/sudo /usr/bin/service mysql start') == true)
 			end
 	
 			def stop(params={})
-				return (system('/usr/bin/service mysql stop') == true)
+				return (system('/usr/bin/sudo /usr/bin/service mysql stop') == true)
 			end
 	
 			def set_port(params={})
@@ -105,7 +105,7 @@ module Nuri
 				return false if ( system(cmd) != true )
 
 				if self.get_state('running') == true
-					return ( system('/usr/bin/service mysql restart') == true )
+					return ( system('/usr/bin/sudo /usr/bin/service mysql restart') == true )
 				end
 				true
 			end

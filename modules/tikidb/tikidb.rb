@@ -24,24 +24,11 @@ module Nuri
 				return @state
 			end
 
-			def read_config
-				config = {}
-				File.open(ConfigFile) { |f| config = JSON[ f.read ] } if File.file?(ConfigFile)
-				config
-			end
-
-			def write_config(config={})
-				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
-				File.open(ConfigFile, 'w') { |f| f.write( JSON.pretty_generate(config) ) }
-			end
-	
 			def install(params={})
 				return false if not Nuri::Util.installed?('mysql-client')
 
 				db_name = self.get_state('db_name').to_s
-
 				if db_name != nil and db_name != ''
-
 					sql = "DROP DATABASE IF EXISTS #{db_name}; CREATE DATABASE #{db_name} default character set 'UTF8'; "
 					return false if not self.execute_sql(sql)
 
@@ -58,29 +45,9 @@ module Nuri
 
 				false
 			end
-
-			def execute_sql(sql, db_name='')
-				port = self.get_state('database.port')
-				host = self.get_state('database.parent.domainname')
-				host = (host == Nuri::Util.domainname ? 'localhost' : host)
-				user = 'root'
-				passwd = self.get_state('database.root_password')
-
-				script_file = '/tmp/tikidb.sql'
-				result = false
-				File.open(script_file, 'w') do |file|
-					file.write(sql)
-					file.flush
-				end
-				cmd = "mysql --user=#{user} --password=#{passwd} --host=#{host} --port=#{port} #{db_name} < #{script_file}"
-				result = system(cmd)
-				File.delete(script_file)
-				return (result == true)
-			end
-		
+	
 			def uninstall(params={})
 				return false if not Nuri::Util.installed?('mysql-client')
-
 				db_name = self.get_state('db_name')
 
 				if db_name != nil 
@@ -150,6 +117,35 @@ module Nuri
 			def upgrade(params={})
 				false
 			end
+
+			protected
+			def read_config
+				config = {}
+				File.open(ConfigFile) { |f| config = JSON[ f.read ] } if File.file?(ConfigFile)
+				config
+			end
+
+			def write_config(config={})
+				Dir.mkdir(ConfigDir) if not File.directory?(ConfigDir)
+				File.open(ConfigFile, 'w') { |f| f.write( JSON.pretty_generate(config) ) }
+			end
+
+			ScriptFile = '/tmp/tikidb.sql'
+
+			def execute_sql(sql, db_name='')
+				port = self.get_state('database.port')
+				host = self.get_state('database.parent.domainname')
+				host = (host == Nuri::Util.domainname ? 'localhost' : host)
+				user = 'root'
+				passwd = self.get_state('database.root_password')
+
+				File.open(ScriptFile, 'w') { |f| f.write(sql) }
+				cmd = "mysql --user=#{user} --password=#{passwd} --host=#{host} --port=#{port} #{db_name} < #{ScriptFile}"
+				result = system(cmd)
+				File.delete(ScriptFile) if File.exist?(ScriptFile)
+				return (result == true)
+			end
+	
 		end
 	end
 end

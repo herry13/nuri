@@ -65,7 +65,8 @@ module Nuri
 
 				begin
 					server_type = (daemon ? WEBrick::Daemon : WEBrick::SimpleServer)
-					log_file = (daemon ? Nuri::Util::http_log_file : nil)
+					#log_file = (daemon ? Nuri::Util::http_log_file : nil)
+					log_file = Nuri::Util::http_log_file
 					log = WEBrick::Log.new(log_file, WEBrick::BasicLog::INFO ||
 					                                 WEBrick::BasicLog::ERROR ||
 					                                 WEBrick::BasicLog::FATAL ||
@@ -85,8 +86,8 @@ module Nuri
 					# Spawn a new process for write some logs, processes' PID, and
 					# BSig reminder
 					fork {
-						Nuri::Util.log "Start Nuri client on port #{port}"
-						sleep 1
+						Nuri::Util.log "Listen on port #{port}"
+						sleep 0.5
 						begin
 							if daemon
 								# get and save process' PIDs in file "var/nuri.pid"
@@ -104,8 +105,13 @@ module Nuri
 
 						# Start BSig reminder
 						Nuri::Util.log 'Start BSig reminder'
+						bsig_start_path = '/bsig/start'
 						begin
-							self.start_bsig_executor
+							begin
+								put_data('localhost', Nuri::Port, bsig_start_path, '')
+							rescue Exception
+							end
+							#self.start_bsig_executor
 							sleep 30 #600 # 10 mins
 						end while not @stopped
 					}
@@ -202,7 +208,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 
 			# create and start BSig executor in separate thread
 			def start_bsig_executor
-				@bsig_executor.start if not @bsig_executor.active
+				@bsig_executor.start #if not @bsig_executor.active
 			end
 
 			# stop BSig executor
@@ -220,6 +226,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					self.stop_bsig_executor
 					Nuri::Client.reset
 					@bsig_executor.reset
+					@goals.clear
 				rescue Exception => exp
 					Nuri::Util.log 'Failed to reset Nuri client: ' + exp.to_s
 					return false
@@ -297,6 +304,8 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					status, content_type, body = self.activate_bsig(request.query)
 				elsif path == '/bsig/goal'
 					status, content_type, body = self.new_bsig_pre_goal(request.query)
+				elsif path == '/bsig/start'
+					status, content_type, body = self.start_bsig_executor
 				elsif path == '/reset'
 					status, content_type, body = self.reset
 				else
@@ -308,9 +317,9 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				response.body = body
 			end
 
-			def reset
-				return (@owner.reset ? 200 : 500), '', ''
-			end
+			def start_bsig_executor; @owner.start_bsig_executor; return 200, '', ''; end
+
+			def reset; return (@owner.reset ? 200 : 500), '', ''; end
 
 			def new_bsig_pre_goal(data)
 				begin
@@ -434,11 +443,6 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 			end
 		end
 
-		#def self.stop
-		#	@@daemon = Nuri::Client::Daemon.new
-		#	@@daemon.stop
-		#end
-
 		def self.stop
 			begin
 				pid_file = Nuri::Util.pid_file
@@ -448,6 +452,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					cmd2 = "/usr/bin/sudo /bin/kill -1 #{pids[0]}"
 					system(cmd1)
 					system(cmd2)
+					raise Exception if (system(cmd) != true)
 					Nuri::Util.log 'Nuri client daemon was stopped'
 				end
 			rescue Exception => e

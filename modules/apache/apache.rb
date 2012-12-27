@@ -83,16 +83,12 @@ module Nuri
 			end
 		
 			def start
-				print 'Start apache2...'
 				result = system('/usr/bin/sudo /usr/bin/service apache2 start')
-				puts 'OK'
 				return (result == true)
 			end
 		
 			def stop
-				print 'Stop apache2...'
 				result = system('sudo /usr/bin/service apache2 stop')
-				puts 'OK'
 				return (result == true)
 			end
 		
