@@ -1,3 +1,10 @@
+27-12-2012 -- 0.2.0 (beta1)
+- fix bugs on BSig reminder -- send start BSig request through localhost
+- provide HTTP PUT /bsig/start -- to accept request starting BSig executor
+- fix partial-order workflow generator (use TO2PO algorithm in Ambite & Knoblock,
+  Planning by Rewriting (2001) to replace Veloso et.al.'s algorithm(1990))
+- provide new console command: console start-bsig
+
 24-12-2012 -- 0.2.0 (beta)
 - enable synchronous BSig execution (replacing the asynchronous version)
 - redirect webrick logs (all levels) to "log/http.log"

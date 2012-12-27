@@ -3,7 +3,7 @@ Nuri
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/nuri
 - last update: 18-12-2012
-- version: 0.2.0 (beta)
+- version: 0.2.0 (beta1)
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
@@ -67,6 +67,11 @@ Running Nuri client on managed node
 
 4. To check whether the daemon has run, open the following URL in your browser: *http://localhost:9090/state*.
    If you get an error, you may need to reconfigure your firewall to open port 9090. 
+
+5. To stop the Nuri client daemon:
+
+		$ sudo ./bin/nuri.rb client stop
+
 
 Controlling Nuri clients from master node
 -----------------------------------------
