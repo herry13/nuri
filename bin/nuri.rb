@@ -65,6 +65,10 @@ commands:
 		puts 'Deploying BSig model...'
 		puts (Nuri::Master.apply_bsig(true) ? 'OK' : 'Failed')
 
+	elsif ARGV[1] == 'start-bsig'
+		puts 'Start BSig executor...'
+		puts (Nuri::Master.start_bsig ? 'OK' : 'Failed')
+
 	elsif ARGV[1] == 'json'
 		plan = Nuri::Master.debug_json
 

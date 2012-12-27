@@ -93,7 +93,7 @@ module Nuri
 					operator = parser.operators[op_name]
 					raise Exception, 'Cannot find operator: ' + op_name if operator.nil?
 					op_sfw = operator.to_sfw
-					#op_sfw['id'] = i
+					op_sfw['id'] = i
 					op_sfw['distance'] = distance
 					op_sfw['successors'] = []
 					op_sfw['predecessors'] = []
@@ -181,11 +181,31 @@ module Nuri
 
 			def set_predecessors(plan)
 				(plan.length-1).downto(0) do |i|
+					op1 = plan[i]
+					op1.prevails.each do |p|
+						(i-1).downto(0) do |j|
+							op2 = plan[j]
+							if op2.support_assignment?(p[:var], p[:prevail])
+								op1.predecessors << op2
+							elsif op2.threat_assignment?(p[:var], p[:prevail])
+								break
+							end
+						end
+					end
+					op1.pre_posts.each do |p|
+						(i-1).downto(0) do |j|
+							op2 = plan[j]
+							if op2.threatened_by_assignment?(p[:var], p[:post])
+								op1.predecessors << op2
+							end
+						end
+					end
+=begin
 					plan[i].prevails.each do |p|
 						(i-1).downto(0) do |j|
 							if plan[j].support_assignment?(p[:var], p[:prevail])
 								plan[i].predecessors << plan[j]
-								break
+								#break
 							end
 						end
 					end
@@ -194,10 +214,18 @@ module Nuri
 						(i-1).downto(0) do |j|
 							if plan[j].support_assignment?(p[:var], p[:pre])
 								plan[i].predecessors << plan[j]
-								break
+								#break
 							end
 						end
 					end
+=end
+=begin
+					op1 = plan[i]
+					(i-1).downto(0) do |j|
+						op2 = plan[j]
+						op1.predecessors << op2 if op2.support?(op1)
+					end
+=end
 				end
 			end
 
@@ -572,6 +600,13 @@ end
 					                  p1[:post] == p2[:pre]
 					}
 				end
+				return false
+			end
+
+			def threatened_by_assignment?(variable, value)
+				return false if value < 0
+				@prevails.each { |p| return true if p[:var] == variable and p[:prevail] != value }
+				@pre_posts.each { |p| return true if p[:var] == variable and p[:pre] != value }
 				return false
 			end
 

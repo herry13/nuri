@@ -142,7 +142,18 @@ module Nuri
 					begin
 						put_data(address, Nuri::Port, '/reset', '')
 					rescue Exception => e
-						Nuri::Util.log 'Cannot reset ' + address.to_s + ' (' + e.to_s + ')'
+						Nuri::Util.log 'Cannot reset ' + address.to_s + ': ' + e.to_s
+					end
+				end
+			end
+
+			def start_bsig
+				system = get_system_information
+				system.each_value do |address|
+					begin
+						put_data(address, Nuri::Port, '/bsig/start', '')
+					rescue Exception => e
+						Nuri::Util.log 'Cannot start BSig executor ' + address.to_s + ': ' + e.to_s
 					end
 				end
 			end
@@ -331,6 +342,11 @@ module Nuri
 		def self.apply_bsig(debug=false)
 			master = Nuri::Master::Daemon.new
 			return master.apply_bsig(debug)
+		end
+
+		def self.start_bsig
+			master = Nuri::Master::Daemon.new
+			return master.start_bsig
 		end
 
 		def self.debug_json

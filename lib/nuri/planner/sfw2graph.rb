@@ -7,21 +7,25 @@ module Nuri
 	module Planner
 		module Graph
 			ActionColor = 'white'
+			ActionLabelWithParameters = false
 
 			def self.clean(value)
 				return value[2, value.length-2] if value[0,2] == '$.'
 				return value
 			end
 			
-			def self.get_label(action)
-				label = clean(action["name"]) + "("
-				if action["parameters"].length > 0
-					action["parameters"].each { |key,value|
-						label += "#{clean(key)}=#{clean(value.to_s)},"
-					}
-					label.chop!
+			def self.get_label(action, withparameters=true)
+				label = clean(action["name"])
+				if withparameters and ActionLabelWithParameters
+					label += "("
+					if action["parameters"].length > 0
+						action["parameters"].each { |key,value|
+							label += "#{clean(key)}=#{clean(value.to_s)},"
+						}
+						label.chop!
+					end
+					label += ')'
 				end
-				label += ')'
 				return label
 			end
 			
