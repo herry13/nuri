@@ -215,6 +215,19 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				@bsig_executor.load
 			end
 
+			def reset
+				begin
+					self.stop_bsig_executor
+					Nuri::Client.reset
+					@bsig_executor.reset
+				rescue Exception => exp
+					Nuri::Util.log 'Failed to reset Nuri client: ' + exp.to_s
+					return false
+				end
+				Nuri::Util.log 'Succeed to reset Nuri client.'
+				return true
+			end
+
 			# Execute a procedure specified in the argument
 			# @param procedure : the description of the procedure
 			# @return nil if the component or the procedure is not found
@@ -296,9 +309,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 			end
 
 			def reset
-				@owner.stop_bsig_executor
-				Nuri::Client.reset
-				return 200, '', ''
+				return (@owner.reset ? 200 : 500), '', ''
 			end
 
 			def new_bsig_pre_goal(data)

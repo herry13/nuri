@@ -37,16 +37,20 @@ module Nuri
 
 			def initialize(owner)
 				@owner = owner
-				@bsig = nil
 				@enabled = false
 				@active = false
 				@lock = Mutex.new
+				self.reset
 			end
 
 			def stop
 				Nuri::Util.log 'Send stop-signal to BSig executor'
 				@lock.synchronize { @enabled = false }
 				while @active; sleep 1; end
+			end
+
+			def reset
+				@bsig = nil
 			end
 
 			def load
@@ -154,7 +158,7 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 							end
 						}
 					end
-				end
+				end if not @bsig.nil? and @bsig.has_key?('operators')
 				return candidates
 			end
 
