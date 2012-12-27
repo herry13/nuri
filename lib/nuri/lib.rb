@@ -33,9 +33,11 @@ module Nuri
 
 		def get_main
 			begin
-				main = 'include "modules/machine/machine.sfp"' + "\n"
+				Dir.chdir(Nuri::Util.home_dir)
+
+				main = "include \"#{Nuri::Util.home_dir}/modules/machine/machine.sfp\"\n"
 				self.get_modules.each do |mod|
-					main += "include \"" + Nuri::Util.home_dir + "/modules/#{mod}/#{mod}.sfp\"\n"
+					main += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"
 				end
 				
 				# if 'main.sfp' is in 'etc' directory, then load it
