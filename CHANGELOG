@@ -6,6 +6,7 @@
 - provide new console command: console start-bsig
 - fix bugs on repairing local-flaws: need to check post-conditions of every
   operator execution with the real current state
+- bin/nuri.rb can be called from any directory
 
 24-12-2012 -- 0.2.0 (beta)
 - enable synchronous BSig execution (replacing the asynchronous version)
