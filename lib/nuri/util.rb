@@ -46,13 +46,19 @@ module Nuri
 
 		def self.warn(msg=nil)
 			@@logger.warn msg if msg != nil
-			puts msg if @@debug
+			puts msg.to_s if @@debug
 			return @@logger
 		end
 
 		def self.log(msg=nil)
 			@@logger.info msg if msg != nil
-			puts msg if @@debug
+			puts msg.to_s if @@debug
+			return @@logger
+		end
+
+		def self.debug(msg=nil)
+			@@logger.debug msg if not msg.nil?
+			puts msg.to_s if @@debug
 			return @@logger
 		end
 

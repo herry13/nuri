@@ -100,7 +100,7 @@ module Nuri
 								end
 							end
 						rescue Exception => exp
-							Nuri::Util.log "Cannot get process' PID: " + exp.to_s
+							Nuri::Util.warn "Cannot get process' PID: " + exp.to_s
 						end
 
 						# Start BSig reminder
@@ -123,7 +123,7 @@ module Nuri
 				rescue Interrupt
 					Nuri::Util.log 'Exiting.'
 				rescue Exception => e
-					Nuri::Util.log 'Client Daemon error: ' + e.to_s
+					Nuri::Util.warn 'Client Daemon error: ' + e.to_s
 					return false
 				end
 				return true
@@ -158,7 +158,7 @@ module Nuri
 						# check if the new goal has been requested before to avoid livelock
 						if @goals.has_key?(path) and not @goals[path].index(value).nil?
 							if @goals[path].last != value
-Nuri::Util.log 'new goal not at the top of goal-stack' + path + '=' + value.to_s
+								Nuri::Util.warn 'new goal not at the top of goal-stack: ' + path + '=' + value.to_s
 								possible_livelock = true
 							end
 
@@ -166,7 +166,7 @@ Nuri::Util.log 'new goal not at the top of goal-stack' + path + '=' + value.to_s
 						      @bsig_executor.bsig['goal'].has_key?(path) and
 								@bsig_executor.bsig['goal'][path] == value
 							if @goals.has_key?(path) and @goals[path].length > 0
-Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_s
+								Nuri::Util.warn 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_s
 								possible_livelock = true
 							end
 
@@ -228,7 +228,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					@bsig_executor.reset
 					@goals.clear
 				rescue Exception => exp
-					Nuri::Util.log 'Failed to reset Nuri client: ' + exp.to_s
+					Nuri::Util.warn 'Failed to reset Nuri client: ' + exp.to_s
 					return false
 				end
 				Nuri::Util.log 'Succeed to reset Nuri client.'
@@ -250,7 +250,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				end
 
 				params = clean_parameters(procedure['parameters'])
-				Nuri::Util.log 'exec: ' + procedure['name'] + ' (' + params.inspect + ')'
+				Nuri::Util.debug 'execute operator: ' + procedure['name'] + ' (' + params.inspect + ')'
 				comp_name, procedure_name = procedure['name'].extract
 				component = @root.get(comp_name)
 				return nil if component.nil? or not component.respond_to?(procedure_name)
@@ -327,7 +327,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					# add new pre-goal
 					return 202, '', '' if @owner.add_goal(goal)
 				rescue Exception => exp
-					Nuri::Util.log 'Failed to achieve subgoal: ' + exp.to_s
+					Nuri::Util.warn 'Failed to achieve subgoal: ' + exp.to_s
 				end
 				return 500, '', ''
 			end
@@ -361,7 +361,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					@owner.start_bsig_executor
 
 				rescue Exception => e
-					Nuri::Util.log 'Failed to activate BSig: ' + e.to_s
+					Nuri::Util.warn 'Failed to activate BSig: ' + e.to_s
 					return 500, '', ''
 				end
 				return 200, '', ''
@@ -378,7 +378,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					File.open(bsig_file, 'w') { |f| f.write(JSON.generate(local)) }
 					@owner.update_bsig_executor
 				rescue Exception => e
-					Nuri::Util.log 'Failed to save BSig: ' + e.to_s
+					Nuri::Util.warn 'Failed to save BSig: ' + e.to_s
 					return 500, '', ''
 				end
 				return 200, '', ''
@@ -393,16 +393,16 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				begin
 					status = @owner.execute(cmd)
 					if status.nil?
-						Nuri::Util.log 'exec: Failed -- cannot find procedure: ' + procedure
+						Nuri::Util.warn 'exec: Failed -- cannot find procedure: ' + procedure
 						return 503, '', ''
 					elsif status == true
 						Nuri::Util.log "exec: Succed -- " + cmd.inspect
 						return 200, '', ''
 					end
 				rescue Exception => e
-					Nuri::Util.log e.to_s
+					Nuri::Util.warn e.to_s
 				end
-				Nuri::Util.log 'exec: Failed -- cannot execute procedure: ' + json
+				Nuri::Util.warn 'exec: Failed -- cannot execute procedure: ' + json
 				return 500, '', ''
 			end
 
@@ -456,7 +456,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 					Nuri::Util.log 'Nuri client daemon was stopped'
 				end
 			rescue Exception => e
-				Nuri::Util.log 'Cannot stop Nuri client: ' + e.to_s
+				Nuri::Util.warn 'Cannot stop Nuri client: ' + e.to_s
 			end
 		end
 
@@ -476,7 +476,7 @@ Nuri::Util.log 'new goal at the bottom of goal-stack: ' + path + '=' + value.to_
 				fpath = Nuri::Util.home_dir + '/var/system.info'
 				File.delete(fpath) if File.exist?(fpath)
 			rescue Exception => exp
-				Nuri::Util.log exp.to_s + "\n" + exp.backtrace.to_s
+				Nuri::Util.warn exp.to_s + "\n" + exp.backtrace.to_s
 			end
 		end
 

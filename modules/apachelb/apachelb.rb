@@ -47,7 +47,6 @@ module Nuri
 				data.split("\n").each do |line|
 					member = line.strip.split(' ')
 					next if member[1] == nil
-					#members.push( member[1].sub(/http(s?):\/\//, '') )
 					members.push( member[1] )
 				end
 				@state['members'] = members
@@ -64,6 +63,8 @@ module Nuri
 				result = system('/usr/sbin/a2enmod status') if result == true
 
 				cmd = "/bin/rm -f /etc/apache2/sites-enabled/*; /bin/cp -f #{Nuri::Util.home_dir}/modules/apachelb/load_balancer #{ConfigFile}"
+				self.stop
+
 				return false if ( system(cmd) != true )
 
 				return (result == true)
@@ -105,7 +106,7 @@ module Nuri
 					end
 				end
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
-
+				sleep 1
 =begin
 				data = `/bin/sed 's/BalancerMember.*//g' #{ConfigFile}`
 				output = ""

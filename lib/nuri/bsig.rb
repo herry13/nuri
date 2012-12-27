@@ -66,7 +66,7 @@ module Nuri
 
 					return true
 				rescue Exception => exp
-					Nuri::Util.log 'Cannot load BSig: ' + exp.to_s
+					Nuri::Util.warn 'Cannot load BSig: ' + exp.to_s
 				end
 				return false
 			end
@@ -96,7 +96,7 @@ module Nuri
 							else
 								succeed, effects = repair_goal_flaws(goal_flaws)
 								if not succeed
-									Nuri::Util.log 'Failed repairing goal-flaws: ' + goal_flaws.inspect
+									Nuri::Util.warn 'Failed repairing goal-flaws: ' + goal_flaws.inspect
 									break
 								else
 									# some goal flaws have been repaired
@@ -105,8 +105,8 @@ module Nuri
 							end
 						end
 					rescue Exception => exp
-						Nuri::Util.log exp.to_s
-						Nuri::Util.log exp.backtrace
+						Nuri::Util.warn 'Error when executing the BSig: ' + exp.to_s
+						Nuri::Util.warn exp.backtrace
 					ensure
 						@lock.synchronize { @active = false }
 					end
@@ -115,33 +115,38 @@ module Nuri
 
 			def get_goal_flaws(goal)
 				flaws = {}
-Nuri::Util.log 'Goal: ' + goal.inspect
+				Nuri::Util.debug 'get goal flaws of: ' + goal.inspect
 				goal.each { |path,value| flaws[path] = value if value != @owner.get_state(path) }
 				return flaws
 			end
 
 			def repair_goal_flaws(goal_flaws)
-Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
+				Nuri::Util.debug 'repairing goal flaws: ' + goal_flaws.inspect
 				candidates = self.search_operator_candidates(goal_flaws)
 				operator = self.select_operator(candidates)
 				# return false if:
 				if operator.nil?
 					# 1) the flaw cannot be repaired -- no operator is applicable
-					Nuri::Util.log 'No applicable operator: ' + goal_flaws.inspect
+					Nuri::Util.warn 'No applicable operator: ' + goal_flaws.inspect
 					return false, nil
 				elsif not achieve_condition(operator)
 					# 2) operator's condition cannot be achieved
-					Nuri::Util.log "Operator's condition cannot be achieved: " +
+					Nuri::Util.warn "Operator's condition cannot be achieved: " +
 						operator.inspect
 					return false, nil
-				elsif not @owner.execute(operator)
+				elsif not execute(operator)
 					# 3) the operator cannot be executed
-					Nuri::Util.log "Cannot execute selected operator: " + operator.inspect
+					Nuri::Util.warn "Cannot execute selected operator: " + operator.inspect
 					return false, nil
 				end
 				#@owner.remove_goal(operator['effect'])
 				#operator['effect'].each { |p| goal_flaws.delete(p) if goal_flaws.has_key?(p) }
 				return true, operator['effect']
+			end
+
+			def execute(operator)
+				#Nuri::Util.debug 'execute operator: ' + operator['name']
+				return @owner.execute(operator)
 			end
 
 			# Return an operator to be executed and the path of subgoal reached by the operator
@@ -194,6 +199,7 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 
 			# @return true if the operator's conditon can be achieved, otherwise false
 			def achieve_condition(operator)
+				Nuri::Util.debug 'achieving condition of operator: ' + operator['name'].to_s
 				# check flaws of operator's condition, and
 				# separate then between local and remote flaws
 				remote_flaws, local_flaws = get_condition_flaws(operator['condition'])
@@ -213,7 +219,7 @@ Nuri::Util.log 'repairing goal flaws: ' + goal_flaws.inspect
 						remote_flaws.each do |address,flaws|
 							data = "json=" + JSON.generate(flaws)
 							code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
-puts '==>> request remote condition: ' + code + ' -- from: ' + address
+							Nuri::Util.debug 'request remote condition: ' + code + ' -- from: ' + address
 							raise Exception if code != '202'
 						end
 						sleep WaitingTime
@@ -235,9 +241,10 @@ puts '==>> request remote condition: ' + code + ' -- from: ' + address
 					while @enabled and local_flaws.length > 0 and timeout >= 0
 						succeed, effects = self.repair_goal_flaws(local_flaws)
 						if succeed
-							effects.each { |var, value|
-								local_flaws.delete(var) if local_flaws.has_key?(var) and local_flaws[var] == value
-							}
+							local_flaws = get_goal_flaws(local_flaws)
+							#effects.each { |var, value|
+							#	local_flaws.delete(var) if local_flaws.has_key?(var) and local_flaws[var] == value
+							#}
 						else
 							timeout -= 1
 						end
@@ -250,10 +257,10 @@ puts '==>> request remote condition: ' + code + ' -- from: ' + address
 
 					return true
 				rescue Timeout::Error
-					Nuri::Util.log "Timeout when achieving the condition"
+					Nuri::Util.warn "Timeout when achieving the condition"
 				rescue Exception => exp
-					Nuri::Util.log "Failed achieving the condition: " + exp.to_s
-					Nuri::Util.log exp.backtrace
+					Nuri::Util.warn "Failed achieving the condition: " + exp.to_s
+					Nuri::Util.warn exp.backtrace
 				end
 
 				return false
