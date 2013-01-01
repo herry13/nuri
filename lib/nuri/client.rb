@@ -79,7 +79,7 @@ module Nuri
 					# BSig reminder
 					fork {
 						Nuri::Util.log "Listen on port #{port}"
-						sleep 0.5
+						sleep 1
 						begin
 							if daemon
 								# get and save process' PIDs in file "var/nuri.pid"

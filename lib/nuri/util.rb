@@ -2,10 +2,12 @@ require 'thread'
 
 module Nuri
 	Port = 1313
+	MaxLogAge = 7 # 7 days
+	MaxLogFileSize = 2097152
 
 	class Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
-		@@logger = Logger.new(@@home_dir + "/var/message.log")
+		@@logger = Logger.new(@@home_dir + "/var/message.log", Nuri::MaxLogAge, Nuri::MaxLogFileSize)
 		@@system = nil
 		@@debug = false
 		@@lock_util = Mutex.new
