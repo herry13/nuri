@@ -2,16 +2,23 @@ require 'thread'
 
 module Nuri
 	module BSig
+
+		# The file where Nuri client saves its active BSig's ID
+		ActiveBSigIdFile = Nuri::Util.home_dir + '/var/bsig_id'
+
+		# The file where Nuri master saves its BSig model
 		MasterBSigFile = Nuri::Util.home_dir + '/var/bsig_system'
+
+		def self.get_active_id
+			return nil if not File.exist?(ActiveBSigIdFile)
+			return File.read(ActiveBSigIdFile).to_i
+		end
 
 		class Executor
 			# Waiting time before sending another request to related nodes in order
 			# to fulfil operator's precondition
 			WaitingTime = 2 # (in seconds)
 			
-			# The file where the active BSig's ID is saved
-			ActiveBSigIdFile = Nuri::Util.home_dir + '/var/bsig_id'
-
 			attr_reader :enabled, :active, :bsig
 
 			def initialize(owner)
@@ -35,16 +42,11 @@ module Nuri
 				@bsig = nil
 			end
 
-			def self.get_active_id
-				return nil if not File.exist?(ActiveBSigIdFile)
-				return File.read(ActiveBSigIdFile).to_i
-			end
-
 			# Load the BSig model from cache file.
 			def load
 				begin
 					# 1) get latest BSig's ID
-					bsig_id = get_active_id
+					bsig_id = Nuri::BSig.get_active_id
 					return false if bsig_id.nil?
 					#return false if not File.exist?(ActiveBSigIdFile)
 					#bsig_id = File.read(ActiveBSigIdFile).to_i
