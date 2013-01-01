@@ -48,8 +48,6 @@ module Nuri
 					# 1) get latest BSig's ID
 					bsig_id = Nuri::BSig.get_active_id
 					return false if bsig_id.nil?
-					#return false if not File.exist?(ActiveBSigIdFile)
-					#bsig_id = File.read(ActiveBSigIdFile).to_i
 	
 					# 2) read BSig
 					bsig_file = Nuri::Util.home_dir + "/var/bsig_#{bsig_id}"

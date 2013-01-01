@@ -431,6 +431,8 @@ module Nuri
 				if bsig.nil?
 					return 404, '', ''
 				else
+					bsig = bsig.clone
+					bsig["id"] = Nuri::BSig.get_active_id
 					return 200, 'application/json', JSON.generate(bsig)
 				end
 			end
