@@ -2,63 +2,45 @@ require 'thread'
 
 module Nuri
 	module BSig
-
-		ValueUndefined = Undefined.new
-
-		class Variable
-			attr_reader :path, :goal
-			
-			def initialize(path)
-				@path = path
-				@value = ValueUndefined
-				@goal = []
-				@lock = Mutex.new
-			end
-
-			def get_value; @lock.synchronize { return @value }; end
-
-			def set_value(value); @lock.synchronize { @value = value }; end
-
-			def add_goal(value)
-				@lock.synchronize {
-					return false if not @goal.index(value).nil?
-					@goal << value
-					return true
-				}
-			end
-		end
-
-		class Undefined; end
+		MasterBSigFile = Nuri::Util.home_dir + '/var/bsig_system'
 
 		class Executor
-			WaitingTime = 2 # in seconds
+			# Waiting time before sending another request to related nodes in order
+			# to fulfil operator's precondition
+			WaitingTime = 2 # (in seconds)
+			
+			# The file where the active BSig's ID is saved
+			ActiveBSigIdFile = Nuri::Util.home_dir + '/var/bsig_id'
 
 			attr_reader :enabled, :active, :bsig
 
 			def initialize(owner)
-				@owner = owner
-				@enabled = false
-				@active = false
-				@lock = Mutex.new
-				self.reset
+				@owner = owner     # holds the Nuri::Client object
+				@enabled = false   # the executor is disabled
+				@active = false    # the executor is not active
+				@lock = Mutex.new  # for synchronizing threads in accessing @enabled and @active
+				self.reset         # reset the BSig model
 			end
 
+			# Send stop-signal to BSig executor thread, then enter an loop until the executor
+			# has stopped (@active == false).
 			def stop
 				Nuri::Util.log 'Send stop-signal to BSig executor'
 				@lock.synchronize { @enabled = false }
 				while self.is_active; sleep 1; end
 			end
 
+			# Reset the BSig model.
 			def reset
 				@bsig = nil
 			end
 
+			# Load the BSig model from cache file.
 			def load
 				begin
 					# 1) get latest BSig's ID
-					bsig_id_file = Nuri::Util.home_dir + '/var/bsig_id'
-					return false if not File.exist?(bsig_id_file)
-					bsig_id = File.read(bsig_id_file).to_i
+					return false if not File.exist?(ActiveBSigIdFile)
+					bsig_id = File.read(ActiveBSigIdFile).to_i
 	
 					# 2) read BSig
 					bsig_file = Nuri::Util.home_dir + "/var/bsig_#{bsig_id}"
@@ -71,8 +53,15 @@ module Nuri
 				return false
 			end
 
+			# Return true if the executor is active, otherwise false.
 			def is_active; @lock.synchronize { return @active }; end
 
+			# Start the executor if it is inactive. This method will create a new thread
+			# which will load the BSig model from cache file, then enter a loop until
+			# a stop-signal is received (see "stop" method) or there is goal-flaw.
+			# On each loop, the thread will:
+			# 1) calculate the goal-flaws
+			# 2) repairing the goal by executing a BSig operator
 			def start
 				return if self.is_active
 				Nuri::Util.log 'Starting BSig executor'
@@ -87,6 +76,7 @@ module Nuri
 						}
 
 						while @enabled
+							# 1) get the goal and calculate the goal-flaw
 							goal = @owner.get_goal
 							goal_flaws = self.get_goal_flaws(goal)
 							if goal_flaws.length <= 0 # no goal-flaw => at goal state
@@ -94,12 +84,15 @@ module Nuri
 								@owner.clear_goal
 								break
 							else
+								# 2) if such goal-flaw exists, repair it by selecting and executing
+								#    a BSig operator (which may not repair all goal-flaws)
 								succeed, effects = repair_goal_flaws(goal_flaws)
 								if not succeed
 									Nuri::Util.warn 'Failed repairing goal-flaws: ' + goal_flaws.inspect
 									break
 								else
-									# some goal flaws have been repaired
+									# Some goal flaws have been repaired, then remove the achieved goal
+									# from goal-stacks
 									@owner.remove_goal(effects)
 								end
 							end
@@ -113,6 +106,8 @@ module Nuri
 				}
 			end
 
+			# Calculate the goal-flaws by comparing the goal with the current state. Then
+			# return the goal-flaws as a set of variable-value pairs.
 			def get_goal_flaws(goal)
 				flaws = {}
 				Nuri::Util.debug 'get goal flaws of: ' + goal.inspect
@@ -120,11 +115,17 @@ module Nuri
 				return flaws
 			end
 
+			# Repair the goal-flaws by searching all operator candidates, then select
+			# an operator which will be executed to repair the goal-flaws.
+			# Return a 2-tuple:
+			# - [false, nil]    -- iff there's no applicable operator, or
+			#                          the condition of selected operator cannot be achieved, or
+			#                          the selected operator cannot be executed
+			# - [true, effects] -- iff the operator was successfully executed
 			def repair_goal_flaws(goal_flaws)
 				Nuri::Util.debug 'repairing goal flaws: ' + goal_flaws.inspect
 				candidates = self.search_operator_candidates(goal_flaws)
 				operator = self.select_operator(candidates)
-				# return false if:
 				if operator.nil?
 					# 1) the flaw cannot be repaired -- no operator is applicable
 					Nuri::Util.warn 'No applicable operator: ' + goal_flaws.inspect
@@ -139,30 +140,36 @@ module Nuri
 					Nuri::Util.warn "Cannot execute selected operator: " + operator.inspect
 					return false, nil
 				end
-				#@owner.remove_goal(operator['effect'])
-				#operator['effect'].each { |p| goal_flaws.delete(p) if goal_flaws.has_key?(p) }
 				return true, operator['effect']
 			end
 
+			# Execute given BSig operator. Return true if the execution was success, otherwise false
 			def execute(operator)
-				#Nuri::Util.debug 'execute operator: ' + operator['name']
+				Nuri::Util.debug 'execute operator: ' + operator['name']
 				return @owner.execute(operator)
 			end
 
 			# Return an operator to be executed and the path of subgoal reached by the operator
 			def select_operator(candidates)
 				return nil if candidates.nil? or candidates.length <= 0
+
 				# Select the operator that has the highest ID value. Each operator
 				# has a distance which represents its distance to the goal state
 				# in total-order plan
 				candidates.uniq!
+
 				# sort in ascending order
 				#candidates.sort! { |x,y| x['distance'] <=> y['distance'] }
 				# sort in decending order
 				candidates.sort! { |x,y| y['distance'] <=> x['distance'] }
+
+				# Return the operator with the lowest distance
 				return candidates.last
 			end
 
+			# Search all operators that can be used to repair the goal-flaws by comparing
+			# the flaws with operators' effects.
+			# Return an array of operators.
 			def search_operator_candidates(flaws)
 				candidates = []
 				flaws.each do |path,value|
@@ -178,6 +185,11 @@ module Nuri
 				return candidates
 			end
 
+			# Given a condition (either a goal or an operator's condition), the method
+			# will calculate the flaws. The condition-flaws will be partitioned into two
+			# sets i.e. the remote-flaws and local-flaws.
+			# Remote-flaws: the flaws that must be repaired by the another agent (node).
+			# Local-flaws: the flaws that can be repaired by this agent (node).
 			def get_condition_flaws(condition)
 				flaws = get_goal_flaws(condition)
 
@@ -197,7 +209,11 @@ module Nuri
 				return remote_flaws, local_flaws
 			end
 
-			# @return true if the operator's conditon can be achieved, otherwise false
+			# Given an operator, the method will:
+			# 1) calculate the operator's condition-flaws
+			# 2) repair either local or remote condition-flaws if they exist
+			#
+			# @return true if the operator's conditon-flaws can be repaired, otherwise false
 			def achieve_condition(operator)
 				Nuri::Util.debug 'achieving condition of operator: ' + operator['name'].to_s
 				# check flaws of operator's condition, and
@@ -266,6 +282,33 @@ module Nuri
 				return false
 			end
 		end
+
+		ValueUndefined = Undefined.new
+
+		class Variable
+			attr_reader :path, :goal
+			
+			def initialize(path)
+				@path = path
+				@value = ValueUndefined
+				@goal = []
+				@lock = Mutex.new
+			end
+
+			def get_value; @lock.synchronize { return @value }; end
+
+			def set_value(value); @lock.synchronize { @value = value }; end
+
+			def add_goal(value)
+				@lock.synchronize {
+					return false if not @goal.index(value).nil?
+					@goal << value
+					return true
+				}
+			end
+		end
+
+		class Undefined; end
 
 	end
 end

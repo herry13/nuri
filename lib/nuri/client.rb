@@ -129,6 +129,8 @@ module Nuri
 				return true
 			end
 
+			def get_bsig; return @bsig_executor.bsig; end
+
 			# Return the state of this node
 			def get_state(path=nil)
 				path = path.gsub(/\//, '.') if path != nil
@@ -269,6 +271,8 @@ module Nuri
 				path.chop! if path[path.length-1,1] == '/'
 				if path[0,6] == '/state'
 					status, content_type, body = self.get_state(:path => path)
+				elsif path == '/bsig'
+					status, content_type, body = self.get_bsig
 				else
 					status = 400
 					content_type = body = ''
@@ -419,6 +423,15 @@ module Nuri
 				else
 					data = Nuri::Sfp.to_json({'value' => state})
 					return 200, 'application/json', data
+				end
+			end
+
+			def get_bsig
+				bsig = @owner.get_bsig
+				if bsig.nil?
+					return 404, '', ''
+				else
+					return 200, 'application/json', JSON.generate(bsig)
 				end
 			end
 

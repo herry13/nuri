@@ -8,21 +8,24 @@ require "nuri/main"
 
 Version = '0.2.0 (alpha)'
 
-def cli
+def console
 	def print_help
 		puts 'Usage: nuri.rb console <command>
 
 commands:
-  main                  print the content of "main.sfp"
-  state [details]       print the current state of this node
-  pull [details]        pull and print the current state of all managed nodes
-  plan                  generate a workflow to achieve the goal state
-  apply [debug]         auto-generate the workflow and execute it to achieve
-                        the goal state; if "debug" is provided, then the workflow
-                        will be printed to the screen
-  update-system         push system information to all managed nodes
-  bsig                  generate a Behavioural Signature model
-  apply-bsig            generate and deploy the Behavioural Signature model
+  main              print the content of "main.sfp"
+  state [details]   print the current state of this node
+  pull [details]    pull and print the current state of all managed nodes
+  plan              generate a workflow to achieve the goal state
+  apply [debug]     auto-generate the workflow and execute it to achieve
+                    the goal state; if "debug" is provided, then the workflow
+                    will be printed to the screen
+  update-system     push system information to all managed nodes
+  bsig              generate a Behavioural Signature model
+  apply-bsig        generate and deploy the Behavioural Signature model
+  status-bsig       print the status of the Behavioural Signature model
+  reset             delete existing BSig model; stop BSig execution agent;
+                    delete existing system information
 
 '
 	end
@@ -62,12 +65,16 @@ commands:
 		puts (bsig == nil ? 'no solution' : JSON.pretty_generate(bsig))
 
 	elsif ARGV[1] == 'apply-bsig'
-		puts 'Deploying BSig model...'
+		puts 'Applying BSig model...'
 		puts (Nuri::Master.apply_bsig(true) ? 'OK' : 'Failed')
 
 	elsif ARGV[1] == 'start-bsig'
 		puts 'Start BSig executor...'
 		puts (Nuri::Master.start_bsig ? 'OK' : 'Failed')
+
+	elsif ARGV[1] == 'status-bsig'
+		puts 'Check BSig status...'
+		Nuri::Master.status_bsig
 
 	elsif ARGV[1] == 'json'
 		plan = Nuri::Master.debug_json
@@ -212,7 +219,7 @@ end
 
 if __FILE__ == $0
 	if ARGV[0] == 'console'
-		cli
+		console
 	elsif ARGV[0] == 'planner'
 		planner
 	elsif ARGV[0] == 'master'

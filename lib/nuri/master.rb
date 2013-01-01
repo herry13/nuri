@@ -51,63 +51,7 @@ module Nuri
 				current_state
 			end
 
-=begin
-			def challenge_child(address)
-				begin
-					url = URI.parse("http://#{address}:#{Nuri::Port}/status/secure")
-					req = Net::HTTP::Get.new(url.path)
-					res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
-					return true if res.code == '200'
-					if res.code == '404'
-						return self.send_public_key_to_child(address)
-					end
-				rescue Exception => e
-					Nuri::Util.log "Cannot challenge node #{address}: " + e.to_s
-				end
-				false
-			end
-
-			def get_child_public_key(address)
-				url = URI.parse("http://#{address}:#{Nuri::Port}/status/public_key")
-				req = Net::HTTP::Get.new(url.path)
-				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
-				return nil if res.code != '200'
-				return res.body
-			end
-	
-			def send_public_key_to_child(address)
-				data = self.get_child_public_key(address)
-				return false if data == nil
-
-				child_pub_key = OpenSSL::PKey::RSA.new data
-				key = Nuri::SSL.public_key_to_s
-				pass_phrase = Nuri::SSL.random_string
-				salt = Nuri::SSL.random_string[0,8]
-				encrypter = OpenSSL::Cipher::Cipher.new 'AES-128-CBC'
-				encrypter.encrypt
-				encrypter.pkcs5_keyivgen pass_phrase, salt
-				encrypted = encrypter.update key
-				encrypted << encrypter.final
-
-				data = {
-					'data1' => Base64.encode64(child_pub_key.public_encrypt(pass_phrase)),
-					'data2' => Base64.encode64(child_pub_key.public_encrypt(salt)),
-					'data3' => Base64.encode64(encrypted)
-				}
-				data = JSON.generate(data)
-
-				url = URI.parse("http://#{address}:#{Nuri::Port}/status/master")
-				req = Net::HTTP::Post.new(url.path)
-				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req, data) }
-				return true if res.code == '200'
-
-				false
-			end
-=end
-
 			def get_child_state(address)
-				#return nil if not self.challenge_child(address)
-
 				begin
 					code, body = self.get_data(address, Nuri::Port, '/state')
 					if code == '200'
@@ -144,6 +88,7 @@ module Nuri
 					rescue Exception => e
 						Nuri::Util.log 'Cannot reset ' + address.to_s + ': ' + e.to_s
 					end
+					File.delete(Nuri::BSig::MasterBSigFile) if File.exist?(Nuri::BSig::MasterBSigFile)
 				end
 			end
 
@@ -156,6 +101,21 @@ module Nuri
 						Nuri::Util.log 'Cannot start BSig executor ' + address.to_s + ': ' + e.to_s
 					end
 				end
+			end
+
+			def status_bsig
+				status = {:flaws => nil, :id => nil, :created => nil}
+				return status if not File.exist?(Nuri::BSig::MasterBSigFile)
+				bsig = JSON[File.read(Nuri::BSig::MasterBSigFile)]
+				state = self.get_state
+				flaws = []
+				bsig['goal'].each do |path,value|
+					flaws << [path, value, state.at?(path)] if value != state.at?(path)
+				end
+				status[:flaws] = flaws
+				status[:id] = bsig['id']
+				status[:created] = File.mtime(Nuri::BSig::MasterBSigFile)
+				return status
 			end
 
 			def apply_bsig(debug=false)
@@ -210,6 +170,9 @@ module Nuri
 							raise Exception, "Failed-activate BSig:#{code},#{address}"
 						end
 					end
+
+					# save the deployed BSig model
+					File.open(Nuri::BSig::MasterBSigFile, 'w') { |f| f.write(JSON.generate(bsig)) }
 
 				rescue Timeout::Error
 					Nuri::Util.log 'Timeout on sending BSig to clients'
@@ -347,6 +310,28 @@ module Nuri
 		def self.start_bsig
 			master = Nuri::Master::Daemon.new
 			return master.start_bsig
+		end
+
+		def self.status_bsig
+			master = Nuri::Master::Daemon.new
+			status = master.status_bsig
+			if status[:id].nil?
+				puts "BSig model is not exist."
+			else
+				puts "- ID: #{status[:id]}"
+				puts "- Created: #{status[:created].to_s}"
+				if status[:flaws].length <= 0
+					puts '- Goal: achieved'
+				else
+					puts '- Goal: not achieved\n  Flaws:'
+					index = 1
+					status[:flaws].each do |flaw|
+						puts "  #{index}) #{flaw[0]}: goal=#{flaw[1]}, current=#{flaw[2]}"
+						index += 1;
+					end
+				end
+			end
+			puts ''
 		end
 
 		def self.debug_json
