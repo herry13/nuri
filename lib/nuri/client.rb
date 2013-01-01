@@ -16,6 +16,7 @@ module Nuri
 				@bsig_executor = Nuri::BSig::Executor.new(self)
 				@lock_goal = Mutex.new
 				@goals = {}
+				@system_nodes = []
 
 				self.load
 			end
@@ -29,18 +30,9 @@ module Nuri
 				else
 					@config['trusted'].each { |addr| return true if addr == requester }
 				end
+				system_nodes = Nuri::Util.get_system_information
+				system_nodes.each_value { |addr| return true if addr == requester }
 				false
-			end
-
-			# Process HTTP request by creating an agent and delegating the request
-			# to the agent
-			def process_request(request, stream)
-				if not self.trusted_address(stream.socket.peeraddr[2])
-					Nuri::Util.warn "Untrusted request from host ..."
-					[403, {}, ['']]
-				else
-					Nuri::Client::Agent.new(self, request, stream).serve_request
-				end
 			end
 
 			def stop
@@ -267,15 +259,21 @@ module Nuri
 			end
 
 			def do_GET(request, response)
-				path = request.path
-				path.chop! if path[path.length-1,1] == '/'
-				if path[0,6] == '/state'
-					status, content_type, body = self.get_state(:path => path)
-				elsif path == '/bsig'
-					status, content_type, body = self.get_bsig
+				if not @owner.trusted_address(request.peeraddr[2])
+					Nuri::Util.warn "Untrusted request from: " + request.peeraddr[2]
+					status = 403
+					content_type, body = ''
 				else
-					status = 400
-					content_type = body = ''
+					path = request.path
+					path.chop! if path[path.length-1,1] == '/'
+					if path[0,6] == '/state'
+						status, content_type, body = self.get_state(:path => path)
+					elsif path == '/bsig'
+						status, content_type, body = self.get_bsig
+					else
+						status = 400
+						content_type = body = ''
+					end
 				end
 				response.status = status
 				response['Content-Type'] = content_type
