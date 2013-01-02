@@ -1,8 +1,0 @@
-include "cloudburst.sfp"
-
-initial state {
-	a isa Service
-	b isa Service {
-		depend is (a )
-	}
-}
