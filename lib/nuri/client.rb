@@ -24,6 +24,7 @@ module Nuri
 			# Check if the HTTP requester is from any trusted host
 			# @return true if trusted, otherwise false
 			def trusted_address(requester)
+				return true if requester == 'localhost'
 				return false if not @config.has_key?('trusted')
 				if not @config['trusted'].is_a?(Array)
 					return (@config['trusted'] == requester)
