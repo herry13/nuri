@@ -281,14 +281,19 @@ module Nuri
 			end
 
 			def do_POST(request, response)
-				#pp request.query
-				path = request.path
-				path.chop! if path[path.length-1,1] == '/'
-				if path == '/system'
-					status, content_type, body = self.set_system_information(request.query)
+				if not @owner.trusted_address(request.peeraddr[2])
+					Nuri::Util.warn "Untrusted request from: " + request.peeraddr[2]
+					status = 403
+					content_type, body = ''
 				else
-					status = 400
-					content_type = body = ''
+					path = request.path
+					path.chop! if path[path.length-1,1] == '/'
+					if path == '/system'
+						status, content_type, body = self.set_system_information(request.query)
+					else
+						status = 400
+						content_type = body = ''
+					end
 				end
 				response.status = status
 				response['Content-Type'] = content_type
@@ -296,23 +301,29 @@ module Nuri
 			end
 
 			def do_PUT(request, response)
-				path = request.path
-				path.chop! if path[path.length-1,1] == '/'
-				if path == '/exec'
-					status, content_type, body = self.execute_action(request.query)
-				elsif path == '/bsig'
-					status, content_type, body = self.save_bsig(request.query)
-				elsif path == '/bsig/activate'
-					status, content_type, body = self.activate_bsig(request.query)
-				elsif path == '/bsig/goal'
-					status, content_type, body = self.new_bsig_pre_goal(request.query)
-				elsif path == '/bsig/start'
-					status, content_type, body = self.start_bsig_executor
-				elsif path == '/reset'
-					status, content_type, body = self.reset
+				if not @owner.trusted_address(request.peeraddr[2])
+					Nuri::Util.warn "Untrusted request from: " + request.peeraddr[2]
+					status = 403
+					content_type, body = ''
 				else
-					status = 400
-					content_type = body = ''
+					path = request.path
+					path.chop! if path[path.length-1,1] == '/'
+					if path == '/exec'
+						status, content_type, body = self.execute_action(request.query)
+					elsif path == '/bsig'
+						status, content_type, body = self.save_bsig(request.query)
+					elsif path == '/bsig/activate'
+						status, content_type, body = self.activate_bsig(request.query)
+					elsif path == '/bsig/goal'
+						status, content_type, body = self.new_bsig_pre_goal(request.query)
+					elsif path == '/bsig/start'
+						status, content_type, body = self.start_bsig_executor
+					elsif path == '/reset'
+						status, content_type, body = self.reset
+					else
+						status = 400
+						content_type = body = ''
+					end
 				end
 				response.status = status
 				response['Content-Type'] = content_type
