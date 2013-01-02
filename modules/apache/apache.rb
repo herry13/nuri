@@ -5,6 +5,7 @@ require 'augeas'
 module Nuri
 	module Module
 		class Apache
+			InstallingLockFile = '/tmp/nuri_apache_installing'
 
 			include Nuri::Resource
 
@@ -27,16 +28,21 @@ module Nuri
 				@state['php_mysql_module'] = (data.length > 1 and data[0] == 'php5-mysql')
 
 				# installed & running
-				data = `/usr/bin/dpkg-query -W apache2`
-				data = data.split(' ')
-				@state["installed"] = (data.length > 1 and data[0] == 'apache2')
-				if @state["installed"]
-					@state["version"] = data[1]
-					data = `/usr/bin/service apache2 status`
-					@state["running"] = ((data =~ /is running/) != nil)
-				else
+				if File.exist?(InstallingLockFile)
+					@state["installed"] = @state["running"] = false
 					@state["version"] = ""
-					@state["running"] = false
+				else
+					data = `/usr/bin/dpkg-query -W apache2`
+					data = data.split(' ')
+					@state["installed"] = (data.length > 1 and data[0] == 'apache2')
+					if @state["installed"]
+						@state["version"] = data[1]
+						data = `/usr/bin/service apache2 status`
+						@state["running"] = ((data =~ /is running/) != nil)
+					else
+						@state["version"] = ""
+						@state["running"] = false
+					end
 				end
 				# port
 				data = (File.file?("/etc/apache2/ports.conf") ?
@@ -68,10 +74,17 @@ module Nuri
 
 				return @state
 			end
-	
+
 			def install
-				result = system('/usr/bin/apt-get -y install apache2')
-				result = system('/usr/bin/sudo /usr/bin/service apache2 stop') if result == true
+				result = false
+				begin
+					File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
+					result = system('/usr/bin/apt-get -y install apache2')
+					result = system('/usr/bin/sudo /usr/bin/service apache2 stop') if result == true
+				rescue Exception
+				ensure
+					File.delete(InstallingLockFile) if File.exist?(InstallingLockFile)
+				end
 				return (result == true)
 			end
 		
