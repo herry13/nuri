@@ -5,6 +5,7 @@ require 'augeas'
 module Nuri
 	module Module
 		class Apachelb
+			InstallingLockFile = '/tmp/nuri_apachelb_installing'
 
 			include Nuri::Resource
 
@@ -16,20 +17,23 @@ module Nuri
 	
 			# get state of this component in JSON
 			def get_self_state
-				# TODO
-
-				data = `/usr/bin/dpkg-query -W apache2`
-				data = data.split(' ')
-				@state['installed'] = (data.length > 1 and data[0] == 'apache2') and
-					File.exists?(ConfigFile)
-
-				if @state['installed']
-					@state['version'] = data[1]
-					data = `/usr/bin/service apache2 status`
-					@state['running'] = ((data =~ /is running/) != nil)
-				else
+				# installed, running, version
+				if File.exist?(InstallingLockFile)
+					@state['installed'] = @state['running'] = false
 					@state['version'] = ''
-					@state['running'] = false
+				else
+					data = `/usr/bin/dpkg-query -W apache2`
+					data = data.split(' ')
+					@state['installed'] = (data.length > 1 and data[0] == 'apache2') and
+						File.exists?(ConfigFile)
+					if @state['installed']
+						@state['version'] = data[1]
+						data = `/usr/bin/service apache2 status`
+						@state['running'] = ((data =~ /is running/) != nil)
+					else
+						@state['version'] = ''
+						@state['running'] = false
+					end
 				end
 
 				# ServerName setting
@@ -55,17 +59,23 @@ module Nuri
 			end
 	
 			def install(params={})
-				result = system('/usr/bin/apt-get -y install apache2')
-				result = system('/usr/bin/service apache2 stop') if result == true
-				result = system('/usr/sbin/a2enmod proxy') if result == true
-				result = system('/usr/sbin/a2enmod proxy_balancer') if result == true
-				result = system('/usr/sbin/a2enmod proxy_http') if result == true
-				result = system('/usr/sbin/a2enmod status') if result == true
+				result = false
+				begin
+					File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
+					result = system('/usr/bin/apt-get -y install apache2')
+					result = system('/usr/bin/service apache2 stop') if result == true
+					result = system('/usr/sbin/a2enmod proxy') if result == true
+					result = system('/usr/sbin/a2enmod proxy_balancer') if result == true
+					result = system('/usr/sbin/a2enmod proxy_http') if result == true
+					result = system('/usr/sbin/a2enmod status') if result == true
 
-				cmd = "/bin/rm -f /etc/apache2/sites-enabled/*; /bin/cp -f #{Nuri::Util.home_dir}/modules/apachelb/load_balancer #{ConfigFile}"
-				self.stop
-
-				return false if ( system(cmd) != true )
+					cmd = "/bin/rm -f /etc/apache2/sites-enabled/*; /bin/cp -f #{Nuri::Util.home_dir}/modules/apachelb/load_balancer #{ConfigFile}"
+					self.stop
+					result = system(cmd)
+				rescue Exception
+				ensure
+					File.delete(InstallingLockFile) if File.exist?(InstallingLockFile)
+				end
 
 				return (result == true)
 			end
