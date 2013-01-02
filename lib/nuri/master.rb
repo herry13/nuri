@@ -32,6 +32,14 @@ module Nuri
 				puts @parser.to_sas
 			end
 
+			def debug_sfp
+				sfp = Nuri::Sfp.deep_clone(@main)
+				sfp.delete('system')
+				sfp['initial'] = self.get_state
+				sfp.accept(Nuri::Sfp::ParentEliminator.new)
+				puts JSON.pretty_generate(sfp)
+			end
+
 			def get_state(path='')
 				return nil if not @main.has_key?('system')
 
@@ -342,6 +350,11 @@ module Nuri
 		def self.debug_sas
 			master = Nuri::Master::Daemon.new
 			master.debug_sas
+		end
+
+		def self.debug_sfp
+			master = Nuri::Master::Daemon.new
+			master.debug_sfp
 		end
 
 		def self.exec(sfw_file)

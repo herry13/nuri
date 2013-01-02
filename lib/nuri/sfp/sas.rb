@@ -173,6 +173,8 @@ module Nuri
 
 					return create_output
 				rescue Exception => e
+pp e
+puts e.backtrace
 					Nuri::Util.log e.to_s
 				end
 			end
@@ -887,9 +889,7 @@ module Nuri
 					# transform formula into a format:
 					#   (x1 and x2) or (y1 and y2 and y3) or z1
 					is_and_or_tree = false
-					keys = formula.keys
-					keys.each { |k|
-					#formula.each { |k,v|
+					formula.keys.each { |k|
 						next if k[0,1] == '_'
 						v = formula[k]
 						if v.is_a?(Hash) and v.isconstraint
@@ -902,9 +902,7 @@ module Nuri
 
 								if formula['_type'] == v['_type']
 									# pull-out all node's elements
-									keys1 = v.keys
-									keys1.each { |k1|
-									#v.each { |k1,v1|
+									v.keys.each { |k1|
 										next if k1[0,1] == '_'
 										v1 = v[k1]
 										# check contradiction facts
@@ -978,8 +976,7 @@ module Nuri
 				# then formula  (x not-equals p1) is transformed into
 				# formula ( (x equals p2) or (x equals p3) )
 				def not_equals_statement_to_or_constraint(formula)
-					keys = formula.keys
-					keys.each do |k|
+					formula.keys.each do |k|
 						next if k[0,1] == '_'
 						v = formula[k]
 						if v.is_a?(Hash) and v.isconstraint
@@ -1017,7 +1014,7 @@ module Nuri
 				# - ARRAY-Iterator constraint by extracting all possible values of given ARRAY
 				#
 				def remove_not_and_iterator_constraint(formula)
-					# TODO: (not (equals) (not-equals) (and) (or))
+					# (not (equals) (not-equals) (and) (or))
 					if formula.isconstraint and formula['_type'] == 'not'
 						formula['_type'] = 'and'
 						formula.each { |k,v|
@@ -1030,7 +1027,9 @@ module Nuri
 									v['_type'] = 'equals'
 								when 'and'
 									v['_type'] = 'or'
-									v.each { |k1,v1|
+									v.keys.each { |k1|
+										next if k1[0,1] == '_'
+										v1 = v[k1]
 										k2 = Nuri::Sfp::Sas.next_constraint_key
 										c_not = create_not_constraint(k2, v)
 										c_not[k1] = v1
@@ -1040,7 +1039,9 @@ module Nuri
 									}
 								when 'or'
 									v['_type'] = 'and'
-									v.each { |k1,v1|
+									v.keys.each { |k1|
+										next if k1[0,1] == '_'
+										v1 = v[k1]
 										k2 = Nuri::Sfp::Sas.next_constraint_key
 										c_not = create_not_constraint(k2, v)
 										c_not[k1] = v1

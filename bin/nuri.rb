@@ -77,10 +77,13 @@ commands:
 		Nuri::Master.status_bsig
 
 	elsif ARGV[1] == 'json'
-		plan = Nuri::Master.debug_json
+		Nuri::Master.debug_json
 
 	elsif ARGV[1] == 'sas'
-		plan = Nuri::Master.debug_sas
+		Nuri::Master.debug_sas
+
+	elsif ARGV[1] == 'sfp'
+		Nuri::Master.debug_sfp
 
 	elsif ARGV[1] == 'apply'
 		debug = (ARGV[2] == 'debug')
