@@ -1,3 +1,11 @@
+02-01-2013 -- 0.2.0 (beta2)
+- fix bugs in 'lib/nuri/sfp/sas.rb' -- in remove_not_constraint method
+- enable multiple statements in conditional constraint
+- allow administrator to check BSig status
+- push trusted nodes from master to client
+- restrict request only from trusted nodes in client
+- allow client to expose its active BSig model
+
 27-12-2012 -- 0.2.0 (beta1)
 - fix bugs on BSig reminder -- send start BSig request through localhost
 - provide HTTP PUT /bsig/start -- to accept request starting BSig executor
