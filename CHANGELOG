@@ -1,4 +1,4 @@
-02-01-2013 -- 0.2.0 (beta2)
+02-01-2013 -- 0.2.0
 - fix bugs in 'lib/nuri/sfp/sas.rb' -- in remove_not_constraint method
 - enable multiple statements in conditional constraint
 - allow administrator to check BSig status
