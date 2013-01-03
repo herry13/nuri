@@ -77,14 +77,10 @@ module Nuri
 
 			def install
 				result = false
-				begin
-					File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
-					result = system('/usr/bin/apt-get -y install apache2')
-					result = system('/usr/bin/sudo /usr/bin/service apache2 stop') if result == true
-				rescue Exception
-				ensure
-					File.delete(InstallingLockFile) if File.exist?(InstallingLockFile)
-				end
+				File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
+				result = system('/usr/bin/apt-get -y install apache2')
+				result = system('/usr/bin/sudo /usr/bin/service apache2 stop') if result == true
+				File.delete(InstallingLockFile) if File.exist?(InstallingLockFile)
 				return (result == true)
 			end
 		
