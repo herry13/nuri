@@ -5,7 +5,7 @@ require 'augeas'
 module Nuri
 	module Module
 		class Apache
-			InstallingLockFile = '/tmp/nuri_apache_installing'
+			RunningLockFile = '/tmp/nuri_apache_installing'
 
 			include Nuri::Resource
 
@@ -28,22 +28,22 @@ module Nuri
 				@state['php_mysql_module'] = (data.length > 1 and data[0] == 'php5-mysql')
 
 				# installed & running
-				if File.exist?(InstallingLockFile)
-					@state["installed"] = @state["running"] = false
-					@state["version"] = ""
-				else
-					data = `/usr/bin/dpkg-query -W apache2`
-					data = data.split(' ')
-					@state["installed"] = (data.length > 1 and data[0] == 'apache2')
-					if @state["installed"]
-						@state["version"] = data[1]
+				data = `/usr/bin/dpkg-query -W apache2`
+				data = data.split(' ')
+				@state["installed"] = (data.length > 1 and data[0] == 'apache2')
+				if @state["installed"]
+					@state["version"] = data[1]
+					if File.exist?(RunningLockFile)
+						@state['running'] = false
+					else
 						data = `/usr/bin/service apache2 status`
 						@state["running"] = ((data =~ /is running/) != nil)
-					else
-						@state["version"] = ""
-						@state["running"] = false
 					end
+				else
+					@state["version"] = ""
+					@state["running"] = false
 				end
+				#end
 				# port
 				data = (File.file?("/etc/apache2/ports.conf") ?
 					`/bin/grep -e "^Listen " /etc/apache2/ports.conf` : "")
@@ -77,10 +77,10 @@ module Nuri
 
 			def install
 				result = false
-				File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
+				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
 				result = system('/usr/bin/apt-get -y install apache2')
 				result = system('/usr/bin/sudo /usr/bin/service apache2 stop') if result == true
-				File.delete(InstallingLockFile) if File.exist?(InstallingLockFile)
+				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
 				return (result == true)
 			end
 		
@@ -146,26 +146,34 @@ module Nuri
 			end
 
 			def install_php_mysql_module
+				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
 				success = Nuri::Util.installed?('php5-mysql')
 				self.stop if success
+				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
 				return success
 			end
 
 			def uninstall_php_mysql_module
+				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
 				success = Nuri::Util.uninstalled?('php5-mysql')
 				self.stop if success
+				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
 				return success
 			end
 
 			def install_php_module
+				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
 				success = Nuri::Util.installed?('libapache2-mod-php5')
 				self.stop if success
+				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
 				return success
 			end
 
 			def uninstall_php_module
+				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
 				success = Nuri::Util.uninstalled?('libapache2-mod-php5')
 				self.stop if success
+				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
 				return success
 			end
 		end
