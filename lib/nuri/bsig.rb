@@ -117,7 +117,7 @@ module Nuri
 			# return the goal-flaws as a set of variable-value pairs.
 			def get_goal_flaws(goal)
 				flaws = {}
-				Nuri::Util.debug 'get goal flaws of: ' + goal.inspect
+				#Nuri::Util.debug 'get goal flaws of: ' + goal.inspect
 				goal.each { |path,value| flaws[path] = value if value != @owner.get_state(path) }
 				return flaws
 			end
@@ -239,6 +239,7 @@ module Nuri
 					# - '500': the node cannot repair the remote flaws
 					timeout = 1800 / WaitingTime
 					begin
+						Nuri::Util.debug 'remote conditions: ' + remote_flaws.inspect
 						remote_flaws.each do |address,flaws|
 							data = "json=" + JSON.generate(flaws)
 							code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
@@ -259,24 +260,21 @@ module Nuri
 						# all remote-flaws have been repaired, and no timeout (timeout: 30m)
 					end while @enabled and remote_flaws.length > 0 and timeout >= 0
 
+					raise Exception, 'Remote conditions cannot be satisfied: ' + remote_flaws.inspect if remote_flaws.length > 0
+					Nuri::Util.debug 'remote conditions have been satisfied'
+
 					# Recursively call itself to repair the local flaws.
 					timeout = 10
 					while @enabled and local_flaws.length > 0 and timeout >= 0
 						succeed, effects = self.repair_goal_flaws(local_flaws)
 						if succeed
 							local_flaws = get_goal_flaws(local_flaws)
-							#effects.each { |var, value|
-							#	local_flaws.delete(var) if local_flaws.has_key?(var) and local_flaws[var] == value
-							#}
 						else
 							timeout -= 1
 						end
 						sleep 0.5
-						#local_flaws.clear if self.repair_goal_flaws(local_flaws)
-						#timeout -= 1
 					end
-					raise Exception, 'Local flaws cannot be repaired: ' + local_flaws.inspect if
-						local_flaws.length > 0
+					raise Exception, 'Local conditions cannot be satisfied: ' + local_flaws.inspect if local_flaws.length > 0
 
 					return true
 				rescue Timeout::Error
