@@ -331,7 +331,7 @@ module Nuri
 				if status[:flaws].length <= 0
 					puts '- Goal: achieved'
 				else
-					puts '- Goal: not achieved\n  Flaws:'
+					puts "- Goal: not achieved\n  Flaws:"
 					index = 1
 					status[:flaws].each do |flaw|
 						puts "  #{index}) #{flaw[0]}: goal=#{flaw[1]}, current=#{flaw[2]}"
