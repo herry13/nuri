@@ -6,11 +6,12 @@ module Nuri
 		class Daemon
 			include Nuri::Config
 
+			attr_reader :main
 			attr_accessor :do_verify_execution
 
 			def initialize
 				self.load(false)
-				@main = self.get_main
+				@main = Nuri::Resource.get_root #self.get_main
 				@do_verify_execution = true
 			end
 
@@ -44,17 +45,10 @@ module Nuri
 				return nil if not @main.has_key?('system')
 
 				current_state = {'_context'=>'state', '_self'=>'initial'}
-				@main['system'].each do |key,node|
-					next if key[0,1] == '_' or
-					        node['_classes'].rindex(MainComponent) == nil or
-					        node['domainname'] == ''
-					state = self.get_child_state(node['domainname'])
-					if state != nil
-						state.each { |k,v| current_state[k] = v }
-					else
-						# TODO
-						#current_state[key] = Nuri::Sfp.deep_clone(node)
-					end
+				@main['system'].each do |key,address|
+					next if key[0,1] == '_'
+					state = self.get_child_state(address)
+					state.each { |k,v| current_state[k] = v } if not state.nil?
 				end
 				current_state
 			end
@@ -380,6 +374,12 @@ module Nuri
 		def self.update_system
 			master = Nuri::Master::Daemon.new
 			master.update_system
+		end
+
+		def self.print_main
+			master = Nuri::Master::Daemon.new
+			main = Nuri::Sfp.deep_clone(master.main).accept(Nuri::Sfp::ParentEliminator.new)
+			puts JSON.pretty_generate(main) #master.main) #get_main.accept(Nuri::Sfp::ParentEliminator.new))
 		end
 
 	end

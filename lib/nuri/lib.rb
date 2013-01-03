@@ -35,6 +35,7 @@ module Nuri
 			begin
 				Dir.chdir(Nuri::Util.home_dir)
 
+				# auto-include all modules
 				main = "include \"#{Nuri::Util.home_dir}/modules/machine/machine.sfp\"\n"
 				self.get_modules.each do |mod|
 					main += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"

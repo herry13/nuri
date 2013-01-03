@@ -13,7 +13,6 @@ def console
 		puts 'Usage: nuri.rb console <command>
 
 commands:
-  main              print the content of "main.sfp"
   state [details]   print the current state of this node
   pull [details]    pull and print the current state of all managed nodes
   plan              generate a workflow to achieve the goal state
@@ -35,9 +34,10 @@ commands:
 	end
 
 	if ARGV[1] == 'main'
-		client = Nuri::Client::Daemon.new
-		main = client.get_main
-		puts Nuri::Sfp.to_pretty_json(main) if main != nil
+		#client = Nuri::Client::Daemon.new
+		#main = client.get_main
+		#puts Nuri::Sfp.to_pretty_json(main) if main != nil
+		Nuri::Master.print_main
 
 	elsif ARGV[1] == 'state'
 		client = Nuri::Client::Daemon.new
