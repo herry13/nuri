@@ -1,3 +1,8 @@
+04-01-2013 -- 0.2.1
+- fix bugs when updating BSig model -- send "reset" command before deploying a new one
+- simplify "main.sfp" structure and syntax
+- merge global into goal constraint by using "always" keyword
+
 02-01-2013 -- 0.2.0
 - fix bugs in 'lib/nuri/sfp/sas.rb' -- in remove_not_constraint method
 - enable multiple statements in conditional constraint

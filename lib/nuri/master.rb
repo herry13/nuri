@@ -127,16 +127,18 @@ module Nuri
 				begin
 					Nuri::Util.log "Sending BSig: #{bsig['id']}"
 
+					# reset previous BSig model
+					self.reset
+
 					# update system information
 					self.update_system
 
 					# send BSig operators to clients
 					nodes = []
 					bsig['operators'].each do |operator|
-						node = self.get_node(operator['name'], @main['system'])
-						return false if node.nil?
+						address = self.domainname?(operator['name'], @main['system'])
+						return false if address.nil?
 
-						address = node['domainname']
 						json = {'id' => bsig['id'], 'operator' => operator}
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
@@ -148,10 +150,9 @@ module Nuri
 
 					# send BSig goal to clients
 					bsig['goal'].each do |var_name,value|
-						node = self.get_node(var_name, @main['system'])
-						return false if node.nil?
+						address = self.domainname?(var_name, @main['system'])
+						return false if address.nil?
 
-						address = node['domainname']
 						json = {'id' => bsig['id'], 'goal' => {var_name => value}}
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
@@ -181,6 +182,7 @@ module Nuri
 					return false
 				rescue Exception => exp
 					Nuri::Util.log 'Failed: ' + exp.to_s
+$stderr.puts exp.backtrace
 					return false
 				end
 
@@ -205,13 +207,10 @@ module Nuri
 				succeed = true
 				if plan['workflow'] != nil
 					begin
+ 						system = self.get_system_information
 						plan['workflow'].each do |action|
-							node = self.get_node(action['name'], @main['system'])
-							if node == nil
-								succeed = false
-							else
-								succeed = self.execute(action, node['domainname'], state)
-							end
+							address = self.domainname?(action['name'], @main['system'])
+							succeed = (address.nil? ? false : self.execute(action, address, system, state))
 							break if not succeed
 							state = get_state
 						end
@@ -223,7 +222,7 @@ module Nuri
 				succeed
 			end
 
-			def execute(action, address, current_state=nil)
+			def execute(action, address, system_info, current_state=nil)
 				def verify(action)
 					state = get_state
 					action['effect'].each do |key,value|
@@ -234,7 +233,7 @@ module Nuri
 				end
 
 				print 'exec: ' + action['name'] + '...'
-				data = { 'action' => action, 'system' => self.get_system_information }
+				data = { 'action' => action, 'system' => system_info }
 				data = "json=" + JSON.generate(data)
 				begin
 					code, _ = put_data(address, Nuri::Port, '/exec', data)
@@ -256,14 +255,7 @@ module Nuri
 
 			def get_system_information
 				system = {}
-				@main['system'].each do |key,value|
-					next if key[0,1] == '_'
-					if value.is_a?(Hash) and value.isobject and
-						value['_classes'].rindex(Nuri::Config::MainComponent) != nil
-
-						system[key] = value['domainname']
-					end
-				end
+				@main['system'].each { |key,value| system[key] = value if key[0,1] != '_' }
 				system
 			end
 
@@ -325,7 +317,7 @@ module Nuri
 				if status[:flaws].length <= 0
 					puts '- Goal: achieved'
 				else
-					puts '- Goal: not achieved\n  Flaws:'
+					puts "- Goal: not achieved\n  Flaws are..."
 					index = 1
 					status[:flaws].each do |flaw|
 						puts "  #{index}) #{flaw[0]}: goal=#{flaw[1]}, current=#{flaw[2]}"

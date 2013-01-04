@@ -27,10 +27,6 @@ module Nuri
 			self.load_modules if client
 		end
 
-		def set_system_information(system)
-			@system = system
-		end
-
 		def get_main
 			begin
 				Dir.chdir(Nuri::Util.home_dir)
@@ -128,10 +124,10 @@ module Nuri
 			end
 		end
 
-		def domainname?(path)
+		def domainname?(path, system=nil)
 			part1, part2, _ = path.split('.', 3) # HACK!
 			node_name = (part1 == '$' ? part2 : part1)
-			system = Nuri::Util.get_system_information
+			system = Nuri::Util.get_system_information if system.nil?
 			return (system.has_key?(node_name) ? system[node_name] : nil)
 		end
 
