@@ -1196,11 +1196,11 @@ puts e.backtrace
 
 		end
 
-		class VariableNotFoundException < Exception
-		end
+		class VariableNotFoundException < Exception;	end
 
-		class ClassNotFoundException < Exception
-		end
+		class TypeNotFoundException < Exception; end
+
+		class ClassNotFoundException < TypeNotFoundException; end
 
 		# Visitor class has 3 attributes
 		# - root : Hash instance of root Context
@@ -1323,10 +1323,14 @@ puts e.backtrace
 				return true if name[0,1] == '_' and name != '_value'
 				type = get_type(value)
 				if type != nil
+					raise TypeNotFoundException, type if not @bucket.has_key?(type)
 					@bucket[type] << value
 				elsif value.is_a?(Hash)
 					if value.isobject
-						value['_classes'].each { |c| @bucket[c] << value }
+						value['_classes'].each { |c|
+							raise TypeNotFoundException, c if not @bucket.has_key?(c)
+							@bucket[c] << value
+						}
 					elsif value.isset
 						raise Exception 'not implemented -- set: ' + value['_isa']
 					end
@@ -1334,15 +1338,23 @@ puts e.backtrace
 					if value.length > 0
 						type = get_type(value[0])
 						if type != nil
-							@bucket["(#{type})"] << value
+							type_id = "(#{type})"
+							raise TypeNotFoundException, type_id if not @bucket.has_key?(type_id)
+							@bucket[type_id] << value
 						elsif value[0].is_a?(String) and value[0].isref
 							val = @sas.root['initial'].at?(value[0])
 							return true if val == nil
 							type = get_type(val)
 							if type != nil
-								@bucket["(#{type})"] << value
+								type_id = "(#{type})"
+								raise TypeNotFoundException, type_id if not @bucket.has_key?(type_id)
+								@bucket[type_id] << value
 							elsif val.is_a?(Hash) and val.isobject
-								val['_classes'].each { |c| @bucket["(#{c})"] << value if @bucket.has_key?("(#{c})") }
+								val['_classes'].each do |c|
+									type_id = "(#{c})"
+									raise TypeNotFoundException, type_id if not @bucket.has_key?(type_id)
+									@bucket[type_id] << value if @bucket.has_key?("(#{c})")
+								end
 							end
 						end
 					end

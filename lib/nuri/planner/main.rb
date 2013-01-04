@@ -19,7 +19,8 @@ module Nuri
 			def solve(problem, json=false, parallel=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.parse(problem)
-				@plan, @sas_task = self.solve_sas(@parser.to_sas)
+				sas = @parser.to_sas
+				@plan, @sas_task = self.solve_sas(sas)
 				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
 				return (json ? JSON.pretty_generate(plan) : plan)
 			end
@@ -29,7 +30,8 @@ module Nuri
 			def solve_sfp(root, json=false, parallel=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.root = root
-				@plan, @sas_task = self.solve_sas(@parser.to_sas)
+				sas = @parser.to_sas
+				@plan, @sas_task = self.solve_sas(sas)
 				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
 				return (json ? JSON.pretty_generate(plan) : plan)
 			end
@@ -39,7 +41,8 @@ module Nuri
 			def solve_file(file, json=false, parallel=false, sas=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.parse_file(file)
-				@plan, @sas_task = self.solve_sas(@parser.to_sas)
+				sas = @parser.to_sas
+				@plan, @sas_task = self.solve_sas(sas)
 				return @plan if sas
 				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
 				return (json ? JSON.pretty_generate(plan) : plan)
@@ -131,7 +134,7 @@ module Nuri
 			end
 
 			def solve_sas(sas)
-				return nil if sas == nil
+				return nil if sas == nil or not sas.is_a?(String) or sas.to_s == ''
 
 				os = `uname -s`.downcase.strip
 				planner = case os
