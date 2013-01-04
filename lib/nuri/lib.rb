@@ -127,7 +127,7 @@ module Nuri
 			end
 		end
 
-		def domainname?(path)
+		def address?(path)
 			part1, part2, _ = path.split('.', 3) # HACK!
 			node_name = (part1 == '$' ? part2 : part1)
 			system = Nuri::Util.get_system_information
@@ -136,8 +136,8 @@ module Nuri
 
 		# @return true if given path is local, otherwise false
 		def local?(path)
-			domainname = self.domainname?(path)
-			return (domainname == Nuri::Util.domainname)
+			address = self.address?(path)
+			return (address == Nuri::Util.domainname or address == Nuri::Util.local_ip)
 		end
 
 		# Request data with GET method

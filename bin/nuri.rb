@@ -16,14 +16,13 @@ commands:
   main              print the content of "main.sfp"
   state [details]   print the current state of this node
   pull [details]    pull and print the current state of all managed nodes
-  plan              generate a workflow to achieve the goal state
-  apply [debug]     auto-generate the workflow and execute it to achieve
-                    the goal state; if "debug" is provided, then the workflow
-                    will be printed to the screen
+  plan              auto-generate a workflow to achieve the goal state;
+                    user can also execute the workflow in order to achieve
+                    the goal state
   update-system     push system information to all managed nodes
-  bsig              generate a Behavioural Signature model
-  apply-bsig        generate and deploy the Behavioural Signature model
-  status-bsig       print the status of the Behavioural Signature model
+  bsig              generate a Behavioural Signature (BSig) model;
+                    deploy the BSig model to managed nodes
+  status            print the status of the Behavioural Signature model
   reset             delete existing BSig model; stop BSig execution agent;
                     delete existing system information
 
@@ -56,13 +55,12 @@ commands:
 
 	elsif ARGV[1] == 'plan'
 		parallel = (ARGV[2] == 'par')
-		print 'Generating the workflow...'
 		plan = Nuri::Master.plan(parallel)
-		puts ((plan.nil? or plan['workflow'].nil?) ? 'no solution' : "\n" + plan.to_s)
 
 	elsif ARGV[1] == 'bsig'
-		bsig = Nuri::Master.get_bsig
-		puts (bsig == nil ? 'no solution' : JSON.pretty_generate(bsig))
+		#bsig = Nuri::Master.get_bsig
+		#puts (bsig == nil ? 'no solution' : JSON.pretty_generate(bsig))
+		Nuri::Master.bsig
 
 	elsif ARGV[1] == 'apply-bsig'
 		puts 'Applying BSig model...'
@@ -72,8 +70,8 @@ commands:
 		puts 'Start BSig executor...'
 		puts (Nuri::Master.start_bsig ? 'OK' : 'Failed')
 
-	elsif ARGV[1] == 'status-bsig'
-		puts 'Check BSig status...'
+	elsif ARGV[1] == 'status-bsig' or ARGV[1] == 'status'
+		puts 'Checking BSig status...'
 		Nuri::Master.status_bsig
 
 	elsif ARGV[1] == 'json'
@@ -100,23 +98,6 @@ commands:
 	elsif ARGV[1] == 'reset'
 		Nuri::Master.reset
 
-=begin
-	elsif ARGV[1] == 'keygen'
-		priv = Nuri::Util.home_dir + '/etc/private.pem'
-		pub = Nuri::Util.home_dir + '/etc/public.pem'
-		if ARGV[2] != 'replace' and (File.exists?(priv) or File.exists?(pub))
-			puts "Public/private key file exist (#{priv},#{pub}). Use option 'replace' to override them."
-
-		else
-			pub, priv = (ARGV.length >= 4 ? [ARGV[2], ARGV[3]] : ['etc/private.pem','etc/public.pem'])
-			Nuri::SSL.keygen(pub, priv)
-			puts 'New keys have been generated.'
-		end
-
-	elsif ARGV[1] == 'test'
-		Nuri::SSL.test
-=end
-
 	else
 		print_help
 	end
@@ -138,7 +119,7 @@ options:
 	end
 
 	begin
-		if ARGV.length == 2 #ARGV[1] == 'planner' and ARGV.length >= 3
+		if ARGV.length == 2
 			planner = Nuri::Planner::Solver.new
 			plan = planner.solve_file(ARGV[1], false, false, true)
 			puts (plan != nil ? plan : 'There is no solution.')

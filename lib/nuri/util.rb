@@ -155,3 +155,4 @@ module Nuri
 		def initialize; end
 	end
 end
+

@@ -205,7 +205,7 @@ module Nuri
 				flaws.each do |path,value|
 					component_path, variable_name = path.extract
 					if not @owner.local?(component_path)
-						address = @owner.domainname?(component_path)
+						address = @owner.address?(component_path)
 						raise Exception, 'Cannot find component: ' + component_path if address.nil?
 						remote_flaws[address] = {} if not remote_flaws.has_key?(address)
 						remote_flaws[address][path] = value

@@ -23,6 +23,7 @@ module Nuri
 				@state["platform"] = Nuri::Util.platform
 				@state["hostname"] = Nuri::Util.hostname
 				@state["domainname"] = Nuri::Util.domainname
+				@state["ip_addr"] = Nuri::Util.local_ip
 				@state["version"] = `uname -r`.strip
 				@state["arch"] = `uname -p`.strip
 				@state["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i

@@ -97,7 +97,7 @@ module Nuri
 						end
 
 						# Start BSig reminder
-						Nuri::Util.log 'Start BSig reminder'
+						Nuri::Util.log 'Starting BSig reminder'
 						bsig_start_path = '/bsig/start'
 						begin
 							begin

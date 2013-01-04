@@ -47,8 +47,10 @@ module Nuri
 				@main['system'].each do |key,node|
 					next if key[0,1] == '_' or
 					        node['_classes'].rindex(MainComponent) == nil or
-					        node['domainname'] == ''
-					state = self.get_child_state(node['domainname'])
+					        node['address'] == ''
+					        #node['domainname'] == ''
+					state = self.get_child_state(node['address'])
+					#state = self.get_child_state(node['domainname'])
 					if state != nil
 						state.each { |k,v| current_state[k] = v }
 					else
@@ -61,13 +63,13 @@ module Nuri
 
 			def get_child_state(address)
 				begin
-					code, body = self.get_data(address, Nuri::Port, '/state')
+					code, body = self.get_data(address.to_s, Nuri::Port, '/state')
 					if code == '200'
 						json = JSON.parse(body)
 						return json['value'] if json.is_a?(Hash) and json.has_key?('value')
 					end
 				rescue Exception => e
-					Nuri::Util.log 'Cannot get state of node ' + address + ': ' + e.to_s
+					Nuri::Util.log 'Cannot get state of node: "' + address.to_s + '" -- ' + e.to_s
 				end
 				nil
 			end
@@ -130,6 +132,10 @@ module Nuri
 				bsig = self.get_bsig
 				puts JSON.pretty_generate(bsig) if debug
 				return true if bsig['operators'].nil? or bsig['operators'].length <= 0
+				return self.deploy_bsig(bsig, debug)
+			end
+
+			def deploy_bsig(bsig, debug=false)
 				begin
 					Nuri::Util.log "Sending BSig: #{bsig['id']}"
 
@@ -142,7 +148,8 @@ module Nuri
 						node = self.get_node(operator['name'], @main['system'])
 						return false if node.nil?
 
-						address = node['domainname']
+						address = node['address']
+						#address = node['domainname']
 						json = {'id' => bsig['id'], 'operator' => operator}
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
@@ -157,7 +164,8 @@ module Nuri
 						node = self.get_node(var_name, @main['system'])
 						return false if node.nil?
 
-						address = node['domainname']
+						address = node['address']
+						#address = node['domainname']
 						json = {'id' => bsig['id'], 'goal' => {var_name => value}}
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
@@ -216,7 +224,8 @@ module Nuri
 							if node == nil
 								succeed = false
 							else
-								succeed = self.execute(action, node['domainname'], state)
+								succeed = self.execute(action, node['address'], state)
+								#succeed = self.execute(action, node['domainname'], state)
 							end
 							break if not succeed
 							state = get_state
@@ -267,7 +276,8 @@ module Nuri
 					if value.is_a?(Hash) and value.isobject and
 						value['_classes'].rindex(Nuri::Config::MainComponent) != nil
 
-						system[key] = value['domainname']
+						system[key] = value['address']
+						#system[key] = value['domainname']
 					end
 				end
 				system
@@ -302,7 +312,44 @@ module Nuri
 
 		def self.plan(parallel=false)
 			master = Nuri::Master::Daemon.new
-			return master.get_plan(nil, true, parallel)
+			puts 'Generating the workflow...'
+			plan = master.get_plan(nil, false, parallel)
+			if plan.nil? or plan['workflow'].nil?
+				puts "\nno solution!"
+			else
+				puts "#{JSON.pretty_generate(plan)}\n"
+				print "Execute it (y/N)? "
+				if STDIN.gets.chomp.upcase == 'Y'
+					puts "Executing the plan..."
+					if master.execute_workflow(plan)
+						puts "execution succeed!"
+					else
+						puts "execution failed!"
+					end
+				end
+				puts ''
+			end
+		end
+
+		def self.bsig
+			master = Nuri::Master::Daemon.new
+			puts 'Generating the Behavioural Signature (BSig) model...'
+			bsig = master.get_bsig
+			if bsig.nil?
+				puts 'no solution!'
+			else
+				puts "#{JSON.pretty_generate(bsig)}\n"
+				print "Deploy it (y/N)? "
+				if STDIN.gets.chomp.upcase == 'Y'
+					print 'Deploying the Behavioural Signature model...'
+					if master.deploy_bsig(bsig)
+						puts 'OK'
+					else
+						puts 'Failed!'
+					end
+				end
+			end
+			puts ''
 		end
 
 		def self.get_bsig
@@ -331,7 +378,7 @@ module Nuri
 				if status[:flaws].length <= 0
 					puts '- Goal: achieved'
 				else
-					puts "- Goal: not achieved\n  Flaws:"
+					puts "- Goal: not achieved (#{status[:flaws].length} flaws)\n  Flaws are:"
 					index = 1
 					status[:flaws].each do |flaw|
 						puts "  #{index}) #{flaw[0]}: goal=#{flaw[1]}, current=#{flaw[2]}"
