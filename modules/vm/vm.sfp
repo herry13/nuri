@@ -1,0 +1,21 @@
+include "modules/machine/machine.sfp"
+
+class VM extends Machine {
+	created is false
+	
+	procedure remove {
+		condition { }
+		effect {
+			this.created is false
+			this.running is false
+		}
+	}
+
+	procedure create {
+		condition { }
+		effect {
+			this.created is true
+			this.running is true
+		}
+	}
+}
