@@ -24,7 +24,7 @@ module Nuri
 		def load(client=true)
 			self.read_config if client
 			Nuri::Resource.set_root(self.get_main)
-			self.load_modules if client
+			self.load_modules #if client
 		end
 
 		def set_system_information(system)
@@ -87,12 +87,17 @@ module Nuri
 				path = modules_dir + "/" + mod
 				modules << mod if File.directory?(path) and
 						File.file?(path + "/" + mod + ".sfp") and
-						File.file?(path + "/" + mod + ".rb")
+						File.file?(path + "/" + mod + ".rb") and
+						File.file?(path + "/main.mf")
 			end
 			return modules
 		end
 
-		# Load all installed modules.
+		# Load all installed modules. A module can only be loaded iff
+		# it has three required files:
+		# - manifest file: main.mf
+		# - sfp file: <module-name>.sfp
+		# - ruby file: <module-name>.rb
 		def load_modules
 			# load installed modules
 			Nuri::Util.log "Load modules..."
@@ -108,8 +113,20 @@ module Nuri
 			# load other modules and put them as machine's children
 			self.get_modules.each do |mod|
 				begin
+					manifest_file = "#{modules_dir}/#{mod}/main.mf"
+					sfp_file = "#{modules_dir}/#{mod}/#{mod}.sfp"
+					ruby_file = "#{modules_dir}/#{mod}/#{mod}.rb"
+					next if not File.exist?(manifest_file) or
+					        not File.exist?(sfp_file) or
+					        not File.exist?(ruby_file)
+
+					# read module manifest file (main.mf)
+					manifest = self.parse_module_manifest(manifest_file)
+					next if manifest['main-class'].to_s.strip == ''
+
+					# load the module based on information in the manifest file
 					require 'modules/' + mod + '/' + mod
-					m = eval("Nuri::Module::" + mod.capitalize + ".new")
+					m = eval("#{manifest['main-class']}.new")
 					m.name = mod if m.name == nil or m.name == ''
 					machine.add(m) if not m.is_abstract
 					Nuri::Util.log "Successfully load module " + mod
@@ -117,6 +134,24 @@ module Nuri
 					Nuri::Util.log.error "Cannot load module " + mod + " -- " + exp.to_s
 				end
 			end
+		end
+
+		def parse_module_manifest(manifest_path)
+			manifest = {}
+			ckey = nil
+			cvalue = ''
+			File.open(manifest_path).each { |line|
+				key, value = line.chomp.split(':', 2)
+				if not key.nil? and not value.nil?
+					manifest[ckey] = cvalue.strip if not ckey.nil?
+					ckey = key
+					cvalue = value
+				else not key.nil? and value.nil?
+					cvalue += value
+				end
+			}
+			manifest[ckey] = cvalue.strip if not ckey.nil?
+			return manifest
 		end
 
 		def get_node(path, root)

@@ -1,0 +1,7 @@
+class Cloud {
+	account_id is ""
+	auth_uri is ""
+	tenant_id is ""
+	zone is ""
+	secret_key is ""
+}

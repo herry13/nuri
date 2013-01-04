@@ -5,13 +5,15 @@ module Nuri
 	module Master
 		class Daemon
 			include Nuri::Config
+			include Nuri::CloudHelper
 
 			attr_accessor :do_verify_execution
 
 			def initialize
-				self.load(false)
-				@main = self.get_main
 				@do_verify_execution = true
+				self.load(false)
+				@main = Nuri::Resource.get_root
+				self.init_cloud
 			end
 
 			def debug_json
@@ -41,21 +43,25 @@ module Nuri
 			end
 
 			def get_state(path='')
-				return nil if not @main.has_key?('system')
+				return nil if @main.nil? or not @main.has_key?('system')
 
 				current_state = {'_context'=>'state', '_self'=>'initial'}
 				@main['system'].each do |key,node|
 					next if key[0,1] == '_' or
-					        node['_classes'].rindex(MainComponent) == nil or
-					        node['address'] == ''
-					        #node['domainname'] == ''
-					state = self.get_child_state(node['address'])
-					#state = self.get_child_state(node['domainname'])
+					        node['_classes'].rindex(MainComponent).nil?
+
+					if not node['_classes'].rindex(VMComponent).nil?
+						address = get_vm_address(node)
+					else
+						address = node['address']
+					end
+					next if address.to_s == ''
+
+					state = self.get_child_state(address)
 					if state != nil
 						state.each { |k,v| current_state[k] = v }
 					else
 						# TODO
-						#current_state[key] = Nuri::Sfp.deep_clone(node)
 					end
 				end
 				current_state
@@ -149,7 +155,6 @@ module Nuri
 						return false if node.nil?
 
 						address = node['address']
-						#address = node['domainname']
 						json = {'id' => bsig['id'], 'operator' => operator}
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
@@ -165,7 +170,6 @@ module Nuri
 						return false if node.nil?
 
 						address = node['address']
-						#address = node['domainname']
 						json = {'id' => bsig['id'], 'goal' => {var_name => value}}
 						data = "json=" + JSON.generate(json)
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
@@ -225,7 +229,6 @@ module Nuri
 								succeed = false
 							else
 								succeed = self.execute(action, node['address'], state)
-								#succeed = self.execute(action, node['domainname'], state)
 							end
 							break if not succeed
 							state = get_state
@@ -277,7 +280,6 @@ module Nuri
 						value['_classes'].rindex(Nuri::Config::MainComponent) != nil
 
 						system[key] = value['address']
-						#system[key] = value['domainname']
 					end
 				end
 				system
