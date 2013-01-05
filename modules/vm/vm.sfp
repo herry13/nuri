@@ -2,8 +2,9 @@ include "modules/machine/machine.sfp"
 
 class VM extends Machine {
 	created is false
+	incloud isref Cloud
 	
-	procedure remove {
+	/*procedure remove {
 		condition { }
 		effect {
 			this.created is false
@@ -17,5 +18,5 @@ class VM extends Machine {
 			this.created is true
 			this.running is true
 		}
-	}
+	}*/
 }

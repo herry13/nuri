@@ -50,24 +50,32 @@ module Nuri
 					next if key[0,1] == '_' or
 					        node['_classes'].rindex(MainComponent).nil?
 
+					state = nil
 					if not node['_classes'].rindex(VMComponent).nil?
-						address = get_vm_address(node)
+						state = self.get_vm_state(node)
 					else
 						address = node['address']
+						state = self.get_node_state(address) if address.to_s != ''
 					end
-					next if address.to_s == ''
 
-					state = self.get_child_state(address)
 					if state != nil
 						state.each { |k,v| current_state[k] = v }
 					else
 						# TODO
 					end
 				end
+
+				# insert Cloud's state
+				state = self.get_cloud_state
+				state.each do |k,v|
+					current_state[k] = v
+					current_state[k]['_parent'] = current_state
+				end if not state.nil?
+
 				current_state
 			end
 
-			def get_child_state(address)
+			def get_node_state(address)
 				begin
 					code, body = self.get_data(address.to_s, Nuri::Port, '/state')
 					if code == '200'
@@ -320,13 +328,15 @@ module Nuri
 				puts "\nno solution!"
 			else
 				puts "#{JSON.pretty_generate(plan)}\n"
-				print "Execute it (y/N)? "
-				if STDIN.gets.chomp.upcase == 'Y'
-					puts "Executing the plan..."
-					if master.execute_workflow(plan)
-						puts "execution succeed!"
-					else
-						puts "execution failed!"
+				if plan['workflow'].length > 0
+					print "Execute it (y/N)? "
+					if STDIN.gets.chomp.upcase == 'Y'
+						puts "Executing the plan..."
+						if master.execute_workflow(plan)
+							puts "execution succeed!"
+						else
+							puts "execution failed!"
+						end
 					end
 				end
 				puts ''

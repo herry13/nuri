@@ -269,6 +269,8 @@ module Nuri
 					path.chop! if path[path.length-1,1] == '/'
 					if path[0,6] == '/state'
 						status, content_type, body = self.get_state(:path => path)
+					elsif path == '/state-vm'
+						status, content_type, body = self.get_vm_state(:path => path)
 					elsif path == '/bsig'
 						status, content_type, body = self.get_bsig
 					else
@@ -418,6 +420,10 @@ module Nuri
 				end
 				Nuri::Util.warn 'exec: Failed -- cannot execute procedure: ' + json
 				return 500, '', ''
+			end
+
+			def get_vm_state(options={})
+				return 404, '', ''
 			end
 
 			def get_state(options={})

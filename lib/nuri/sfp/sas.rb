@@ -129,7 +129,7 @@ module Nuri
 					self.set_variable_values
 	
 					# identify immutable variables
-					self.identify_immutable_variables
+					#self.identify_immutable_variables
 
 					# re-evaluate set variables and types
 					self.evaluate_set_variables_and_types
@@ -232,6 +232,7 @@ puts e.backtrace
 			# Find immutable variables -- variables that will never be affected with any
 			# actions. Then reduce the size of their domain by 1 only i.e. the possible
 			# value is only their initial value.
+			# BUGGY! -- operator's effects may contain other object's variable
 			def identify_immutable_variables
 				def is_this(ref)
 					ref.length > 7 and (ref[0,7] == '$.this.' or ref[0,7] == '$.self.')
@@ -261,7 +262,7 @@ puts e.backtrace
 					if var != nil and not var.is_final and (not is_mutable)
 						var.clear
 						var << var.init
-						var.immutable = false
+						var.mutable = false
 					end
 				end
 			end
@@ -350,7 +351,7 @@ puts e.backtrace
 						value = @types[var.type][0] if value.is_a?(Hash) and value.isnull
 						value = @root['initial'].at?(value) if value.is_a?(String) and value.isref
 						var.goal = value
-						if not var.immutable
+						if not var.mutable
 							var.init = var.goal
 							var.clear
 							var << var.init
@@ -1414,7 +1415,7 @@ puts e.backtrace
 			# @layer -- axiom layer ( '-1' if this is not axiom variable, otherwise >0)
 			# @init -- initial value
 			# @goal -- goal value (desired value)
-			attr_accessor :name, :type, :layer, :init, :goal, :is_final, :id, :immutable, :isset
+			attr_accessor :name, :type, :layer, :init, :goal, :is_final, :id, :mutable, :isset
 			attr_reader :is_primitive
 
 			def initialize(name, type, layer=-1, init=nil, goal=nil, is_final=false)
@@ -1425,7 +1426,7 @@ puts e.backtrace
 				@goal = goal
 				@is_final = is_final
 				@is_primitive = (type == '$.String' or type == '$.Integer' or type == '$.Boolean')
-				@immutable = true
+				@mutable = true
 			end
 
 			def to_s
