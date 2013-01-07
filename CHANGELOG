@@ -1,6 +1,6 @@
 07-01-2013 -- 0.2.1
 - new module: cloud (only handle HPCloud)
-- create/delete VM
+- create/delete Virtual Machine (VM)
 - allow "parent" to be used in reference of constraint or mutation
 - obligation to provide manifest file (main.mf) for non-abstract module
 - any module without manifest file is an abstract module
