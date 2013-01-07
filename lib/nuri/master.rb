@@ -51,9 +51,9 @@ module Nuri
 					        node['_classes'].rindex(MainComponent).nil?
 
 					state = nil
-					if not node['_classes'].rindex(VMComponent).nil?
+					if self.vm?(node) # a VM node
 						state = self.get_vm_state(node)
-					else
+					else # a standard Machine
 						address = node['address']
 						state = self.get_node_state(address) if address.to_s != ''
 					end
@@ -62,6 +62,7 @@ module Nuri
 						state.each { |k,v| current_state[k] = v }
 					else
 						# TODO
+						Nuri::Util.warn "Cannot get the current state of: #{node['_self']}"
 					end
 				end
 
@@ -159,7 +160,7 @@ module Nuri
 					# send BSig operators to clients
 					nodes = []
 					bsig['operators'].each do |operator|
-						node = self.get_node(operator['name'], @main['system'])
+						node = self.get_node(operator['name'])
 						return false if node.nil?
 
 						address = node['address']
@@ -174,7 +175,7 @@ module Nuri
 
 					# send BSig goal to clients
 					bsig['goal'].each do |var_name,value|
-						node = self.get_node(var_name, @main['system'])
+						node = self.get_node(var_name)
 						return false if node.nil?
 
 						address = node['address']
@@ -232,11 +233,12 @@ module Nuri
 				if plan['workflow'] != nil
 					begin
 						plan['workflow'].each do |action|
-							node = self.get_node(action['name'], @main['system'])
+							node = self.get_node(action['name'])
 							if node == nil
+								Nuri::Util.log "Cannot find module of action: #{action['name']}"
 								succeed = false
 							else
-								succeed = self.execute(action, node['address'], state)
+								succeed = self.execute(action, node)
 							end
 							break if not succeed
 							state = get_state
@@ -249,35 +251,64 @@ module Nuri
 				succeed
 			end
 
-			def execute(action, address, current_state=nil)
+			def execute(action, node)
 				def verify(action)
 					state = get_state
 					action['effect'].each do |key,value|
 						v = state.at?(key)
 						raise Nuri::ExecutionFailedException, action['name'] if state.at?(key) != value
-						puts 'OK'
 					end
 				end
 
-				print 'exec: ' + action['name'] + '...'
-				data = { 'action' => action, 'system' => self.get_system_information }
-				data = "json=" + JSON.generate(data)
-				begin
-					code, _ = put_data(address, Nuri::Port, '/exec', data)
-					if code == '200'
-						verify(action) if @do_verify_execution
-						return true
+				def remote_execute(action, address)
+					data = { 'action' => action, 'system' => self.get_system_information }
+					data = "json=" + JSON.generate(data)
+					begin
+						code, _ = put_data(address, Nuri::Port, '/exec', data)
+						if code == '200'
+							verify(action) if @do_verify_execution
+							return true
+						end
+					rescue Timeout::Error
+						Nuri::Util.log "Timeout when executing: " + action['name']
+						raise Timeout::Error
+					rescue ExecutionFailedException => efe
+						Nuri::Util.log efe.to_s
+					rescue Exception => e
+						Nuri::Util.log 'Cannot execute action: ' + action['name']
 					end
-				rescue Timeout::Error
-					Nuri::Util.log "Timeout when executing: " + action['name']
-					raise Timeout::Error
-				rescue ExecutionFailedException => efe
-					Nuri::Util.log efe.to_s
-				rescue Exception => e
-					Nuri::Util.log 'Cannot execute action: ' + action['name']
+					false
 				end
-				puts 'FAILED'
-				false
+
+				def clean_parameters(params)
+					p = {}
+					params.each { |k,v| p[k[2, k.length-2]] = params[k] }
+					p
+				end
+
+				def local_execute(action)
+					begin
+						comp_name, procedure_name = action['name'].extract
+						component = @root.get(comp_name)
+						return false if not component.respond_to?(procedure_name)
+						params = clean_parameters(action['parameters'])
+						return component.send(procedure_name) if params.size <= 0
+						return component.send(procedure_name, params)
+					rescue Exception => e
+						Nuri::Util.log "Cannot execute action: #{action['name']}"
+					end
+					false
+				end
+
+				print '- executing ' + action['name'] + '...'
+				if node.has_key?('address')
+					succeed = remote_execute(action, node['address'])
+				else
+					succeed = local_execute(action)
+				end
+				puts (succeed ? 'OK' : 'Failed')
+
+				succeed
 			end
 
 			def get_system_information
@@ -329,11 +360,11 @@ module Nuri
 			else
 				puts "#{JSON.pretty_generate(plan)}\n"
 				if plan['workflow'].length > 0
-					print "Execute it (y/N)? "
+					print "Execute it [y/N]? "
 					if STDIN.gets.chomp.upcase == 'Y'
 						puts "Executing the plan..."
 						if master.execute_workflow(plan)
-							puts "execution succeed!"
+							puts "execution success!"
 						else
 							puts "execution failed!"
 						end
@@ -351,7 +382,7 @@ module Nuri
 				puts 'no solution!'
 			else
 				puts "#{JSON.pretty_generate(bsig)}\n"
-				print "Deploy it (y/N)? "
+				print "Deploy it [y/N]? "
 				if STDIN.gets.chomp.upcase == 'Y'
 					print 'Deploying the Behavioural Signature model...'
 					if master.deploy_bsig(bsig)
@@ -422,7 +453,7 @@ module Nuri
 			if plan != nil
 				master = Nuri::Master::Daemon.new
 				if master.execute_workflow(plan)
-					puts 'Execution succeed!'
+					puts 'Execution success!'
 				else
 					puts 'Execution failed!'
 				end

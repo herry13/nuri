@@ -1,3 +1,7 @@
+# 07-01-2013
+# - disable removing "immutable" variables because the method has bugs
+# - allow using "parent" in reference of constraint or effect
+#
 # 31-10-2012
 # - rename primitive types: $.Boolean, $.Integer, $.String
 # - set SFp to only recognise integer value
@@ -216,14 +220,25 @@ puts e.backtrace
 			def evaluate_set_variables_and_types
 				@variables.each_value do |var|
 					next if not var.isset
-					var.delete_if { |x| x == nil or x == '' }
+					new_values = []
+					var.each { |x| new_values << x['_values'] if x.is_a?(Hash) and x.isset }
+					new_values.each { |x| var << x }
+					#var.delete_if { |x| x.nil? or x == '' }
+					var.delete_if { |x| x.nil? or x == '' or (x.is_a?(Hash) and x.isset) }
 					var.each { |x| x.sort! }
 					var.uniq!
+
+					var.init = var.init['_values'] if var.init.is_a?(Hash) and var.init.isset
+					var.goal = var.goal['_values'] if var.goal.is_a?(Hash) and var.goal.isset
 				end
 
 				@types.each do |name,values|
 					next if name[0,1] != '('
-					values.delete_if { |x| x == nil or x == '' }
+					new_values = []
+					values.each { |x| new_values << x['_values'] if x.is_a?(Hash) and x.isset }
+					new_values.each { |x| values << x }
+					values.delete_if { |x| x.nil? or x == '' or (x.is_a?(Hash) and x.isset) }
+					#values.delete_if { |x| x == nil or x == '' }
 					values.each { |x| x.sort! }
 					values.uniq!
 				end
@@ -604,7 +619,7 @@ puts e.backtrace
 					end
 				end
 				bucket = Array.new
-				grounder = ParameterGrounder.new
+				grounder = ParameterGrounder.new(@root['initial'])
 				combinator(bucket, grounder, procedure, params.keys, params, Hash.new, 0)
 				return bucket
 			end
@@ -1061,7 +1076,7 @@ puts e.backtrace
 						if @arrays.has_key?(ref)
 							# substitute ARRAY
 							total = @arrays[ref]
-							grounder = ParameterGrounder.new(Hash.new)
+							grounder = ParameterGrounder.new(@root['initial'], {})
 							for i in 0..(total-1)
 								grounder.map.clear
 								grounder.map[var] = ref + "[#{i}]"
@@ -1071,14 +1086,14 @@ puts e.backtrace
 							setvalue = @root['initial'].at?(ref)
 							if setvalue.is_a?(Hash) and setvalue.isset
 								# substitute SET
-								grounder = ParameterGrounder.new( { } )
+								grounder = ParameterGrounder.new(@root['initial'], {})
 								setvalue['_values'].each do |v|
 									grounder.map.clear
 									grounder.map[var] = v
 									substitute_template(grounder, formula['_template'], formula)
 								end
 							elsif setvalue.is_a?(Array)
-								grounder = ParameterGrounder.new( { } )
+								grounder = ParameterGrounder.new(@root['initial'], {})
 								setvalue.each do |v|
 									grounder.map.clear
 									grounder.map[var] = v
@@ -1097,7 +1112,7 @@ puts e.backtrace
 						classref = '$.' + formula['_class']
 						raise ClassNotFoundException, classref if not @types.has_key?(classref)
 						var = '$.' + formula['_variable']
-						grounder = ParameterGrounder.new(Hash.new)
+						grounder = ParameterGrounder.new(@root['initial'], {})
 						@types[classref].each do |v|
 							next if v == nil or (v.is_a?(Hash) and v.isnull)
 							grounder.map.clear
@@ -1368,19 +1383,22 @@ puts e.backtrace
 		class ParameterGrounder
 			attr_accessor :map
 
-			def initialize(map=nil)
+			def initialize(root, map={})
+				@root = root
 				@map = map
 			end
 
 			def visit(name, value, obj)
 				return if name[0,1] == '_' and name != '_value' and name != '_template'
 				if name[0,1] != '_'
+					modified = false
 					map.each { |k,v|
 						if name == k
 							obj[v] = value
 							obj.delete(name)
 							name = v
 							value['_self'] = name if value.is_a?(Hash)
+							modified = true
 							break
 						elsif name.length > k.length and name[k.length,1] == '.' and name[0, k.length] == k
 							grounded = v + name[k.length, (name.length-k.length)]
@@ -1388,9 +1406,20 @@ puts e.backtrace
 							obj.delete(name)
 							name = grounded
 							value['_self'] = name if value.is_a?(Hash)
+							modified = true
 							break
 						end
 					}
+
+					if modified and (name =~ /.*\.parent(\..*)?/ )
+						parent, last = name.pop_ref
+						new_name = @root.at?(parent).ref.push(last) if last != 'parent'
+						new_name = @root.at?(parent).ref.to_top if last == 'parent'
+						obj[new_name] = value
+						obj.delete(name)
+						name = new_name
+						value['_self'] = name if value.is_a?(Hash)
+					end
 				end
 				if value.is_a?(String) and value.isref
 					map.each { |k,v|

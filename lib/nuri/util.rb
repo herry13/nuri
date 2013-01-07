@@ -64,6 +64,12 @@ module Nuri
 			return @@logger
 		end
 
+		def self.error(msg=nil)
+			@@logger.error msg if not msg.nil?
+			puts msg.to_s if @@debug
+			return @@logger
+		end
+
 		def self.os
 			return @@os if defined?(@@os) != nil and @@os != nil
 			@@os = (`uname -s`).strip 
@@ -151,8 +157,24 @@ module Nuri
 			return ( system("/usr/bin/apt-get -y install #{package} 2>/dev/null 1>/dev/null") == true )
 		end
 
+		def self.is_nuri_active?(address)
+			begin
+				Timeout::timeout(1) do
+					begin
+						s = TCPSocket.new(address, Nuri::Port)
+						s.close
+						return true
+					rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+					end
+				end
+			rescue Timeout::Error
+			end
+			false
+		end
+
 		private
 		def initialize; end
+
 	end
 end
 

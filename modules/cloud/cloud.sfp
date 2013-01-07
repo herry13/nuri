@@ -1,4 +1,6 @@
-class Cloud {
+include "modules/machine/machine.sfp"
+
+class Cloud extends Machine {
 	account_id is ""
 	auth_uri is ""
 	tenant_id is ""

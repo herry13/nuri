@@ -1,3 +1,4 @@
 author: Herry
 version: 1.0
+sfp-class: Apache
 main-class: Nuri::Module::Apache

@@ -36,6 +36,7 @@ Hash.send(:define_method, "at?") { |addr|
 		return self.at?(addrs[1])
 	elsif addrs[0] == 'parent'
 		return nil if not self.has_key?('_parent')
+		return self['_parent'] if addrs[1].nil?
 		return self['_parent'].at?(addrs[1])
 	elsif self.has_key?(addrs[0])
 		if addrs.length == 1 
@@ -179,5 +180,4 @@ String.send(:define_method, 'to_top') {
 	parts = self.split('.')
 	return self[0, self.length - parts[parts.length-1].length - 1]
 }
-
 

@@ -5,11 +5,10 @@ require 'augeas'
 module Nuri
 	module Module
 		class Apache
-			RunningLockFile = '/tmp/nuri_apache_installing'
-
 			include Nuri::Resource
 
 			ConfigFile = '/etc/apache2/sites-available/default'
+			RunningLockFile = '/tmp/nuri_apache_installing'
 
 			def initialize
 				self.register('Apache', 'apache')

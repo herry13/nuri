@@ -18,6 +18,7 @@ module Nuri
 	module Config
 		attr_reader :config, :root, :system
 
+		AbstractModules = ['machine', 'vm', 'cloud']
 		MainComponent = '$.Machine'
 		DefaultReadTimeout = 1800 # 30 mins
 
@@ -39,7 +40,7 @@ module Nuri
 				self.get_modules.each do |mod|
 					main += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"
 				end
-				
+
 				# if 'main.sfp' is in 'etc' directory, then load it
 				mainfile = "/etc/nuri/main.sfp"
 				mainfile = Nuri::Util.home_dir + "/etc/main.sfp" if not File.exist?(mainfile)
@@ -48,9 +49,10 @@ module Nuri
 				return Nuri::Sfp::Parser.to_sfp(main)
 
 			rescue Exception => exp
-				Nuri::Util.log.error "Cannot load main description" + " -- " + exp.to_s
+				Nuri::Util.error "Cannot load main description" + " -- " + exp.to_s
+				Nuri::Util.error exp.backtrace.to_s
 			rescue StandardError => stderr
-				Nuri::Util.log.error "Cannot load main description"
+				Nuri::Util.error "Cannot load main description"
 			end
 			nil
 		end
@@ -79,16 +81,25 @@ module Nuri
 			end
 		end
 
+		def get_non_abstract_modules
+			modules = self.get_modules
+			modules_dir = Nuri::Util.home_dir + "/modules"
+			modules.delete_if do |mod|
+				ruby = "#{modules_dir}/#{mod}/#{mod}.rb"
+				manifest = "#{modules_dir}/#{mod}/main.mf"
+				not (File.exist?(ruby) and File.exist?(manifest))
+			end
+			return modules
+		end
+
 		def get_modules
 			modules_dir = Nuri::Util.home_dir + "/modules"
 			modules = Array.new
 			Dir.foreach(modules_dir) do |mod|
-				next if mod == 'machine' or  mod[0,1] == '.'
+				next if mod[0,1] == '.'
 				path = modules_dir + "/" + mod
 				modules << mod if File.directory?(path) and
-						File.file?(path + "/" + mod + ".sfp") and
-						File.file?(path + "/" + mod + ".rb") and
-						File.file?(path + "/main.mf")
+						File.file?(path + "/" + mod + ".sfp")
 			end
 			return modules
 		end
@@ -111,7 +122,7 @@ module Nuri
 			@root.add(machine)
 
 			# load other modules and put them as machine's children
-			self.get_modules.each do |mod|
+			self.get_non_abstract_modules.each do |mod|
 				begin
 					manifest_file = "#{modules_dir}/#{mod}/main.mf"
 					sfp_file = "#{modules_dir}/#{mod}/#{mod}.sfp"
@@ -129,12 +140,38 @@ module Nuri
 					m = eval("#{manifest['main-class']}.new")
 					m.name = mod if m.name == nil or m.name == ''
 					machine.add(m) if not m.is_abstract
-					Nuri::Util.log "Successfully load module " + mod
+					Nuri::Util.log "Successfully loaded module " + mod
 				rescue Exception => exp
 					Nuri::Util.log.error "Cannot load module " + mod + " -- " + exp.to_s
 				end
 			end
 		end
+
+=begin
+		def get_default_state
+			begin
+				Dir.chdir(Nuri::Util.home_dir)
+
+				sfp = "include \"#{Nuri::Util.home_dir}/modules/machine/machine.sfp\"\n"
+				self.get_modules.each do |mod|
+					sfp += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"
+				end
+
+				sfp += "default {\n"
+				self.get_non_abstract_modules.each do |mod|
+					sfp += "#{mod} isa \n"
+				end
+				sfp += "}\n"
+
+				#puts sfp
+
+				#return Nuri::Sfp::Parser.to_sfp(sfp)
+			rescue Exception => exp
+				Nuri::Util.error "Cannot generate the default state"
+			end
+			nil
+		end
+=end
 
 		def parse_module_manifest(manifest_path)
 			manifest = {}
@@ -154,12 +191,23 @@ module Nuri
 			return manifest
 		end
 
-		def get_node(path, root)
-			while path != '$'
-				path = path.to_top
-				n = root.at?(path)
-				return n if n != nil and n['_classes'].rindex(MainComponent) != nil
+		def get_node(path)
+			node = nil
+			# 1) find in "system"
+			if @main.is_a?(Hash) and @main.has_key?('system')
+				root = @main['system']
+				while path != '$'
+					path = path.to_top
+					n = root.at?(path)
+					node = n if n != nil and n['_classes'].rindex(MainComponent) != nil
+				end
 			end
+
+			if not node.nil? and self.vm?(node)
+				node['incloud'], node['address'] = get_vm_address_by_name(node['_self'])
+			end
+
+			node
 		end
 
 		def address?(path)

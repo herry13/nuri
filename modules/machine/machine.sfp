@@ -1,14 +1,6 @@
 class Machine {
 	running = false
-	nuri_latest = false
 
-	procedure upgrade_nuri {
-		condition { }
-		effect {
-			this.nuri_latest = true
-		}
-	}
-	
 	procedure start {
 		condition { }
 		effect {
