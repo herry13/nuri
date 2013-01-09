@@ -15,7 +15,7 @@ module Nuri
 			end
 
 			# get state of this component in JSON
-			def get_self_state
+			def update_state
 				# php module
 				data = `/usr/bin/dpkg-query -W libapache2-mod-php5 2> /dev/null`.chop
 				data = data.split(' ')

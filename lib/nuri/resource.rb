@@ -140,7 +140,7 @@ puts 'parent: ' + @parent.class.name
 
 		def get_path_state(path=nil)
 			if path == nil or path == ''
-				self.get_self_state
+				self.update_state
 				return @state
 			end
 
@@ -158,7 +158,7 @@ puts 'parent: ' + @parent.class.name
 				return @children[first].get_path_state(rest)
 
 			else
-				self.get_self_state
+				self.update_state
 				if @state.has_key?(first)
 					if rest == nil or rest == ''
 						return @state[first]
@@ -198,16 +198,16 @@ puts 'parent: ' + @parent.class.name
 		end
 
 		def get_all_state
-			self.get_self_state
+			self.update_state
 			# get state of children components
 			@children.each_pair { |name,mod| @state[name] = mod.get_state }
 
 			return @state
 		end
 
-		def get_self_state
-			# all components must implement this method
-		end
+		# all components must implement this method which is called to update the current
+		# state of each component
+		def update_state; end
 
 		def get_goal
 			goals = @goal.clone

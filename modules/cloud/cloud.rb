@@ -24,7 +24,7 @@ module Nuri
 				@conn = nil
 			end
 
-			def get_self_state
+			def update_state
 				url = URI.parse(@auth_uri)
 				@state['running'] = self.is_port_open?(url.host, url.port)
 			end

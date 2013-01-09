@@ -12,7 +12,7 @@ module Nuri
 			end
 	
 			# get state of this component in JSON
-			def get_self_state
+			def update_state
 				# installed & running
 				data = `/usr/bin/dpkg-query -W mysql-server 2> /dev/null`
 				data = data.split(' ') if data.is_a?(String)

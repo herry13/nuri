@@ -15,9 +15,8 @@ module Nuri
 						'_type' => 'equals',
 						'_value' => true
 					}
-					return false
 				end
-				true
+				false
 			end
 		end
 
@@ -88,9 +87,10 @@ module Nuri
 				@vm_template.each { |k,v|
 					if k[0,1] != '_' and v.is_a?(Hash) and v.isobject
 						state[vm_name][k] = Nuri::Sfp.deep_clone(v)
+						state[vm_name][k].accept(CloudProcedureModifier.new)
 					end
 				}
-				state[vm_name].accept(CloudProcedureModifier.new)
+				state[vm_name].accept(CloudProcedureModifier.new('this'))
 			end
 			return state
 

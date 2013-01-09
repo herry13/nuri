@@ -16,7 +16,7 @@ module Nuri
 			end
 	
 			# get state of this component in JSON
-			def get_self_state
+			def update_state
 				# installed, running, version
 				if File.exist?(InstallingLockFile)
 					@state['installed'] = @state['running'] = false

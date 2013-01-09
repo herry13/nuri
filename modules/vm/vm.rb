@@ -11,7 +11,7 @@ module Nuri
 				self.register('VM', name)
 			end
 
-			def get_self_state
+			def update_state
 				# get memory info
 				mem = `free`
 				mem = mem.split("\n")[1].split(" ")

@@ -1,5 +1,5 @@
 require 'nuri/lib.rb'
-require 'nuri/bsig.rb'
-require 'nuri/cloudhelper.rb'
+require 'nuri/bsig-engine.rb'
+require 'nuri/cloud-helper.rb'
 require 'nuri/client.rb'
 require 'nuri/master.rb'

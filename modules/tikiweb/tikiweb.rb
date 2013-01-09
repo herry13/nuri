@@ -15,7 +15,7 @@ module Nuri
 			end
 	
 			# get state of this component in JSON
-			def get_self_state
+			def update_state
 				if File.file?(ConfigFile)
 					config = read_config
 					config.each { |k,v| @state[k] = v }
