@@ -360,7 +360,7 @@ module Nuri
 			else
 				puts "#{JSON.pretty_generate(plan)}\n"
 				if plan['workflow'].length > 0
-					print "Execute it [y/N]? "
+					print "Execute the workflow [y/N]? "
 					if STDIN.gets.chomp.upcase == 'Y'
 						puts "Executing the plan..."
 						if master.execute_workflow(plan)
@@ -382,7 +382,7 @@ module Nuri
 				puts 'no solution!'
 			else
 				puts "#{JSON.pretty_generate(bsig)}\n"
-				print "Deploy it [y/N]? "
+				print "Deploy the BSig model [y/N]? "
 				if STDIN.gets.chomp.upcase == 'Y'
 					print 'Deploying the Behavioural Signature model...'
 					if master.deploy_bsig(bsig)
