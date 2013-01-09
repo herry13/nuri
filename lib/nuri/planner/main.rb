@@ -202,7 +202,7 @@ module Nuri
 					raise Exception, exp.to_s
 				ensure
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
-					system 'rm -rf ' + tmp_dir
+					#system 'rm -rf ' + tmp_dir
 				end
 
 				return nil, nil

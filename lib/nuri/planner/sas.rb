@@ -200,54 +200,6 @@ module Nuri
 							end
 						end
 					end
-=begin
-					plan[i].prevails.each do |p|
-						(i-1).downto(0) do |j|
-							if plan[j].support_assignment?(p[:var], p[:prevail])
-								plan[i].predecessors << plan[j]
-								#break
-							end
-						end
-					end
-					plan[i].pre_posts.each do |p|
-						next if p[:pre] < 0
-						(i-1).downto(0) do |j|
-							if plan[j].support_assignment?(p[:var], p[:pre])
-								plan[i].predecessors << plan[j]
-								#break
-							end
-						end
-					end
-=end
-=begin
-					op1 = plan[i]
-					(i-1).downto(0) do |j|
-						op2 = plan[j]
-						op1.predecessors << op2 if op2.support?(op1)
-					end
-=end
-				end
-			end
-
-			def remove_transitive_predecessors2(plan)
-				# remove duplicates in predecessors list
-				@operators.each { |op| op.predecessors.uniq! }
-
-				# remove "transitive" directed-edge
-				plan.each do |op1|
-					valid_predecessors = []
-					while op1.predecessors.length > 0
-						op2 = op1.predecessors.pop
-						valid = true
-						op1.predecessors.each do |op3|
-							if op3.predecessors.index(op2) != nil
-								valid = false
-								break
-							end
-						end
-						valid_predecessors << op2 if valid
-					end
-					op1.predecessors = valid_predecessors
 				end
 			end
 
@@ -392,6 +344,7 @@ end
 				# promotion
 			end
 
+			# TODO -- Fix bugs
 			def to_stage_workflow(plan, states)
 begin
 				current_state = states[states.length-1].clone
@@ -410,7 +363,15 @@ begin
 					counter += 1
 				end
 
-				return nil, nil if not current_state.equals?(@init)
+				begin
+					#current_state.each_index { |i|
+					#	next if current_state[i] == @init[i]
+					#	puts i.to_s + ' ' + current_state[i].to_s + ' != ' + @init[i].to_s
+					#}
+					#puts current_state.inspect
+					#puts @init.inspect
+					return nil, nil
+				end if not current_state.equals?(@init)
 				return stages.reverse, states.reverse
 rescue Exception => e
 	$stderr.puts e.to_s
@@ -508,7 +469,6 @@ end
 					valid = true
 					@goal.each do |var|
 						if state[var.index] != var.goal
-							#puts var.name + ': ' + state[var.index].to_s + ' - ' + var.goal.to_s
 							valid = false
 						end
 					end
