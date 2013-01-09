@@ -57,8 +57,8 @@ module Nuri
 			nil
 		end
 
-		# Reads configuration file in '/etc/nuri/config.sfp'. If it does not
-		# exist then it tries to read '<HOME>/etc/config.sfp'.
+		# Reads configuration file in '/etc/nuri/nuri.sfp'. If it does not
+		# exist then it tries to read '<HOME>/etc/nuri.sfp'.
 		def read_config
 			begin
 				Nuri::Util.log 'Read configuration file...'
@@ -66,8 +66,19 @@ module Nuri
 				cfile = Nuri::Util.home_dir + "/etc/nuri.sfp" if not File.file?(cfile)
 				@config = Nuri::Sfp::Parser.file_to_sfp(cfile)['nuri']
 
+				# Set the read timeout
 				@read_timeout = (@config.has_key?('read_timeout') ?
 				                 @config['read_timeout'].to_i : DefaultReadTimeout)
+
+				# Set the timeout of the solver to solve a task
+				if @config.has_key?('solver_timeout')
+					Nuri::Planner::Solver.set_timeout(@config['solver_timeout'].to_i)
+				end
+
+				# Set the max-memory that can be consumed by the solver (in K)
+				if @config.has_key?('solver_max_memory')
+					Nuri::Planner::Solver.set_max_memory(@config['solver_max_memory'].to_i)
+				end
 
 				Nuri::Util.log 'Successfully load configuration file ' + cfile
 			rescue Exception => exp

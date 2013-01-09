@@ -7,6 +7,17 @@ module Nuri
 		Debugging = false
 
 		class Solver
+			# The timeout for the solver in seconds (default 600s/5mins)
+			@@timeout = 600
+			# The maximum memory that can be consumed by the solver
+			@@max_memory = 2048000 # (in K) -- default ~2GB
+
+			# Set the search timeout in seconds
+			def self.set_timeout(timeout); @@timeout = timeout; end
+
+			# Set the maximum memory that can be consumed by the solver
+			def self.set_max_memory(memory); @@max_memory = memory; end
+
 			attr_accessor :debug
 			attr_reader :parser
 
@@ -162,8 +173,8 @@ module Nuri
 					end
 
 					command = case os
-						when 'linux' then "#{planner}/preprocess < #{sas_file} | #{planner}/downward #{params} --plan-file #{plan_file}"
-						when 'macos', 'darwin' then "cd #{tmp_dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; #{planner}/downward #{params} --plan-file #{plan_file} < #{tmp_dir}/output 1> /dev/null;"
+						when 'linux' then "#{planner}/preprocess < #{sas_file} | timeout #{@@timeout} #{planner}/downward #{params} --plan-file #{plan_file}"
+						when 'macos', 'darwin' then "cd #{tmp_dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; timeout #{@@timeout} #{planner}/downward #{params} --plan-file #{plan_file} < #{tmp_dir}/output 1> /dev/null;"
 						else nil
 					end
 

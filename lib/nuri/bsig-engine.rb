@@ -283,6 +283,7 @@ module Nuri
 				               local_flaws.length <= 0
 
 				begin
+					# repairing local-flaws
 					success, local_flaws = repair_local_flaws(local_flaws)
 					if not success
 						raise Exception, "Local conditions of #{operator_name} cannot be satisfied: #{local_flaws.inspect}."
@@ -290,6 +291,7 @@ module Nuri
 						Nuri::Util.debug "Local conditions of #{operator_name} have been satisfied."
 					end
 
+					# repairing remote-flaws
 					success, remote_flaws = repair_remote_flaws(remote_flaws)
 					if not success
 						raise Exception, "Remote conditions of #{operator_name} cannot be satisfied: #{remote_flaws.inspect}."

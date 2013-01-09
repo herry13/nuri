@@ -1,4 +1,6 @@
 09-01-2013 -- 0.2.1
+- set time limit for the solver (default 5mins) -- it can be set by specifying "solver_timeout"
+  in "nuri.sfp"
 - prioritise repairing local-flaws than remote-flaws
 - rename method "get_self_state" => "update_state" in resource.rb and all modules' ruby files
 
