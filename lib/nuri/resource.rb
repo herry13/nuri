@@ -3,6 +3,9 @@ module Nuri
 		attr_accessor :name, :parent
 		attr_reader :children, :state, :is_abstract, :goal, :class_path
 
+		# class_path: SFP class path
+		# name: name of the object
+		# is_abstract: false if not abstract, otherwise true
 		def register(class_path, name=nil, is_abstract=false)
 			@name = name
 			@children = Hash.new

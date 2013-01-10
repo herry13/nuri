@@ -363,11 +363,7 @@ module Nuri
 					print "Execute the workflow [y/N]? "
 					if STDIN.gets.chomp.upcase == 'Y'
 						puts "Executing the plan..."
-						if master.execute_workflow(plan)
-							puts "execution success!"
-						else
-							puts "execution failed!"
-						end
+						puts "execution " + (master.execute_workflow(plan) ? "success!" : "failed!")
 					end
 				end
 				puts ''
@@ -382,13 +378,11 @@ module Nuri
 				puts 'no solution!'
 			else
 				puts "#{JSON.pretty_generate(bsig)}\n"
-				print "Deploy the BSig model [y/N]? "
-				if STDIN.gets.chomp.upcase == 'Y'
-					print 'Deploying the Behavioural Signature model...'
-					if master.deploy_bsig(bsig)
-						puts 'OK'
-					else
-						puts 'Failed!'
+				if bsig['operators'].length > 0
+					print "Deploy the BSig model [y/N]? "
+					if STDIN.gets.chomp.upcase == 'Y'
+						print 'Deploying the Behavioural Signature model...'
+						puts (master.deploy_bsig(bsig) ? 'OK' : 'Failed')
 					end
 				end
 			end
