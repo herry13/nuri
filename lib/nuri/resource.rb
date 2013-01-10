@@ -31,6 +31,7 @@ module Nuri
 					object.delete('_super')
 					@state = object
 					@state.accept(Nuri::Sfp::SetModifier.new)
+					@state.accept(Nuri::Sfp::NullModifier.new)
 				end
 			end
 		end
