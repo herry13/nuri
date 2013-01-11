@@ -270,7 +270,7 @@ procedure
 	;
 
 parameters
-	:	'(' parameter (',' parameter)* ')'
+	:	'(' parameter (',' NL* parameter)* ')'
 	;
 	
 parameter
