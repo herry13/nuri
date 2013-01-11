@@ -9,35 +9,31 @@ module Nuri
 			attr_accessor :auth_uri
 
 			def initialize(options={})
-				@name = (options.has_key?('name') ? options['name'] : 'hpcloud')
-				@account_id = (options.has_key?('account_id') ? options['account_id'] : nil)
-				@auth_uri = (options.has_key?('auth_uri') ? options['auth_uri'] : nil)
-				@tenant_id = (options.has_key?('tenant_id') ? options['tenant_id'] : nil)
-				@secret_key = (options.has_key?('secret_key') ? options['secret_key'] : nil)
-				@zone = (options.has_key?('zone') ? options['zone'] : nil)
-				@conn = nil
-
 				# registering the component
-				self.register('HPCloud', name)
+				self.register('HPCloud', 'hpcloud')
 			end
 
 			def update_state
 				self.reset
 
-				if not @auth_uri.nil?
-					url = URI.parse(@auth_uri)
-					@state['running'] = self.is_port_open?(url.host, url.port)
-				end
+				#if not @auth_uri.nil?
+				#	url = URI.parse(@auth_uri)
+				#	@state['running'] = self.is_port_open?(url.host, url.port)
+				#end
+				@state['running'] = true # HACK!
+
+				self.read_config.each { |k,v| @state[k] = v }
 			end
 
 			def open_connection
 				begin
+					config = self.read_config
 					@conn = Fog::Compute.new(:provider => "HP",
-					                         :hp_account_id => @account_id,
-					                         :hp_auth_uri => @auth_uri,
-					                         :hp_tenant_id => @tenant_id,
-					                         :hp_secret_key => @secret_key,
-				   	                      :hp_avl_zone => @zone)
+					                         :hp_account_id => config['account_id'],
+					                         :hp_auth_uri => config['auth_uri'],
+					                         :hp_tenant_id => config['tenant_id'],
+					                         :hp_secret_key => config['secret_key'],
+				   	                      :hp_avl_zone => config['zone'])
 				rescue Exception => exp
 					Nuri::Util "Cannot open connection to cloud's end point: #{@name}"
 					return false
@@ -79,10 +75,36 @@ module Nuri
 				return false
 			end
 
+			ConfigFile = '/var/lib/hpcloud/config.json'
+			def save_config(config)
+				dir = File.dirname(ConfigFile)
+				Dir.mkdir(dir) if not File.exist?(dir)
+				File.open(ConfigFile, 'w') { |f| f.write(JSON.generate(config)) }
+			end
+
+			def read_config
+				return JSON.parse(File.read(ConfigFile)) if File.exist?(ConfigFile)
+				return {}
+			end
+
+			# SFP method
+			def set_account(params={})
+				config = self.read_config
+				params.each { |k,v| config[k] = v }
+				self.save_config(config)
+				return true
+			end
+			def set_account_id(params={}); self.set_account(params); end
+			def set_auth_uri(params={}); self.set_account(params); end
+			def set_tenant_id(params={}); self.set_account(params); end
+			def set_secret_key(params={}); self.set_account(params); end
+			def set_zone(params={}); self.set_account(params); end
+
 			DefaultFlavorID = 100
 			DefaultImageID = 75845
 			DefaultKeyName = "herrykey"
 
+			# SFP method
 			def create_vm(params={})
 				self.open_connection if @conn.nil?
 				name = params['vm']
@@ -167,6 +189,7 @@ module Nuri
 				false
 			end
 
+			# SFP method
 			def delete_vm(params={})
 				self.open_connection if @conn.nil?
 				name = params['vm']
