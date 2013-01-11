@@ -21,6 +21,23 @@ module Nuri
 					config.each { |k,v| @state[k] = v }
 				end
 
+				db_name = @state['db_name']
+				if not @state['database'].nil?
+					port = self.get_state(@state['database'] + '.port')
+					host = self.get_state(@state['database'] + '.parent.domainname')
+					host = (host == Nuri::Util.domainname ? 'localhost' : host)
+					user = 'root'
+					passwd = self.get_state(@state['database'] + '.root_password')
+			
+					# installed
+					if not port.is_a?(Nuri::Undefined) and not port.nil? and
+							not db_name.nil? and db_name != ''
+						sql = "show databases like '#{db_name}';"
+						result = do_query(host, port, user, passwd, db_name, sql, true)
+						@state['installed'] = result.split("\n")[1] == db_name
+					end
+				end
+
 				return @state
 			end
 
@@ -132,18 +149,38 @@ module Nuri
 
 			ScriptFile = '/tmp/tikidb.sql'
 
-			def execute_sql(sql, db_name='')
+			def do_query(host, port, user, password, db_name, sql, query=false)
+				File.open(ScriptFile, 'w') { |f| f.write(sql) }
+				cmd = "mysql --user=#{user} --password=#{password} --host=#{host} --port=#{port} #{db_name} < #{ScriptFile}"
+				if not query
+					result = system(cmd)
+					File.delete(ScriptFile) if File.exist?(ScriptFile)
+					return (result == true)
+				else
+					return `#{cmd} 2>/dev/null`
+				end
+			end
+
+			def execute_sql(sql, db_name='', query=false)
 				port = self.get_state('database.port')
 				host = self.get_state('database.parent.domainname')
 				host = (host == Nuri::Util.domainname ? 'localhost' : host)
 				user = 'root'
 				passwd = self.get_state('database.root_password')
 
+				return do_query(host, port, user, passwd, db_name, sql, query)
+=begin
 				File.open(ScriptFile, 'w') { |f| f.write(sql) }
 				cmd = "mysql --user=#{user} --password=#{passwd} --host=#{host} --port=#{port} #{db_name} < #{ScriptFile}"
-				result = system(cmd)
-				File.delete(ScriptFile) if File.exist?(ScriptFile)
-				return (result == true)
+
+				if not query
+					result = system(cmd)
+					File.delete(ScriptFile) if File.exist?(ScriptFile)
+					return (result == true)
+				else
+					return `cmd`
+				end
+=end
 			end
 	
 		end

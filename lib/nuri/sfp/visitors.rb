@@ -81,5 +81,18 @@ module Nuri
 				true
 			end
 		end
+
+		class NullModifier
+			def visit(name, value, parent)
+				return false if value.is_a?(Hash) and value.isprocedure
+
+				if value.is_a?(Hash) and value.isnull
+					parent[name] = nil
+					return false
+				end
+				true
+			end
+		end
+
 	end
 end
