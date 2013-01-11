@@ -7,45 +7,35 @@ class HPCloud {
 	running is false
 
 	procedure set_account_id(account_id isref String) {
-		condition {
-			this.running is true
-		}
+		condition { }
 		effect {
 			this.account_id = account_id
 		}
 	}
 
 	procedure set_auth_uri(auth_uri isref String) {
-		condition {
-			this.running is true
-		}
+		condition { }
 		effect {
 			this.auth_uri = auth_uri
 		}
 	}
 
 	procedure set_tenant_id(tenant_id isref String) {
-		condition {
-			this.running is true
-		}
+		condition { }
 		effect {
 			this.tenant_id = tenant_id
 		}
 	}
 
 	procedure set_zone(zone isref String) {
-		condition {
-			this.running is true
-		}
+		condition { }
 		effect {
 			this.zone = zone
 		}
 	}
 
 	procedure set_secret_key(secret_key isref String) {
-		condition {
-			this.running is true
-		}
+		condition { }
 		effect {
 			this.secret_key = secret_key
 		}
