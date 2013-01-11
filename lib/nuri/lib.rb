@@ -4,6 +4,7 @@
 require 'rubygems'
 require 'logger'
 require 'json'
+require 'uri'
 # Nuri libraries
 require 'nuri/util'
 require 'nuri/resource'
@@ -243,17 +244,19 @@ module Nuri
 		end
 
 		# Send data with POST method to a remote address in JSON format
-		def post_data(address, port, path, data, timeout=@read_timeout)
+		def post_data(address, port, path, data=nil, timeout=@read_timeout)
 			url = URI.parse('http://' + address + ':' + port.to_s + path)
-			data = "json=" + JSON.generate(data)
+			data = (data.nil? ? '' : URI.encode_www_form('json' => JSON.generate(data)))
+			#data = "json=" + JSON.generate(data)
 			req = Net::HTTP::Post.new(url.path)
 			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
 			return res.code, res.body
 		end
 
 		# Send data with PUT method to a remote address in JSON format
-		def put_data(address, port, path, data, timeout=@read_timeout)
+		def put_data(address, port, path, data=nil, timeout=@read_timeout)
 			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			data = (data.nil? ? '' : URI.encode_www_form('json' => JSON.generate(data)))
 			req = Net::HTTP::Put.new(url.path)
 			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
 			return res.code, res.body

@@ -109,7 +109,7 @@ module Nuri
 				system = get_system_information
 				system.each_value do |address|
 					begin
-						put_data(address, Nuri::Port, '/reset', '')
+						put_data(address, Nuri::Port, '/reset')
 					rescue Exception => e
 						Nuri::Util.log 'Cannot reset ' + address.to_s + ': ' + e.to_s
 					end
@@ -121,7 +121,7 @@ module Nuri
 				system = get_system_information
 				system.each_value do |address|
 					begin
-						put_data(address, Nuri::Port, '/bsig/start', '')
+						put_data(address, Nuri::Port, '/bsig/start')
 					rescue Exception => e
 						Nuri::Util.log 'Cannot start BSig executor ' + address.to_s + ': ' + e.to_s
 					end
@@ -164,8 +164,7 @@ module Nuri
 						return false if node.nil?
 
 						address = node['address']
-						json = {'id' => bsig['id'], 'operator' => operator}
-						data = "json=" + JSON.generate(json)
+						data = {'id' => bsig['id'], 'operator' => operator}
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
 						if code != '200'
 							raise Exception, "sending BSig operator:#{code},#{address}"
@@ -179,8 +178,7 @@ module Nuri
 						return false if node.nil?
 
 						address = node['address']
-						json = {'id' => bsig['id'], 'goal' => {var_name => value}}
-						data = "json=" + JSON.generate(json)
+						data = {'id' => bsig['id'], 'goal' => {var_name => value}}
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
 						if code != '200'
 							raise Exception, "sending BSig goal:#{code},#{address}"
@@ -191,8 +189,7 @@ module Nuri
 					# send deployment signal to all clients
 					nodes.uniq!
 					Nuri::Util.log "Activate BSig ID #" + bsig['id'].to_s
-					json = {'id' => bsig['id']}
-					data = "json=" + JSON.generate(json)
+					data = {'id' => bsig['id']}
 					nodes.each do |address|
 						code, _ = put_data(address, Nuri::Port, '/bsig/activate', data)
 						if code != '200'
@@ -262,7 +259,6 @@ module Nuri
 
 				def remote_execute(action, address)
 					data = { 'action' => action, 'system' => self.get_system_information }
-					data = "json=" + JSON.generate(data)
 					begin
 						code, _ = put_data(address, Nuri::Port, '/exec', data)
 						if code == '200'
@@ -275,7 +271,7 @@ module Nuri
 					rescue ExecutionFailedException => efe
 						Nuri::Util.log efe.to_s
 					rescue Exception => e
-						Nuri::Util.log 'Cannot execute action: ' + action['name']
+						Nuri::Util.log 'Cannot execute action: ' + action['name'] + ' -- ' + e.to_s
 					end
 					false
 				end
@@ -363,7 +359,7 @@ module Nuri
 					print "Execute the workflow [y/N]? "
 					if STDIN.gets.chomp.upcase == 'Y'
 						puts "Executing the plan..."
-						puts "execution " + (master.execute_workflow(plan) ? "success!" : "failed!")
+						puts "Execution " + (master.execute_workflow(plan) ? "success!" : "failed!")
 					end
 				end
 				puts ''

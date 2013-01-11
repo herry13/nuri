@@ -101,7 +101,7 @@ module Nuri
 						bsig_start_path = '/bsig/start'
 						begin
 							begin
-								put_data('localhost', Nuri::Port, bsig_start_path, '')
+								put_data('localhost', Nuri::Port, bsig_start_path)
 							rescue Exception
 							end
 							#self.start_bsig_executor
