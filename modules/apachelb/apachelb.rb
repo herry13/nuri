@@ -22,7 +22,7 @@ module Nuri
 					@state['installed'] = @state['running'] = false
 					@state['version'] = ''
 				else
-					data = `/usr/bin/dpkg-query -W apache2`
+					data = `/usr/bin/dpkg-query -W apache2 2>/dev/null`
 					data = data.split(' ')
 					@state['installed'] = (data.length > 1 and data[0] == 'apache2') and
 						File.exists?(ConfigFile)
