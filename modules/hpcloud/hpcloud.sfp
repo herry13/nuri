@@ -1,3 +1,5 @@
+include "modules/cloud/cloud.sfp"
+
 class HPCloud {
 	account_id is ""
 	auth_uri is ""

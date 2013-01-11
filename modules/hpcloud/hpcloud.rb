@@ -15,14 +15,17 @@ module Nuri
 
 			def update_state
 				self.reset
+				self.read_config.each { |k,v| @state[k] = v }
 
-				if not @auth_uri.nil?
-					url = URI.parse(@auth_uri)
-					@state['running'] = self.is_port_open?(url.host, url.port)
+				if not @state['auth_uri'].nil?
+					begin
+						url = URI.parse(@state['auth_uri'])
+						@state['running'] = self.is_port_open?(url.host, url.port)
+					rescue Exception => exp
+						Nuri::Util.log 'HPCloud update state error: ' + exp.to_s
+					end
 				end
 				#@state['running'] = true # HACK!
-
-				self.read_config.each { |k,v| @state[k] = v }
 			end
 
 			def open_connection
