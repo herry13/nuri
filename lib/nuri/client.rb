@@ -93,7 +93,7 @@ module Nuri
 								end
 							end
 						rescue Exception => exp
-							Nuri::Util.warn "Cannot get process' PID: " + exp.to_s
+							Nuri::Util.error "Cannot get process' PID: " + exp.to_s
 						end
 
 						# Start BSig reminder
@@ -116,7 +116,7 @@ module Nuri
 				rescue Interrupt
 					Nuri::Util.log 'Exiting.'
 				rescue Exception => e
-					Nuri::Util.warn 'Client Daemon error: ' + e.to_s
+					Nuri::Util.error 'Client Daemon error: ' + e.to_s
 					return false
 				end
 				return true
@@ -223,7 +223,7 @@ module Nuri
 					@bsig_executor.reset
 					@goals.clear
 				rescue Exception => exp
-					Nuri::Util.warn 'Failed to reset Nuri client: ' + exp.to_s
+					Nuri::Util.error 'Failed to reset Nuri client: ' + exp.to_s
 					return false
 				end
 				Nuri::Util.log 'Succeed to reset Nuri client.'
@@ -343,7 +343,7 @@ module Nuri
 					# add new pre-goal
 					return 202, '', '' if @owner.add_goal(goal)
 				rescue Exception => exp
-					Nuri::Util.warn 'Failed to achieve subgoal: ' + exp.to_s
+					Nuri::Util.error 'Failed to achieve subgoal: ' + exp.to_s
 				end
 				return 500, '', ''
 			end
@@ -377,7 +377,7 @@ module Nuri
 					@owner.start_bsig_executor
 
 				rescue Exception => e
-					Nuri::Util.warn 'Failed to activate BSig: ' + e.to_s
+					Nuri::Util.error 'Failed to activate BSig: ' + e.to_s
 					return 500, '', ''
 				end
 				return 200, '', ''
@@ -394,7 +394,7 @@ module Nuri
 					File.open(bsig_file, 'w') { |f| f.write(JSON.generate(local)) }
 					@owner.update_bsig_executor
 				rescue Exception => e
-					Nuri::Util.warn 'Failed to save BSig: ' + e.to_s
+					Nuri::Util.error 'Failed to save BSig: ' + e.to_s
 					return 500, '', ''
 				end
 				return 200, '', ''
@@ -409,16 +409,16 @@ module Nuri
 				begin
 					status = @owner.execute(cmd)
 					if status.nil?
-						Nuri::Util.warn 'exec: Failed -- cannot find procedure: ' + procedure
+						Nuri::Util.error 'exec: Failed -- cannot find procedure: ' + cmd.inspect
 						return 503, '', ''
 					elsif status == true
 						Nuri::Util.log "exec: Succed -- " + cmd.inspect
 						return 200, '', ''
 					end
 				rescue Exception => e
-					Nuri::Util.warn e.to_s
+					Nuri::Util.error e.to_s
 				end
-				Nuri::Util.warn 'exec: Failed -- cannot execute procedure: ' + json
+				Nuri::Util.error 'exec: Failed -- cannot execute procedure: ' + json
 				return 500, '', ''
 			end
 
@@ -487,7 +487,7 @@ module Nuri
 					Nuri::Util.log 'Nuri client daemon was stopped'
 				end
 			rescue Exception => e
-				Nuri::Util.warn 'Cannot stop Nuri client: ' + e.to_s
+				Nuri::Util.error 'Cannot stop Nuri client: ' + e.to_s
 			end
 		end
 
@@ -507,7 +507,7 @@ module Nuri
 				fpath = Nuri::Util.home_dir + '/var/system.info'
 				File.delete(fpath) if File.exist?(fpath)
 			rescue Exception => exp
-				Nuri::Util.warn exp.to_s + "\n" + exp.backtrace.to_s
+				Nuri::Util.error exp.to_s + "\n" + exp.backtrace.to_s
 			end
 		end
 

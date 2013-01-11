@@ -1,0 +1,28 @@
+class HPCloud {
+	account_id is ""
+	auth_uri is ""
+	tenant_id is ""
+	zone is ""
+	secret_key is ""
+	running is false
+
+	procedure delete_vm(vm isref VM) {
+		condition {
+			vm.created = true
+		}
+		effect {
+			vm.created = false
+			vm.running = false
+		}
+	}
+
+	procedure create_vm(vm isref VM) {
+		condition {
+			vm.created = false
+		}
+		effect {
+			vm.created = true
+			vm.running = true
+		}
+	}
+}

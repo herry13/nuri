@@ -1,0 +1,17 @@
+include "modules/vm/vm.sfp"
+include "modules/apache/apache.sfp"
+include "modules/apachelb/apachelb.sfp"
+include "modules/mysql/mysql.sfp"
+include "modules/tikidb/tikidb.sfp"
+include "modules/tikiweb/tikiweb.sfp"
+
+template {
+	vm isa VM {
+		apache isa Apache
+		apachelb isa Apachelb
+		mysql isa Mysql
+		tikidb isa Tikidb
+		tikiweb isa Tikiweb
+	}
+}
+	
