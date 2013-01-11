@@ -16,11 +16,11 @@ module Nuri
 			def update_state
 				self.reset
 
-				#if not @auth_uri.nil?
-				#	url = URI.parse(@auth_uri)
-				#	@state['running'] = self.is_port_open?(url.host, url.port)
-				#end
-				@state['running'] = true # HACK!
+				if not @auth_uri.nil?
+					url = URI.parse(@auth_uri)
+					@state['running'] = self.is_port_open?(url.host, url.port)
+				end
+				#@state['running'] = true # HACK!
 
 				self.read_config.each { |k,v| @state[k] = v }
 			end
