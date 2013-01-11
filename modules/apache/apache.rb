@@ -27,7 +27,7 @@ module Nuri
 				@state['php_mysql_module'] = (data.length > 1 and data[0] == 'php5-mysql')
 
 				# installed & running
-				data = `/usr/bin/dpkg-query -W apache2`
+				data = `/usr/bin/dpkg-query -W apache2 2>/dev/null`
 				data = data.split(' ')
 				@state["installed"] = (data.length > 1 and data[0] == 'apache2')
 				if @state["installed"]
