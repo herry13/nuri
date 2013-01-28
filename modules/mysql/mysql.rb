@@ -46,11 +46,12 @@ module Nuri
 			end
 	
 			def uninstall(params={})
-				return (
-					Nuri::Helper::Command.exec('/bin/chmod 0600 /etc/mysql/nuri.cnf') and
-					Nuri::Helper::Command.exec('/bin/rm /etc/mysql/nuri.cnf') and
-					Nuri::Helper::Package.uninstall('mysql-server')
-				)
+				if File.exist?('/etc/mysql/nuri.cnf') and
+					not (Nuri::Helper::Command.exec('/bin/chmod 0600 /etc/mysql/nuri.cnf') and
+						Nuri::Helper::Command.exec('/bin/rm /etc/mysql/nuri.cnf'))
+					return false
+				end
+				return Nuri::Helper::Package.uninstall('mysql-server')
 				#	Nuri::Helper::Command.exec('/usr/bin/apt-get -y --purge autoremove 1>/dev/null 2>/dev/null')
 				#	system("/usr/bin/dpkg -l | /bin/grep ^rc | /usr/bin/cut -d' ' -f3| /usr/bin/xargs /usr/bin/apt-get -y purge 1>/dev/null 2>/dev/null")
 				#end
