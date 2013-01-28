@@ -175,7 +175,7 @@ module Nuri
 						end
 					else
 						Nuri::Util.log "Cannot install Nuri on the new VM: #{name}"
-						self.delete_vm('vm' => name)
+						#self.delete_vm('vm' => name)
 						return false
 					end
 

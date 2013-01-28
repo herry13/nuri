@@ -401,7 +401,7 @@ module Nuri
 			end
 
 			def execute_action(data)
-				Nuri::Util.log "executing: #{data['json']}..."
+				Nuri::Util.log "[Exec: #{data['json']}..."
 				data = JSON[data['json']]
 				cmd = data['action']
 				Nuri::Util.set_system_information(data['system'])
@@ -409,16 +409,16 @@ module Nuri
 				begin
 					status = @owner.execute(cmd)
 					if status.nil?
-						Nuri::Util.error 'exec: Failed -- cannot find procedure: ' + cmd.inspect
+						Nuri::Util.error "[Exec: #{cmd['name']}...Failed!] -- cannot find the procedure. " + cmd.inspect
 						return 503, '', ''
 					elsif status == true
-						Nuri::Util.log "exec: Succed -- " + cmd.inspect
+						Nuri::Util.log "[Exec: #{cmd['name']}...OK]" # -- " + cmd.inspect
 						return 200, '', ''
 					end
 				rescue Exception => e
 					Nuri::Util.error e.to_s
 				end
-				Nuri::Util.error 'exec: Failed -- cannot execute procedure: ' + json
+				Nuri::Util.error "[Exec: #{cmd['name']}...Failed!] -- cannot execute the procedure. " + json
 				return 500, '', ''
 			end
 

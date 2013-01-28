@@ -12,6 +12,9 @@ class Tikidb {
 	procedure set_tikiweb (webs isset Tikiweb) {
 		condition {
 			this.installed = true
+			foreach (webs as w) {
+				w.parent.running = true
+			}
 		}
 		effect {
 			this.tikiweb = webs
