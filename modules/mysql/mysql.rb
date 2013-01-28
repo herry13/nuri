@@ -30,8 +30,12 @@ module Nuri
 				end
 
 				# can be accessed from outside?
-				data = Nuri::Helper::Command.getoutput("grep '^bind-address' /etc/mysql/my.cnf 2>/dev/null")
-				@state['public'] = (data.length <= 0)
+				if @state['installed']
+					data = Nuri::Helper::Command.getoutput("grep '^bind-address' /etc/mysql/my.cnf 2>/dev/null")
+					@state['public'] = (data.length <= 0)
+				else
+					@state['public'] = false
+				end
 
 				return @state
 			end
@@ -51,7 +55,7 @@ module Nuri
 						Nuri::Helper::Command.exec('/bin/rm /etc/mysql/nuri.cnf'))
 					return false
 				end
-				return Nuri::Helper::Package.uninstall('mysql-server')
+				return Nuri::Helper::Package.uninstall('mysql-server*')
 			end
 	
 			def start(params={})
