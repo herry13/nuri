@@ -50,12 +50,9 @@ module Nuri
 			end
 	
 			def uninstall(params={})
-				if File.exist?('/etc/mysql/nuri.cnf') and
-					not (Nuri::Helper::Command.exec('/bin/chmod 0600 /etc/mysql/nuri.cnf') and
-						Nuri::Helper::Command.exec('/bin/rm /etc/mysql/nuri.cnf'))
-					return false
-				end
-				return Nuri::Helper::Package.uninstall('mysql-server*')
+				return false if Nuri::Helper::Package.uninstall('mysql-server*')
+				Nuri::Helper::Command.exec('/bin/rm -rf /etc/mysql') if File.exist?('/etc/mysql')
+				return true
 			end
 	
 			def start(params={})
