@@ -72,7 +72,7 @@ module Nuri
 				cmd = "cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null"
 				return false if ( system(cmd) != true )
 
-				cmd = "cd #{tiki_dir}; mv _htaccess .htaccess"
+				cmd = "cd #{tiki_dir}; mv -f _htaccess .htaccess"
 				return false if ( system(cmd) != true )
 
 				mysql_host = self.get_state('database.parent.address')

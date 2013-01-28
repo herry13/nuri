@@ -226,7 +226,7 @@ module Nuri
 
 			def execute_workflow(plan)
 				state = get_state
-				succeed = true
+				success = true
 				if plan['workflow'] != nil
 					begin
 						# update system information
@@ -234,18 +234,18 @@ module Nuri
 
 						# execute the action in sequential
 						if plan['type'] == 'sequential'
-							self.sequential_execution(plan)
+							success = self.sequential_execution(plan)
 						elsif plan['type'] == 'parallel'
 							# TODO -- implement parallel scheduler
-							succeed = false
+							success = false
 						else
-							succeed = false
+							success = false
 						end
 					rescue Timeout::Error
-						succeed = false
+						success = false
 					end
 				end
-				succeed
+				success
 			end
 
 			def sequential_execution(plan)
@@ -253,13 +253,13 @@ module Nuri
 					node = self.get_node(action['name'])
 					if node == nil
 						Nuri::Util.log "Cannot find module of action: #{action['name']}"
-						succeed = false
+						return false
 					else
-						succeed = self.execute(action, node)
+						return false if not self.execute(action, node)
 					end
-					break if not succeed
 					state = get_state
 				end
+				true
 			end
 
 			def execute(action, node)
