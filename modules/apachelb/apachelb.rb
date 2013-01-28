@@ -17,33 +17,19 @@ module Nuri
 	
 			# get state of this component in JSON
 			def update_state
-				# installed, running, version
+				# package apache2: installed, running, version
 				if File.exist?(InstallingLockFile)
 					@state['installed'] = @state['running'] = false
 					@state['version'] = ''
 				else
-					data = `/usr/bin/dpkg-query -W apache2 2>/dev/null`
-					data = data.split(' ')
-					@state['installed'] = (data.length > 1 and data[0] == 'apache2') and
-						File.exists?(ConfigFile)
-					if @state['installed']
-						@state['version'] = data[1]
-						data = `/usr/bin/service apache2 status`
-						@state['running'] = ((data =~ /is running/) != nil)
-					else
-						@state['version'] = ''
-						@state['running'] = false
-					end
+					@state['installed'] = Nuri::Helper::Package.installed?('apache2')
+					@state['version'] = Nuri::Helper::Package.version?('apache2')
+					@state['running'] = Nuri::Helper::Service.running?('apache2')
 				end
 
-				# ServerName setting
-				data = `/bin/grep "ServerName" #{ConfigFile} 2>/dev/null`.chop.strip
-				data = data.split(' ')
-				if data[1] != nil and data[1] != '<server_name>'
-					@state['server_name'] = data[1]
-				else
-					@state['server_name'] = ""
-				end
+				# ServerName
+				data = (File.file?(ConfigFile) ? `/bin/grep -e "ServerName " #{ConfigFile}` : "")
+				@state['server_name'] = (data.length > 0 ? data.strip.split(' ')[1] : '')
 	
 				# Balancer members setting
 				data =`/bin/grep "BalancerMember" #{ConfigFile} 2>/dev/null`.chop
@@ -62,6 +48,17 @@ module Nuri
 				result = false
 				begin
 					File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
+					return (Nuri::Helper::Package.install('apache2') and
+						Nuri::Helper::Service.stop('apache2') and
+						Nuri::Helper::Command.exec('/usr/sbin/a2enmod proxy') and
+						Nuri::Helper::Command.exec('/usr/sbin/a2enmod proxy_balancer') and
+						Nuri::Helper::Command.exec('/usr/sbin/a2enmod proxy_http') and
+						Nuri::Helper::Command.exec('/usr/sbin/a2enmod status') and
+						Nuri::Helper::Command.exec("/bin/rm -f /etc/apache2/sites-enabled/*") and
+						Nuri::Helper::Command.exec("/bin/cp -f #{Nuri::Util.home_dir}/modules/apachelb/load_balancer #{ConfigFile}") and
+						Nuri::Helper::Service.stop('apache2'))
+
+=begin
 					result = system('/usr/bin/apt-get -y install apache2')
 					result = system('/usr/bin/service apache2 stop') if result == true
 					result = system('/usr/sbin/a2enmod proxy') if result == true
@@ -72,27 +69,25 @@ module Nuri
 					cmd = "/bin/rm -f /etc/apache2/sites-enabled/*; /bin/cp -f #{Nuri::Util.home_dir}/modules/apachelb/load_balancer #{ConfigFile}"
 					self.stop
 					result = system(cmd)
-				rescue Exception
+=end
+				rescue
+					return false
 				ensure
 					File.delete(InstallingLockFile) if File.exist?(InstallingLockFile)
 				end
-
-				return (result == true)
 			end
 
 			def uninstall(params={})
-				result = system("/bin/rm -f #{ConfigFile}")
-				result = system('/usr/bin/apt-get -y --purge remove apache2') if (result == true)
-				result = system('/usr/bin/apt-get -y --purge autoremove') if (result == true)
-				return (result == true)
+				return (Nuri::Helper::Command.exec("/bin/rm -f #{ConfigFile}") and
+					Nuri::Helper::Package.uninstall('apache2'))
 			end
 
 			def start
-				return ( system('/usr/bin/sudo /usr/bin/service apache2 start') == true )
+				return Nuri::Helper::Service.start('apache2')
 			end
 
 			def stop
-				return ( system('/usr/bin/sudo /usr/bin/service apache2 stop') == true )
+				return Nuri::Helper::Service.stop('apache2')
 			end
 
 			def set_members(params={})

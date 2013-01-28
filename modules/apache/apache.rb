@@ -101,6 +101,7 @@ module Nuri
 			end
 
 			def set_server_name(params={})
+=begin
 				return false if not params.has_key?('target')
 				server_name = params['target']
 				data = File.read(ConfigFile)
@@ -119,6 +120,10 @@ module Nuri
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
 
 				true
+=end
+				server_name = params['target']
+				return false if server_name.nil?
+				return Nuri::Helper::Command.exec("sed -i 's/ServerName.*/ServerName #{server_name}/g' #{ConfigFile}")
 			end
 
 			def install_php_mysql_module

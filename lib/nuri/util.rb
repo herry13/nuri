@@ -228,6 +228,12 @@ module Nuri
 				return nil if command.length <= 0
 				return `#{command} 2>/dev/null`.to_s
 			end
+
+			def self.exec(command)
+				command = command.to_s
+				return true if command.length <= 0
+				return (system(command) == true)
+			end
 		end
 
 		module Service
