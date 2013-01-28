@@ -241,7 +241,7 @@ module Nuri
 				service = service.to_s
 				return false if service.length <= 0
 				data = `/usr/bin/service #{service} status 2>/dev/null`
-				return ((data =~ /is running/) != nil)
+				return (not (data =~ /is running/).nil? or not (data =~ /start\/running/).nil?)
 			end
 
 			def self.start(service)
