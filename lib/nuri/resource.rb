@@ -177,6 +177,7 @@ puts 'parent: ' + @parent.class.name
 				else
 					system = Nuri::Util.get_system_information
 					if system.has_key?(first)
+puts system.inspect
 						return get_remote_path_state(system[first], path)
 					end
 				end
@@ -186,6 +187,7 @@ puts 'parent: ' + @parent.class.name
 		end
 
 		def get_remote_path_state(address, path)
+puts address, path
 			url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
 
 			begin
