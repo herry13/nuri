@@ -71,7 +71,7 @@ module Nuri
 			# 2) repairing the goal by executing a BSig operator
 			def start
 				return if self.is_active
-				Nuri::Util.log 'Starting BSig executor'
+				Nuri::Util.log 'BSig engine is started'
 
 				@thread = Thread.new {
 					begin
