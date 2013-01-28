@@ -202,8 +202,8 @@ module Nuri
 				package = package.to_s
 				return false if package.length <= 0
 				return true if installed?(package)
-				if (system("/usr/bin/apt-get -y install #{package} 2>/dev/null 1>/dev/null") == false)
-					system("/usr/bin/apt-get update 2>/dev/null 1>/dev/null")
+				if (system("/usr/bin/sudo /usr/bin/apt-get -y install #{package} 2>/dev/null 1>/dev/null") == false)
+					system("/usr/bin/sudo /usr/bin/apt-get update 2>/dev/null 1>/dev/null")
 				else
 					return true
 				end
@@ -214,8 +214,8 @@ module Nuri
 				package = package.to_s
 				return false if package.length <= 0
 				return true if not installed?(package)
-				if (system("/usr/bin/apt-get -y --purge remove #{package} 1>/dev/null 2>/dev/null") == true)
-					system("/usr/bin/apt-get -u --purge autoremove 1>/dev/null 2>/dev/null")
+				if (system("/usr/bin/sudo /usr/bin/apt-get -y --purge remove #{package} 1>/dev/null 2>/dev/null") == true)
+					system("/usr/bin/sudo /usr/bin/apt-get -u --purge autoremove 1>/dev/null 2>/dev/null")
 					return true
 				end
 				return false
@@ -248,14 +248,14 @@ module Nuri
 				service = service.to_s
 				return false if service.length <= 0
 				return true if running?(service)
-				return (system("/usr/bin/service #{service} start 2>/dev/null") == true)
+				return (system("/usr/bin/sudo /usr/bin/service #{service} start 2>/dev/null") == true)
 			end
 
 			def self.stop(service)
 				service = service.to_s
 				return false if service.length <= 0
 				return true if not running?(service)
-				return (system("/usr/bin/service #{service} stop 2>/dev/null") == true)
+				return (system("/usr/bin/sudo /usr/bin/service #{service} stop 2>/dev/null") == true)
 			end
 		end
 	end
