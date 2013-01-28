@@ -229,23 +229,37 @@ module Nuri
 				succeed = true
 				if plan['workflow'] != nil
 					begin
-						plan['workflow'].each do |action|
-							node = self.get_node(action['name'])
-							if node == nil
-								Nuri::Util.log "Cannot find module of action: #{action['name']}"
-								succeed = false
-							else
-								succeed = self.execute(action, node)
-							end
-							break if not succeed
-							state = get_state
+						# update system information
+						self.update_system
+
+						# execute the action in sequential
+						if plan['type'] == 'sequential'
+							self.sequential_execution(plan)
+						elsif plan['type'] == 'parallel'
+							# TODO -- implement parallel scheduler
+							succeed = false
+						else
+							succeed = false
 						end
 					rescue Timeout::Error
 						succeed = false
-						# TODO: retry exec the workflow here
 					end
 				end
 				succeed
+			end
+
+			def sequential_execution(plan)
+				plan['workflow'].each do |action|
+					node = self.get_node(action['name'])
+					if node == nil
+						Nuri::Util.log "Cannot find module of action: #{action['name']}"
+						succeed = false
+					else
+						succeed = self.execute(action, node)
+					end
+					break if not succeed
+					state = get_state
+				end
 			end
 
 			def execute(action, node)
@@ -311,10 +325,12 @@ module Nuri
 				system = {}
 				@main['system'].each do |key,value|
 					next if key[0,1] == '_'
-					if value.is_a?(Hash) and value.isobject and
-						value['_classes'].rindex(Nuri::Config::MainComponent) != nil
-
-						system[key] = value['address']
+					if value.is_a?(Hash) and value.isobject and value['_classes'].rindex(Nuri::Config::MainComponent) != nil
+						if self.vm?(value) # a VM node
+							_, system[key] = self.get_vm_address_by_name(value['_self'])
+						else # a standard Machine
+							system[key] = value['address'].to_s
+						end
 					end
 				end
 				system

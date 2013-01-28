@@ -82,7 +82,6 @@ module Nuri
 			end
 
 			def set_tikiweb(params={})
-begin
 				# 1) revoke previous permissions
 				db_name = self.get_state('db_name')
 				db_user = self.get_state('db_user')
@@ -96,7 +95,6 @@ begin
 					db_host = self.get_state(host + '.parent.domainname')
 					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{db_host}' IDENTIFIED BY '#{db_password}';"
 				}
-puts sql
 
 				config = self.read_config
 				if not self.execute_sql(sql)
@@ -108,10 +106,6 @@ puts sql
 					self.write_config(config)
 					return true
 				end
-rescue Exception => exp
-	puts exp.to_s
-	puts exp.backtrace
-end
 			end
 
 			def set_account(params={})
@@ -158,7 +152,6 @@ end
 			def do_query(host, port, user, password, db_name, sql, query=false)
 				File.open(ScriptFile, 'w') { |f| f.write(sql) }
 				cmd = "mysql --user=#{user} --password=#{password} --host=#{host} --port=#{port} #{db_name} < #{ScriptFile}"
-puts cmd
 				if not query
 					result = system(cmd)
 					File.delete(ScriptFile) if File.exist?(ScriptFile)
@@ -176,18 +169,6 @@ puts cmd
 				passwd = self.get_state('database.root_password')
 
 				return do_query(host, port, user, passwd, db_name, sql, query)
-=begin
-				File.open(ScriptFile, 'w') { |f| f.write(sql) }
-				cmd = "mysql --user=#{user} --password=#{passwd} --host=#{host} --port=#{port} #{db_name} < #{ScriptFile}"
-
-				if not query
-					result = system(cmd)
-					File.delete(ScriptFile) if File.exist?(ScriptFile)
-					return (result == true)
-				else
-					return `cmd`
-				end
-=end
 			end
 	
 		end

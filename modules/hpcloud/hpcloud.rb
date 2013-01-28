@@ -122,7 +122,8 @@ module Nuri
 					:flavor_id => DefaultFlavorID, #vm['flavor_id'],
 					:image_id => DefaultImageID,   #vm['image_id'],
 					:key_name => DefaultKeyName,   #vm['key_name'],
-					:security_groups => ['default'])
+					:security_groups => ['default'],
+					:metadata => {'name' => name})
 				if not new_server.nil?
 					# wait until the new VM "ACTIVE"
 					counter = 120
@@ -134,7 +135,7 @@ module Nuri
 					end
 
 					if info.state != "ACTIVE"
-						Nuri::Util.warn "Too long waiting VM to become active #{name}"
+						Nuri::Util.error "Too long waiting VM to become active #{name}"
 						self.delete_vm('vm' => name)
 						return false
 					end
@@ -148,7 +149,7 @@ module Nuri
 					end
 
 					if not self.is_port_open?(address, 22)
-						Nuri::Util.warn "Cannot connect to SSH server of: #{name}"
+						Nuri::Util.error "Cannot connect to SSH server of: #{name}"
 						self.delete_vm('vm' => name)
 						return false
 					end
@@ -160,12 +161,11 @@ module Nuri
 					options = "-i #{pub_key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					remote_command = "'/bin/bash -s' < #{script_file}"
 					cmd = "/usr/bin/ssh #{options} ubuntu@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
-					succeed = (system(cmd) == true)
 
-					if succeed
+					if Nuri::Helper::Command.exec(cmd)
 						remote_command = "'/usr/bin/sudo nuri/bin/nuri.rb client start'"
 						cmd = "timeout 5 /usr/bin/ssh #{options} ubuntu@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
-						system(cmd)
+						Nuri::Helper::Command.exec(cmd)
 						succeed = Nuri::Util.is_nuri_active?(address)
 						counter = 30
 						while not succeed and counter > 0
@@ -175,7 +175,6 @@ module Nuri
 						end
 					else
 						Nuri::Util.log "Cannot install Nuri on the new VM: #{name}"
-						#self.delete_vm('vm' => name)
 						return false
 					end
 

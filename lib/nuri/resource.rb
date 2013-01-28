@@ -187,6 +187,9 @@ puts system.inspect
 		end
 
 		def get_remote_path_state(address, path)
+			address = address.to_s
+			path = path.to_s
+			return nil if address.length <= 0
 puts address, path
 			url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
 
