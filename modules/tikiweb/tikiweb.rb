@@ -75,8 +75,8 @@ module Nuri
 				cmd = "cd #{tiki_dir}; mv _htaccess .htaccess"
 				return false if ( system(cmd) != true )
 
-				mysql_host = self.get_state('database.parent.domainname')
-				mysql_host = (mysql_host == Nuri::Util.domainname ? 'localhost' : mysql_host)
+				mysql_host = self.get_state('database.parent.address')
+				#mysql_host = (mysql_host == Nuri::Util.domainname ? 'localhost' : mysql_host)
 				db_name = self.get_state('database.db_name')
 				db_user = self.get_state('database.db_user')
 				db_password = self.get_state('database.db_password')
