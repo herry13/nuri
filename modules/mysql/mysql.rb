@@ -41,7 +41,7 @@ module Nuri
 					Nuri::Helper::Command.exec('echo mysql-server mysql-server/root_password_again select mysql | debconf-set-selections') and
 					Nuri::Helper::Package.install('mysql-server') and
 					Nuri::Helper::Service.stop('mysql') and
-					Nuri::Helper::Command.exec('/bin/echo mysql > /etc/mysql.nuri.cnf') and
+					Nuri::Helper::Command.exec('/bin/echo mysql > /etc/mysql/nuri.cnf') and
 					Nuri::Helper::Command.exec('/bin/chmod 0400 /etc/mysql/nuri.cnf'))
 			end
 	
