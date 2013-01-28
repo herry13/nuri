@@ -25,10 +25,11 @@ module Nuri
 				
 				system_info = Nuri::Util.get_system_information
 				if system_info.has_key?(@name) and system_info[@name].to_s.length > 0
-					@state['domainname'] = system_info[@name]
+					@state['address'] = system_info[@name]
 				else
-					@state["domainname"] = Nuri::Util.domainname
+					@state['address'] = ''
 				end
+				@state["domainname"] = Nuri::Util.domainname
 				@state["ip_addr"] = Nuri::Util.local_ip
 				@state["version"] = `uname -r`.strip
 				@state["arch"] = `uname -p`.strip

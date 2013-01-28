@@ -92,7 +92,7 @@ module Nuri
 				# 2) grant permissions from current tikiweb
 				sql = ''
 				params['webs'].each.each { |host|
-					db_host = self.get_state(host + '.parent.domainname')
+					db_host = self.get_state(host + '.parent.address')
 					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{db_host}' IDENTIFIED BY '#{db_password}';"
 				}
 
