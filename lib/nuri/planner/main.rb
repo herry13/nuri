@@ -178,7 +178,7 @@ module Nuri
 						else nil
 					end
 
-					command = "#{command} 1> /dev/null 2>/dev/null" if not debug and os == 'linux'
+					command = "ulimit -Sv 2000000; nice #{command} 1> /dev/null 2>/dev/null" if not debug and os == 'linux'
 
 					Kernel.system(command)
 					plan = (File.exist?(plan_file) ? File.read(plan_file) : nil)

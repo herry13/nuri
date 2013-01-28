@@ -8,7 +8,8 @@ module Nuri
 			include Nuri::Resource
 
 			ConfigFile = '/etc/apache2/sites-available/default'
-			RunningLockFile = '/tmp/nuri_apache_installing'
+			InstallingLockFile = '/tmp/nuri_apache_installing'
+			NotRunningLockFile = '/tmp/nuri_apache_not_running'
 
 			def initialize
 				self.register('Apache', 'apache')
@@ -17,87 +18,63 @@ module Nuri
 			# get state of this component in JSON
 			def update_state
 				# php module
-				data = `/usr/bin/dpkg-query -W libapache2-mod-php5 2> /dev/null`.chop
-				data = data.split(' ')
-				@state['php_module'] = (data.length > 1 and data[0] == 'libapache2-mod-php5')
-
+				@state['php_module'] = Nuri::Helper::Package.installed?('libapache2-mod-php5')
 				# php_mysql module
-				data = `/usr/bin/dpkg-query -W php5-mysql 2> /dev/null`
-				data = data.split(' ')
-				@state['php_mysql_module'] = (data.length > 1 and data[0] == 'php5-mysql')
+				@state['php_mysql_module'] = Nuri::Helper::Package.installed?('php5-mysql')
 
-				# installed & running
-				data = `/usr/bin/dpkg-query -W apache2 2>/dev/null`
-				data = data.split(' ')
-				@state["installed"] = (data.length > 1 and data[0] == 'apache2')
-				if @state["installed"]
-					@state["version"] = data[1]
-					if File.exist?(RunningLockFile)
-						@state['running'] = false
-					else
-						data = `/usr/bin/service apache2 status`
-						@state["running"] = ((data =~ /is running/) != nil)
-					end
+				# apache2 installed & running
+				if File.exist?(InstallingLockFile)
+					@state['installed'] = @state['running'] = false
+					@state['version'] = ''
 				else
-					@state["version"] = ""
-					@state["running"] = false
+					@state['installed'] = Nuri::Helper::Package.installed?('apache2')
+					@state['version'] = Nuri::Helper::Package.version?('apache2')
+					@state['running'] = (File.exist?(NotRunningLockFile) ? false : Nuri::Helper::Service.running?('apache2'))
 				end
-				#end
+
 				# port
-				data = (File.file?("/etc/apache2/ports.conf") ?
-					`/bin/grep -e "^Listen " /etc/apache2/ports.conf` : "")
-				if data.length > 0
-					data = data.split(' ')
-					@state["port"] = data[1].to_i
-				else
-					@state["port"] = 0
-				end
+				data = (File.file?("/etc/apache2/ports.conf") ? `/bin/grep -e "^Listen " /etc/apache2/ports.conf` : "")
+				@state['port'] = (data.length > 0 ?	@state["port"] = data.split(' ')[1].to_i : 0)
 
 				# document root
 				data = (File.file?(ConfigFile) ?	`/bin/grep -e "DocumentRoot " #{ConfigFile}` : "")
-				if data.length > 0
-					data = data.strip.split(' ')
-					@state["document_root"] = data[1]
-				else
-					@state["docment_root"] = ""
-				end
+				@state['document_root'] = (data.length > 0 ? data.strip.split(' ')[1] : '')
 
 				# ServerName
 				data = (File.file?(ConfigFile) ? `/bin/grep -e "ServerName " #{ConfigFile}` : "")
-				if data.length > 0
-					data = data.strip.split(' ')
-					@state['server_name'] = data[1]
-				else
-					@state['server_name'] = ''
-				end
+				@state['server_name'] = (data.length > 0 ? data.strip.split(' ')[1] : '')
 
 				return @state
 			end
 
 			def install
-				result = false
-				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
-				result = system('/usr/bin/apt-get -y install apache2')
-				result = system('/usr/bin/sudo /usr/bin/service apache2 stop') if result == true
-				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
-				return (result == true)
+				begin
+					File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
+					return (Nuri::Helper::Package.install('apache2') and
+							Nuri::Helper::Service.stop('apache2'))
+				rescue
+					return false
+				ensure
+					File.delete(InstallingLockFile) if File.exist?(InstallingLockFile)
+				end
 			end
 		
 			def uninstall
-				result = system('/usr/bin/apt-get -y --purge remove apache2*')
-				system('/usr/bin/apt-get -y --purge autoremove') if (result == true)
-				system('/bin/rm -rf /etc/apache2') if File.directory?('/etc/apache2')
-				return (result == true)
+				begin
+					Nuri::Helper::Package.uninstall('apache2*')
+					system('/bin/rm -rf /etc/apache2') if File.directory?('/etc/apache2')
+					return true
+				rescue
+				end
+				return false
 			end
 		
 			def start
-				result = system('/usr/bin/sudo /usr/bin/service apache2 start')
-				return (result == true)
+				return Nuri::Helper::Service.start('apache2')
 			end
 		
 			def stop
-				result = system('sudo /usr/bin/service apache2 stop')
-				return (result == true)
+				return Nuri::Helper::Service.stop('apache2')
 			end
 		
 			def set_port(params=nil)
@@ -145,35 +122,47 @@ module Nuri
 			end
 
 			def install_php_mysql_module
-				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
-				success = Nuri::Util.installed?('php5-mysql')
-				self.stop if success
-				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
-				return success
+				begin
+					File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
+					return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.install('php5-mysql')
+					return false
+				rescue
+				ensure
+					File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
+				end
 			end
 
 			def uninstall_php_mysql_module
-				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
-				success = Nuri::Util.uninstalled?('php5-mysql')
-				self.stop if success
-				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
-				return success
+				begin
+					File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
+					return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.uninstall('php5-mysql')
+					return false
+				rescue
+				ensure
+					File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
+				end
 			end
 
 			def install_php_module
-				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
-				success = Nuri::Util.installed?('libapache2-mod-php5')
-				self.stop if success
-				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
-				return success
+				begin
+					File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
+					return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.install('libapache2-mod-php5')
+					return false
+				rescue
+				ensure
+					File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
+				end
 			end
 
 			def uninstall_php_module
-				File.open(RunningLockFile, 'w') { |f| f.write(' ') }
-				success = Nuri::Util.uninstalled?('libapache2-mod-php5')
-				self.stop if success
-				File.delete(RunningLockFile) if File.exist?(RunningLockFile)
-				return success
+				begin
+					File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
+					return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.uninstall('libapache2-mod-php5')
+					return false
+				rescue
+				ensure
+					File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
+				end
 			end
 		end
 	end

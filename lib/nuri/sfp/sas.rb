@@ -573,7 +573,16 @@ puts e.backtrace
 			def process_procedure(procedure, object)
 				operators = ground_procedure_parameters(procedure)
 				if operators != nil
-					operators.each { |op| process_operator(op) }
+					invalid_operators = []
+					operators.each do |op|
+						#begin
+							process_operator(op)
+						#rescue UndefinedValueException
+						#	invalid_operators << op
+						#	puts "TODO -- invalid operator: " + op['_self'].to_s
+						#end
+					end
+					#operators.delete_if { |op| not invalid_operators.index(op).nil? }
 				end
 				# remove the procedure because we don't need it anymore
 				object.delete(procedure['_self'])
@@ -592,6 +601,7 @@ puts e.backtrace
 					type = (v.isnull ? v['_isa'] : (v.isset ? "(#{v['_isa']})" : nil))
 					next if type == nil
 					@types[ type ].each { |val| params[k] << val if not (val.is_a?(Hash) and val.isnull)	}
+					#puts k.to_s + ": " + params[k].length.to_s
 				}
 				# combinatorial method for all possible values of parameters
 				# using recursive method
@@ -1083,7 +1093,7 @@ puts e.backtrace
 								substitute_template(grounder, formula['_template'], formula)
 							end
 						else
-							setvalue = @root['initial'].at?(ref)
+							setvalue = (ref.is_a?(Array) ? ref : @root['initial'].at?(ref))
 							if setvalue.is_a?(Hash) and setvalue.isset
 								# substitute SET
 								grounder = ParameterGrounder.new(@root['initial'], {})
@@ -1100,8 +1110,9 @@ puts e.backtrace
 									substitute_template(grounder, formula['_template'], formula)
 								end
 							else
-								#puts setvalue.inspect + ' -- ' + formula.ref
-								raise Exception, 'Undefined'
+								#puts setvalue.inspect + ' -- ' + formula.ref + ' -- ' + var.to_s
+								#raise UndefinedValueException, 'Undefined'
+								raise UndefinedValueException.new(var)
 							end
 						end
 						formula['_type'] = 'and'
@@ -1212,10 +1223,14 @@ puts e.backtrace
 
 		end
 
-		class VariableNotFoundException < Exception
-		end
+		class VariableNotFoundException < Exception; end
 
-		class ClassNotFoundException < Exception
+		class ClassNotFoundException < Exception;	end
+
+		class UndefinedValueException < Exception
+			attr_accessor :var
+
+			def to_s; return @var; end
 		end
 
 		# Visitor class has 3 attributes
@@ -1421,6 +1436,14 @@ puts e.backtrace
 						value['_self'] = name if value.is_a?(Hash)
 					end
 				end
+				# TODO ----- HACK! -----
+				if obj.is_a?(Hash) and obj.isconstraint and obj['_type'] == 'iterator' and
+						value.is_a?(String) and value.isref and map.has_key?(value)
+					obj[name] = value = map[value]
+					#puts map[value].inspect
+					#puts "==>> " + obj.ref.push(name)
+				end
+				# ------ END of HACK! ----
 				if value.is_a?(String) and value.isref
 					map.each { |k,v|
 						if value == k

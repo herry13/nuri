@@ -5,7 +5,8 @@ module Nuri
 	MaxLogAge = 7 # 7 days
 	MaxLogFileSize = 2097152
 
-	class Util
+	#class Util
+	module Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
 		@@logger = Logger.new(@@home_dir + "/var/message.log", Nuri::MaxLogAge, Nuri::MaxLogFileSize)
 		@@system = nil
@@ -172,9 +173,86 @@ module Nuri
 			false
 		end
 
-		private
-		def initialize; end
+		#private
+		#def initialize; end
 
 	end
+
+	module Helper
+		module Package
+			def self.installed?(package)
+				package = package.to_s
+				return false if package.length <= 0
+				data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
+				return true if (data[0].to_s == package)
+				false
+			end
+
+			def self.version?(package)
+				package = package.to_s
+				return false if package.length <= 0
+				data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
+				if data[0].to_s == package
+					return data[1]
+				end
+				""
+			end
+
+			def self.install(package)
+				package = package.to_s
+				return false if package.length <= 0
+				return true if installed?(package)
+				if (system("/usr/bin/apt-get -y install #{package} 2>/dev/null 1>/dev/null") == false)
+					system("/usr/bin/apt-get update 2>/dev/null 1>/dev/null")
+				else
+					return true
+				end
+				return (system("/usr/bin/apt-get -y install #{package} 2>/dev/null 1>/dev/null") == true)
+			end
+
+			def self.uninstall(package)
+				package = package.to_s
+				return false if package.length <= 0
+				return true if not installed?(package)
+				if (system("/usr/bin/apt-get -y --purge remove #{package}") == true)
+					system("/usr/bin/apt-get -u --purge autoremove")
+					return true
+				end
+				return false
+			end
+		end
+
+		module Command
+			def self.getoutput(command)
+				command = command.to_s
+				return nil if command.length <= 0
+				return `#{command} 2>/dev/null`.to_s
+			end
+		end
+
+		module Service
+			def self.running?(service)
+				service = service.to_s
+				return false if service.length <= 0
+				data = `/usr/bin/service #{service} status`
+				return ((data =~ /is running/) != nil)
+			end
+
+			def self.start(service)
+				service = service.to_s
+				return false if service.length <= 0
+				return true if running?(service)
+				return (system("/usr/bin/service #{service} start") == true)
+			end
+
+			def self.stop(service)
+				service = service.to_s
+				return false if service.length <= 0
+				return true if not running?(service)
+				return (system("/usr/bin/service #{service} stop") == true)
+			end
+		end
+	end
+
 end
 
