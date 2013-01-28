@@ -22,7 +22,13 @@ module Nuri
 				@state["os"] = Nuri::Util.os
 				@state["platform"] = Nuri::Util.platform
 				@state["hostname"] = Nuri::Util.hostname
-				@state["domainname"] = Nuri::Util.domainname
+				
+				system_info = Nuri::Util.get_system_information
+				if system_info.has_key?(@name) and system_info[@name].to_s.length > 0
+					@state['domainname'] = system_info[@name]
+				else
+					@state["domainname"] = Nuri::Util.domainname
+				end
 				@state["ip_addr"] = Nuri::Util.local_ip
 				@state["version"] = `uname -r`.strip
 				@state["arch"] = `uname -p`.strip
