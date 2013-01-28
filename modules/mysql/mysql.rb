@@ -50,7 +50,7 @@ module Nuri
 			end
 	
 			def uninstall(params={})
-				return false if Nuri::Helper::Package.uninstall('mysql-server*')
+				return false if Nuri::Helper::Package.uninstall('mysql-server')
 				Nuri::Helper::Command.exec('/bin/rm -rf /etc/mysql') if File.exist?('/etc/mysql')
 				return true
 			end
