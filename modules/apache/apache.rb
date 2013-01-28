@@ -61,7 +61,7 @@ module Nuri
 		
 			def uninstall
 				begin
-					Nuri::Helper::Package.uninstall('apache2*')
+					Nuri::Helper::Package.uninstall('apache2')
 					system('/bin/rm -rf /etc/apache2') if File.directory?('/etc/apache2')
 					return true
 				rescue
