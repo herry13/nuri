@@ -53,7 +53,6 @@ module Nuri
 				Nuri::Helper::Command.exec('/bin/chmod 0600 /etc/mysql/nuri.cnf;/bin/rm -f /etc/mysql/nuri.cnf') if
 					File.exist?('/etc/mysql/nuri.cnf')
 				result = Nuri::Helper::Package.uninstall('mysql-server')
-puts '=====>>>>> result: ' + result.to_s
 				return result
 			end
 	
