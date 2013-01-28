@@ -83,11 +83,11 @@ module Nuri
 
 				Nuri::Util.log 'Successfully load configuration file ' + cfile
 			rescue Exception => exp
-				Nuri::Util.log.error "Cannot load configuration file " + cfile + ' -- ' + exp.to_s
+				Nuri::Util.error "Cannot load configuration file " + cfile + ' -- ' + exp.to_s
 				$stderr.puts 'Cannot load configuration file ' + cfile
 				exit
 			rescue StandardError => stderr
-				Nuri::Util.log.error "Cannot load configuration file " + cfile
+				Nuri::Util.error "Cannot load configuration file " + cfile
 				$stderr.puts 'Cannot load configuration file ' + cfile
 				exit
 			end
@@ -154,36 +154,10 @@ module Nuri
 					machine.add(m) if not m.is_abstract
 					Nuri::Util.log "Successfully loaded module " + mod
 				rescue Exception => exp
-					Nuri::Util.log.error "Cannot load module " + mod + " -- " + exp.to_s
+					Nuri::Util.error "Cannot load module " + mod + " -- " + exp.to_s
 				end
 			end
 		end
-
-=begin
-		def get_default_state
-			begin
-				Dir.chdir(Nuri::Util.home_dir)
-
-				sfp = "include \"#{Nuri::Util.home_dir}/modules/machine/machine.sfp\"\n"
-				self.get_modules.each do |mod|
-					sfp += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"
-				end
-
-				sfp += "default {\n"
-				self.get_non_abstract_modules.each do |mod|
-					sfp += "#{mod} isa \n"
-				end
-				sfp += "}\n"
-
-				#puts sfp
-
-				#return Nuri::Sfp::Parser.to_sfp(sfp)
-			rescue Exception => exp
-				Nuri::Util.error "Cannot generate the default state"
-			end
-			nil
-		end
-=end
 
 		def parse_module_manifest(manifest_path)
 			manifest = {}
