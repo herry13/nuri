@@ -135,9 +135,7 @@ module Nuri
 			def set_server_name(params={})
 				server_name = params['name']
 				return false if server_name == nil
-
-				cmd = "sed -i 's/ServerName.*/ServerName #{server_name}/g' #{ConfigFile}"
-				return ( system(cmd) == true )
+				return Nuri::Helper::Command.exec("sed -i 's/ServerName.*/ServerName #{server_name}/g' #{ConfigFile}")
 			end
 
 		end
