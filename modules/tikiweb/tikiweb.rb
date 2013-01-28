@@ -61,19 +61,19 @@ module Nuri
 				doc_root = self.get_state('webserver.document_root')
 				path = self.get_state('path')
 				tiki_dir = doc_root + path
-				system('mkdir -p ' + tiki_dir) if not File.directory?(tiki_dir)
+				Nuri::Helper::Command.exec('mkdir -p ' + tiki_dir) if not File.directory?(tiki_dir)
 				return false if not File.directory?(tiki_dir)
 				if not File.file?(tiki_dir + '/index.php')
 					cmd = 'cd ' + tiki_dir + ';/usr/bin/wget ' + DownloadURL
-					return false if ( system(cmd) != true )
-					cmd = 'cd ' + tiki_dir + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .;rm -rf tiki-9.2'
-					return false if ( system(cmd) != true )
+					return false if not Nuri::Helper::Command.exec(cmd)
+					cmd = 'cd ' + tiki_dir + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .; mv tiki-9.2/.* .; rm -rf tiki-9.2'
+					return false if not Nuri::Helper::Command.exec(cmd)
 				end
 				cmd = "cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null"
-				return false if ( system(cmd) != true )
+				return false if not Nuri::Helper::Command.exec(cmd)
 
-				cmd = "cd #{tiki_dir}; mv -f _htaccess .htaccess"
-				return false if ( system(cmd) != true )
+				cmd = "cd #{tiki_dir}; sudo /bin/sh htaccess.sh" # mv -f _htaccess .htaccess"
+				return false if not Nuri::Helper::Command.exec(cmd)
 
 				mysql_host = self.get_state('database.parent.address')
 				#mysql_host = (mysql_host == Nuri::Util.domainname ? 'localhost' : mysql_host)
