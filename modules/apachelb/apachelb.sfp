@@ -15,6 +15,16 @@ class Apachelb extends Service {
 		}
 	}
 
+	/*procedure set_server_name_by_machine (machine isref Machine) {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.server_name = machine.address
+		}
+	}*/
+
 	procedure set_server_name (name isref String) {
 		condition {
 			this.installed = true

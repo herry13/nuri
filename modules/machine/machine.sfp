@@ -1,5 +1,6 @@
 class Machine {
 	running = false
+	address = ""
 
 	procedure start {
 		condition { }
