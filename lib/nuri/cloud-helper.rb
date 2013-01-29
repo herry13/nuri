@@ -78,6 +78,7 @@ module Nuri
 			if not address.nil?
 				# pull VM's state
 				node_state = self.get_node_state(address)
+				return nil if node_state.nil? # connection error with VM
 				# replace with current state
 				node_state[vm_name].each { |k,v| state[vm_name][k] = v if k[0,1] != '_' }
 				# set "created=true"

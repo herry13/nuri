@@ -528,7 +528,13 @@ puts e.backtrace
 			# process given operator
 			def process_operator(op)
 				# return if given operator is not valid
-				return if not normalize_formula(op['_condition'])
+				# - method "normalize_formula" return false
+				# - there's an exception during normalization process
+				begin
+					return if not normalize_formula(op['_condition'])
+				rescue Exception => exp
+					return
+				end
 				# at this step, the conditions formula has been normalized (AND/OR tree)
 				# AND conditions
 				if op['_condition']['_type'] == 'and'
@@ -1428,6 +1434,8 @@ puts e.backtrace
 
 					if modified and (name =~ /.*\.parent(\..*)?/ )
 						parent, last = name.pop_ref
+						parent_value = @root.at?(parent)
+						raise VariableNotFoundException, parent if parent_value.nil?
 						new_name = @root.at?(parent).ref.push(last) if last != 'parent'
 						new_name = @root.at?(parent).ref.to_top if last == 'parent'
 						obj[new_name] = value
