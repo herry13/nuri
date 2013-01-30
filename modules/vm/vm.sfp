@@ -2,7 +2,8 @@ include "modules/machine/machine.sfp"
 
 class VM extends Machine {
 	created is false
-	incloud isref Cloud
+	cloud_proxy isref Cloud
+	cloud_desc is ""
 	
 	/*procedure remove {
 		condition { }
