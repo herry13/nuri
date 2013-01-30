@@ -243,8 +243,7 @@ module Nuri
 				begin
 					Nuri::Util.debug 'remote conditions: ' + remote_flaws.inspect
 					remote_flaws.each do |address,flaws|
-						data = "json=" + JSON.generate(flaws)
-						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', data)
+						code, _ = @owner.put_data(address, Nuri::Port, '/bsig/goal', flaws)
 						Nuri::Util.debug 'request remote condition: ' + code + ' -- from: ' + address
 						raise Exception if code != '202'
 					end
