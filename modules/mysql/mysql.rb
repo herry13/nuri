@@ -44,17 +44,20 @@ module Nuri
 				return (Nuri::Helper::Command.exec('echo mysql-server mysql-server/root_password select mysql | debconf-set-selections') and
 					Nuri::Helper::Command.exec('echo mysql-server mysql-server/root_password_again select mysql | debconf-set-selections') and
 					Nuri::Helper::Package.install('mysql-server') and
+					Nuri::Helper::Command.exec('echo "\n[mysqld]\nmax_connect_errors = 10000" >> /etc/mysql/my.cnf') and
 					Nuri::Helper::Service.stop('mysql') and
 					Nuri::Helper::Command.exec('/bin/echo mysql > /etc/mysql/nuri.cnf') and
 					Nuri::Helper::Command.exec('/bin/chmod 0400 /etc/mysql/nuri.cnf'))
 			end
 	
 			def uninstall(params={})
-				result = Nuri::Helper::Package.uninstall('mysql-server')
-				Nuri::Helper::Package.uninstall('mysql*')
-				Nuri::Helper::Command.exec('/bin/chmod 0600 /etc/mysql/nuri.cnf;/bin/rm -f /etc/mysql/nuri.cnf') if
+				Nuri::Helper::Command.exec('/bin/rm -f /etc/mysql/nuri.cnf') if
 					File.exist?('/etc/mysql/nuri.cnf')
-				Nuri::Helper::Command.exec('/bin/rm -rf /etc/mysql') if File.exist?('/etc/mysql')
+				result = Nuri::Helper::Package.uninstall('mysql-server')
+				if result == false
+					result = Nuri::Helper::Package.uninstall('mysql*')
+				end
+				#Nuri::Helper::Command.exec('/bin/rm -rf /etc/mysql') if File.exist?('/etc/mysql')
 				return result
 			end
 	

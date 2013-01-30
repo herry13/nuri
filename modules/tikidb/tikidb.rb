@@ -32,9 +32,34 @@ module Nuri
 					# installed
 					if not port.is_a?(Nuri::Undefined) and not port.nil? and
 							not db_name.nil? and db_name != ''
+						# installed
 						sql = "show databases like '#{db_name}';"
 						result = do_query(host, port, user, passwd, db_name, sql, true)
 						@state['installed'] = result.split("\n")[1] == db_name
+
+						# tikiweb(s)
+						if @state['installed']
+							sql = "select password('#{@state['db_password']}');"
+							results = do_query(host, port, user, passwd, 'mysql', sql, true)
+							results = results.split("\n")
+							enc_passwd = results[1]
+							#enc_passwd.chop!
+							db_user = @state['db_user']
+							sql = "select host,password from user where user='#{db_user}'"
+							results = do_query(host, port, user, passwd, 'mysql', sql, true)
+							results = results.split("\n")
+							if results.length > 0
+								results.shift
+								results.each do |line|
+									parts = line.split(' ')
+									if parts[1] != enc_passwd
+										@state['tikiweb'] = []
+										break
+#puts parts[0] + ':' + parts[1] + ':' + enc_passwd if parts[1] != enc_passwd
+									end
+								end
+							end
+						end
 					end
 				end
 
@@ -86,14 +111,14 @@ module Nuri
 				db_name = self.get_state('db_name')
 				db_user = self.get_state('db_user')
 				db_password = self.get_state('db_password')
-				sql = "DELETE FROM db WHERE db = '#{db_name}';";
+				sql = "DELETE FROM db WHERE db = '#{db_name}'; DELETE FROM user WHERE user='#{db_user}';";
 				return false if not self.execute_sql(sql, 'mysql')
 
 				# 2) grant permissions from current tikiweb
 				sql = ''
 				params['webs'].each.each { |host|
 					db_host = self.get_state(host + '.parent.address')
-					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{db_host}' IDENTIFIED BY '#{db_password}';"
+					sql += "GRANT ALL ON #{db_name}.* TO '#{db_user}'@'#{db_host}' IDENTIFIED BY '#{db_password}'; FLUSH PRIVILEGES;"
 				}
 
 				config = self.read_config
