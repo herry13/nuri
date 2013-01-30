@@ -1,5 +1,6 @@
 class Machine {
 	running = false
+	created = true
 	address = ""
 
 	procedure start {
