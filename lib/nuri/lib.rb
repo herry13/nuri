@@ -230,26 +230,30 @@ module Nuri
 		# Send data with POST method to a remote address in JSON format
 		def post_data(address, port, path, data=nil, timeout=@read_timeout)
 			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			req = Net::HTTP::Post.new(url.path)
 			if URI.respond_to?('encode_www_form')
 				data = (data.nil? ? '' : URI.encode_www_form('json' => JSON.generate(data)))
+				res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
 			else
-				data = (data.nil? ? '' : Net::HTTP::Post.set_form_data('json' => JSON.generate(data)))
+				data = (data.nil? ? '' : {'json' => JSON.generate(data)})
+				req.set_form_data(data)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req) }
 			end
-			req = Net::HTTP::Post.new(url.path)
-			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
 			return res.code, res.body
 		end
 
 		# Send data with PUT method to a remote address in JSON format
 		def put_data(address, port, path, data=nil, timeout=@read_timeout)
 			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			req = Net::HTTP::Put.new(url.path)
 			if URI.respond_to?('encode_www_form')
 				data = (data.nil? ? '' : URI.encode_www_form('json' => JSON.generate(data)))
+				res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
 			else
-				data = (data.nil? ? '' : Net::HTTP::Post.set_form_data('json' => JSON.generate(data)))
+				data = (data.nil? ? '' : {'json' => JSON.generate(data)})
+				req.set_form_data(data)
+				res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req) }
 			end
-			req = Net::HTTP::Put.new(url.path)
-			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
 			return res.code, res.body
 		end
 
