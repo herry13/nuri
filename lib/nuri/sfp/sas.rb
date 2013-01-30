@@ -129,6 +129,7 @@ module Nuri
 	
 					# remove duplicates from type's set of value
 					@types.each_value { |type| type.uniq! }
+
 					# set domain values for each variable
 					self.set_variable_values
 	
@@ -170,8 +171,8 @@ module Nuri
 					self.search_and_merge_mutually_inclusive_operators
 	
 					#self.dump_types
-					#self.dump_operators
 					#self.dump_vars
+					#self.dump_operators
 	
 					@vars = @variables.values
 
@@ -433,8 +434,16 @@ puts e.backtrace
 				}
 				out += "#{count}\n#{goal}end_goal\n"
 				# operators
-				out += "#{@operators.length}\n"
-				@operators.each_value { |op| out += op.to_sas(@root['initial']) + "\n" }
+				#out += "#{@operators.length}\n"
+				ops = ''
+				total = 0
+				@operators.each_value { |op|
+					next if op.total_preposts <= 0
+					total += 1
+					ops += op.to_sas(@root['initial']) + "\n"
+				}
+				out += "#{total}\n"
+				out += ops
 				# axioms
 				out += "0"
 
@@ -818,17 +827,18 @@ puts e.backtrace
 					return [names, rest]
 				end
 
-				def normalize_multiple_right_values(left, right, formula)
+				def normalize_nested_right_only_multiple_values(left, right, formula)
+					# TODO -- evaluate this method
 					ref = right['_value']
 					key1 = Nuri::Sfp::Sas.next_constraint_key
 					c_or = create_or_constraint(key1, formula)
 					@variables[ref].each do |v|
+						value = ( (v.is_a?(Hash) and v.isobject) ? v.ref : v)
 						key2 = Nuri::Sfp::Sas.next_constraint_key
 						c_and = create_and_constraint(key2, c_or)
-						value = (v.is_a?(Hash) and v.isobject ? v.ref : v)
-						c_and[left] = create_equals_constraint(value)
-						c_and[ref] = create_equals_constraint(value) if right['_type'] == 'equals'
-						c_and[ref] = create_not_equals_constraint(value) if right['_type'] == 'not-equals'
+						#c_and[ref] = create_equals_constraint(value) ## HACK! -- this should be uncomment
+						c_and[left] = create_equals_constraint(value) if right['_type'] == 'equals'
+						c_and[left] = create_not_equals_constraint(value) if right['_type'] == 'not-equals'
 						c_or[key2] = c_and
 					end
 					formula.delete(left)
@@ -840,7 +850,7 @@ puts e.backtrace
 					# TODO
 					#puts 'nested right: ' + left + ' = ' + right['_value']
 
-					raise Exception 'not implemented: normalized_nested_right'
+					raise Exception, 'not implemented: normalized_nested_right'
 				end
 
 				def normalize_nested_right_only(left, right, formula)
@@ -848,7 +858,7 @@ puts e.backtrace
 					return if @variables.has_key?(value) and @variables[value].is_final
 
 					if @variables.has_key?(value)
-						normalize_multiple_right_values(left, right, formula)
+						normalize_nested_right_only_multiple_values(left, right, formula)
 					else
 						normalize_nested_right_values(left, right, formula)
 					end
@@ -862,7 +872,7 @@ puts e.backtrace
 					#last_names1 = Array.new
 					#ref_combinator(bucket1, rest, names, nil, last_names1)
 
-					raise Exception 'not implemented: normalized_nested_left_right'
+					raise Exception, 'not implemented: normalized_nested_left_right'
 				end
 
 				def normalize_nested_left_only(left, right, formula)
@@ -1279,8 +1289,9 @@ puts e.backtrace
 			end
 
 			def visit(name, value, parent)
-				return false if name[0,1] == '_' or #value.is_a?(Array) or
-						(value.is_a?(Hash) and not (value.isobject or value.isnull or value.isset))
+				return false if name[0,1] == '_'
+				return false if (value.is_a?(Hash) and not (value.isobject or value.isnull or value.isset))
+									# or value.is_a?(Array)
 
 				var_name = parent.ref.push(name)
 				isfinal = self.is_final(value)
@@ -1365,7 +1376,7 @@ puts e.backtrace
 					if value.isobject
 						value['_classes'].each { |c| @bucket[c] << value }
 					elsif value.isset
-						raise Exception 'not implemented -- set: ' + value['_isa']
+						raise Exception, 'not implemented -- set: ' + value['_isa']
 					end
 				elsif value.is_a?(Array)
 					if value.length > 0
@@ -1575,6 +1586,18 @@ puts e.backtrace
 					end
 				end
 				return op
+			end
+
+			def total_prevails
+				count = 0
+				self.each_value { |p| count += 1 if p.post.nil? }
+				count
+			end
+
+			def total_preposts
+				count = 0
+				self.each_value { |p| count += 1 if not p.post.nil? }
+				count
 			end
 
 			def get_pre_state

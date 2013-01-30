@@ -1,11 +1,8 @@
 include "modules/machine/machine.sfp"
 
-class Cloud extends Machine {
-	account_id is ""
-	auth_uri is ""
-	tenant_id is ""
-	zone is ""
-	secret_key is ""
+class Cloud {
+	running is false
+	description is ""
 
 	procedure delete_vm(vm isref VM) {
 		condition {

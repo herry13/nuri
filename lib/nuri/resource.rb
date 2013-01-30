@@ -98,40 +98,6 @@ module Nuri
 			return true
 		end
 
-=begin
-		def get_state(path=nil)
-			return self.get_all_state if path == nil or path.strip == ''
-
-			path.strip!
-			first, nextpath = path.split('/', 2)
-puts first + ' -- ' + nextpath
-			if first == 'parent'
-puts 'parent: ' + @parent.class.name
-				return @parent.get_state(path) if @parent != nil
-			elsif @children[first] != nil
-				state = @children[first].get_state
-				return self.get_path_value(state, nextpath)
-			else
-				return self.get_path_value(@state, path)
-			end
-
-			# not found
-			return Nuri::Undefined.new(path)
-		end
-
-		def get_path_value(state, path)
-			return state if path == nil or path == ''
-			return Nuri::Undefined.new if not state.is_a?(Hash)
-			first, nextpath = path.split('/', 2)
-			if state.has_key?(first)
-				return self.get_path_value(state[first], nextpath)
-			else
-				# not found
-				return Nuri::Undefined.new(path)
-			end
-		end
-=end
-
 		def get_state(path=nil)
 			return self.get_all_state if path == nil or path.strip == ''
 
@@ -177,7 +143,6 @@ puts 'parent: ' + @parent.class.name
 				else
 					system = Nuri::Util.get_system_information
 					if system.has_key?(first)
-puts system.inspect
 						return get_remote_path_state(system[first], path)
 					end
 				end
@@ -190,7 +155,6 @@ puts system.inspect
 			address = address.to_s
 			path = path.to_s
 			return nil if address.length <= 0
-puts address, path
 			url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
 
 			begin

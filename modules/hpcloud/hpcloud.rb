@@ -15,17 +15,19 @@ module Nuri
 
 			def update_state
 				self.reset
-				self.read_config.each { |k,v| @state[k] = v }
+				config = self.read_config
+				# set cloud name
+				@state['description'] = config['description']
 
-				if not @state['auth_uri'].nil?
+				# check running status
+				if not config['auth_uri'].nil?
 					begin
-						url = URI.parse(@state['auth_uri'])
+						url = URI.parse(config['auth_uri'])
 						@state['running'] = self.is_port_open?(url.host, url.port)
 					rescue Exception => exp
 						Nuri::Util.log 'HPCloud update state error: ' + exp.to_s
 					end
 				end
-				#@state['running'] = true # HACK!
 			end
 
 			def open_connection
@@ -78,16 +80,19 @@ module Nuri
 				return false
 			end
 
-			ConfigFile = '/var/lib/hpcloud/config.json'
+			#ConfigFile = '/var/lib/hpcloud/config.json'
 			def save_config(config)
-				dir = File.dirname(ConfigFile)
-				Dir.mkdir(dir) if not File.exist?(dir)
+				config_file = File.expand_path(File.dirname(__FILE__) + '/config.sfp')
+				#dir = File.dirname(ConfigFile)
+				#Dir.mkdir(dir) if not File.exist?(dir)
 				File.open(ConfigFile, 'w') { |f| f.write(JSON.generate(config)) }
 			end
 
 			def read_config
-				return JSON.parse(File.read(ConfigFile)) if File.exist?(ConfigFile)
-				return {}
+				config_file = File.expand_path(File.dirname(__FILE__) + '/config.sfp')
+				#return JSON.parse(File.read(ConfigFile)) if File.exist?(ConfigFile)
+				return {} if not File.exist?(config_file)
+				return Nuri::Sfp::Parser.parse_file(config_file)['config']
 			end
 
 			# SFP method

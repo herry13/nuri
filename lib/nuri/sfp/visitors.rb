@@ -43,8 +43,15 @@ module Nuri
 				if value.is_a?(Hash)
 					value['_parent'] = parent
 					value['_self'] = name
-					value['_context'] = 'object' if not value.has_key?('_context') and
-							value.has_key?('_isa')
+					if not value.has_key?('_context')
+						value['_context'] = 'object'
+						if value.has_key?('_isa')
+						else
+							value['_isa'] = '$.Object'
+						end
+					end
+					#value['_context'] = 'object' if not value.has_key?('_context') and
+					#		value.has_key?('_isa')
 					Nuri::Sfp::Sfplibs.expand_object(value, @root) if value.isobject
 				end
 				return true

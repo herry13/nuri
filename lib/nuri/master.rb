@@ -212,7 +212,7 @@ module Nuri
 			end
 
 			def get_plan(state=nil, json=false, parallel=false)
-				sfp_task = create_task(state)
+				sfp_task = self.create_task(state)
 				planner = Nuri::Planner::Solver.new
 				return planner.solve_sfp(sfp_task, json, parallel)
 			end
@@ -225,7 +225,7 @@ module Nuri
 			end
 
 			def execute_workflow(plan)
-				state = get_state
+				#state = get_state
 				success = true
 				if plan['workflow'] != nil
 					begin
@@ -257,7 +257,8 @@ module Nuri
 					else
 						return false if not self.execute(action, node)
 					end
-					state = get_state
+					self.update_system
+					#state = get_state
 				end
 				true
 			end
@@ -268,6 +269,9 @@ module Nuri
 					action['effect'].each do |key,value|
 						v = state.at?(key)
 						raise Nuri::ExecutionFailedException, action['name'] if state.at?(key) != value
+						#if self.get_state(key) != value
+						#	raise Nuri::ExecutionFailedException, action['name']
+						#end
 					end
 				end
 
@@ -310,7 +314,7 @@ module Nuri
 					false
 				end
 
-				print '- executing ' + action['name'] + '...'
+				print '- executing ' + action['name'] + JSON.generate(action['parameters']) + '...'
 				if node.has_key?('address')
 					succeed = remote_execute(action, node['address'])
 				else
@@ -327,7 +331,7 @@ module Nuri
 					next if key[0,1] == '_'
 					if value.is_a?(Hash) and value.isobject and value['_classes'].rindex(Nuri::Config::MainComponent) != nil
 						if self.vm?(value) # a VM node
-							_, system[key] = self.get_vm_address_by_name(value['_self'])
+							_, _, system[key] = self.get_vm_address_by_name(value['_self'])
 						else # a standard Machine
 							system[key] = value['address'].to_s
 						end
@@ -339,6 +343,7 @@ module Nuri
 			def update_system
 				system = get_system_information
 				system.each_value do |target|
+					next if target.nil? or target.to_s.length <= 0
 					begin
 						post_data(target, Nuri::Port, '/system', system)
 					rescue Exception => e

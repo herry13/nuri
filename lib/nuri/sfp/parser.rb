@@ -6,6 +6,10 @@ module Nuri
 			attr_accessor :root, :root_dir
 
 			# Parse SFP file and return its JSON representation
+			def self.parse_file(file)
+				return file_to_sfp(file)
+			end
+
 			def self.file_to_sfp(file)
 				parser = Parser.new
 				parser.parse_file(file)

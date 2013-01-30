@@ -1,47 +1,7 @@
 include "modules/cloud/cloud.sfp"
 
-class HPCloud {
-	account_id is ""
-	auth_uri is ""
-	tenant_id is ""
-	zone is ""
-	secret_key is ""
+class HPCloud extends Cloud {
 	running is false
-
-	procedure set_account_id(account_id isref String) {
-		condition { }
-		effect {
-			this.account_id = account_id
-		}
-	}
-
-	procedure set_auth_uri(auth_uri isref String) {
-		condition { }
-		effect {
-			this.auth_uri = auth_uri
-		}
-	}
-
-	procedure set_tenant_id(tenant_id isref String) {
-		condition { }
-		effect {
-			this.tenant_id = tenant_id
-		}
-	}
-
-	procedure set_zone(zone isref String) {
-		condition { }
-		effect {
-			this.zone = zone
-		}
-	}
-
-	procedure set_secret_key(secret_key isref String) {
-		condition { }
-		effect {
-			this.secret_key = secret_key
-		}
-	}
 
 	procedure delete_vm(vm isref VM) {
 		condition {
