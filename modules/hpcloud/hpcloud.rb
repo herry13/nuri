@@ -17,7 +17,7 @@ module Nuri
 				self.reset
 				config = self.read_config
 				# set cloud name
-				@state['description'] = config['description']
+				@state['description'] = (config.has_key?('description') ? config['description'] : '')
 
 				# check running status
 				if not config['auth_uri'].nil?
