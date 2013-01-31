@@ -132,10 +132,6 @@ module Nuri
 				true
 			end
 
-			#def set_server_name_by_machine(params={})
-			#	server_name = self.get_state(
-			#end
-
 			def set_server_name(params={})
 				server_name = params['name']
 				return false if server_name == nil
