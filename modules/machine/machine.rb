@@ -24,12 +24,12 @@ module Nuri
 				@state["hostname"] = Nuri::Util.hostname
 				
 				system_info = Nuri::Util.get_system_information
+				@state["domainname"] = Nuri::Util.domainname
 				if system_info.has_key?(@name) and system_info[@name].to_s.length > 0
 					@state['address'] = system_info[@name]
 				else
-					@state['address'] = ''
+					@state['address'] = @state['domainname']
 				end
-				@state["domainname"] = Nuri::Util.domainname
 				@state["ip_addr"] = Nuri::Util.local_ip
 				@state["version"] = `uname -r`.strip
 				@state["arch"] = `uname -p`.strip

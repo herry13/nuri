@@ -16,7 +16,7 @@ commands:
   main              print the content of "main.sfp"
   state [details]   print the current state of this node
   pull [details]    pull and print the current state of all managed nodes
-  plan              auto-generate a workflow to achieve the goal state;
+  plan [main-file]  auto-generate a workflow to achieve the goal state;
                     user can also execute the workflow in order to achieve
                     the goal state
   update-system     push system information to all managed nodes
@@ -54,17 +54,17 @@ commands:
 		end
 
 	elsif ARGV[1] == 'plan'
-		parallel = (ARGV[2] == 'par')
-		plan = Nuri::Master.plan(parallel)
+		plan = Nuri::Master.plan(:parallel => false, :mainfile => ARGV[2])
+
+	elsif ARGV[1] == 'plan-par'
+		plan = Nuri::Master.plan(:parallel => true, :mainfile => ARGV[2])
 
 	elsif ARGV[1] == 'bsig'
-		#bsig = Nuri::Master.get_bsig
-		#puts (bsig == nil ? 'no solution' : JSON.pretty_generate(bsig))
 		Nuri::Master.bsig
 
 	elsif ARGV[1] == 'apply-bsig'
 		puts 'Applying BSig model...'
-		puts (Nuri::Master.apply_bsig(true) ? 'OK' : 'Failed')
+		puts (Nuri::Master.apply_bsig(:debug => true) ? 'OK' : 'Failed')
 
 	elsif ARGV[1] == 'start-bsig'
 		puts 'Start BSig executor...'
@@ -86,11 +86,11 @@ commands:
 	elsif ARGV[1] == 'apply'
 		debug = (ARGV[2] == 'debug')
 		puts 'Generating and executing the workflow...'
-		result = Nuri::Master.apply(debug)
+		result = Nuri::Master.apply(:debug => debug)
 		puts (result ? 'OK' : 'Failed')
 
 	elsif ARGV[1] == 'exec' and ARGV.length >= 3
-		result = Nuri::Master.exec(ARGV[2])
+		result = Nuri::Master.exec(:planfile => ARGV[2])
 
 	elsif ARGV[1] == 'update-system'
 		Nuri::Master.update_system

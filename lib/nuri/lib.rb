@@ -35,20 +35,9 @@ module Nuri
 
 		def get_main
 			begin
-				Dir.chdir(Nuri::Util.home_dir)
-
-				main = "include \"#{Nuri::Util.home_dir}/modules/machine/machine.sfp\"\n"
-				self.get_modules.each do |mod|
-					main += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"
-				end
-
-				# if 'main.sfp' is in 'etc' directory, then load it
 				mainfile = "/etc/nuri/main.sfp"
 				mainfile = Nuri::Util.home_dir + "/etc/main.sfp" if not File.exist?(mainfile)
-				main += "\n" + File.read(mainfile) if File.exist?(mainfile)
-
-				return Nuri::Sfp::Parser.to_sfp(main)
-
+				return self.parse_main_file(mainfile)
 			rescue Exception => exp
 				Nuri::Util.error "Cannot load main description" + " -- " + exp.to_s
 				Nuri::Util.error exp.backtrace.to_s
@@ -56,6 +45,16 @@ module Nuri
 				Nuri::Util.error "Cannot load main description"
 			end
 			nil
+		end
+
+		def parse_main_file(mainfile)
+			Dir.chdir(Nuri::Util.home_dir)
+			main = "include \"#{Nuri::Util.home_dir}/modules/machine/machine.sfp\"\n"
+			self.get_modules.each do |mod|
+				main += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"
+			end
+			main += "\n" + File.read(mainfile) if File.exist?(mainfile)
+			return Nuri::Sfp::Parser.to_sfp(main)
 		end
 
 		# Reads configuration file in '/etc/nuri/nuri.sfp'. If it does not

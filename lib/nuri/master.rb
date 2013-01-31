@@ -7,7 +7,7 @@ module Nuri
 			include Nuri::Config
 			include Nuri::CloudHelper
 
-			attr_accessor :do_verify_execution
+			attr_accessor :main, :do_verify_execution
 
 			def initialize
 				@do_verify_execution = true
@@ -89,8 +89,9 @@ module Nuri
 				nil
 			end
 
-			def create_task(state=nil)
-				sfp_task = Nuri::Sfp.deep_clone(@main)
+			def create_task(state=nil, sfp_main=nil)
+				raise Exception, 'Invalid SFP main' if sfp_main.nil?
+				sfp_task = Nuri::Sfp.deep_clone(sfp_main)
 				sfp_task.delete('system')
 				sfp_task['initial'] = (state == nil ? self.get_state : Nuri::Sfp.deep_clone(state))
 				sfp_task.accept(Nuri::Sfp::SfpGenerator.new(sfp_task))
@@ -98,7 +99,7 @@ module Nuri
 			end
 
 			def get_bsig(state=nil)
-				sfp_task = create_task(state)
+				sfp_task = self.create_task(state, @main)
 				planner = Nuri::Planner::Solver.new
 				plan = planner.solve_sfp(sfp_task)
 				bsig = (plan.nil? ? nil : planner.to_bsig)
@@ -211,8 +212,12 @@ module Nuri
 				return true
 			end
 
+			def set_main_file(mainfile)
+				@main = self.parse_main_file(mainfile)
+			end
+
 			def get_plan(state=nil, json=false, parallel=false)
-				sfp_task = self.create_task(state)
+				sfp_task = self.create_task(state, @main)
 				planner = Nuri::Planner::Solver.new
 				return planner.solve_sfp(sfp_task, json, parallel)
 			end
@@ -358,7 +363,8 @@ module Nuri
 			# TODO -- start Nuri master
 		end
 
-		def self.apply(debug=false)
+		def self.apply(params={})
+			debug = (params.has_key?(:debug) ? params[:debug] : false)
 			master = Nuri::Master::Daemon.new
 			master.apply(false, debug)
 		end
@@ -368,10 +374,19 @@ module Nuri
 			return master.get_state
 		end
 
-		def self.plan(parallel=false)
+		def self.plan(params={})
+			parallel = (params.has_key?(:parallel) ? params[:parallel] : false)
+			mainfile = (params.has_key?(:mainfile) ? params[:mainfile] : nil)
+
 			master = Nuri::Master::Daemon.new
 			puts 'Generating the workflow...'
-			plan = master.get_plan(nil, false, parallel)
+			if not mainfile.nil?
+				master.set_main_file(mainfile)
+				plan = master.get_plan(nil, false, parallel)
+			else
+				plan = master.get_plan(nil, false, parallel)
+			end
+
 			if plan.nil? or plan['workflow'].nil?
 				puts "\nno solution!"
 			else
@@ -411,7 +426,8 @@ module Nuri
 			return master.get_bsig
 		end
 
-		def self.apply_bsig(debug=false)
+		def self.apply_bsig(params={})
+			debug = (params.has_key?(:debug) ? params[:debug] : false)
 			master = Nuri::Master::Daemon.new
 			return master.apply_bsig(debug)
 		end
@@ -458,7 +474,9 @@ module Nuri
 			master.debug_sfp
 		end
 
-		def self.exec(sfw_file)
+		def self.exec(params={})
+			sfw_file = (params.has_key?(:planfile) ? params[:planfile] : nil)
+			raise Exception, 'Invalid file' if not File.exist?(sfw_file)
 			plan = nil
 			File.open(sfw_file) { |f| plan = JSON[ f.read ] }
 			if plan != nil
