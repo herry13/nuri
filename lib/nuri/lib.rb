@@ -134,6 +134,8 @@ module Nuri
 
 			# load other modules and put them as machine's children
 			self.get_non_abstract_modules.each do |mod|
+				next if @config.has_key?('excluded_modules') and not @config['excluded_modules'].index(mod).nil?
+
 				begin
 					manifest_file = "#{modules_dir}/#{mod}/main.mf"
 					sfp_file = "#{modules_dir}/#{mod}/#{mod}.sfp"
