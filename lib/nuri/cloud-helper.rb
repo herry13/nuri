@@ -56,13 +56,35 @@ module Nuri
 			false
 		end
 
+		def update_cloud_proxies
+			system = @main['system']
+			system.each do |name, value|
+				if value.is_a?(Hash) and value.isobject and not self.vm?(value)
+					begin
+						path = "/state/#{name}/hpcloud/running"
+						address = value['address']
+						code, body = self.get_data(address, Nuri::Port, path)
+						if code == '200'
+							data = JSON.parse(body)
+							@cloud_proxies[name] = address if data['value'] == true
+						end
+					rescue Exception => exp
+						Nuri::Util.error 'Error: update_cloud_proxies - ' + exp.to_s
+					end
+				end
+			end
+		end
+
+		# Return the address of the VM with its proxy
+		# [<address>, <proxy_name>]
 		def get_vm_address_by_name(vm_name)
-			@cloud_proxies.each do |key,node|
-				address = node['address'].to_s
+			@cloud_proxies.each do |key,address|
 				next if address.length <= 0
 				next if not Nuri::Util.is_nuri_active?(address)
 				begin
-					code, body = self.get_data(address, Nuri::Port, "/cloud/vm/address/#{vm_name}")
+					data = {'name' => vm_name}
+					path = "/function/#{key}/hpcloud/get_vm_address"
+					code, body = self.put_data(address, Nuri::Port, path, data)
 					if code == '200'
 						data = JSON.parse(body)
 						return data['value'], key if not data['value'].nil?
@@ -80,7 +102,8 @@ module Nuri
 				next if address.length <= 0
 				next if not Nuri::Util.is_nuri_active?(address)
 				begin
-					code, body = self.get_data(address.to_s, Nuri::Port, '/vms')
+					code, body = self.put_data(address.to_s, Nuri::Port,
+						"/function/#{key}/hpcloud/get_vms")
 					if code == '200'
 						data = JSON.parse(body)
 						data['value'].each { |k,v| addresses[k] = v }

@@ -86,37 +86,6 @@ module Nuri
 					end
 					collect_state(current_state, node, state)
 				end
-=begin
-				@main['system'].each do |key,node|
-					next if key[0,1] == '_' or
-					        node['_classes'].rindex(MainComponent).nil?
-
-					state = nil
-					if self.vm?(node) # a VM node
-						state = self.get_vm_state(node)
-					else # a standard Machine
-						address = node['address']
-						state = self.get_node_state(address) if address.to_s != ''
-					end
-
-					if state != nil
-						state.each { |k,v|
-							current_state[k] = v
-							self.add_cloudproxy(v) if self.cloudproxy?(v)
-						}
-					else
-						# TODO
-						Nuri::Util.warn "Cannot get the current state of: #{node['_self']}"
-					end
-				end
-
-				# insert Cloud's state
-				state = self.get_cloud_state
-				state.each do |k,v|
-					current_state[k] = v
-					current_state[k]['_parent'] = current_state
-				end if not state.nil?
-=end
 				current_state
 			end
 
@@ -368,7 +337,6 @@ module Nuri
 
 				print '- executing ' + action['name'] + JSON.generate(action['parameters']) + '...'
 				if node.has_key?('address')
-puts action['name'].to_s + ':' + node['address'].to_s
 					succeed = remote_execute(action, node['address'])
 				else
 					succeed = local_execute(action)
@@ -380,11 +348,12 @@ puts action['name'].to_s + ':' + node['address'].to_s
 
 			def get_system_information
 				system = {}
+				self.update_cloud_proxies
 				@main['system'].each do |key,value|
 					next if key[0,1] == '_'
 					if value.is_a?(Hash) and value.isobject and value['_classes'].rindex(Nuri::Config::MainComponent) != nil
 						if self.vm?(value) # a VM node
-							_, _, system[key] = self.get_vm_address_by_name(value['_self'])
+							system[key], _ = self.get_vm_address_by_name(value['_self'])
 						else # a standard Machine
 							system[key] = value['address'].to_s
 						end
@@ -393,8 +362,36 @@ puts action['name'].to_s + ':' + node['address'].to_s
 				system
 			end
 
+			def get_node(path)
+				return nil if not path.isref
+				node = nil
+	
+				# 1) find in "localhost"
+				first, _ = path.explode[1].explode
+				if first == Nuri::Util.hostname
+					return {}
+				end
+	
+				# 2) find in the "system" (remote-host)
+				if @main.is_a?(Hash) and @main.has_key?('system')
+					root = @main['system']
+					while path != '$'
+						path = path.to_top
+						n = root.at?(path)
+						node = n if n != nil and n['_classes'].rindex(MainComponent) != nil
+					end
+				end
+	
+				# update node's state if it's a VM on the cloud
+				if not node.nil? and self.vm?(node)
+					node['address'], cloud_proxy = self.get_vm_address_by_name(node['_self'])
+				end
+	
+				node
+			end
+
 			def update_system
-				system = get_system_information
+				system = self.get_system_information
 				system.each_value do |target|
 					next if target.nil? or target.to_s.length <= 0
 					begin

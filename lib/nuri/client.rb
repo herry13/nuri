@@ -451,40 +451,6 @@ module Nuri
 				[500, '', '']
 			end
 
-=begin
-			### Cloud functions ###
-			def get_vm_address
-				begin
-					hostname = Nuri::Util.hostname
-					component = 'hpcloud' # HACK!
-					function = 'get_vm_address'
-					path = "$.#{hostname}.#{component}.#{function}"
-					data = {'value' => @owner.call(path)}
-					return 200, 'application/json', JSON.generate(data)
-				rescue Exception => exp
-					Nuri::Util.error "Error: executing get_vm_address() - " + exp.to_s
-					#puts exp.backtrace
-				end
-				[500, '', '']
-			end
-
-			def get_vms
-				begin
-					hostname = Nuri::Util.hostname
-					component = 'hpcloud' # HACK!
-					function = 'get_vms' # HACK!
-					path = "$.#{hostname}.#{component}.#{function}"
-					data = {'value' => @owner.call(path)}
-					return 200, 'application/json', JSON.generate(data)
-				rescue Exception => exp
-					Nuri::Util.error "Error: executing get_vms() - " + exp.to_s
-					puts exp.backtrace
-				end
-				[500, '', '']
-			end
-			######
-=end
-
 			def get_state(options={})
 				if not options.has_key?(:path)
 					state = @owner.get_state

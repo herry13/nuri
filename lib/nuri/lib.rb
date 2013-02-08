@@ -180,35 +180,6 @@ module Nuri
 			return manifest
 		end
 
-		def get_node(path)
-			return nil if not path.isref
-			node = nil
-
-			# 1) find in "localhost"
-			first, _ = path.explode[1].explode
-			if first == Nuri::Util.hostname
-				return {}
-			end
-
-			# 2) find in the "system" (remote-host)
-			if @main.is_a?(Hash) and @main.has_key?('system')
-				root = @main['system']
-				while path != '$'
-					path = path.to_top
-					n = root.at?(path)
-					node = n if n != nil and n['_classes'].rindex(MainComponent) != nil
-				end
-			end
-
-			# update node's state if it's a VM on the cloud
-			if not node.nil? and self.vm?(node)
-				#node['incloud'], node['address'] = get_vm_address_by_name(node['_self'])
-				node['cloud_proxy'], node['cloud_desc'], node['address'] = get_vm_address_by_name(node['_self'])
-			end
-
-			node
-		end
-
 		def address?(path)
 			part1, part2, _ = path.split('.', 3) # HACK!
 			node_name = (part1 == '$' ? part2 : part1)
