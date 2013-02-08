@@ -252,6 +252,13 @@ module Nuri
 				return component.send(procedure_name) if params.size <= 0
 				return component.send(procedure_name, params)
 			end
+
+			def call(function_path)
+				comp_name, function_name = function_path.extract
+				component = @root.get(comp_name)
+				return nil if component.nil? or not component.respond_to?(function_name)
+				return component.send(function_name)
+			end
 		end
 
 		class Agent < WEBrick::HTTPServlet::AbstractServlet
@@ -269,10 +276,10 @@ module Nuri
 					path.chop! if path[path.length-1,1] == '/'
 					if path[0,6] == '/state'
 						status, content_type, body = self.get_state(:path => path)
-					elsif path == '/state-vm'
-						status, content_type, body = self.get_vm_state(:path => path)
 					elsif path == '/bsig'
 						status, content_type, body = self.get_bsig
+					elsif path == '/vms'
+						status, content_type, body = self.get_vms
 					else
 						status = 400
 						content_type = body = ''
@@ -416,14 +423,26 @@ module Nuri
 						return 200, '', ''
 					end
 				rescue Exception => e
-					Nuri::Util.error e.to_s
+					Nuri::Util.error "Error: " + e.to_s
+					e.backtrace
 				end
-				Nuri::Util.error "[Exec: #{cmd['name']}...Failed!] -- cannot execute the procedure. " + json
+				Nuri::Util.error "[Exec: #{cmd['name']}...Failed!] - cannot execute the procedure:" + cmd['name'].to_s + ",status=" + status.to_s
 				return 500, '', ''
 			end
 
-			def get_vm_state(options={})
-				return 404, '', ''
+			def get_vms
+				begin
+					hostname = Nuri::Util.hostname
+					component = 'hpcloud' # HACK!
+					function = 'get_vms' # HACK!
+					path = "$.#{hostname}.#{component}.#{function}"
+					data = @owner.call(path)
+					return 200, 'application/json', JSON.generate(data)
+				rescue Exception => exp
+					Nuri::Util.error "Error: executing get_vms() - " + exp.to_s
+					puts exp.backtrace
+				end
+				return 500, '', ''
 			end
 
 			def get_state(options={})
