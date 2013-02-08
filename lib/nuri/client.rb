@@ -253,11 +253,12 @@ module Nuri
 				return component.send(procedure_name, params)
 			end
 
-			def call(function_path)
+			def call(function_path, params={})
 				comp_name, function_name = function_path.extract
 				component = @root.get(comp_name)
 				return nil if component.nil? or not component.respond_to?(function_name)
-				return component.send(function_name)
+				return component.send(function_name) if params.size <= 0
+				return component.send(function_name, params)
 			end
 		end
 
@@ -278,8 +279,11 @@ module Nuri
 						status, content_type, body = self.get_state(:path => path)
 					elsif path == '/bsig'
 						status, content_type, body = self.get_bsig
-					elsif path == '/vms'
-						status, content_type, body = self.get_vms
+					#elsif path == '/cloud/vms'
+					#	status, content_type, body = self.get_vms
+					#elsif path[0,18] == '/cloud/vm/address/'
+					#	_, _, _, _, vm_name, _ = path.split('/', 6)
+					#	status, content_type, body = self.get_vm_address(vm_name)
 					else
 						status = 400
 						content_type = body = ''
@@ -330,6 +334,8 @@ module Nuri
 						status, content_type, body = self.start_bsig_executor
 					elsif path == '/reset'
 						status, content_type, body = self.reset
+					elsif path[0,10] == '/function/' and path.length > 10
+						status, content_type, body = self.call_function(path, request.query)
 					else
 						status = 400
 						content_type = body = ''
@@ -430,6 +436,38 @@ module Nuri
 				return 500, '', ''
 			end
 
+			def call_function(path, data)
+				begin
+					# /function/<function-path>
+					_, _, func_path = path.split('/', 3)
+					func_path = '$.' + func_path.gsub(/\//, '.')
+					params = (data.is_a?(Hash) and data.has_key?('json') ? JSON[data['json']] : {})
+					data = {'value' => @owner.call(func_path, params)}
+					return 200, 'application/json', JSON.generate(data)
+				rescue Exception => exp
+					Nuri::Util.error "Error: calling function #{func_path} - " + exp.to_s
+					#puts exp.backtrace
+				end
+				[500, '', '']
+			end
+
+=begin
+			### Cloud functions ###
+			def get_vm_address
+				begin
+					hostname = Nuri::Util.hostname
+					component = 'hpcloud' # HACK!
+					function = 'get_vm_address'
+					path = "$.#{hostname}.#{component}.#{function}"
+					data = {'value' => @owner.call(path)}
+					return 200, 'application/json', JSON.generate(data)
+				rescue Exception => exp
+					Nuri::Util.error "Error: executing get_vm_address() - " + exp.to_s
+					#puts exp.backtrace
+				end
+				[500, '', '']
+			end
+
 			def get_vms
 				begin
 					hostname = Nuri::Util.hostname
@@ -442,8 +480,10 @@ module Nuri
 					Nuri::Util.error "Error: executing get_vms() - " + exp.to_s
 					puts exp.backtrace
 				end
-				return 500, '', ''
+				[500, '', '']
 			end
+			######
+=end
 
 			def get_state(options={})
 				if not options.has_key?(:path)
@@ -455,21 +495,17 @@ module Nuri
 
 				if state.is_a?(Nuri::Undefined)
 					return 404, '', ''
-				else
-					data = Nuri::Sfp.to_json({'value' => state})
-					return 200, 'application/json', data
 				end
+				data = Nuri::Sfp.to_json({'value' => state})
+				[200, 'application/json', data]
 			end
 
 			def get_bsig
 				bsig = @owner.get_bsig
-				if bsig.nil?
-					return 404, '', ''
-				else
-					bsig = bsig.clone
-					bsig["id"] = Nuri::BSig.get_active_id
-					return 200, 'application/json', JSON.generate(bsig)
-				end
+				return 404, '', '' if bsig.nil?
+				bsig = bsig.clone
+				bsig["id"] = Nuri::BSig.get_active_id
+				[200, 'application/json', JSON.generate(bsig)]
 			end
 
 			def set_system_information(data)
@@ -479,8 +515,8 @@ module Nuri
 					Nuri::Util.log 'system information updated'
 					return 200, '', ''
 				rescue
-					return 404, '', ''
 				end
+				[404, '', '']
 			end
 		end
 

@@ -64,7 +64,7 @@ module Nuri
 				nil
 			end
 
-			def get_vms
+			def get_vms(params={})
 				data = {}
 				self.open_connection if @conn.nil?
 				servers = @conn.servers
