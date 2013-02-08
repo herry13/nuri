@@ -65,14 +65,13 @@ module Nuri
 						state = self.get_node_state(address) if address.to_s != ''
 					end
 					if not state.nil? and self.cloudproxy?(state)
-						cloud_proxies[key] = node
+						self.add_cloud_proxy(node)
 					end
 					collect_state(current_state, node, state)
 				end
-				self.set_cloud_proxies(cloud_proxies)
 
 				# 2) get state of virtual machines
-				vms = self.get_all_vm_addresses(cloud_proxies)
+				vms = self.get_all_vm_addresses
 				@main['system'].each do |name,node|
 					next if name[0,1] == '_' or node['_classes'].rindex(MainComponent).nil?
 					state = nil

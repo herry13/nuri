@@ -48,7 +48,7 @@ module Nuri
 			false
 		end
 
-		def add_cloudproxy(node)
+		def add_cloud_proxy(node)
 			if node['address'].to_s.length > 0
 				@cloud_proxies[ node['_self'] ] = node['address']
 				return true
@@ -76,8 +76,7 @@ module Nuri
 
 		def get_all_vm_addresses
 			addresses = {}
-			@cloud_proxies.each do |key,node|
-				address = node['address'].to_s
+			@cloud_proxies.each do |key,address|
 				next if address.length <= 0
 				next if not Nuri::Util.is_nuri_active?(address)
 				begin
