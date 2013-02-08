@@ -14,6 +14,7 @@ require 'nuri/planner/main'
 require 'nuri/ssl'
 # Nuri modules
 require 'modules/machine/machine'
+require 'modules/vm/vm'
 
 module Nuri
 	module Config
