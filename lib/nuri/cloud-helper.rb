@@ -50,6 +50,18 @@ puts '==> ' + name + '::' + node['_classes'].inspect
 
 		def vm?(node); not node['_classes'].rindex(VMComponent).nil?; end
 
+		def cloudproxy?(node)
+			node.each { |k,v|
+				next if k[0,1] == '_'
+				next if not v.is_a?(Hash) or not v.isobject or v['_classes'].rindex(CloudComponent).nil?
+				puts v['_self']
+			}
+			false
+		end
+
+		def add_cloudproxy(node)
+		end
+
 		def get_cloud_state
 			# get state of localhost cloud-proxy
 			state = {}

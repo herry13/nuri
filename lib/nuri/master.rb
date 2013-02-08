@@ -59,7 +59,10 @@ module Nuri
 					end
 
 					if state != nil
-						state.each { |k,v| current_state[k] = v }
+						state.each { |k,v|
+							current_state[k] = v
+							self.add_cloudproxy(v) if self.cloudproxy?(v)
+						}
 					else
 						# TODO
 						Nuri::Util.warn "Cannot get the current state of: #{node['_self']}"
