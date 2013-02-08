@@ -22,6 +22,7 @@ module Nuri
 
 		def init_cloud
 			@cloud_proxies = {}
+			@cloud_proc_modifier = CloudProcedureModifier.new
 
 			# create a template state for non-created VM
 			template_file = Nuri::Util.home_dir + "/modules/cloud/vm_template.sfp"
@@ -92,8 +93,6 @@ module Nuri
 			return addresses
 		end
 
-		Modifier = CloudProcedureModifier.new
-
 		def get_vm_template(vm)
 			name = vm['_self']
 			state = {name => vm.clone}
@@ -101,10 +100,10 @@ module Nuri
 			@vm_template.each { |k,v|
 				if k[0,1] != '_' and v.is_a?(Hash) and v.isobject
 					state[name][k] = Nuri::Sfp.deep_clone(v)
-					state[name][k].accept(Modifier) #CloudProcedureModifier.new)
+					state[name][k].accept(@cloud_proc_modifier) #CloudProcedureModifier.new)
 				end
 			}
-			state[name].accept(Modifier)
+			state[name].accept(@cloud_proc_modifier)
 			return state
 		end
 
