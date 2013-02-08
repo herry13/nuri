@@ -64,6 +64,14 @@ module Nuri
 				nil
 			end
 
+			def get_vms
+				data = {}
+				self.open_connection if @conn.nil?
+				servers = @conn.servers
+				servers.each { |s| data[s.name] = s.public_ip_address }
+				data
+			end
+
 			def get_info(name)
 				self.open_connection if @conn.nil?
 				servers = @conn.servers
