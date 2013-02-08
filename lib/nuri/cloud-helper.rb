@@ -21,25 +21,7 @@ module Nuri
 		end
 
 		def init_cloud
-=begin
-			@clouds = {}
-			@clouds_sfp = {}
-			@main['system'].each do |name, node|
-				next if name[0,1] == '_'
-				next if node['_classes'].rindex(CloudComponent).nil?
-puts '==> ' + name + '::' + node['_classes'].inspect
-				begin
-					#@clouds[name] = Nuri::Module::Cloud.new(node)
-					#@clouds_sfp[name] = Nuri::Sfp.deep_clone(node)
-					#@clouds_sfp[name]['_parent'] = @clouds_sfp
-				rescue Exception => exp
-					Nuri::Util.log 'Error when initializing cloud component: ' + exp.to_s
-				end
-			end
-
-			# add cloud component to root
-			#@clouds.each { |name,cloud| @root.add(cloud) }
-=end
+			@cloud_proxies = {}
 
 			# create a template state for non-created VM
 			template_file = Nuri::Util.home_dir + "/modules/cloud/vm_template.sfp"
@@ -53,15 +35,80 @@ puts '==> ' + name + '::' + node['_classes'].inspect
 		def cloudproxy?(node)
 			node.each { |k,v|
 				next if k[0,1] == '_'
-				next if not v.is_a?(Hash) or not v.isobject or v['_classes'].rindex(CloudComponent).nil?
-				puts v['_self']
+				next if not v.is_a?(Hash) or not v.isobject
+				v.each { |name,comp|
+					next if name[0,1] == '_'
+					next if not comp.is_a?(Hash) or not comp.isobject
+					next if comp['_classes'].rindex(CloudComponent).nil?
+					next if not comp['running']
+					return true
+				}
 			}
 			false
 		end
 
 		def add_cloudproxy(node)
+			if node['address'].to_s.length > 0
+				@cloud_proxies[ node['_self'] ] = node['address']
+				return true
+			end
+			false
 		end
 
+		def get_vm_address_by_name(vm_name)
+			@cloud_proxies.each do |key,node|
+				address = node['address'].to_s
+				next if address.length <= 0
+				next if not Nuri::Util.is_nuri_active?(address)
+				begin
+					code, body = self.get_data(address, Nuri::Port, "/cloud/vm/address/#{vm_name}")
+					if code == '200'
+						data = JSON.parse(body)
+						return data['value'], key if not data['value'].nil?
+					end
+				rescue Exception => e
+					Nuri::Util.error 'Cannot get VM address: ' + vm_name + ' - ' + e.to_s
+				end
+			end
+			nil, nil
+		end
+
+		def get_all_vm_addresses
+			addresses = {}
+			@cloud_proxies.each do |key,node|
+				address = node['address'].to_s
+				next if address.length <= 0
+				next if not Nuri::Util.is_nuri_active?(address)
+				begin
+					code, body = self.get_data(address.to_s, Nuri::Port, '/vms')
+					if code == '200'
+						data = JSON.parse(body)
+						data['value'].each { |k,v| addresses[k] = v }
+					end
+				rescue Exception => e
+					Nuri::Util.log 'Cannot get VMs address from proxy: ' + address + ' - ' + e.to_s
+				end
+			end
+			return addresses
+		end
+
+		Modifier = CloudProcedureModifier.new
+
+		def get_vm_template(vm)
+			name = vm['_self']
+			state = {name => vm.clone}
+			state[name].delete('_parent')
+			@vm_template.each { |k,v|
+				if k[0,1] != '_' and v.is_a?(Hash) and v.isobject
+					state[name][k] = Nuri::Sfp.deep_clone(v)
+					state[name][k].accept(Modifier) #CloudProcedureModifier.new)
+				end
+			}
+			state[name].accept(Modifier)
+			return state
+		end
+
+################################################
 		def get_cloud_state
 			# get state of localhost cloud-proxy
 			state = {}
@@ -79,7 +126,8 @@ puts '==> ' + name + '::' + node['_classes'].inspect
 			return state
 		end
 
-		def get_vm_address_by_name(vm_name)
+
+		def get_vm_address_by_name2(vm_name)
 			# check localhost cloud-proxy
 			@root.children.first[1].children.each do |name, mod|
 				sfp_class = @main.at?(mod.class_path)
@@ -93,7 +141,7 @@ puts '==> ' + name + '::' + node['_classes'].inspect
 			return nil, nil, nil
 		end
 
-		def get_vm_state(vm)
+		def get_vm_state2(vm)
 			vm_name = vm['_self']
 			# create VM's temporary state
 			state = {vm_name => vm.clone}
@@ -120,8 +168,8 @@ puts '==> ' + name + '::' + node['_classes'].inspect
 				state[vm_name].accept(CloudProcedureModifier.new('this'))
 			end
 			return state
-
 		end
+
 
 	end
 end

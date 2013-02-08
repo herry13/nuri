@@ -190,7 +190,7 @@ module Nuri
 				return {}
 			end
 
-			# 2) find in "system" (remote-host)
+			# 2) find in the "system" (remote-host)
 			if @main.is_a?(Hash) and @main.has_key?('system')
 				root = @main['system']
 				while path != '$'
@@ -224,7 +224,11 @@ module Nuri
 
 		# Request data with GET method
 		def get_data(address, port, path, timeout=@read_timeout)
-			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			address = address.to_s
+			port = port.to_s
+			path = path.to_s
+			raise Exception, 'Invalid parameters' if address.length <= 0 or port.length <= 0 or path.length <= 0
+			url = URI.parse('http://' + address.to_s + ':' + port.to_s + path.to_s)
 			req = Net::HTTP::Get.new(url.path)
 			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req) }
 			return res.code, res.body
@@ -232,7 +236,12 @@ module Nuri
 
 		# Send data with POST method to a remote address in JSON format
 		def post_data(address, port, path, data=nil, timeout=@read_timeout)
-			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			address = address.to_s
+			port = port.to_s
+			path = path.to_s
+			raise Exception, 'Invalid parameters' if address.length <= 0 or port.length <= 0 or path.length <= 0
+
+			url = URI.parse('http://' + address.to_s + ':' + port.to_s + path.to_s)
 			req = Net::HTTP::Post.new(url.path)
 			if URI.respond_to?('encode_www_form')
 				data = (data.nil? ? '' : URI.encode_www_form('json' => JSON.generate(data)))
@@ -247,7 +256,12 @@ module Nuri
 
 		# Send data with PUT method to a remote address in JSON format
 		def put_data(address, port, path, data=nil, timeout=@read_timeout)
-			url = URI.parse('http://' + address + ':' + port.to_s + path)
+			address = address.to_s
+			port = port.to_s
+			path = path.to_s
+			raise Exception, 'Invalid parameters' if address.length <= 0 or port.length <= 0 or path.length <= 0
+
+			url = URI.parse('http://' + address.to_s + ':' + port.to_s + path.to_s)
 			req = Net::HTTP::Put.new(url.path)
 			if URI.respond_to?('encode_www_form')
 				data = (data.nil? ? '' : URI.encode_www_form('json' => JSON.generate(data)))
