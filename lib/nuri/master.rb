@@ -275,8 +275,11 @@ module Nuri
 				def verify(action)
 					state = get_state
 					action['effect'].each do |key,value|
-						v = state.at?(key)
-						raise Nuri::ExecutionFailedException, action['name'] if state.at?(key) != value
+						val = state.at?(key)
+						if val != value
+							puts 'Failed verifying: ' + key + '=' + value.to_s + ' <> ' + val.to_s
+							raise Nuri::ExecutionFailedException, action['name']
+						end
 						#if self.get_state(key) != value
 						#	raise Nuri::ExecutionFailedException, action['name']
 						#end
@@ -295,7 +298,7 @@ module Nuri
 						Nuri::Util.log "Timeout when executing: " + action['name']
 						raise Timeout::Error
 					rescue ExecutionFailedException => efe
-						Nuri::Util.log efe.to_s
+						Nuri::Util.log "Execution failed exception: " + efe.to_s
 					rescue Exception => e
 						Nuri::Util.log 'Cannot execute action: ' + action['name'] + ' -- ' + e.to_s
 					end

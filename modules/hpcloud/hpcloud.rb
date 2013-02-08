@@ -46,14 +46,21 @@ module Nuri
 				return true
 			end
 
+			def get_vm_address(params={})
+				return self.get_address(:name => params['name'])
+			end
+
 			def get_address(params={})
-				self.open_connection if @conn.nil?
-				servers = @conn.servers
-				servers.each { |s|
-					if s.name == params[:name] and s.state == 'ACTIVE'
-						return s.public_ip_address
-					end
-				}
+				name = params[:name].to_s
+				if name.length > 0
+					self.open_connection if @conn.nil?
+					servers = @conn.servers
+					servers.each { |s|
+						if s.name == params[:name] and s.state == 'ACTIVE'
+							return s.public_ip_address
+						end
+					}
+				end
 				nil
 			end
 
