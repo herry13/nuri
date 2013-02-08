@@ -71,7 +71,7 @@ module Nuri
 					Nuri::Util.error 'Cannot get VM address: ' + vm_name + ' - ' + e.to_s
 				end
 			end
-			nil, nil
+			return nil, nil
 		end
 
 		def get_all_vm_addresses
