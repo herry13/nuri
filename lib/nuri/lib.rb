@@ -129,7 +129,11 @@ module Nuri
 			@root = Nuri::Root.new
 
 			# load module "Machine"
-			machine = Nuri::Module::Machine.new
+			if @config['isa_vm'] != true
+				machine = Nuri::Module::Machine.new
+			else
+				machine = Nuri::Module::VM.new
+			end
 			@root.add(machine)
 
 			excluded = ((not @config.nil? and @config.is_a?(Hash) and @config.has_key?('excluded_modules')) ?

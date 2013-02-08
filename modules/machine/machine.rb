@@ -50,12 +50,6 @@ module Nuri
 				# TODO
 				return false
 			end
-
-			def upgrade_nuri(params)
-				cmd = "cd " + Nuri::Util.home_dir + ";" + "/usr/bin/git pull; 2> /dev/null"
-				result = system(cmd)
-				return (result == true)
-			end
 		end
 	end
 end

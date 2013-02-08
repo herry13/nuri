@@ -156,7 +156,9 @@ module Nuri
 					@variables.each_value { |var|
 						if var.is_final
 							var.init.each { |k,v|
-								process_procedure(v, var.init) if v.is_a?(Hash) and v.isprocedure
+								if v.is_a?(Hash) and v.isprocedure
+									process_procedure(v, var.init)
+								end
 							}
 						end
 					}
@@ -171,8 +173,8 @@ module Nuri
 					self.search_and_merge_mutually_inclusive_operators
 	
 					#self.dump_types
-					#self.dump_vars
-					#self.dump_operators
+					self.dump_vars
+					self.dump_operators
 	
 					@vars = @variables.values
 
@@ -598,6 +600,8 @@ puts e.backtrace
 						#end
 					end
 					#operators.delete_if { |op| not invalid_operators.index(op).nil? }
+				else
+puts 'proc: ' + procedure.ref + ' cannot be grounded'
 				end
 				# remove the procedure because we don't need it anymore
 				object.delete(procedure['_self'])
@@ -611,7 +615,9 @@ puts e.backtrace
 					next if k[0,1] == '_'
 					# if the specified parameter does not have any value,
 					# then it's invalid procedure
-					return nil if not @types.has_key?( v['_isa'] )
+					if not @types.has_key?( v['_isa'] )
+						return nil
+					end
 					params[k] = Array.new
 					type = (v.isnull ? v['_isa'] : (v.isset ? "(#{v['_isa']})" : nil))
 					next if type == nil
