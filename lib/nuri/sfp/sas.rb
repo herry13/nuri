@@ -173,8 +173,8 @@ module Nuri
 					self.search_and_merge_mutually_inclusive_operators
 	
 					#self.dump_types
-					self.dump_vars
-					self.dump_operators
+					#self.dump_vars
+					#self.dump_operators
 	
 					@vars = @variables.values
 

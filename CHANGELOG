@@ -1,3 +1,11 @@
+08-02-2013 -- 0.3.0
+- enable cloud-proxy as a component, but right now only support HP-Cloud
+- cloud-proxy is not integrated anymore with master-node
+- new configuration in nuri.sfp: "virtual_machine" (boolean)
+  represents whether a node is a virtual machine or not; if it is, then use VM instead of Machine class
+- update "get_system_information" method in master.rb to adopt cloud-proxy
+- class VM is a subclass of class Machine in both SFP and Ruby codes
+
 09-01-2013 -- 0.2.1
 - set time limit for the solver (default 5mins) -- it can be set by specifying "solver_timeout"
   in "nuri.sfp"
