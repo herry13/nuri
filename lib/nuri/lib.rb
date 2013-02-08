@@ -130,7 +130,7 @@ module Nuri
 			@root = Nuri::Root.new
 
 			# load module "Machine"
-			if @config['virtual_machine'] != true
+			if not @config.nil? and @config['virtual_machine'] != true
 				machine = Nuri::Module::Machine.new
 			else
 				machine = Nuri::Module::VM.new
