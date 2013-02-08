@@ -436,7 +436,7 @@ module Nuri
 					component = 'hpcloud' # HACK!
 					function = 'get_vms' # HACK!
 					path = "$.#{hostname}.#{component}.#{function}"
-					data = @owner.call(path)
+					data = {'value' => @owner.call(path)}
 					return 200, 'application/json', JSON.generate(data)
 				rescue Exception => exp
 					Nuri::Util.error "Error: executing get_vms() - " + exp.to_s

@@ -45,7 +45,49 @@ module Nuri
 			def get_state(path='')
 				return nil if @main.nil? or not @main.has_key?('system')
 
+				def collect_state(current, node, state)
+					if state.nil?
+						Nuri::Util.warn "Cannot get the current state of: #{node['_self']}"
+					else
+						state.each { |k,v| current[k] = v }
+					end
+				end
+
 				current_state = {'_context'=>'state', '_self'=>'initial'}
+				# 1) get state of physical machines
+				#    - foreach PM, check if it's a cloud-proxy
+				cloud_proxies = {}
+				@main['system'].each do |key,node|
+					next if key[0,1] == '_' or node['_classes'].rindex(MainComponent).nil?
+					state = nil
+					if not self.vm?(node) # node is a physical machine
+						address = node['address']
+						state = self.get_node_state(address) if address.to_s != ''
+					end
+					if not state.nil? and self.cloudproxy?(state)
+						cloud_proxies[key] = node
+					end
+					collect_state(current_state, node, state)
+				end
+				self.set_cloud_proxies(cloud_proxies)
+
+				# 2) get state of virtual machines
+				vms = self.get_all_vm_addresses(cloud_proxies)
+				@main['system'].each do |name,node|
+					next if name[0,1] == '_' or node['_classes'].rindex(MainComponent).nil?
+					state = nil
+					if self.vm?(node) # node is a virtual machine
+						if vms.has_key?(name)
+							address = vms[name]
+							state = self.get_node_state(address) if address.to_s != ''
+							state[name]['created'] = true
+						else
+							state = self.get_vm_template(node)
+						end
+					end
+					collect_state(current_state, node, state)
+				end
+=begin
 				@main['system'].each do |key,node|
 					next if key[0,1] == '_' or
 					        node['_classes'].rindex(MainComponent).nil?
@@ -75,7 +117,7 @@ module Nuri
 					current_state[k] = v
 					current_state[k]['_parent'] = current_state
 				end if not state.nil?
-
+=end
 				current_state
 			end
 
@@ -300,7 +342,7 @@ module Nuri
 					rescue ExecutionFailedException => efe
 						Nuri::Util.log "Execution failed exception: " + efe.to_s
 					rescue Exception => e
-						Nuri::Util.log 'Cannot execute action: ' + action['name'] + ' -- ' + e.to_s
+						Nuri::Util.log 'Cannot execute remote action: ' + action['name'].to_s + ' -- ' + e.to_s
 					end
 					false
 				end
@@ -320,13 +362,14 @@ module Nuri
 						return component.send(procedure_name) if params.size <= 0
 						return component.send(procedure_name, params)
 					rescue Exception => e
-						Nuri::Util.log "Cannot execute action: #{action['name']}"
+						Nuri::Util.log "Cannot execute local action: #{action['name']}"
 					end
 					false
 				end
 
 				print '- executing ' + action['name'] + JSON.generate(action['parameters']) + '...'
 				if node.has_key?('address')
+puts action['name'].to_s + ':' + node['address'].to_s
 					succeed = remote_execute(action, node['address'])
 				else
 					succeed = local_execute(action)
