@@ -24,5 +24,6 @@ if [ -f "nuri.tgz" ]; then
 	cp etc/nuri-template.sfp etc/nuri.sfp
 	sed -i 's/^\s*trusted.*/\ttrusted is \("__MASTER__"\)/g' etc/nuri.sfp
 	sed -i "s/__MASTER__/$MASTER/g" etc/nuri.sfp
+	sed -i "s/host/virtual_machine is true\n\thost/g" etc/nuri.sfp
 	echo "...OK"
 fi
