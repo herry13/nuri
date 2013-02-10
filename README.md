@@ -47,7 +47,7 @@ Available Modules
 - Mysql -- Mysql Database Server
 - Apachelb -- Apache Load Balancer
 - Tikiweb and Tikidb -- TikiWiki Content Management System
-- Cloud -- Cloud IaaS (currenly only supports HPCloud)
+- HPCloud -- HPCloud computing management
 
 Running Nuri client on managed node
 -----------------------------------
