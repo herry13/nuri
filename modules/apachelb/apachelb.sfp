@@ -3,6 +3,7 @@ include "modules/apache/apache.sfp"
 class Apachelb extends Service {
 	port = 80
 	members isset String
+	xmembers isset Machine
 	server_name = ""
 
 	procedure set_members (members isset String) {
