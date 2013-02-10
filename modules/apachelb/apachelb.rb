@@ -98,6 +98,32 @@ module Nuri
 				return Nuri::Helper::Service.stop('apache2')
 			end
 
+			def set_xmembers(params={})
+				members = ''
+				reverses = ''
+				params['xmembers'].each do |ref|
+					path = ref.push('address')
+					address = self.get_state(path)
+					members += "\n\tBalancerMember #{address}"
+					reverses += "\n\tProxyPassReverse / #{address}"
+				end
+				output = ''
+				data = File.read(ConfigFile)
+				data.each_line do |line|
+					head, _ = line.strip.split(' ', 2)
+					next if head == 'BalanceMember' or head == 'ProxyPassReverse'
+					output += "#{line} \n"
+					if head == 'ProxySet'
+						output += "#{members}\n"
+					elsif head == '</Location>'
+						output += "#{reverses}\n"
+					end
+				end
+				File.open(ConfigFile, 'w') { |f| f.write(output) }
+				sleep 1
+				true
+			end
+
 			def set_members(params={})
 				members = ''
 				reverses = ''
