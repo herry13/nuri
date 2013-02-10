@@ -46,6 +46,8 @@ module Nuri
 					end
 					members.push( member[1] )
 				end
+				members.sort!
+				xmembers.sort!
 				@state['members'] = members
 				@state['xmembers'] = xmembers
 
@@ -65,19 +67,6 @@ module Nuri
 						Nuri::Helper::Command.exec("/bin/rm -f /etc/apache2/sites-enabled/*") and
 						Nuri::Helper::Command.exec("/bin/cp -f #{Nuri::Util.home_dir}/modules/apachelb/load_balancer #{ConfigFile}") and
 						Nuri::Helper::Service.stop('apache2'))
-
-=begin
-					result = system('/usr/bin/apt-get -y install apache2')
-					result = system('/usr/bin/service apache2 stop') if result == true
-					result = system('/usr/sbin/a2enmod proxy') if result == true
-					result = system('/usr/sbin/a2enmod proxy_balancer') if result == true
-					result = system('/usr/sbin/a2enmod proxy_http') if result == true
-					result = system('/usr/sbin/a2enmod status') if result == true
-
-					cmd = "/bin/rm -f /etc/apache2/sites-enabled/*; /bin/cp -f #{Nuri::Util.home_dir}/modules/apachelb/load_balancer #{ConfigFile}"
-					self.stop
-					result = system(cmd)
-=end
 				rescue
 					return false
 				ensure
@@ -109,7 +98,7 @@ module Nuri
 				end
 				output = ''
 				data = File.read(ConfigFile)
-				data.each_line do |line|
+				data.split("\n").each do |line|
 					head, _ = line.strip.split(' ', 2)
 					next if head == 'BalanceMember' or head == 'ProxyPassReverse'
 					output += "#{line}"
