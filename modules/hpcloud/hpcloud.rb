@@ -95,17 +95,14 @@ module Nuri
 				return false
 			end
 
-			#ConfigFile = '/var/lib/hpcloud/config.json'
 			def save_config(config)
-				config_file = File.expand_path(File.dirname(__FILE__) + '/config.sfp')
-				#dir = File.dirname(ConfigFile)
-				#Dir.mkdir(dir) if not File.exist?(dir)
+				config_file = Nuri::Util.home_dir + '/modules/hpcloud/config.sfp'
 				File.open(ConfigFile, 'w') { |f| f.write(JSON.generate(config)) }
 			end
 
 			def read_config
-				config_file = File.expand_path(File.dirname(__FILE__) + '/config.sfp')
-				#return JSON.parse(File.read(ConfigFile)) if File.exist?(ConfigFile)
+				config_file = Nuri::Util.home_dir + '/modules/hpcloud/config.sfp'
+				Nuri::Util.log config_file
 				return {} if not File.exist?(config_file)
 				return Nuri::Sfp::Parser.parse_file(config_file)['config']
 			end
