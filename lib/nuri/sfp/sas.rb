@@ -171,7 +171,7 @@ module Nuri
 	
 					# detect and merge mutually inclusive operators
 					self.search_and_merge_mutually_inclusive_operators
-	
+
 					#self.dump_types
 					#self.dump_vars
 					#self.dump_operators
@@ -601,7 +601,7 @@ puts e.backtrace
 					end
 					#operators.delete_if { |op| not invalid_operators.index(op).nil? }
 				else
-puts 'proc: ' + procedure.ref + ' cannot be grounded'
+#puts 'proc: ' + procedure.ref + ' cannot be grounded'
 				end
 				# remove the procedure because we don't need it anymore
 				object.delete(procedure['_self'])
@@ -621,6 +621,7 @@ puts 'proc: ' + procedure.ref + ' cannot be grounded'
 					params[k] = Array.new
 					type = (v.isnull ? v['_isa'] : (v.isset ? "(#{v['_isa']})" : nil))
 					next if type == nil
+					raise TypeNotFoundException, type if not @types.has_key?(type)
 					@types[ type ].each { |val| params[k] << val if not (val.is_a?(Hash) and val.isnull)	}
 					#puts k.to_s + ": " + params[k].length.to_s
 				}
@@ -1143,7 +1144,7 @@ puts 'proc: ' + procedure.ref + ' cannot be grounded'
 						formula.delete('_template')
 					elsif formula.isconstraint and formula['_type'] == 'forall'
 						classref = '$.' + formula['_class']
-						raise ClassNotFoundException, classref if not @types.has_key?(classref)
+						raise TypeNotFoundException, classref if not @types.has_key?(classref)
 						var = '$.' + formula['_variable']
 						grounder = ParameterGrounder.new(@root['initial'], {})
 						@types[classref].each do |v|
@@ -1247,7 +1248,7 @@ puts 'proc: ' + procedure.ref + ' cannot be grounded'
 
 		class VariableNotFoundException < Exception; end
 
-		class ClassNotFoundException < Exception;	end
+		class TypeNotFoundException < Exception;	end
 
 		class UndefinedValueException < Exception
 			attr_accessor :var
