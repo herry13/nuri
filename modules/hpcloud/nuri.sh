@@ -20,10 +20,16 @@ if [ -f "nuri.tgz" ]; then
 	mv $DIR nuri
 	cd nuri
 
+	# setup configuration file
 	echo -n "Setup configuration file..."
 	cp etc/nuri-template.sfp etc/nuri.sfp
 	sed -i 's/^\s*trusted.*/\ttrusted is \("__MASTER__"\)/g' etc/nuri.sfp
 	sed -i "s/__MASTER__/$MASTER/g" etc/nuri.sfp
 	sed -i "s/host/virtual_machine is true\n\thost/g" etc/nuri.sfp
+
+	# delete unused file
+	cd ..
+	rm -f nuri.tgz
+
 	echo "...OK"
 fi
