@@ -99,7 +99,9 @@ module Nuri
 				output = ''
 				data = File.read(ConfigFile)
 				data.each_line do |line|
-					head, _ = line.strip.split(' ', 2)
+					xline = line.strip
+					next if xline.length <= 0
+					head, _ = xline.split(' ', 2)
 					next if head == 'BalancerMember' or head == 'ProxyPassReverse'
 					output += "#{line} \n"
 					if head == 'ProxySet'
@@ -123,13 +125,15 @@ module Nuri
 
 				data = File.read(ConfigFile)
 				output = ''
-				data.split("\n").each do |line|
-					tuple = line.strip.split(' ')
-					next if tuple[0] == 'BalancerMember' or tuple[0] == 'ProxyPassReverse'
+				data.each_line do |line|
+					xline = line.strip
+					next if xline.length <= 0
+					head, _ = xline.split(' ', 2)
+					next if head == 'BalancerMember' or head == 'ProxyPassReverse'
 					output += "#{line} \n"
-					if tuple[0] == 'ProxySet'
+					if head == 'ProxySet'
 						output += members + "\n"
-					elsif tuple[0] == '</Location>'
+					elsif head == '</Location>'
 						output += reverses + "\n"
 					end
 				end
