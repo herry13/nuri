@@ -40,7 +40,10 @@ module Nuri
 					next if member[1] == nil
 					_, address = member[1].split('http://', 2)
 					name = Nuri::Util.get_system_information.index(address)
-					xmembers.push(name) if not name.nil?
+					if not name.nil?
+						ref = '$.' + name
+						xmembers.push(ref)
+					end
 					members.push( member[1] )
 				end
 				@state['members'] = members
