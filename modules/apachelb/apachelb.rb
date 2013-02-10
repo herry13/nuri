@@ -104,15 +104,15 @@ module Nuri
 				params['xmembers'].each do |ref|
 					path = ref.push('address')
 					address = self.get_state(path)
-					members += "\n\tBalancerMember #{address}"
-					reverses += "\n\tProxyPassReverse / #{address}"
+					members += "\n\tBalancerMember http://#{address}"
+					reverses += "\n\tProxyPassReverse / http://#{address}"
 				end
 				output = ''
 				data = File.read(ConfigFile)
 				data.each_line do |line|
 					head, _ = line.strip.split(' ', 2)
 					next if head == 'BalanceMember' or head == 'ProxyPassReverse'
-					output += "#{line} \n"
+					output += "#{line}"
 					if head == 'ProxySet'
 						output += "#{members}\n"
 					elsif head == '</Location>'
