@@ -98,10 +98,10 @@ module Nuri
 				end
 				output = ''
 				data = File.read(ConfigFile)
-				data.split("\n").each do |line|
+				data.each_line do |line|
 					head, _ = line.strip.split(' ', 2)
-					next if head == 'BalanceMember' or head == 'ProxyPassReverse'
-					output += "#{line}"
+					next if head == 'BalancerMember' or head == 'ProxyPassReverse'
+					output += "#{line} \n"
 					if head == 'ProxySet'
 						output += "#{members}\n"
 					elsif head == '</Location>'
