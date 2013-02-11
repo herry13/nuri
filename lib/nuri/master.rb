@@ -53,6 +53,44 @@ module Nuri
 					end
 				end
 
+				# update cloud proxies, then populate all VMs' address
+				self.update_cloud_proxies
+				vms = self.get_all_vm_addresses
+
+				# retrieve node's current state
+				current_state = {'_context'=>'state', '_self'=>'initial'}
+				@main['system'].each do |key,node|
+					next if key[0,1] == '_' or node['_classes'].rindex(MainComponent).nil?
+					state = nil
+					if self.vm?(node) # node is a virtual machine
+						if vms.has_key?(name) # the VM exists (has been created)
+							address = vms[name].to_s
+							state = self.get_node_state(address) if address.length > 0
+							state[name]['created'] = true
+						else
+							# the VM does not exist
+							state = self.create_vm_template(node)
+						end
+					else # node is not a virtual machine
+						address = node['address'].to_s
+						state = self.get_node_state(address) if address.length > 0
+					end
+					collect_state(current_state, node, state)
+				end
+				current_state
+			end
+=begin
+			def get_state(path='')
+				return nil if @main.nil? or not @main.has_key?('system')
+
+				def collect_state(current, node, state)
+					if state.nil?
+						Nuri::Util.warn "Cannot get the current state of: #{node['_self']}"
+					else
+						state.each { |k,v| current[k] = v }
+					end
+				end
+
 				current_state = {'_context'=>'state', '_self'=>'initial'}
 				# 1) get state of physical machines
 				#    - foreach PM, check if it's a cloud-proxy
@@ -88,7 +126,7 @@ module Nuri
 				end
 				current_state
 			end
-
+=end
 			def get_node_state(address)
 				begin
 					code, body = self.get_data(address.to_s, Nuri::Port, '/state')
