@@ -3,7 +3,7 @@ require 'nuri/planner/sas'
 
 module Nuri
 	module Planner
-		Heuristic = 'ff' # lmcut, cg, cea, ff
+		Heuristic = 'fflmcut' # lmcut, cg, cea, ff
 		Debugging = false
 
 		class Solver
@@ -158,10 +158,13 @@ module Nuri
 						f.flush
 					end
 
-					#command = Nuri::Planner.command(tmp_dir, sas_file, plan_file, Heuristic)
-					#Kernel.system(command)
-					fflmcut = FFLMCUT.new(tmp_dir, sas_file, plan_file)
-					fflmcut.solve
+					if Heuristic == 'fflmcut'
+						fflmcut = FFLMCUT.new(tmp_dir, sas_file, plan_file)
+						fflmcut.solve
+					else
+						command = Nuri::Planner.command(tmp_dir, sas_file, plan_file, Heuristic)
+						Kernel.system(command)
+					end
 					plan = (File.exist?(plan_file) ? File.read(plan_file) : nil)
 
 					if plan != nil
@@ -202,6 +205,8 @@ puts exp.backtrace
 			planner
 		end
 
+		# Return the solver parameters based on given heuristic mode.
+		# Default value: FF
 		def self.parameters(heuristic='ff')
 			return case heuristic
 				when 'lmcut' then '--search "astar(lmcut())"'
@@ -212,6 +217,10 @@ puts exp.backtrace
 			end
 		end
 
+		# Return a command to run the planner:
+		# - within given working directory "dir"
+		# - problem in SAS+ format, available in"sas_file"
+		# - solution will be saved in "plan_file"
 		def self.command(dir, sas_file, plan_file, heuristic='ff', debug=false)
 			planner = Nuri::Planner.path
 			params = Nuri::Planner.parameters(heuristic)
@@ -230,6 +239,10 @@ puts exp.backtrace
 			command
 		end
 
+		# Combination between two heuristic to obtain a suboptimal plan.
+		# 1) solve the problem with FF, that will produce (usually) a non-optimal plan
+		# 2) remove actions which are not selected by previous step (FF)
+		# 3) solve the problem with LMCUT using A*-search to obtain a sub-optimal plan
 		class FFLMCUT
 			def initialize(dir, sas_file, plan_file)
 				@dir = dir
@@ -238,19 +251,27 @@ puts exp.backtrace
 			end
 
 			def solve
+				# 1) solve with FF
 				ff = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'ff')
 				Kernel.system(ff)
 				return false if not File.exist?(@plan_file)
+
+				# 2) remove unselected operators
 				self.filter_operators(@sas_file, @plan_file)
 				File.delete(@plan_file)
+
+				# 3) generate the final plan with LMCUT
 				lmcut = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'lmcut')
 				Kernel.system(lmcut)
 				return File.exist?(@plan_file)
 			end
 
 			def filter_operators(sas, plan)
+				# generate the selected actions
 				selected = []
 				File.read(plan).each_line { |line| selected << line[1,line.length-1].split('$.', 2)[0] }
+
+				# remove unselected operators
 				output = ""
 				operator = nil
 				id = nil
@@ -278,6 +299,8 @@ puts exp.backtrace
 						operator += line
 					end
 				end
+
+				# save filtered problem
 				File.open(sas, 'w') { |f| f.write(output) }
 			end
 		end
