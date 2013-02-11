@@ -3,7 +3,7 @@ Nuri
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/nuri
 - last update: 08-02-2013
-- version: 0.3.0
+- version: 0.3.0a
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 

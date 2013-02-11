@@ -1,3 +1,11 @@
+11-02-2013 -- 0.3.0a
++ add the cloud-proxy node as "trusted" node -- inside "create_vm"
++ enable system-information propagation between children nodes
++ planner optimization
+  + run 1st with FF to generate highly likely possible actions
+  + remove actions which are not selected by FF
+  + run lmcut with selected actions
+
 10-02-2013 -- 0.3.0a
 - enable machine's reference in members of Apachelb
 
