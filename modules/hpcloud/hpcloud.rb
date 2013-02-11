@@ -170,12 +170,20 @@ module Nuri
 						return false
 					end
 
+					# get self-address
+					my_address = self.get_state("$.#{Nuri::Util.whoami?}.address").to_s
+					
+					# create a list of trusted nodes
+					config = self.read_config
+					trusted = config['master']
+					trusted += ", " + my_address if my_address.length > 0
+
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/hpcloud"
 					pub_key_file = dir + "/herrykey.pem"
 					script_file = dir + "/nuri.sh"
 					options = "-i #{pub_key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-					remote_command = "'/bin/bash -s' < #{script_file}"
+					remote_command = "'/bin/bash -s \"#{trusted}\"' < #{script_file}"
 					cmd = "/usr/bin/ssh #{options} ubuntu@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 
 					if Nuri::Helper::Command.exec(cmd)

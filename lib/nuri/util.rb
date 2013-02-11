@@ -88,6 +88,8 @@ module Nuri
 			Socket.do_not_reverse_lookup = orig
 		end
 
+		def self.whoami?; self.hostname.strip.sub(/\..*/,''); end
+
 		def self.hostname
 			name = `uname -n`.chop
 			return name if name != ''

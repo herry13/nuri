@@ -1,6 +1,7 @@
 #!/bin/bash
 
-MASTER="nena.inf.ed.ac.uk"
+#MASTER="nena.inf.ed.ac.uk"
+TRUSTED="$1"
 
 echo "Installing required softwares and libraries..."
 sudo apt-get -y update
@@ -23,8 +24,8 @@ if [ -f "nuri.tgz" ]; then
 	# setup configuration file
 	echo -n "Setup configuration file..."
 	cp etc/nuri-template.sfp etc/nuri.sfp
-	sed -i 's/^\s*trusted.*/\ttrusted is \("__MASTER__"\)/g' etc/nuri.sfp
-	sed -i "s/__MASTER__/$MASTER/g" etc/nuri.sfp
+	sed -i 's/^\s*trusted.*/\ttrusted is \("__TRUSTED__"\)/g' etc/nuri.sfp
+	sed -i "s/__TRUSTED__/$TRUSTED/g" etc/nuri.sfp
 	sed -i "s/host/virtual_machine is true\n\thost/g" etc/nuri.sfp
 
 	# delete unused file
