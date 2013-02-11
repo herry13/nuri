@@ -1,6 +1,13 @@
 require 'thread'
 
 module Nuri
+
+	# Behavioural Signature Engine
+	# ============================
+	# Controlling the components based on Behavioural Signature (BSig) model
+	# which consists of:
+	# 1) BSig operators
+	# 2) Goal state
 	module BSig
 
 		# The file where Nuri client saves its active BSig's ID
@@ -83,7 +90,7 @@ module Nuri
 						}
 
 						while @enabled
-							# 1) get the goal and calculate the goal-flaw
+							# 1) get the goal and calculate the goal-flaws
 							goal = @owner.get_goal
 							goal_flaws = self.get_goal_flaws(goal)
 							if goal_flaws.length <= 0 # no goal-flaw => at goal state
@@ -134,8 +141,8 @@ module Nuri
 				candidates = self.search_operator_candidates(goal_flaws)
 				operator = self.select_operator(candidates)
 				if operator.nil?
-					# 1) the flaw cannot be repaired -- no operator is applicable
-					Nuri::Util.warn 'No applicable operator: ' + goal_flaws.inspect
+					# 1) the flaw cannot be repaired -- no operator can repair the flaw
+					Nuri::Util.warn 'Cannot repair the flaws: ' + goal_flaws.inspect
 					return false, nil
 				elsif not achieve_condition(operator)
 					# 2) operator's condition cannot be achieved
@@ -152,7 +159,7 @@ module Nuri
 
 			# Execute given BSig operator. Return true if the execution was success, otherwise false
 			def execute(operator)
-				Nuri::Util.debug 'execute operator: ' + operator['name']
+				Nuri::Util.debug "[executing: #{operator['name']}]"
 				return @owner.execute(operator)
 			end
 
@@ -192,9 +199,11 @@ module Nuri
 				return candidates
 			end
 
-			# Given a condition (either a goal or an operator's condition), the method
+			# Given a state (either a goal state or an operator's conditions), the method
 			# will calculate the flaws. The condition-flaws will be partitioned into two
-			# sets i.e. the remote-flaws and local-flaws.
+			# sets i.e. the remote-flaws and local-flaws. Try to satisfy the local-flaws
+			# first, then the remote-flaws.
+			#
 			# Remote-flaws: the flaws that must be repaired by the another agent (node).
 			# Local-flaws: the flaws that can be repaired by this agent (node).
 			def get_condition_flaws(condition)
@@ -216,8 +225,14 @@ module Nuri
 				return remote_flaws, local_flaws
 			end
 
+			# Repairing given local-flaws by recursively calling "repair_goal_flaws"
+			# where the goal is the local-flaws.
+			# This method will try 10 times, if in that tries the flaws cannot be repaired
+			# then return [false, {disrepair-local-flaws}]
+			# otherwise, return [true, nil]
 			def repair_local_flaws(local_flaws)
 				# Recursively call itself to repair the local flaws.
+				Nuri::Util.debug '[repairing local flaws]'
 				timeout = 10
 				while @enabled and local_flaws.length > 0 and timeout >= 0
 					succeed, effects = self.repair_goal_flaws(local_flaws)
@@ -232,6 +247,10 @@ module Nuri
 				return true, nil
 			end
 
+			# Repairing given remote-flaws by send a request to remote node that can repair
+			# the flaws. Within 30 minutes, it will try several times until the flaws have
+			# been repaired. If success, then return [true,nil]. Otherwise return
+			# [false, <disrepair-remote-flaws>]
 			def repair_remote_flaws(remote_flaws)
 				remote_flaws = remote_flaws.clone
 				# Send request to remote node to repair the remote flaws periodically until
@@ -267,7 +286,11 @@ module Nuri
 
 			# Given an operator, the method will:
 			# 1) calculate the operator's condition-flaws
-			# 2) repair either local or remote condition-flaws if they exist
+			# 2) if such flaws exist, separate into local and remote flaws
+			# 3) try to repair local-flaws first
+			# 4) if success repairing local-flaws, try to repair remote-flaws;
+			#    otherwise raise Exception
+			# 5) if success repairing remote-flaws, return true
 			#
 			# @return true if the operator's conditon-flaws can be repaired, otherwise false
 			def achieve_condition(operator)
@@ -285,7 +308,8 @@ module Nuri
 					# repairing local-flaws
 					success, local_flaws = repair_local_flaws(local_flaws)
 					if not success
-						raise Exception, "Local conditions of #{operator_name} cannot be satisfied: #{local_flaws.inspect}."
+						raise DisrepairLocalFlawException,
+							"Local conditions of #{operator_name} cannot be satisfied: #{local_flaws.inspect}."
 					else
 						Nuri::Util.debug "Local conditions of #{operator_name} have been satisfied."
 					end
@@ -293,7 +317,8 @@ module Nuri
 					# repairing remote-flaws
 					success, remote_flaws = repair_remote_flaws(remote_flaws)
 					if not success
-						raise Exception, "Remote conditions of #{operator_name} cannot be satisfied: #{remote_flaws.inspect}."
+						raise DisrepairRemoteFlawException,
+							"Remote conditions of #{operator_name} cannot be satisfied: #{remote_flaws.inspect}."
 					else
 						Nuri::Util.debug "Remote conditions of #{operator_name} have been satisfied."
 					end
@@ -309,6 +334,9 @@ module Nuri
 				return false
 			end
 		end
+
+		class DisrepairLocalFlawException < Exception; end
+		class DisrepairRemoteFlawException < Exception; end
 
 		ValueUndefined = Undefined.new
 

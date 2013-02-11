@@ -304,6 +304,8 @@ module Nuri
 					path.chop! if path[path.length-1,1] == '/'
 					if path == '/system'
 						status, content_type, body = self.set_system_information(request.query)
+					elsif path == '/system/update'
+						status, content_type, body = self.update_system_information(request.query)
 					else
 						status = 400
 						content_type = body = ''
@@ -474,11 +476,43 @@ module Nuri
 				[200, 'application/json', JSON.generate(bsig)]
 			end
 
+			def propagate_system_information(system)
+				system.each_value do |target|
+					next if target.nil? or target.to_s.length <= 0
+					begin
+						post_data(target, Nuri::Port, '/system', system)
+					rescue Exception => e
+						Nuri::Util.log 'Cannot send system information to ' + target.to_s + ' (' + e.to_s + ')'
+					end
+				end
+			end
+
+			def update_system_information(data)
+				begin
+					system = Nuri::Util.get_system_information
+					items = JSON[data['json']]
+					changed = false
+					items.each do |key,value|
+						next if system.has_key?(key) and system[key] == value
+						system[key] = value
+						changed = true
+					end
+					if changed
+						Nuri::Util.set_system_information(system)
+						Nuri::Util.log 'system information is updated(2)'
+						self.propagate_system_information(system)
+					end
+					return 200, '', ''
+				rescue
+				end
+				[404, '', '']
+			end
+
 			def set_system_information(data)
 				begin
 					system = JSON[data['json']]
 					Nuri::Util.set_system_information(system)
-					Nuri::Util.log 'system information updated'
+					Nuri::Util.log 'system information is updated(1)'
 					return 200, '', ''
 				rescue
 				end
