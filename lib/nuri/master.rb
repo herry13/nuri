@@ -63,10 +63,10 @@ module Nuri
 					next if key[0,1] == '_' or node['_classes'].rindex(MainComponent).nil?
 					state = nil
 					if self.vm?(node) # node is a virtual machine
-						if vms.has_key?(name) # the VM exists (has been created)
-							address = vms[name].to_s
+						if vms.has_key?(key) # the VM exists (has been created)
+							address = vms[key].to_s
 							state = self.get_node_state(address) if address.length > 0
-							state[name]['created'] = true
+							state[key]['created'] = true
 						else
 							# the VM does not exist
 							state = self.create_vm_template(node)
