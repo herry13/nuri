@@ -197,6 +197,14 @@ module Nuri
 							sleep 1
 							succeed = Nuri::Util.is_nuri_active?(address)
 						end
+
+						# update system information
+						system = Nuri::Util.get_system_information
+						system[name] = address
+						Nuri::Util.set_system_information(system)
+						# broadcast system information
+						Nuri::Util.broadcast_system_information
+
 					else
 						Nuri::Util.log "Cannot install Nuri on the new VM: #{name}"
 						return false
