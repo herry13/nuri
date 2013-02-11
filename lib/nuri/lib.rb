@@ -254,6 +254,21 @@ module Nuri
 
 	end
 
+
+	class SystemInfoUpdater
+		include Nuri::NetHelper
+		def broadcast(system)
+			system.each_value do |target|
+				next if target.nil? or target.to_s.length <= 0
+				begin
+					post_data(target, Nuri::Port, '/system', system)
+				rescue Exception => e
+					Nuri::Util.log 'Cannot send system information to ' + target.to_s + ' (' + e.to_s + ')'
+				end
+			end
+		end
+	end
+
 	class ExecutionFailedException < Exception
 	end
 end
