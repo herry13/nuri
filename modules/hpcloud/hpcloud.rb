@@ -102,7 +102,6 @@ module Nuri
 
 			def read_config
 				config_file = Nuri::Util.home_dir + '/modules/hpcloud/config.sfp'
-				Nuri::Util.log config_file
 				return {} if not File.exist?(config_file)
 				return Nuri::Sfp::Parser.parse_file(config_file)['config']
 			end

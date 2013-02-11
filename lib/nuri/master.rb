@@ -66,7 +66,7 @@ module Nuri
 						if vms.has_key?(key) # the VM exists (has been created)
 							address = vms[key].to_s
 							state = self.get_node_state(address) if address.length > 0
-							state[key]['created'] = true
+							state[key]['created'] = true if not state.nil?
 						else
 							# the VM does not exist
 							state = self.create_vm_template(node)
