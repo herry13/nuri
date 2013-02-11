@@ -199,7 +199,7 @@ module Nuri
 		end
 	end
 
-	module Net
+	module NetHelper
 		# Request data with GET method
 		def get_data(address, port, path, timeout=@read_timeout)
 			address = address.to_s
