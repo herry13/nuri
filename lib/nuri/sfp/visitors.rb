@@ -7,6 +7,13 @@ module Nuri
 			end
 		end
 
+		class ParentGenerator
+			def visit(name, value, parent)
+				value['_parent'] = parent if value.is_a?(Hash)
+				return true
+			end
+		end
+
 		class ProcedureEliminator
 			def visit(name, value, parent)
 				if value.is_a?(Hash) and value.isprocedure

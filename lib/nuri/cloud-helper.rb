@@ -4,25 +4,24 @@ module Nuri
 		CloudComponent = '$.Cloud'
 
 		class CloudProcedureModifier
-			def initialize(vm_path='this.parent')
-				@vm_path = vm_path
+			def initialize(vm_name)
+				@path = "$.#{vm_name}.created"
 			end
 
 			def visit(name, value, parent)
 				if value.is_a?(Hash) and value.isprocedure
-					value['_condition']["$.#{@vm_path}.created"] = {
+					value['_condition'][@path] = {
 						'_context' => 'constraint',
 						'_type' => 'equals',
 						'_value' => true
 					}
 				end
-				false
+				true
 			end
 		end
 
 		def init_cloud
 			@cloud_proxies = {}
-			@cloud_proc_modifier = CloudProcedureModifier.new
 
 			# create a template state for non-created VM
 			template_file = Nuri::Util.home_dir + "/modules/cloud/vm_template.sfp"
@@ -144,10 +143,11 @@ module Nuri
 			@vm_template.each { |k,v|
 				if k[0,1] != '_' and v.is_a?(Hash) and v.isobject
 					state[name][k] = Nuri::Sfp.deep_clone(v)
-					state[name][k].accept(@cloud_proc_modifier)
 				end
 			}
-			state[name].accept(@cloud_proc_modifier)
+			state[name].accept(Nuri::Sfp::ParentGenerator.new)
+			state[name].accept(CloudProcedureModifier.new(name)) #@cloud_proc_modifier)
+			state[name].accept(Nuri::Sfp::ParentEliminator.new)
 			return state
 		end
 

@@ -244,6 +244,14 @@ module Nuri
 						break
 					end
 				}
+
+				# update system information
+				system = Nuri::Util.get_system_information
+				system[name] = nil
+				Nuri::Util.set_system_information(system)
+				# broadcast system information
+				Nuri::Util.broadcast_system_information
+
 				return true
 			end
 		end
