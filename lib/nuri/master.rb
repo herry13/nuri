@@ -5,6 +5,7 @@ module Nuri
 	module Master
 		class Daemon
 			include Nuri::Config
+			include Nuri::Net
 			include Nuri::CloudHelper
 
 			attr_accessor :main, :do_verify_execution

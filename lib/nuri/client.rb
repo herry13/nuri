@@ -7,6 +7,7 @@ module Nuri
 	module Client
 		class Daemon
 			include Nuri::Config
+			include Nuri::Net
 
 			attr_accessor :master_keys
 
@@ -263,6 +264,8 @@ module Nuri
 		end
 
 		class Agent < WEBrick::HTTPServlet::AbstractServlet
+			include Nuri::Net
+
 			def initialize(server, owner)
 				@owner = owner
 			end

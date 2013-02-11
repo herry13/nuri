@@ -197,7 +197,9 @@ module Nuri
 			address = self.address?(path)
 			return (address == Nuri::Util.domainname or address == Nuri::Util.local_ip)
 		end
+	end
 
+	module Net
 		# Request data with GET method
 		def get_data(address, port, path, timeout=@read_timeout)
 			address = address.to_s
