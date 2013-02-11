@@ -175,8 +175,8 @@ module Nuri
 					
 					# create a list of trusted nodes
 					config = self.read_config
-					trusted = config['master']
-					trusted += ", " + my_address if my_address.length > 0
+					trusted = '\"' + config['master'] + '\"'
+					trusted += ', \"' + my_address + '\"' if my_address.length > 0
 
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/hpcloud"

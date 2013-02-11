@@ -24,7 +24,7 @@ if [ -f "nuri.tgz" ]; then
 	# setup configuration file
 	echo -n "Setup configuration file..."
 	cp etc/nuri-template.sfp etc/nuri.sfp
-	sed -i 's/^\s*trusted.*/\ttrusted is \("__TRUSTED__"\)/g' etc/nuri.sfp
+	sed -i 's/^\s*trusted.*/\ttrusted is \(__TRUSTED__\)/g' etc/nuri.sfp
 	sed -i "s/__TRUSTED__/$TRUSTED/g" etc/nuri.sfp
 	sed -i "s/host/virtual_machine is true\n\thost/g" etc/nuri.sfp
 
