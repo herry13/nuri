@@ -1,4 +1,5 @@
 require 'thread'
+require 'lib'
 
 module Nuri
 	Port = 1313
