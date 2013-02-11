@@ -171,7 +171,6 @@ module Nuri
 					end
 
 					# install nuri on newly created VM
-					#dir = File.expand_path(File.dirname(__FILE__))
 					dir = Nuri::Util.home_dir + "/modules/hpcloud"
 					pub_key_file = dir + "/herrykey.pem"
 					script_file = dir + "/nuri.sh"
