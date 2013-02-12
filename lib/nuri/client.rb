@@ -354,8 +354,6 @@ module Nuri
 					bsig_file = Nuri::BSig.bsig_vm_file(bsig['id'])
 					local = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {})
 
-puts 'save VM BSig: ' + data['json']
-
 					vm_name = bsig['vm']
 					local[vm_name] = { 'operators' => [], 'goal' => {} } if not local.has_key?(vm_name)
 					operators = local[vm_name]['operators']

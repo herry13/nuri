@@ -157,9 +157,11 @@ module Nuri
 			end
 
 			def deploy_bsig(bsig, debug=false)
-				def send_to_cloud_proxies(node, id, operator)
+				def send_to_cloud_proxies(node, id, operator=nil, goal=nil)
 					@cloud_proxies.each_value do |address|
-						data = {'vm' => node['_self'], 'id' => id, 'operator' => operator,}
+						data = {'vm' => node['_self'], 'id' => id}
+						data['operator'] = operator if not operator.nil?
+						data['goal'] = goal if not goal.nil?
 						code, _ = put_data(address, Nuri::Port, '/bsig/vm', data)
 						raise Exception, 'Failed sending BSig to cloud-proxy: ' + address.to_s if code != '200'
 					end
@@ -180,18 +182,18 @@ module Nuri
 							Nuri::Util.error "Cannot find node of operator: #{operator['name']}"
 							return false
 						end
+
 						address = node['address']
 						if address.nil? and self.vm?(node)
-							#raise Exception, 'address is nil'
 							send_to_cloud_proxies(node, bsig['id'], operator)
+						else
+							data = {'id' => bsig['id'], 'operator' => operator}
+							code, _ = put_data(address, Nuri::Port, '/bsig', data)
+							if code != '200'
+								raise Exception, "sending BSig operator:#{code},#{address}"
+							end
+							nodes << address
 						end
-
-						data = {'id' => bsig['id'], 'operator' => operator}
-						code, _ = put_data(address, Nuri::Port, '/bsig', data)
-						if code != '200'
-							raise Exception, "sending BSig operator:#{code},#{address}"
-						end
-						nodes << address
 					end
 
 					# send BSig goal to clients
@@ -200,12 +202,16 @@ module Nuri
 						return false if node.nil?
 
 						address = node['address']
-						data = {'id' => bsig['id'], 'goal' => {var_name => value}}
-						code, _ = put_data(address, Nuri::Port, '/bsig', data)
-						if code != '200'
-							raise Exception, "sending BSig goal:#{code},#{address}"
+						if address.nil? and self.vm?(node)
+							send_to_cloud_proxies(node, bsig['id'], nil, {var_name => value})
+						else
+							data = {'id' => bsig['id'], 'goal' => {var_name => value}}
+							code, _ = put_data(address, Nuri::Port, '/bsig', data)
+							if code != '200'
+								raise Exception, "sending BSig goal:#{code},#{address}"
+							end
+							nodes << address
 						end
-						nodes << address
 					end
 
 					# send deployment signal to all clients

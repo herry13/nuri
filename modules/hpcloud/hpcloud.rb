@@ -135,9 +135,9 @@ module Nuri
 				# create VM
 				new_server = @conn.servers.create(
 					:name => name,
-					:flavor_id => DefaultFlavorID, #vm['flavor_id'],
-					:image_id => DefaultImageID,   #vm['image_id'],
-					:key_name => DefaultKeyName,   #vm['key_name'],
+					:flavor_id => DefaultFlavorID,
+					:image_id => DefaultImageID,
+					:key_name => DefaultKeyName,
 					:security_groups => ['default'],
 					:metadata => {'name' => name})
 				if not new_server.nil?
@@ -199,11 +199,15 @@ module Nuri
 						end
 
 						# update system information
+						# - include the new VM's address into local system information
 						system = Nuri::Util.get_system_information
 						system[name] = address
 						Nuri::Util.set_system_information(system)
 						# broadcast system information
 						Nuri::Util.broadcast_system_information
+
+						# send the BSig model to the new VM
+						# TODO
 
 					else
 						Nuri::Util.log "Cannot install Nuri on the new VM: #{name}"
