@@ -180,9 +180,7 @@ module Nuri
 
 					return create_output
 				rescue Exception => e
-pp e
-puts e.backtrace
-					Nuri::Util.log e.to_s
+					Nuri::Util.error e.to_s + "\n" + e.bracktrace.to_s
 				end
 			end
 
@@ -442,7 +440,7 @@ puts e.backtrace
 				@operators.each_value { |op|
 					next if op.total_preposts <= 0
 					total += 1
-					ops += op.to_sas(@root['initial']) + "\n"
+					ops += op.to_sas(@root['initial'], @variables) + "\n"
 				}
 				out += "#{total}\n"
 				out += ops
@@ -1639,7 +1637,7 @@ puts e.backtrace
 				return @name + ': ' + self.length.to_s
 			end
 
-			def to_sas(root)
+			def to_sas(root, variables)
 				prevail = Array.new
 				prepost = Array.new
 				self.each_value { |p|
@@ -1652,9 +1650,9 @@ puts e.backtrace
 				sas = "begin_operator\n#{@name}"
 				@params.each { |k,v| sas += " #{k}=#{v}" if k != '$.this' } if @params != nil
 				sas += "\n#{prevail.length}\n"
-				prevail.each { |p| sas += p.to_sas(root) + "\n" }
+				prevail.each { |p| sas += p.to_sas(root, variables) + "\n" }
 				sas += "#{prepost.length}\n"
-				prepost.each { |p| sas += p.to_sas(root) + "\n" }
+				prepost.each { |p| sas += p.to_sas(root, variables) + "\n" }
 				sas += "#{@cost}\nend_operator"
 				return sas
 			end
@@ -1717,10 +1715,12 @@ puts e.backtrace
 				return Parameter.new(@var, @pre, @post)
 			end
 
-			def to_sas(root)
+			def to_sas(root, variables)
 				# resolve the reference
-				pre = ( (@pre.is_a?(String) and @pre.isref) ? root.at?(@pre) : @pre )
-				post = ( (@post.is_a?(String) and @post.isref) ? root.at?(@post) : @post )
+				#pre = ( (@pre.is_a?(String) and @pre.isref) ? root.at?(@pre) : @pre )
+				#post = ( (@post.is_a?(String) and @post.isref) ? root.at?(@post) : @post )
+				pre = ((@pre.is_a?(String) and @pre.isref) ? variables[@pre].init : @pre)
+				post = ((@post.is_a?(String) and @post.isref) ? variables[@post].init : @post)
 				# calculate the index
 				pre = ( (pre.is_a?(Hash) and pre.isnull) ? 0 : (pre == nil ? -1 : @var.index(pre)) )
 				post = ( (post.is_a?(Hash) and post.isnull) ? 0 : @var.index(post) )

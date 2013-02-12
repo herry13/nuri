@@ -21,6 +21,9 @@ module Nuri
 			return File.read(ActiveBSigIdFile).to_i
 		end
 
+		def self.bsig_file(id);	Nuri::Util.home_dir + '/var/bsig_' + id.to_s; end
+		def self.bsig_vm_file(id); Nuri::Util.home_dir + '/var/bsig_' + id.to_s + '.vm'; end
+
 		class Executor
 			# Waiting time before sending another request to related nodes in order
 			# to fulfil operator's precondition

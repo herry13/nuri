@@ -157,6 +157,15 @@ module Nuri
 			end
 
 			def deploy_bsig(bsig, debug=false)
+				def send_to_cloud_proxies(node, id, operator)
+					@cloud_proxies.each_value do |address|
+						data = {'vm' => node['_self'], 'id' => id, 'operator' => operator,}
+						code, _ = put_data(address, Nuri::Port, '/bsig/vm', data)
+						raise Exception, 'Failed sending BSig to cloud-proxy: ' + address.to_s if code != '200'
+					end
+					#raise Exception, 'proxies: ' + data.inspect.to_s
+				end
+
 				begin
 					Nuri::Util.log "Sending BSig: #{bsig['id']}"
 
@@ -167,9 +176,16 @@ module Nuri
 					nodes = []
 					bsig['operators'].each do |operator|
 						node = self.get_node(operator['name'])
-						return false if node.nil?
-
+						if node.nil?
+							Nuri::Util.error "Cannot find node of operator: #{operator['name']}"
+							return false
+						end
 						address = node['address']
+						if address.nil? and self.vm?(node)
+							#raise Exception, 'address is nil'
+							send_to_cloud_proxies(node, bsig['id'], operator)
+						end
+
 						data = {'id' => bsig['id'], 'operator' => operator}
 						code, _ = put_data(address, Nuri::Port, '/bsig', data)
 						if code != '200'
@@ -207,10 +223,10 @@ module Nuri
 					File.open(Nuri::BSig::MasterBSigFile, 'w') { |f| f.write(JSON.generate(bsig)) }
 
 				rescue Timeout::Error
-					Nuri::Util.log 'Timeout on sending BSig to clients'
+					Nuri::Util.error 'Timeout on sending BSig to clients'
 					return false
 				rescue Exception => exp
-					Nuri::Util.log 'Failed: ' + exp.to_s
+					Nuri::Util.error 'Failed: ' + exp.to_s + ' -- ' + exp.backtrace.to_s
 					return false
 				end
 

@@ -282,11 +282,6 @@ module Nuri
 						status, content_type, body = self.get_state(:path => path)
 					elsif path == '/bsig'
 						status, content_type, body = self.get_bsig
-					#elsif path == '/cloud/vms'
-					#	status, content_type, body = self.get_vms
-					#elsif path[0,18] == '/cloud/vm/address/'
-					#	_, _, _, _, vm_name, _ = path.split('/', 6)
-					#	status, content_type, body = self.get_vm_address(vm_name)
 					else
 						status = 400
 						content_type = body = ''
@@ -337,6 +332,8 @@ module Nuri
 						status, content_type, body = self.new_bsig_pre_goal(request.query)
 					elsif path == '/bsig/start'
 						status, content_type, body = self.start_bsig_executor
+					elsif path == '/bsig/vm'
+						status, content_type, body = self.save_bsig_vm(request.query)
 					elsif path == '/reset'
 						status, content_type, body = self.reset
 					elsif path[0,10] == '/function/' and path.length > 10
@@ -349,6 +346,31 @@ module Nuri
 				response.status = status
 				response['Content-Type'] = content_type
 				response.body = body
+			end
+
+			def save_bsig_vm(data)
+				begin
+					bsig = JSON[data['json']]
+					bsig_file = Nuri::BSig.bsig_vm_file(bsig['id'])
+					local = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {})
+
+puts 'save VM BSig: ' + data['json']
+
+					vm_name = bsig['vm']
+					local[vm_name] = { 'operators' => [], 'goal' => {} } if not local.has_key?(vm_name)
+					operators = local[vm_name]['operators']
+					goals = local[vm_name]['goal']
+
+					operators << bsig['operator'] if bsig.has_key?('operator')
+					bsig['operators'].each { |op| operators << op } if bsig.has_key?('operators')
+					bsig['goal'].each { |k,v| goals[k] = v } if bsig.has_key?('goal')
+
+					File.open(bsig_file, 'w') { |f| f.write(JSON.generate(local)) }
+				rescue Exception => e
+					Nuri::Util.error 'Failed to save BSig VM: ' + e.to_s
+					return 500, '', ''
+				end
+				return 200, '', ''
 			end
 
 			def start_bsig_executor; @owner.start_bsig_executor; return 200, '', ''; end

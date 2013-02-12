@@ -78,13 +78,6 @@ module Nuri
 						if self.cloud_proxy?(name, address)
 							@cloud_proxies[name] = address
 						end
-						#path = "/state/#{name}/hpcloud/running"
-						#address = value['address']
-						#code, body = self.get_data(address, Nuri::Port, path)
-						#if code == '200'
-						#	data = JSON.parse(body)
-						#	@cloud_proxies[name] = address if data['value'] == true
-						#end
 					rescue Exception => exp
 						Nuri::Util.error 'Error: update_cloud_proxies - ' + exp.to_s
 					end
