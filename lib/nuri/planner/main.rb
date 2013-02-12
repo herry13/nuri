@@ -159,7 +159,7 @@ module Nuri
 					end
 
 					if Heuristic == 'fflmcut'
-						fflmcut = FFLMCUT.new(tmp_dir, sas_file, plan_file)
+						fflmcut = MixedHeuristic.new(tmp_dir, sas_file, plan_file)
 						fflmcut.solve
 					else
 						command = Nuri::Planner.command(tmp_dir, sas_file, plan_file, Heuristic)
@@ -243,7 +243,7 @@ puts exp.backtrace
 		# 1) solve the problem with FF, that will produce (usually) a non-optimal plan
 		# 2) remove actions which are not selected by previous step (FF)
 		# 3) solve the problem with LMCUT using A*-search to obtain a sub-optimal plan
-		class FFLMCUT
+		class MixedHeuristic
 			def initialize(dir, sas_file, plan_file)
 				@dir = dir
 				@sas_file = sas_file
@@ -254,19 +254,34 @@ puts exp.backtrace
 				# 1) solve with FF
 				ff = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'ff')
 				Kernel.system(ff)
-				return false if not File.exist?(@plan_file)
+				# 1b) if not found, try CEA
+				if not File.exist?(@plan_file)
+					cea = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cea')
+					Kernel.system(cea)
+				end
+				# 1c) if not found, try CG
+				if not File.exists?(@plan_file)
+					cg = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cg')
+					Kernel.system(cg)
+					return false if not File.exist?(@plan_file)
+				end
 
 				# 2) remove unselected operators
-				self.filter_operators(@sas_file, @plan_file)
-				File.delete(@plan_file)
+				new_sas = @sas_file + '.2'
+				new_plan = @plan_file + '.2'
+				self.filter_operators(@sas_file, @plan_file, new_sas)
 
 				# 3) generate the final plan with LMCUT
-				lmcut = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'lmcut')
+				lmcut = ::Nuri::Planner.command(@dir, new_sas, new_plan, 'lmcut')
 				Kernel.system(lmcut)
-				return File.exist?(@plan_file)
+
+				# LMCUT cannot find the sub-optimized plan
+				File.rename(new_plan, @plan_file) if File.exist?(new_plan)
+
+				true
 			end
 
-			def filter_operators(sas, plan)
+			def filter_operators(sas, plan, new_sas)
 				# generate the selected actions
 				selected = []
 				File.read(plan).each_line { |line| selected << line[1,line.length-1].split('$.', 2)[0] }
@@ -301,7 +316,7 @@ puts exp.backtrace
 				end
 
 				# save filtered problem
-				File.open(sas, 'w') { |f| f.write(output) }
+				File.open(new_sas, 'w') { |f| f.write(output) }
 			end
 		end
 
