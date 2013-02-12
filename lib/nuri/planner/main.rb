@@ -3,12 +3,12 @@ require 'nuri/planner/sas'
 
 module Nuri
 	module Planner
-		Heuristic = 'fflmcut' # lmcut, cg, cea, ff
+		Heuristic = 'mixed' # lmcut, cg, cea, ff, mixed ([cg|cea|ff]=>lmcut)
 		Debugging = false
 
 		class Solver
 			# The timeout for the solver in seconds (default 600s/5mins)
-			@@timeout = 600
+			@@timeout = 60
 			# The maximum memory that can be consumed by the solver
 			@@max_memory = 2048000 # (in K) -- default ~2GB
 
@@ -158,9 +158,9 @@ module Nuri
 						f.flush
 					end
 
-					if Heuristic == 'fflmcut'
-						fflmcut = MixedHeuristic.new(tmp_dir, sas_file, plan_file)
-						fflmcut.solve
+					if Heuristic == 'mixed'
+						mixed = MixedHeuristic.new(tmp_dir, sas_file, plan_file)
+						mixed.solve
 					else
 						command = Nuri::Planner.command(tmp_dir, sas_file, plan_file, Heuristic)
 						Kernel.system(command)
@@ -183,11 +183,10 @@ module Nuri
 
 					return plan, sas_task
 				rescue Exception => exp
-puts exp.backtrace
 					raise Exception, exp.to_s
 				ensure
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
-					#system 'rm -rf ' + tmp_dir
+					system 'rm -rf ' + tmp_dir
 				end
 
 				return nil, nil
@@ -251,18 +250,18 @@ puts exp.backtrace
 			end
 
 			def solve
-				# 1) solve with FF
-				ff = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'ff')
-				Kernel.system(ff)
+				# 1) solve with CG
+				planner1 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cg')
+				Kernel.system(planner1)
 				# 1b) if not found, try CEA
 				if not File.exist?(@plan_file)
-					cea = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cea')
-					Kernel.system(cea)
+					planner2 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cea')
+					Kernel.system(planner2)
 				end
 				# 1c) if not found, try CG
 				if not File.exists?(@plan_file)
-					cg = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cg')
-					Kernel.system(cg)
+					planner3 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'ff')
+					Kernel.system(planner3)
 					return false if not File.exist?(@plan_file)
 				end
 
@@ -276,6 +275,7 @@ puts exp.backtrace
 				Kernel.system(lmcut)
 
 				# LMCUT cannot find the sub-optimized plan
+				File.delete(@plan_file)
 				File.rename(new_plan, @plan_file) if File.exist?(new_plan)
 
 				true
@@ -284,18 +284,23 @@ puts exp.backtrace
 			def filter_operators(sas, plan, new_sas)
 				# generate the selected actions
 				selected = []
-				File.read(plan).each_line { |line| selected << line[1,line.length-1].split('$.', 2)[0] }
+				File.read(plan).each_line do |line|
+					line.strip!
+					line = line[1, line.length-2]
+					selected << line.split(' ', 2)[0]
+				end
 
 				# remove unselected operators
 				output = ""
 				operator = nil
 				id = nil
 				total_op = false
+				counter = 0
 				File.read(sas).each_line do |line|
 					if line =~ /^end_goal/
 						total_op = true
 					elsif total_op
-						output += selected.length.to_s + "\n"
+						output += "__TOTAL_OPERATOR__\n"
 						total_op = false
 						next
 					end
@@ -304,16 +309,22 @@ puts exp.backtrace
 						operator = ""
 						id = nil
 					elsif line =~ /^end_operator/
-						output += "begin_operator\n#{operator}end_operator\n" if not selected.index(id).nil?
+						if not selected.index(id).nil?
+							output += "begin_operator\n#{operator}end_operator\n"
+							counter += 1
+						end
 						operator = nil
 						id = nil
 					elsif operator.nil?
 						output += line
 					else
-						id = line.split('$.', 2)[0] if id.nil?
+						id = line.split(' ', 2)[0] if id.nil?
 						operator += line
 					end
 				end
+
+				# replace total operator
+				output.sub!(/__TOTAL_OPERATOR__/, counter.to_s)
 
 				# save filtered problem
 				File.open(new_sas, 'w') { |f| f.write(output) }
