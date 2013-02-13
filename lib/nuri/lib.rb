@@ -259,6 +259,7 @@ module Nuri
 		def broadcast(system)
 			system.each_value do |target|
 				next if target.nil? or target.to_s.length <= 0
+				next if not Nuri::Util.is_nuri_active?(target)
 				begin
 					post_data(target, Nuri::Port, '/system', system)
 				rescue Exception => e

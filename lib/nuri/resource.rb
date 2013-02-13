@@ -171,7 +171,7 @@ module Nuri
 					return json['value'] if json.is_a?(Hash) and json.has_key?('value')
 				end
 			rescue Exception => e	
-				Nuri::Util.log 'Cannot send system information to ' + address + ' -- ' + e.to_s
+				Nuri::Util.log 'Cannot get state from: ' + address + ' -- ' + e.to_s
 			end
 
 			#nil
