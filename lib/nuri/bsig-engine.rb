@@ -376,7 +376,7 @@ module Nuri
 					end
 					return true
 				rescue Exception => exp
-					Nuri::Util.error "Cannot activate BSig model of VM: #{vm_name},#{address} -- " + exp.to_s + ":" exp.backtrace.to_s
+					Nuri::Util.error "Cannot activate BSig model of VM: #{vm_name},#{address} -- " + exp.to_s + ":" + exp.backtrace.to_s
 				end
 				false
 			end
