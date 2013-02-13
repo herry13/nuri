@@ -175,7 +175,7 @@ module Nuri
 						self.delete_vm('vm' => name)
 						return false
 					end
-					Nuri::Util.log "#{name} ssh-server: running'
+					Nuri::Util.log "#{name} ssh-server: running"
 
 					# get self-address
 					my_address = self.get_state("$.#{Nuri::Util.whoami?}.address").to_s
