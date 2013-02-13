@@ -197,15 +197,19 @@ module Nuri
 					end
 
 					# send BSig goal to clients
-					bsig['goal'].each do |var_name,value|
-						node = self.get_node(var_name)
+					bsig['goal'].each do |variable,value|
+						operator = bsig['goal_operator'][variable]
+						#node = self.get_node(variable)
+						node = self.get_node(operator)
 						return false if node.nil?
+
+puts variable + ":" + operator + " => " + node['_self']
 
 						address = node['address']
 						if address.nil? and self.vm?(node)
-							send_to_cloud_proxies(node, bsig['id'], nil, {var_name => value})
+							send_to_cloud_proxies(node, bsig['id'], nil, {variable => value})
 						else
-							data = {'id' => bsig['id'], 'goal' => {var_name => value}}
+							data = {'id' => bsig['id'], 'goal' => {variable => value}}
 							code, _ = put_data(address, Nuri::Port, '/bsig', data)
 							if code != '200'
 								raise Exception, "sending BSig goal:#{code},#{address}"

@@ -84,7 +84,7 @@ module Nuri
 					prev_op = workflow[i-1]
 					prev_op['effect'].each { |k,v| op['condition'][k] = v }
 				end
-				bsig['goal'] = self.bsig_goal(workflow)
+				bsig['goal'] = self.bsig_goal
 				return bsig
 			end
 
@@ -101,25 +101,34 @@ module Nuri
 						pred_op['effect'].each { |k,v| op['condition'][k] = v }
 					end
 				end
-				bsig['goal'] = self.bsig_goal(workflow)
+				bsig['goal'] = self.bsig_goal
+				bsig['goal_operator'] = bsig_goal_operator(workflow)
 				return bsig
 			end
 
-			def bsig_goal(workflow)
-				goal = {}
+			def bsig_goal_operator(workflow)
+				data = {}
 				@sas_task.final_state.each do |g|
-					var_name, var_value = @parser.variable_name_and_value(g[:id], g[:value])
+					variable, value = @parser.variable_name_and_value(g[:id], g[:value])
 					# search the supporting operator
 					(workflow.length-1).downto(0) do |i|
-						if workflow[i]['effect'].has_key?(var_name)
-							if workflow[i]['effect'][var_name] == var_value
-								#puts var_name + '=' + var_value.to_s + ' ==> ' + workflow[i]['name']
+						if workflow[i]['effect'].has_key?(variable)
+							if workflow[i]['effect'][variable] == value
+								data[variable] = workflow[i]['name']
 								break
 							else
-								raise Exception, "#{var_name} is not supported by last operator"
+								raise Exception, "#{variable}=#{value} is not supported by last possible operator"
 							end
 						end
 					end
+				end
+				data
+			end
+
+			def bsig_goal
+				goal = {}
+				@sas_task.final_state.each do |g|
+					var_name, var_value = @parser.variable_name_and_value(g[:id], g[:value])
 					goal[var_name] = var_value
 				end
 				return goal

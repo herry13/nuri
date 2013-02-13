@@ -1,4 +1,5 @@
 module Nuri
+	# An object of this class will be returned as the value of a non-exist variable
 	class Undefined
 		attr_accessor :path
 
@@ -7,11 +8,7 @@ module Nuri
 		end
 
 		def to_s
-			if @path == nil
-				"Undefined"
-			else
-				"Undefined path: " + @path
-			end
+			(@path.nil? ? "<sfp::undefined>" : "<sfp::Undefined[#{@path}]>")
 		end
 	end
 end
