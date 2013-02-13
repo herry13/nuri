@@ -465,7 +465,7 @@ module Nuri
 				begin
 					# /function/<function-path>
 					_, _, func_path = path.split('/', 3)
-					func_path = '$.' + func_path.gsub(/\//, '.')
+					func_path = '$.' + func_path.gsub(/\//, '.') if not func_path.nil?
 					params = (data.is_a?(Hash) and data.has_key?('json') ? JSON[data['json']] : {})
 					data = {'value' => @owner.call(func_path, params)}
 					return 200, 'application/json', JSON.generate(data)
@@ -480,7 +480,7 @@ module Nuri
 					state = @owner.get_state
 				else
 					_, _, path = options[:path].split('/', 3)
-					path = '$.' + path.gsub(/\//, '.')
+					path = '$.' + path.gsub(/\//, '.') if not path.nil?
 					state = @owner.get_state(path)
 				end
 

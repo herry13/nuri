@@ -8,7 +8,6 @@ require 'uri'
 # Nuri libraries
 require 'nuri/util'
 require 'nuri/resource'
-require 'nuri/undefined'
 require 'nuri/sfp/main'
 require 'nuri/planner/main'
 require 'nuri/ssl'

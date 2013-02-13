@@ -1,3 +1,21 @@
+module Nuri
+	class Undefined
+		attr_accessor :path
+
+		def initialize(path=nil)
+			@path = path
+		end
+
+		def to_s
+			if @path == nil
+				"Undefined"
+			else
+				"Undefined path: " + @path
+			end
+		end
+	end
+end
+
 # return a fullpath of reference of this context
 Hash.send(:define_method, "ref") {
 	return '$' if not self.has_key?('_parent') or self['_parent'] == nil
@@ -25,7 +43,8 @@ Hash.send(:define_method, "accept") { |visitor|
 
 # resolve a reference, return nil if there's no value with given address
 Hash.send(:define_method, "at?") { |addr|
-	return nil if not addr.is_a?(String)
+	#return nil if not addr.is_a?(String)
+	return Nuri::Undefined.new if not addr.is_a?(String)
 	addrs = addr.split('.', 2)
 
 	if addrs[0] == '$'
@@ -45,7 +64,9 @@ Hash.send(:define_method, "at?") { |addr|
 			return self[addrs[0]].at?(addrs[1]) if self[addrs[0]].is_a?(Hash) and addrs[1] != ''
 		end
 	end
-	return nil
+
+	#return nil
+	return Nuri::Undefined.new
 }
 
 Hash.send(:define_method, "type?") { |name|

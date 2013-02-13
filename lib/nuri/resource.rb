@@ -110,6 +110,7 @@ module Nuri
 		end
 
 		def get_path_state(path=nil, parent=nil)
+#puts 'get_path_state:' + path.to_s + ' < ' + parent.to_s
 			if path == nil or path == ''
 				self.update_state
 				return @state
@@ -144,7 +145,6 @@ module Nuri
 				else
 					system = Nuri::Util.get_system_information
 					if system.has_key?(first) and (parent == '$' or parent == 'root')
-#puts 'remote[' + system[first] + ']:' + path
 						return get_remote_path_state(system[first], path)
 					else
 						# undefined
@@ -210,7 +210,7 @@ module Nuri
 		end
 
 		def get_value(ref)
-			# TODO -- unfound attribute should return "Nuri::UndefinedValue"
+			# TODO -- unfound attribute should return "Nuri::Undefined"
 			# rather than just "nil"
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
