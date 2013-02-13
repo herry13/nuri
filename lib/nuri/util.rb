@@ -146,7 +146,7 @@ module Nuri
 			return @@platform
 		end
 
-		def self.nuri_version; return `git rev-parse HEAD`.chop; end
+		def self.nuri_version; return ''; end
 
 		def self.uninstalled?(package)
 			success = ( system("/usr/bin/apt-get -y --purge remove #{package}") == true )
