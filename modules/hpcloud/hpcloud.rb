@@ -136,6 +136,7 @@ module Nuri
 				@conn.servers.each { |s| return true if s.name == name }
 
 				# create VM
+				Nuri::Util.log "creating new VM: #{name}..."
 				new_server = @conn.servers.create(
 					:name => name,
 					:flavor_id => DefaultFlavorID,
@@ -158,6 +159,7 @@ module Nuri
 						self.delete_vm('vm' => name)
 						return false
 					end
+					Nuri::Util.log "#{name} is active"
 
 					address = info.public_ip_address
 					# wait until SSH Server is running
@@ -166,12 +168,14 @@ module Nuri
 						sleep 1
 						counter -= 1
 					end
+					Nuri::Util.log "#{name} ip: #{address}"
 
 					if not self.is_port_open?(address, 22)
 						Nuri::Util.error "Cannot connect to SSH server of: #{name}"
 						self.delete_vm('vm' => name)
 						return false
 					end
+					Nuri::Util.log "#{name} ssh-server: running'
 
 					# get self-address
 					my_address = self.get_state("$.#{Nuri::Util.whoami?}.address").to_s
@@ -181,6 +185,7 @@ module Nuri
 					trusted = '\"' + config['master'] + '\"'
 					trusted += ', \"' + my_address + '\"' if my_address.length > 0
 
+					Nuri::Util.log "#{name}: installing Nuri-client"
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/hpcloud"
 					pub_key_file = dir + "/herrykey.pem"
@@ -200,6 +205,7 @@ module Nuri
 							sleep 1
 							succeed = Nuri::Util.is_nuri_active?(address)
 						end
+						Nuri::Util.log "#{name}: Nuri client is active"
 
 						# update system information
 						# - include the new VM's address into local system information
@@ -210,8 +216,9 @@ module Nuri
 						Nuri::Util.broadcast_system_information
 
 						# send and active the BSig model to the new VM
-						if not Nuri::BSig::VM.send(name, address) or
-						   not Nuri::BSig.activate(name, address)
+						bsig_helper = Nuri::BSig::VMHelper.new
+						if not bsig_helper.send(name, address) or
+						   not bsig_helper.activate(name, address)
 							Nuri::Util.error "Cannot send and activate BSig model of VM: #{name},#{address}"
 							succeed = false
 						end

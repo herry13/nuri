@@ -338,7 +338,7 @@ module Nuri
 			end
 		end
 
-		module VM
+		class VMHelper
 			include ::Nuri::NetHelper
 
 			def self.send(vm_name, address)
@@ -351,12 +351,12 @@ module Nuri
 					if bsig.has_key?(vm_name)
 						# send BSig model
 						data = bsig[vm_name]
-						code, _ = put_data(address, Nuri::Port, '/bsig', data)
-						return false if code != '200'
+						code, _ = self.put_data(address, Nuri::Port, '/bsig', data)
+						raise Exception, "Return code: #{code}" if code != '200'
 					end
 					return true
 				rescue Exception => exp
-					Nuri::Util.error "Cannot send BSig model to VM: #{vm_name},#{address}"
+					Nuri::Util.error "Cannot send BSig model to VM: #{vm_name},#{address} -- " + exp.to_s + ":" + exp.backtrace.to_s
 				end
 				false
 			end
@@ -371,12 +371,12 @@ module Nuri
 					if bsig.has_key?(vm_name)
 						# activate BSig model
 						data = {'id' => bsig_id}
-						code, _ = put_data(address, Nuri::Port, '/bsig/activate', data)
-						return false if code != '200'
+						code, _ = self.put_data(address, Nuri::Port, '/bsig/activate', data)
+						raise Exception, "Return code: #{code}" if code != '200'
 					end
 					return true
 				rescue Exception => exp
-					Nuri::Util.error "Cannot activate BSig model of VM: #{vm_name},#{address}"
+					Nuri::Util.error "Cannot activate BSig model of VM: #{vm_name},#{address} -- " + exp.to_s + ":" exp.backtrace.to_s
 				end
 				false
 			end
