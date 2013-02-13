@@ -193,6 +193,10 @@ module Nuri
 
 		# @return true if given path is local, otherwise false
 		def local?(path)
+			part1, part2, _ = path.split('.', 3)
+			node_name = (part1 == '$' ? part2 : part1)
+			return true if node_name == Nuri::Util.whoami?
+
 			address = self.address?(path)
 			return (address == Nuri::Util.domainname or address == Nuri::Util.local_ip)
 		end
