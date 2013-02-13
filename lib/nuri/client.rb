@@ -471,7 +471,6 @@ module Nuri
 					return 200, 'application/json', JSON.generate(data)
 				rescue Exception => exp
 					Nuri::Util.error "Error: calling function #{func_path} - " + exp.to_s
-					#puts exp.backtrace
 				end
 				[500, '', '']
 			end
@@ -481,6 +480,7 @@ module Nuri
 					state = @owner.get_state
 				else
 					_, _, path = options[:path].split('/', 3)
+					path = '$.' + path.gsub(/\//, '.')
 					state = @owner.get_state(path)
 				end
 

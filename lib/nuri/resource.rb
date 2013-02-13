@@ -103,12 +103,13 @@ module Nuri
 
 			path.strip!
 			value = get_path_state(path)
-			return value if value != nil
+			#return value if value != nil
 
-			return Nuri::Undefined.new(path)
+			#return Nuri::Undefined.new(path)
+			return value
 		end
 
-		def get_path_state(path=nil)
+		def get_path_state(path=nil, parent=nil)
 			if path == nil or path == ''
 				self.update_state
 				return @state
@@ -116,16 +117,16 @@ module Nuri
 
 			first, rest = path.split('.', 2)
 			if first == '$' or first == 'root'
-				return self.root.get_path_state(rest)
+				return self.root.get_path_state(rest, first)
 
 			elsif first == 'parent'
-				return @parent.get_path_state(rest) if @parent != nil
+				return @parent.get_path_state(rest, first) if @parent != nil
 
 			elsif first == 'this' or first == 'self'
-				return self.get_path_state(rest)
+				return self.get_path_state(rest, first)
 
 			elsif @children.has_key?(first) # sub-module
-				return @children[first].get_path_state(rest)
+				return @children[first].get_path_state(rest, first)
 
 			else
 				self.update_state
@@ -136,28 +137,33 @@ module Nuri
 						return @state[first].at?(rest)
 					elsif @state[first].is_a?(String) and @state[first].isref
 						new_path = @state[first] + '.' + rest
-						return self.get_path_state(new_path)
+						return self.get_path_state(new_path, first)
 					else
-						puts 'not found: ' + path
+						# undefined
 					end
 				else
 					system = Nuri::Util.get_system_information
-					if system.has_key?(first)
+					if system.has_key?(first) and (parent == '$' or parent == 'root')
+#puts 'remote[' + system[first] + ']:' + path
 						return get_remote_path_state(system[first], path)
+					else
+						# undefined
 					end
 				end
 			end
 
-			return nil
+			return Nuri::Undefined.new(path)
+			#return nil
 		end
 
 		def get_remote_path_state(address, path)
 			address = address.to_s
 			path = path.to_s
-			return nil if address.length <= 0
-			url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
+			#return nil if address.length <= 0
+			return Nuri::Undefined.new(path) if address.length <= 0
 
 			begin
+				url = URI.parse('http://' + address + ':' + Nuri::Port.to_s + '/state/' + path)
 				req = Net::HTTP::Get.new(url.path)
 				res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
 				if res.code == '200'
@@ -167,7 +173,9 @@ module Nuri
 			rescue Exception => e	
 				Nuri::Util.log 'Cannot send system information to ' + address + ' -- ' + e.to_s
 			end
-			nil
+
+			#nil
+			Nuri::Undefined.new(path)
 		end
 
 		def get_all_state
@@ -202,6 +210,8 @@ module Nuri
 		end
 
 		def get_value(ref)
+			# TODO -- unfound attribute should return "Nuri::UndefinedValue"
+			# rather than just "nil"
 			return self if ref == nil or ref == ''
 			first, rest = ref.to_s.explode
 			if first == '$'
@@ -223,7 +233,7 @@ module Nuri
 					return self.get( @state[first] + '.' + rest )
 				end
 			else
-				puts 'not found: ' + ref
+				#puts 'not found: ' + ref
 			end
 			return nil
 		end
