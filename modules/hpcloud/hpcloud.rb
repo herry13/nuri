@@ -210,12 +210,15 @@ module Nuri
 						Nuri::Util.broadcast_system_information
 
 						# send and active the BSig model to the new VM
-						# TODO
-						self.send_and_active_bsig_to_vm(name, address)
+						if not Nuri::BSig::VM.send(name, address) or
+						   not Nuri::BSig.activate(name, address)
+							Nuri::Util.error "Cannot send and activate BSig model of VM: #{name},#{address}"
+							succeed = false
+						end
 
 					else
 						Nuri::Util.error "Cannot install Nuri on the new VM: #{name}"
-						return false
+						succeed = false
 					end
 
 					if not succeed
@@ -228,29 +231,6 @@ module Nuri
 					Nuri::Util.error "Cannot create VM: #{name}"
 				end
 
-				false
-			end
-
-			def send_bsig_to_vm(vm_name, address)
-				begin
-					bsig_id = ''
-					bsig_file = Nuri::BSig.bsig_vm_file(bsig_id)
-					bsig = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {})
-					if bsig.has_key?(vm_name)
-						# send BSig model
-						data = bsig[vm_name]
-						code, _ = put_data(address, Nuri::Port, '/bsig', data)
-						return false if code != '200'
-						
-						# activate BSig model
-						data = {'id' => bsig_id}
-						code, _ = put_data(address, Nuri::Port, '/bsig/activate', data)
-						return false if code != '200'
-					end
-					return true
-				rescue Exception => exp
-					Nuri::Util.error "Cannot send BSig model to VM: " + vm_name.to_s + "," + address.to_s
-				end
 				false
 			end
 

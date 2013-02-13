@@ -338,6 +338,50 @@ module Nuri
 			end
 		end
 
+		module VM
+			include ::Nuri::NetHelper
+
+			def self.send(vm_name, address)
+				begin
+					bsig_id = ::Nuri::BSig.get_active_id
+					return true if bsig_id.nil? # no BSig available
+
+					bsig_file = ::Nuri::BSig.bsig_vm_file(bsig_id)
+					bsig = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {})
+					if bsig.has_key?(vm_name)
+						# send BSig model
+						data = bsig[vm_name]
+						code, _ = put_data(address, Nuri::Port, '/bsig', data)
+						return false if code != '200'
+					end
+					return true
+				rescue Exception => exp
+					Nuri::Util.error "Cannot send BSig model to VM: #{vm_name},#{address}"
+				end
+				false
+			end
+
+			def self.activate(vm_name, address)
+				begin
+					bsig_id = ::Nuri::BSig.get_active_id
+					return true if bsig_id.nil? # no BSig available
+
+					bsig_file = ::Nuri::BSig.bsig_vm_file(bsig_id)
+					bsig = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {})
+					if bsig.has_key?(vm_name)
+						# activate BSig model
+						data = {'id' => bsig_id}
+						code, _ = put_data(address, Nuri::Port, '/bsig/activate', data)
+						return false if code != '200'
+					end
+					return true
+				rescue Exception => exp
+					Nuri::Util.error "Cannot activate BSig model of VM: #{vm_name},#{address}"
+				end
+				false
+			end
+		end
+
 		class DisrepairLocalFlawException < Exception; end
 		class DisrepairRemoteFlawException < Exception; end
 
