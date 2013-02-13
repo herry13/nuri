@@ -28,6 +28,9 @@ module Nuri
 						Nuri::Util.log 'HPCloud update state error: ' + exp.to_s
 					end
 				end
+
+				@state['vms'] = self.get_vms
+				
 			end
 
 			def open_connection
