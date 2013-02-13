@@ -7,7 +7,6 @@ class HPCloud extends Cloud {
 	procedure delete_vm(vm isref VM) {
 		condition {
 			this.running = true
-			vm.created = true
 		}
 		effect {
 			vm.created = false
@@ -18,7 +17,6 @@ class HPCloud extends Cloud {
 	procedure create_vm(vm isref VM) {
 		condition {
 			this.running = true
-			vm.created = false
 		}
 		effect {
 			vm.created = true
