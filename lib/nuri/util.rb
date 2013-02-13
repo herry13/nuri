@@ -255,18 +255,22 @@ module Nuri
 				return (not (data =~ /is running/).nil? or not (data =~ /start\/running/).nil?)
 			end
 
-			def self.start(service)
+			def self.start(service, debug=false)
 				service = service.to_s
 				return false if service.length <= 0
 				return true if running?(service)
-				return (system("/usr/bin/sudo /usr/bin/service #{service} start 2>/dev/null") == true)
+				cmd = "/usr/bin/sudo /usr/bin/service #{service} start 2>/dev/null"
+				cmd += " 1>/dev/null" if not debug
+				return (system(cmd) == true)
 			end
 
-			def self.stop(service)
+			def self.stop(service, debug=false)
 				service = service.to_s
 				return false if service.length <= 0
 				return true if not running?(service)
-				return (system("/usr/bin/sudo /usr/bin/service #{service} stop 2>/dev/null") == true)
+				cmd = "/usr/bin/sudo /usr/bin/service #{service} stop 2>/dev/null"
+				cmd += " 1>/dev/null" if not debug
+				return (system(cmd) == true)
 			end
 		end
 	end
