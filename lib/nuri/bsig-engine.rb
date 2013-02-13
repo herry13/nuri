@@ -341,7 +341,7 @@ module Nuri
 		class VMHelper
 			include ::Nuri::NetHelper
 
-			def self.send(vm_name, address)
+			def self.send_bsig(vm_name, address)
 				begin
 					bsig_id = ::Nuri::BSig.get_active_id
 					return true if bsig_id.nil? # no BSig available
@@ -361,7 +361,7 @@ module Nuri
 				false
 			end
 
-			def self.activate(vm_name, address)
+			def self.activate_bsig(vm_name, address)
 				begin
 					bsig_id = ::Nuri::BSig.get_active_id
 					return true if bsig_id.nil? # no BSig available
