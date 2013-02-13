@@ -203,8 +203,6 @@ module Nuri
 						node = self.get_node(operator)
 						return false if node.nil?
 
-puts variable + ":" + operator + " => " + node['_self']
-
 						address = node['address']
 						if address.nil? and self.vm?(node)
 							send_to_cloud_proxies(node, bsig['id'], nil, {variable => value})
