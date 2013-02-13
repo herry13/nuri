@@ -156,9 +156,23 @@ module Nuri
 			#return nil
 		end
 
+		def get_not_created_vm_state(path)
+			# TODO -- implement this
+			# 1) search cloud-proxy address
+			# 2) request VM's state to cloud-proxy
+
+			# HACK!
+			state = {'running'=>false,'created'=>false}
+			first, rest = path.split('.', 2)
+			return state.at?(rest)
+		end
+
 		def get_remote_path_state(address, path)
+			return get_not_created_vm_state(path) if address.nil?
+
 			address = address.to_s
 			path = path.to_s
+
 			#return nil if address.length <= 0
 			return Nuri::Undefined.new(path) if address.length <= 0
 
