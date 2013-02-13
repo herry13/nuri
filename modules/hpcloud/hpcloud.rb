@@ -29,8 +29,8 @@ module Nuri
 					end
 				end
 
-				@state['vms'] = self.get_vms
-				
+				@state['vms'] = {}
+				self.get_vms.each_key { |name| @state['vms'][name] = true }
 			end
 
 			def open_connection
