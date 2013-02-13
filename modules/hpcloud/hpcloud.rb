@@ -136,7 +136,7 @@ module Nuri
 				@conn.servers.each { |s| return true if s.name == name }
 
 				# create VM
-				Nuri::Util.log "VM[#{name}]: creating"
+				Nuri::Util.log "vm[#{name}]: creating"
 				new_server = @conn.servers.create(
 					:name => name,
 					:flavor_id => DefaultFlavorID,
@@ -159,7 +159,7 @@ module Nuri
 						self.delete_vm('vm' => name)
 						return false
 					end
-					Nuri::Util.log "VM[#{name}]: active"
+					Nuri::Util.log "vm[#{name}]: active"
 
 					address = info.public_ip_address
 					# wait until SSH Server is running
@@ -168,14 +168,14 @@ module Nuri
 						sleep 1
 						counter -= 1
 					end
-					Nuri::Util.log "VM[#{name}]: ip=#{address}"
+					Nuri::Util.log "vm[#{name}]: ip=#{address}"
 
 					if not self.is_port_open?(address, 22)
 						Nuri::Util.error "Cannot connect to SSH server of: #{name}"
 						self.delete_vm('vm' => name)
 						return false
 					end
-					Nuri::Util.log "VM[#{name}]: ssh-server is running"
+					Nuri::Util.log "vm[#{name}]: ssh-server is running"
 
 					# get self-address
 					my_address = self.get_state("$.#{Nuri::Util.whoami?}.address").to_s
@@ -185,7 +185,7 @@ module Nuri
 					trusted = '\"' + config['master'] + '\"'
 					trusted += ', \"' + my_address + '\"' if my_address.length > 0
 
-					Nuri::Util.log "VM[#{name}]: installing nuri client"
+					Nuri::Util.log "vm[#{name}]: installing nuri client"
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/hpcloud"
 					pub_key_file = dir + "/herrykey.pem"
@@ -205,7 +205,7 @@ module Nuri
 							sleep 1
 							succeed = Nuri::Util.is_nuri_active?(address)
 						end
-						Nuri::Util.log "VM[#{name}]: nuri client is active"
+						Nuri::Util.log "vm[#{name}]: nuri client is active"
 
 						# update system information
 						# - include the new VM's address into local system information
