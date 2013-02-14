@@ -24,6 +24,11 @@ module Nuri
 		def self.bsig_file(id);	Nuri::Util.home_dir + '/var/bsig_' + id.to_s; end
 		def self.bsig_vm_file(id); Nuri::Util.home_dir + '/var/bsig_' + id.to_s + '.vm'; end
 
+		def self.get_active_bsig
+			bsig_file = bsig_file(get_active_id)
+			return (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {'goal'=>{},'operators'=>[]})
+		end
+
 		class Executor
 			# Waiting time before sending another request to related nodes in order
 			# to fulfil operator's precondition
@@ -162,7 +167,7 @@ module Nuri
 
 			# Execute given BSig operator. Return true if the execution was success, otherwise false
 			def execute(operator)
-				Nuri::Util.debug "[executing: #{operator['name']}]"
+				#Nuri::Util.debug "[executing: #{operator['name']}]"
 				return @owner.execute(operator)
 			end
 
@@ -211,12 +216,18 @@ module Nuri
 			# Local-flaws: the flaws that can be repaired by this agent (node).
 			def get_condition_flaws(condition)
 				flaws = get_goal_flaws(condition)
+				bsig = ::Nuri::BSig.get_active_bsig
 
 				remote_flaws = {}
 				local_flaws = {}
 				flaws.each do |path,value|
 					component_path, variable_name = path.extract
-					if not @owner.local?(component_path)
+					# check if the flaw is in local bsig-goal, if yes, then treat it
+					# as local-flaws because it can be repaired by local-action,
+					# otherwise treat it as remote flaws
+					if bsig['goal'].has_key?(path) and bsig['goal'][path] == value
+						local_flaws[path] = value
+					elsif not @owner.local?(component_path)
 						address = @owner.address?(component_path)
 						raise Exception, 'Cannot find component: ' + component_path if address.nil?
 						remote_flaws[address] = {} if not remote_flaws.has_key?(address)
@@ -225,6 +236,7 @@ module Nuri
 						local_flaws[path] = value
 					end
 				end
+
 				return remote_flaws, local_flaws
 			end
 
@@ -235,7 +247,7 @@ module Nuri
 			# otherwise, return [true, nil]
 			def repair_local_flaws(local_flaws)
 				# Recursively call itself to repair the local flaws.
-				Nuri::Util.debug '[repairing local flaws]'
+				Nuri::Util.debug 'repairing local flaws'
 				timeout = 10
 				while @enabled and local_flaws.length > 0 and timeout >= 0
 					succeed, effects = self.repair_goal_flaws(local_flaws)
@@ -297,33 +309,41 @@ module Nuri
 			#
 			# @return true if the operator's conditon-flaws can be repaired, otherwise false
 			def achieve_condition(operator)
-				operator_name = operator['name'].to_s
-				Nuri::Util.debug 'achieving condition of operator: ' + operator_name
+				label = "#{operator['name']}(#{operator['parameters'].inspect})"
+				Nuri::Util.debug "achieving condition: #{label}"
 				# check flaws of operator's condition, and
 				# separate then between local and remote flaws
 				remote_flaws, local_flaws = get_condition_flaws(operator['condition'])
 
 				# Operator's conditions are satisfied
-				return true if remote_flaws.length <= 0 and
-				               local_flaws.length <= 0
+				if remote_flaws.length <= 0 and local_flaws.length <= 0
+					Nuri::Util.debug "condition of #{label} does not have any flaw"
+					return true
+				end
+
+				Nuri::Util.debug "local-flaws: #{local_flaws.inspect} - remote-flaws: #{remote_flaws.inspect}"
 
 				begin
 					# repairing local-flaws
-					success, local_flaws = repair_local_flaws(local_flaws)
-					if not success
-						raise DisrepairLocalFlawException,
-							"Local conditions of #{operator_name} cannot be satisfied: #{local_flaws.inspect}."
-					else
-						Nuri::Util.debug "Local conditions of #{operator_name} have been satisfied."
+					if local_flaws.length > 0
+						success, local_flaws = repair_local_flaws(local_flaws)
+						if not success
+							raise DisrepairLocalFlawException,
+								"Local-flaws of #{label} cannot be repaired: #{local_flaws.inspect}."
+						else
+							Nuri::Util.debug "Local-flaws of #{label} have been repaired."
+						end
 					end
 
 					# repairing remote-flaws
-					success, remote_flaws = repair_remote_flaws(remote_flaws)
-					if not success
-						raise DisrepairRemoteFlawException,
-							"Remote conditions of #{operator_name} cannot be satisfied: #{remote_flaws.inspect}."
-					else
-						Nuri::Util.debug "Remote conditions of #{operator_name} have been satisfied."
+					if remote_flaws.length > 0
+						success, remote_flaws = repair_remote_flaws(remote_flaws)
+						if not success
+							raise DisrepairRemoteFlawException,
+								"Remote-flaws of #{label} cannot be repaired: #{remote_flaws.inspect}."
+						else
+							Nuri::Util.debug "Remote-flaws of #{label} have been repaired."
+						end
 					end
 
 					return true

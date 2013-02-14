@@ -55,25 +55,25 @@ module Nuri
 
 		def self.warn(msg=nil)
 			@@logger.warn msg if msg != nil
-			puts msg.to_s if @@debug
+			puts "[warn] #{msg}" if @@debug
 			return @@logger
 		end
 
 		def self.log(msg=nil)
 			@@logger.info msg if msg != nil
-			puts msg.to_s if @@debug
+			puts "[info] #{msg}" if @@debug
 			return @@logger
 		end
 
 		def self.debug(msg=nil)
 			@@logger.debug msg if not msg.nil?
-			puts msg.to_s if @@debug
+			puts "[debug] #{msg}" if @@debug
 			return @@logger
 		end
 
 		def self.error(msg=nil)
 			@@logger.error msg if not msg.nil?
-			puts msg.to_s if @@debug
+			puts "[error] #{msg}" if @@debug
 			return @@logger
 		end
 
