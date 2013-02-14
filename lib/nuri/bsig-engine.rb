@@ -372,10 +372,9 @@ module Nuri
 						# send BSig model
 						data = bsig[vm_name]
 						data['id'] = bsig_id
-						Nuri::Util.log "vm[#{vm_name}]: send BSig model - #{data.inspect}"
+						#Nuri::Util.log "vm[#{vm_name}]: send BSig model - #{data.inspect}"
 						code, _ = self.put_data(address, Nuri::Port, '/bsig', data)
 						raise Exception, "Return code: #{code}" if code != '200'
-						
 						Nuri::Util.log "vm[#{vm_name}]: send BSig model - #{code}"
 					else
 						Nuri::Util.log "vm[#{vm_name}]: no BSig model"
@@ -396,10 +395,10 @@ module Nuri
 					bsig = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {})
 					if bsig.has_key?(vm_name)
 						# activate BSig model
-						Nuri::Util.log "vm[#{vm_name}]: active BSig - #{bsig_id}"
 						data = {'id' => bsig_id}
 						code, _ = self.put_data(address, Nuri::Port, '/bsig/activate', data)
 						raise Exception, "Return code: #{code}" if code != '200'
+						Nuri::Util.log "vm[#{vm_name}]: active BSig - #{bsig_id}"
 					end
 					return true
 				rescue Exception => exp
