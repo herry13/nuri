@@ -501,6 +501,16 @@ module Nuri
 		end
 
 		def self.status_bsig
+			def self.to_string(value)
+				if value.is_a?(Hash)
+					return "null" if value.isnull
+					return "[]" if value.isset
+				end
+				return "null" if value.nil?
+				return value if value.is_a?(String) and value.isref
+				return value.inspect
+			end
+
 			master = Nuri::Master::Daemon.new
 			status = master.status_bsig
 			if status[:id].nil?
@@ -514,7 +524,7 @@ module Nuri
 					puts "- Goal: not achieved (#{status[:flaws].length} flaws)\n  Flaws are:"
 					index = 1
 					status[:flaws].each do |flaw|
-						puts "  #{index}) #{flaw[0]}: goal=#{flaw[1]}, current=#{flaw[2]}"
+						puts "  #{index}) #{flaw[0]}: goal=#{to_string(flaw[1])}, current=#{to_string(flaw[2])}"
 						index += 1;
 					end
 				end

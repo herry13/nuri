@@ -110,7 +110,6 @@ module Nuri
 		end
 
 		def get_path_state(path=nil, parent=nil)
-#puts 'get_path_state:' + path.to_s + ' < ' + parent.to_s
 			if path == nil or path == ''
 				self.update_state
 				return @state

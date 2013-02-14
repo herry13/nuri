@@ -247,7 +247,7 @@ module Nuri
 			# otherwise, return [true, nil]
 			def repair_local_flaws(local_flaws)
 				# Recursively call itself to repair the local flaws.
-				Nuri::Util.debug 'repairing local flaws'
+				#Nuri::Util.debug 'repairing local flaws'
 				timeout = 10
 				while @enabled and local_flaws.length > 0 and timeout >= 0
 					succeed, effects = self.repair_goal_flaws(local_flaws)
