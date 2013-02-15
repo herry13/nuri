@@ -13,6 +13,7 @@ module Nuri
 			@@max_memory = 2048000 # (in K) -- default ~2GB
 
 			def self.timeout; @@timeout; end
+			def self.max_memory; @@max_memory; end
 
 			# Set the search timeout in seconds
 			def self.set_timeout(timeout); @@timeout = timeout; end
@@ -247,14 +248,17 @@ module Nuri
 
 			os = `uname -s`.downcase.strip
 			command = case os
-				when 'linux' then "#{planner}/preprocess < #{sas_file} 2>/dev/null | " +
-				                  "timeout #{timeout} #{planner}/downward #{params} --plan-file #{plan_file}"
-				when 'macos', 'darwin' then "cd #{tmp_dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; " +
+				when 'linux' then "cd #{dir}; " +
+				                  "#{planner}/preprocess < #{sas_file} 2>/dev/null 1>/dev/null; " +
+				                  "timeout #{timeout} nice #{planner}/downward < output " +
+				                  "#{params} --plan-file #{plan_file}"
+				when 'macos', 'darwin' then "cd #{dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; " +
 				                            "timeout #{timeout} #{planner}/downward #{params} " +
 				                            "--plan-file #{plan_file} < #{tmp_dir}/output 1> /dev/null;"
 				else nil
 			end
-			command = "ulimit -Sv 2000000; nice #{command} 1> /dev/null 2>/dev/null" if not debug and os == 'linux'
+			command = "ulimit -Sv #{Nuri::Planner::Solver.max_memory}; " +
+			          "#{command} 1> /dev/null 2>/dev/null" if not debug and os == 'linux'
 			command
 		end
 
