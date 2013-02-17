@@ -394,8 +394,9 @@ module Nuri
 					while path != '$'
 						path = path.to_top
 						n = root.at?(path)
-						node = n if not n.nil? and not n.is_a?(Nuri::Undefined) and
-						            n['_classes'].rindex(MainComponent) != nil
+						#node = n if not n.nil? and not n.is_a?(Nuri::Undefined) and
+						#            n['_classes'].rindex(MainComponent) != nil
+						node = n if n.is_a?(Hash) and not n['_classes'].rindex(MainComponent).nil?
 					end
 				end
 	

@@ -2,14 +2,14 @@ module Nuri
 	# An object of this class will be returned as the value of a non-exist variable
 	class Undefined
 		attr_accessor :path
+		def initialize(path=nil); @path = path; end
+		def to_s; (@path.nil? ? "<sfp::undefined>" : "<sfp::undefined[#{@path}]>"); end
+	end
 
-		def initialize(path=nil)
-			@path = path
-		end
-
-		def to_s
-			(@path.nil? ? "<sfp::undefined>" : "<sfp::Undefined[#{@path}]>")
-		end
+	class Unknown
+		attr_accessor :path
+		def initialize(path=nil); @path = path; end
+		def to_s; (@path.nil? ? "<sfp::unknown>" : "<sfp::unknown[#{@path}]>"); end
 	end
 end
 
@@ -41,7 +41,8 @@ Hash.send(:define_method, "accept") { |visitor|
 # resolve a reference, return nil if there's no value with given address
 Hash.send(:define_method, "at?") { |addr|
 	#return nil if not addr.is_a?(String)
-	return Nuri::Undefined.new if not addr.is_a?(String)
+	#return Nuri::Undefined.new if not addr.is_a?(String)
+	return Nuri::Unknown.new if not addr.is_a?(String)
 	addrs = addr.split('.', 2)
 
 	if addrs[0] == '$'
@@ -63,7 +64,8 @@ Hash.send(:define_method, "at?") { |addr|
 	end
 
 	#return nil
-	return Nuri::Undefined.new
+	#return Nuri::Undefined.new
+	return Nuri::Unknown.new
 }
 
 Hash.send(:define_method, "type?") { |name|

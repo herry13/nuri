@@ -484,9 +484,9 @@ module Nuri
 					state = @owner.get_state(path)
 				end
 
-				if state.is_a?(Nuri::Undefined)
-					return 404, '', ''
-				end
+				return 204, '', '' if state.is_a?(::Nuri::Undefined)
+				return 404, '', '' if state.is_a?(::Nuri::Unknown)
+
 				data = Nuri::Sfp.to_json({'value' => state})
 				[200, 'application/json', data]
 			end

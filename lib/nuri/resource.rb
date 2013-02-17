@@ -182,13 +182,17 @@ module Nuri
 				if res.code == '200'
 					json = JSON.parse(res.body)
 					return json['value'] if json.is_a?(Hash) and json.has_key?('value')
+				elsif res.code == '204'
+					return ::Nuri::Undefined.new(path)
+				elsif res.code == '404'
+					return ::Nuri::Unknown.new(path)
 				end
 			rescue Exception => e	
 				Nuri::Util.log 'Cannot get state from: ' + address + ' -- ' + e.to_s
 			end
 
 			#nil
-			Nuri::Undefined.new(path)
+			Nuri::Unknown.new(path)
 		end
 
 		def get_all_state

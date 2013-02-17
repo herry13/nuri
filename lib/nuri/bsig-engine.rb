@@ -411,7 +411,8 @@ module Nuri
 		class DisrepairLocalFlawException < Exception; end
 		class DisrepairRemoteFlawException < Exception; end
 
-		ValueUndefined = Undefined.new
+		ValueUndefined = ::Nuri::Undefined.new
+		ValueUnknown = ::Nuri::Unknown.new
 
 		class Variable
 			attr_reader :path, :goal
@@ -435,8 +436,5 @@ module Nuri
 				}
 			end
 		end
-
-		class Undefined; end
-
 	end
 end
