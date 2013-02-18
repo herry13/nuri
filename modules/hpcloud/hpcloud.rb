@@ -43,7 +43,8 @@ module Nuri
 					                         :hp_secret_key => config['secret_key'],
 				   	                      :hp_avl_zone => config['zone'])
 				rescue Exception => exp
-					Nuri::Util "Cannot open connection to cloud's end point: #{@name}"
+					Nuri::Util.warn "Cannot open connection to cloud's end point: #{@name}"
+					@conn = nil
 					return false
 				end
 				return true
@@ -57,6 +58,7 @@ module Nuri
 				name = params[:name].to_s
 				if name.length > 0
 					self.open_connection if @conn.nil?
+					return nil if @conn.nil?
 					servers = @conn.servers
 					servers.each { |s|
 						if s.name == params[:name] and s.state == 'ACTIVE'
@@ -70,6 +72,7 @@ module Nuri
 			def get_vms(params={})
 				data = {}
 				self.open_connection if @conn.nil?
+				return data if @conn.nil?
 				servers = @conn.servers
 				servers.each { |s| data[s.name] = s.public_ip_address }
 				data
@@ -77,6 +80,7 @@ module Nuri
 
 			def get_info(name)
 				self.open_connection if @conn.nil?
+				return nil if @conn.nil?
 				servers = @conn.servers
 				servers.each { |s| return s if s.name == name }
 				nil
@@ -129,6 +133,8 @@ module Nuri
 			# SFP method
 			def create_vm(params={})
 				self.open_connection if @conn.nil?
+				return false if @conn.nil?
+
 				name = params['vm']
 				name = name[2, name.length-2] if name[0,2] == '$.'
 
@@ -244,6 +250,8 @@ module Nuri
 			# SFP method
 			def delete_vm(params={})
 				self.open_connection if @conn.nil?
+				return false if @conn.nil?
+
 				name = params['vm']
 				name = name[2, name.length-2] if name[0,2] == '$.'
 
