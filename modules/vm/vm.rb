@@ -14,6 +14,7 @@ module Nuri
 			def update_state
 				self.super_update_state
 				@state['created'] = true
+				@state['oncloud'] = Nuri::Util.get_oncloud
 			end
 		end
 	end

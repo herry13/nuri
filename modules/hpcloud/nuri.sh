@@ -2,6 +2,7 @@
 
 #MASTER="nena.inf.ed.ac.uk"
 TRUSTED="$1"
+CLOUD="$2"
 
 echo "Installing required softwares and libraries..."
 sudo apt-get -y update
@@ -27,6 +28,7 @@ if [ -f "nuri.tgz" ]; then
 	sed -i 's/^\s*trusted.*/\ttrusted is \(__TRUSTED__\)/g' etc/nuri.sfp
 	sed -i "s/__TRUSTED__/$TRUSTED/g" etc/nuri.sfp
 	sed -i "s/host/virtual_machine is true\n\thost/g" etc/nuri.sfp
+	sed -i "s/virtual/oncloud is $CLOUD\n\tvirtual/g" etc/nuri.sfp
 
 	# delete unused file
 	cd ..

@@ -5,13 +5,17 @@ module Nuri
 	MaxLogAge = 7 # 7 days
 	MaxLogFileSize = 2097152
 
-	#class Util
 	module Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
 		@@logger = Logger.new(@@home_dir + "/var/message.log", Nuri::MaxLogAge, Nuri::MaxLogFileSize)
 		@@system = nil
 		@@debug = false
 		@@lock_util = Mutex.new
+
+		@@oncloud = nil
+
+		def self.set_oncloud(cloud); @@oncloud = cloud; end
+		def self.get_oncloud(cloud); @@oncloud; end
 
 		def self.set_debug(debug=false); @@debug = debug; end
 

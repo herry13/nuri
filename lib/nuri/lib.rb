@@ -80,6 +80,11 @@ module Nuri
 					Nuri::Planner::Solver.set_max_memory(@config['solver_max_memory'].to_i)
 				end
 
+				# Set oncloud value to Nuri::Util
+				if @config.has_key?('oncloud')
+					Nuri::Util.set_oncloud(@config['oncloud'])
+				end
+
 				Nuri::Util.log 'Successfully load configuration file ' + cfile
 			rescue Exception => exp
 				Nuri::Util.error "Cannot load configuration file " + cfile + ' -- ' + exp.to_s

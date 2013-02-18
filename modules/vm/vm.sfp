@@ -1,7 +1,7 @@
 include "modules/machine/machine.sfp"
+include "modules/cloud/cloud.sfp"
 
 class VM extends Machine {
 	created is false
-	//cloud_proxy isref Cloud
-	//cloud_desc is ""
+	oncloud isref Cloud
 }
