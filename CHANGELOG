@@ -1,91 +1,106 @@
+18-02-2013 -- 0.3.1
++ send a BSig-goal to a node that supports the goal
++ the BSig-goal of uncreated VM will be sent to cloud-proxy, which will be
+  sent to Nuri client-agent after the VM has been created
++ activate BSig model of a new-created VM after it received the BSig model
++ a node with "null" address means that it is a VM but not yet created
++ if a Nuri client-agent cannot be contacted, then all variables of that agent
+  have values "<sfp::unknown>"
++ a variable has value "<sfp::undefined>" iff the node has been created,
+  the Nuri client-agent can be contacted, and the variable is not exist in
+  that node
++ BSig-goal is a collection of pairs of variable-value, where variable's final
+  value is either not same with the initial state, or supported by an operator
+  in the workflow
+
 11-02-2013 -- 0.3.0a
 + add the cloud-proxy node as "trusted" node -- inside "create_vm"
 + enable system-information propagation between children nodes
 + planner optimization
   + run 1st with CG|CEA|FF to generate highly likely possible actions
   + remove actions which are not selected by previous step
-  + run LMCUT with selected actions
+  + run LMCUT with selected actions to get sub-optimal workflow
 
 10-02-2013 -- 0.3.0a
-- enable machine's reference in members of Apachelb
++ enable machine's reference in members of Apachelb
 
 08-02-2013 -- 0.3.0
-- enable cloud-proxy as a component, but right now only support HP-Cloud
-- cloud-proxy is not integrated anymore with master-node
-- new configuration in nuri.sfp: "virtual_machine" (boolean)
++ enable cloud-proxy as a component, but right now only support HP-Cloud
++ cloud-proxy is not integrated anymore with master-node
++ new configuration in nuri.sfp: "virtual_machine" (boolean)
   represents whether a node is a virtual machine or not; if it is, then use VM instead of Machine class
-- update "get_system_information" method in master.rb to adopt cloud-proxy
-- class VM is a subclass of class Machine in both SFP and Ruby codes
++ update "get_system_information" method in master.rb to adopt cloud-proxy
++ class VM is a subclass of class Machine in both SFP and Ruby codes
 
 09-01-2013 -- 0.2.1
-- set time limit for the solver (default 5mins) -- it can be set by specifying "solver_timeout"
++ set time limit for the solver (default 5mins) -- it can be set by specifying "solver_timeout"
   in "nuri.sfp"
-- prioritise repairing local-flaws than remote-flaws
-- rename method "get_self_state" => "update_state" in resource.rb and all modules' ruby files
++ prioritise repairing local-flaws than remote-flaws
++ rename method "get_self_state" => "update_state" in resource.rb and all modules' ruby files
 
 07-01-2013 -- 0.2.1
-- new module: cloud (only handle HPCloud)
-- create/delete Virtual Machine (VM)
-- allow "parent" to be used in reference of constraint or mutation
-- obligation to provide manifest file (main.mf) for non-abstract module
-- any module without manifest file is an abstract module
++ new module: cloud (only handle HPCloud)
++ create/delete Virtual Machine (VM)
++ allow "parent" to be used in reference of constraint or mutation
++ obligation to provide manifest file (main.mf) for non-abstract module
++ any module without manifest file is an abstract module
   (it will not loaded by Nuri when aggregating current state)
 
 02-01-2013 -- 0.2.0
-- fix bugs in 'lib/nuri/sfp/sas.rb' -- in remove_not_constraint method
-- enable multiple statements in conditional constraint
-- allow administrator to check BSig status
-- push trusted nodes from master to client
-- restrict request only from trusted nodes in client
-- allow client to expose its active BSig model
++ fix bugs in 'lib/nuri/sfp/sas.rb' -- in remove_not_constraint method
++ enable multiple statements in conditional constraint
++ allow administrator to check BSig status
++ push trusted nodes from master to client
++ restrict request only from trusted nodes in client
++ allow client to expose its active BSig model
 
 27-12-2012 -- 0.2.0 (beta1)
-- fix bugs on BSig reminder -- send start BSig request through localhost
-- provide HTTP PUT /bsig/start -- to accept request starting BSig executor
-- fix partial-order workflow generator (use TO2PO algorithm in Ambite & Knoblock,
++ fix bugs on BSig reminder -- send start BSig request through localhost
++ provide HTTP PUT /bsig/start -- to accept request starting BSig executor
++ fix partial-order workflow generator (use TO2PO algorithm in Ambite & Knoblock,
   Planning by Rewriting (2001) to replace Veloso et.al.'s algorithm(1990))
-- provide new console command: console start-bsig
-- fix bugs on repairing local-flaws: need to check post-conditions of every
++ provide new console command: console start-bsig
++ fix bugs on repairing local-flaws: need to check post-conditions of every
   operator execution with the real current state
-- bin/nuri.rb can be called from any directory
++ bin/nuri.rb can be called from any directory
 
 24-12-2012 -- 0.2.0 (beta)
-- enable synchronous BSig execution (replacing the asynchronous version)
-- redirect webrick logs (all levels) to "log/http.log"
++ enable synchronous BSig execution (replacing the asynchronous version)
++ redirect webrick logs (all levels) to "log/http.log"
 
 23-12-2012
-- enable BSig executor to send request to itself (localhost) for satisfying an operator's precondition
-- fix bugs on start/stop nuri client
++ enable BSig executor to send request to itself (localhost) for satisfying an operator's precondition
++ fix bugs on start/stop nuri client
 
 21-12-2012 -- 0.2.0 (alpha)
-- enable distributed execution, but only tested on a system with 3 nodes
++ enable distributed execution, but only tested on a system with 3 nodes
 
 19-12-2012 -- 0.1.4
-- from master node, sending BSig model to each client nodes
-- on client node, saving the BSig model
++ from master node, sending BSig model to each client nodes
++ on client node, saving the BSig model
 
 18-12-2012 -- 0.1.3
-- enable partial-order workflow
-- generate BSig model
-- modify CLI parameters in 'bin/nuri.rb'
++ enable partial-order workflow
++ generate BSig model
++ modify CLI parameters in 'bin/nuri.rb'
   -c => console
   -p => planner
 
 12-12-2012 -- 0.1.2
-- replace mongrel with WEBrick
-- disable secure connection due to immature implementations (buggy)
++ replace mongrel with WEBrick
++ disable secure connection due to immature implementations (buggy)
 
 18-11-2012 -- 0.1.1
-- implement modules to manage TikiWiki; separated into two modules:
++ implement modules to manage TikiWiki; separated into two modules:
 	- Tikiweb -- managing the frontend: installing PHP files, set PHP config
 	- Tikidb -- managing the backend: executing SQL to create the database, grant/revoke permissions
 
 12-11-2012
-- implement module "Apachelb" -- Apache Load Balancer
-- allow Set as argument of procedure
++ implement module "Apachelb" -- Apache Load Balancer
++ allow Set as argument of procedure
 
 06-11-2012
-- first release
-- available modules
++ first release
++ available modules
 	- Apache
 	- Mysql
