@@ -34,7 +34,7 @@ module Nuri
 				# Balancer members setting
 				data =`/bin/grep "BalancerMember" #{ConfigFile} 2>/dev/null`.chop
 				members = []
-				xmembers = []
+				#xmembers = []
 				data.split("\n").each do |line|
 					member = line.strip.split(' ')
 					next if member[1] == nil
@@ -42,14 +42,15 @@ module Nuri
 					name = Nuri::Util.get_system_information.index(address)
 					if not name.nil?
 						ref = '$.' + name
-						xmembers.push(ref)
+						#xmembers.push(ref)
+						members.push(ref)
 					end
-					members.push( member[1] )
+					#members.push( member[1] )
 				end
 				members.sort!
-				xmembers.sort!
+				#xmembers.sort!
 				@state['members'] = members
-				@state['xmembers'] = xmembers
+				#@state['xmembers'] = xmembers
 
 				return @state
 			end
@@ -87,10 +88,12 @@ module Nuri
 				return Nuri::Helper::Service.stop('apache2')
 			end
 
-			def set_xmembers(params={})
+			#def set_xmembers(params={})
+			def set_members(params={})
 				members = ''
 				reverses = ''
-				params['xmembers'].each do |ref|
+				#params['xmembers'].each do |ref|
+				params['members'].each do |ref|
 					path = ref.push('address')
 					address = self.get_state(path)
 					members += "\n\tBalancerMember http://#{address}"
@@ -115,6 +118,7 @@ module Nuri
 				true
 			end
 
+=begin
 			def set_members(params={})
 				members = ''
 				reverses = ''
@@ -139,25 +143,9 @@ module Nuri
 				end
 				File.open(ConfigFile, 'w') { |f| f.write(output) }
 				sleep 1
-=begin
-				data = `/bin/sed 's/BalancerMember.*//g' #{ConfigFile}`
-				output = ""
-				data.split("\n").each do |line|
-					line2 = line.strip
-					next if line2 == ''
-
-					if line2 == '### Balancer Members ###'
-						output += members + "\n"
-					elsif line2.strip == '### Balancer Reverse ###'
-						output += reverses + "\n"
-					else
-						output += line + "\n"
-					end
-				end
-				File.open(ConfigFile, 'w') { |f| f.write(output) }
-=end
 				true
 			end
+=end
 
 			def set_server_name(params={})
 				server_name = params['name']

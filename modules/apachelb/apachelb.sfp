@@ -2,30 +2,19 @@ include "modules/apache/apache.sfp"
 
 class Apachelb extends Service {
 	port = 80
-	members isset String
-	xmembers isset Machine
+	members isset Machine
 	server_name = ""
 
-	procedure set_members (members isset String) {
+	procedure set_members (members isset Machine) {
 		condition {
 			this.installed = true
 			this.running = false
-		}
-		effect {
-			this.members = members
-		}
-	}
-
-	procedure set_xmembers (xmembers isset Machine) {
-		condition {
-			this.installed = true
-			this.running = false
-			foreach (xmembers as m) {
-				m.apache.running = true
+			foreach (members as m) {
+				m.running = true
 			}
 		}
 		effect {
-			this.xmembers = xmembers
+			this.members = members
 		}
 	}
 
