@@ -1,4 +1,4 @@
 author: Herry
 version: 1.0
 main-class: Nuri::Module::HPCloud
-sfp-class: HPCloud
+sfp-class: Cloud

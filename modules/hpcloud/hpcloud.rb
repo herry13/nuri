@@ -127,10 +127,6 @@ module Nuri
 			def set_secret_key(params={}); self.set_account(params); end
 			def set_zone(params={}); self.set_account(params); end
 
-			DefaultFlavorID = 100
-			DefaultImageID = 75845
-			DefaultKeyName = "herrykey"
-
 			# SFP method
 			def create_vm(params={})
 				self.open_connection if @conn.nil?
@@ -142,13 +138,18 @@ module Nuri
 				# return true if there is a VM with given name
 				@conn.servers.each { |s| return true if s.name == name }
 
+				config = self.read_config
+				flavor_id = config['default_flavor_id']
+				image_id = config['default_image_id']
+				key_name = config['default_key_name']
+
 				# create VM
 				Nuri::Util.log "vm[#{name}]: creating"
 				new_server = @conn.servers.create(
 					:name => name,
-					:flavor_id => DefaultFlavorID,
-					:image_id => DefaultImageID,
-					:key_name => DefaultKeyName,
+					:flavor_id => flavor_id,
+					:image_id => image_id,
+					:key_name => key_name,
 					:security_groups => ['default'],
 					:metadata => {'name' => name})
 				if not new_server.nil?
@@ -196,7 +197,7 @@ module Nuri
 					Nuri::Util.log "vm[#{name}]: installing nuri client"
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/hpcloud"
-					pub_key_file = dir + "/herrykey.pem"
+					pub_key_file = dir + "/" + key_name + ".pem"
 					script_file = dir + "/nuri.sh"
 					options = "-i #{pub_key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					remote_command = "'/bin/bash -s \"#{trusted}\" \"#{cloud}\"' < #{script_file}"
