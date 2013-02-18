@@ -14,8 +14,7 @@ def console
 
 commands:
   main              print the content of "main.sfp"
-  state [details]   print the current state of this node
-  pull [details]    pull and print the current state of all managed nodes
+  state [details]   pull and print the current state of all managed nodes
   plan [main-file]  auto-generate a workflow to achieve the goal state;
                     user can also execute the workflow in order to achieve
                     the goal state
@@ -38,15 +37,7 @@ commands:
 		main = client.get_main
 		puts Nuri::Sfp.to_pretty_json(main) if main != nil
 
-	elsif ARGV[1] == 'state'
-		client = Nuri::Client::Daemon.new
-		state = client.get_state
-		state = {} if state == nil
-		state.accept(Nuri::Sfp::PrettyStateGenerator.new) if
-				ARGV.length < 3 or ARGV[2] != 'details'
-		puts Nuri::Sfp.to_pretty_json(state) if state != nil
-
-	elsif ARGV[1] == 'pull'
+	elsif ARGV[1] == 'pull' or ARGV[1] == 'state'
 		state = Nuri::Master.pull
 		if state != nil
 			state.accept(Nuri::Sfp::PrettyStateGenerator.new) if ARGV[2] != 'details'
@@ -165,15 +156,25 @@ def client
 		puts "Usage: nuri.rb client <command>
 
 commands:
-  start     start the Nuri client daemon
-  stop      stop the Nuri client daemon
-  debug     start the Nuri client but not as a daemon
-  reset     clear all caches e.g. BSig model
+  state [details]   print the current state of this node
+  start             start the Nuri client daemon
+  stop              stop the Nuri client daemon
+  debug             start the Nuri client but not as a daemon
+  reset             clear all caches e.g. BSig model
 
 "
 	end
 
-	if ARGV[1] == 'start'
+	if ARGV[1] == 'state'
+		client = Nuri::Client::Daemon.new
+		state = client.get_state
+		state = {} if state == nil
+		state.accept(Nuri::Sfp::PrettyStateGenerator.new) if
+				ARGV.length < 3 or ARGV[2] != 'details'
+		puts Nuri::Sfp.to_pretty_json(state) if state != nil
+
+
+	elsif ARGV[1] == 'start'
 		Nuri::Util.log 'Start Nuri client daemon...'
 		Nuri::Client.start(true)
 
