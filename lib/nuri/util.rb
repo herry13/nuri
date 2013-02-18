@@ -15,7 +15,7 @@ module Nuri
 		@@oncloud = nil
 
 		def self.set_oncloud(cloud); @@oncloud = cloud; end
-		def self.get_oncloud(cloud); @@oncloud; end
+		def self.get_oncloud; @@oncloud; end
 
 		def self.set_debug(debug=false); @@debug = debug; end
 
