@@ -4,4 +4,4 @@ main.sfp*
 *.pem
 tiki*
 old
-configs
+*configs*
