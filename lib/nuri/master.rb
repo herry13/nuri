@@ -174,6 +174,9 @@ module Nuri
 					# update system information
 					self.update_system
 
+					# reset existing BSig model
+					self.reset
+
 					# send BSig operators to clients
 					nodes = []
 					bsig['operators'].each do |operator|
