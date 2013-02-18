@@ -85,7 +85,7 @@ module Nuri
 					prev_op = workflow[i-1]
 					prev_op['effect'].each { |k,v| op['condition'][k] = v }
 				end
-				bsig['goal'] = self.bsig_goal
+				bsig['goal'], _ = self.bsig_goal_operator(workflow)
 				return bsig
 			end
 
@@ -102,38 +102,60 @@ module Nuri
 						pred_op['effect'].each { |k,v| op['condition'][k] = v }
 					end
 				end
-				bsig['goal'] = self.bsig_goal
-				bsig['goal_operator'] = bsig_goal_operator(workflow)
+				bsig['goal'], bsig['goal_operator'] = self.bsig_goal_operator(workflow)
 				return bsig
 			end
 
 			def bsig_goal_operator(workflow)
-				data = {}
+				goal_op = {}
+				goal = {}
 				@sas_task.final_state.each do |g|
 					variable, value = @parser.variable_name_and_value(g[:id], g[:value])
-					# search the supporting operator
+					# search a supporting operator
 					(workflow.length-1).downto(0) do |i|
 						if workflow[i]['effect'].has_key?(variable)
 							if workflow[i]['effect'][variable] == value
-								data[variable] = workflow[i]['name']
+								goal_op[variable] = workflow[i]['name']
+								goal[variable] = value
 								break
 							else
-								raise Exception, "#{variable}=#{value} is not supported by last possible operator"
+								Nuri::Util.info "#{variable}=#{value} is not changing"
 							end
 						end
 					end
 				end
-				data
+				return goal, goal_op
+				#@sas_task.final_state.each do |g|
+				#	variable, value = @parser.variable_name_and_value(g[:id], g[:value])
+				#	# search the supporting operator
+				#	(workflow.length-1).downto(0) do |i|
+				#		if workflow[i]['effect'].has_key?(variable)
+				#			if workflow[i]['effect'][variable] == value
+				#				data[variable] = workflow[i]['name']
+				#				break
+				#			else
+				#				raise Exception, "#{variable}=#{value} is not supported by last possible operator"
+				#			end
+				#		end
+				#	end
+				#end
+				#data
 			end
 
+=begin
 			def bsig_goal
 				goal = {}
-				@sas_task.final_state.each do |g|
-					var_name, var_value = @parser.variable_name_and_value(g[:id], g[:value])
-					goal[var_name] = var_value
+				@sas_task.goal_state.each do |g|
+					variable, value = @parser.variable_name_and_value(g[:id], g[:value])
+					goal[variable] = value
 				end
+				#@sas_task.final_state.each do |g|
+				#	var_name, var_value = @parser.variable_name_and_value(g[:id], g[:value])
+				#	goal[var_name] = var_value
+				#end
 				return goal
 			end
+=end
 
 			def get_sequential_plan
 				json = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }
@@ -194,11 +216,14 @@ module Nuri
 						sas_task.sas_plan = plan
 
 						tmp = []
-						plan.each do |p|
-							_, name, _ = p.split('-', 3)
+						goal_op = nil
+						plan.each do |op|
+							_, name, _ = op.split('-', 3)
+							goal_op = op if name == 'goal'
 							next if name == 'goal' or name == 'globalop' or name == 'sometime'
-							tmp.push(p)
+							tmp.push(op)
 						end
+						sas_task.goal_operator_name = goal_op
 						plan = tmp
 					end
 
@@ -207,7 +232,7 @@ module Nuri
 					raise Exception, exp.to_s
 				ensure
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
-					system 'rm -rf ' + tmp_dir
+					#system 'rm -rf ' + tmp_dir
 				end
 
 				return nil, nil
@@ -263,8 +288,8 @@ module Nuri
 		end
 
 		# Combination between two heuristic to obtain a suboptimal plan.
-		# 1) solve the problem with FF, that will produce (usually) a non-optimal plan
-		# 2) remove actions which are not selected by previous step (FF)
+		# 1) solve the problem with CG/CEA/FF, that will produce (usually) a non-optimal plan
+		# 2) remove actions which are not selected by previous step
 		# 3) solve the problem with LMCUT using A*-search to obtain a sub-optimal plan
 		class MixedHeuristic
 			def initialize(dir, sas_file, plan_file)

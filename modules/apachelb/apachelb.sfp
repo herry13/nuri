@@ -21,7 +21,7 @@ class Apachelb extends Service {
 			this.installed = true
 			this.running = false
 			foreach (xmembers as m) {
-				m.running = true
+				m.apache.running = true
 			}
 		}
 		effect {

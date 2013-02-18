@@ -3,13 +3,16 @@ module Nuri
 		class Task
 			attr_reader :variables, :mutexes, :operators, :axioms, :init, :goal
 			attr_reader :global_variable, :global_operators
-			attr_accessor :sas_plan
+			attr_accessor :sas_plan, :goal_operator_name
 
 			GlobalVariable = 'global'
 			GlobalOperator = 'globalop'
 			GoalOperator = 'goal'
+			GoalVariable = 'goal'
 
 			def initialize(sas_file)
+				@goal_operator_name = nil
+
 				f = File.new(sas_file, "r")
 				### read version
 				f.gets
@@ -113,23 +116,48 @@ module Nuri
 				return sfw, init, sfw.length
 			end
 
+			def goal_state
+				goal = []
+				if @goal_operator_name.nil?
+					@goal.each { |var| goal << {:id => var.index, :value => var.goal} }
+				else
+					@operators.each do |op|
+						if op.name == @goal_operator_name
+							op.prevails.each { |param|
+								goal << {:id => param.var.index, :value => param.prevail}
+							}
+							break
+						end
+					end
+				end
+				goal
+			end
+
 			def final_state
 				state = @init.clone
 				self.collect_operators.each { |op| state.apply!(op) }
 				final = []
+				#for i in 0..(state.length-1)
+				#	final <<  {:id => i, :value => state[i]} #if state[i] != @init[i]
+				#end
 				for i in 0..(state.length-1)
-					final <<  {:id => i, :value => state[i]} if state[i] != @init[i]
+					next if @variables[i].is_global or @variables[i].is_goal
+					final << {:id => i, :value => state[i]}
 				end
 				return final
 			end
 
 			protected
 			def self.is_global_variable?(variable_name)
-				return variable_name.split('_')[2] == GlobalVariable
+				return (variable_name.split('_')[2] == GlobalVariable)
 			end
 
 			def self.is_global_operator?(operator_name)
 				return (operator_name.split('-')[1] == GlobalOperator)
+			end
+
+			def self.is_goal_variable?(variable_name)
+				return (variable_name.split('-')[1] == GoalVariable)
 			end
 
 			def self.is_goal_operator?(operator_name)
@@ -851,7 +879,7 @@ end
 
 		class Variable
 			attr_accessor :init, :goal
-			attr_reader :name, :axiom_layer, :length, :is_global, :index
+			attr_reader :name, :axiom_layer, :length, :index, :is_global, :is_goal
 
 			def initialize(params={})
 				if params.has_key?(:io)
@@ -860,6 +888,7 @@ end
 					self.read_parameters(params)
 				end
 				@is_global = Task::is_global_variable?(@name)
+				@is_goal = Task::is_goal_variable?(@name)
 				@index = params[:index]
 			end
 
