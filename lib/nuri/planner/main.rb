@@ -119,7 +119,7 @@ module Nuri
 								goal[variable] = value
 								break
 							else
-								Nuri::Util.info "#{variable}=#{value} is not changing"
+								Nuri::Util.debug "#{variable}=#{value} is not changing"
 							end
 						end
 					end
