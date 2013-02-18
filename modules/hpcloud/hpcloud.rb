@@ -185,7 +185,7 @@ module Nuri
 
 					# get self-address
 					my_address = self.get_state("$.#{Nuri::Util.whoami?}.address").to_s
-					cloud = "$.#{Nuri::Util.whoami?}.hpcloud"
+					cloud = "#{Nuri::Util.whoami?}.hpcloud"
 					
 					# create a list of trusted nodes
 					config = self.read_config
