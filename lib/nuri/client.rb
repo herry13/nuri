@@ -127,7 +127,7 @@ module Nuri
 
 			# Return the state of this node
 			def get_state(path=nil)
-				path.gsub!(/\//, '.') if path != nil
+				path.gsub!(/\//, '.') if path.is_a?(String) # path != nil
 				return @root.get_state(path)
 			end
 
