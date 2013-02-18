@@ -51,7 +51,11 @@ module Nuri
 			Dir.chdir(Nuri::Util.home_dir)
 			main = "include \"#{Nuri::Util.home_dir}/modules/machine/machine.sfp\"\n"
 			self.get_modules.each do |mod|
-				main += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"
+				sfp_file = "#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp"
+				if File.exist?(sfp_file)
+					main += "include \"#{sfp_file}\"\n"
+				end
+				#main += "include \"#{Nuri::Util.home_dir}/modules/#{mod}/#{mod}.sfp\"\n"
 			end
 			main += "\n" + File.read(mainfile) if File.exist?(mainfile)
 			return Nuri::Sfp::Parser.to_sfp(main)
@@ -114,8 +118,12 @@ module Nuri
 			Dir.foreach(modules_dir) do |mod|
 				next if mod[0,1] == '.'
 				path = modules_dir + "/" + mod
+				sfp_file = "#{path}/#{mod}.sfp"
+				manifest = "#{path}/main.mf"
 				modules << mod if File.directory?(path) and
-						File.file?(path + "/" + mod + ".sfp")
+				                  (File.exist?(sfp_file) or File.exist?(manifest))
+				#modules << mod if File.directory?(path) and
+				#		File.file?(path + "/" + mod + ".sfp")
 			end
 			return modules
 		end
@@ -141,18 +149,21 @@ module Nuri
 			end
 			@root.add(machine)
 
-			excluded = ((not @config.nil? and @config.is_a?(Hash) and @config.has_key?('excluded_modules')) ?
-				@config['excluded_modules'] : [])
+			excluded = []
+			if not @config.nil? and @config.is_a?(Hash) and @config.has_key?('excluded_modules')
+				excluded = @config['excluded_modules']
+			end
+
 			# load other modules and put them as machine's children
 			self.get_non_abstract_modules.each do |mod|
 				next if not excluded.index(mod).nil?
 
 				begin
 					manifest_file = "#{modules_dir}/#{mod}/main.mf"
-					sfp_file = "#{modules_dir}/#{mod}/#{mod}.sfp"
+					#sfp_file = "#{modules_dir}/#{mod}/#{mod}.sfp"
 					ruby_file = "#{modules_dir}/#{mod}/#{mod}.rb"
 					next if not File.exist?(manifest_file) or
-					        not File.exist?(sfp_file) or
+					        #not File.exist?(sfp_file) or
 					        not File.exist?(ruby_file)
 
 					# read module manifest file (main.mf)

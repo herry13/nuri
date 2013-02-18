@@ -10,7 +10,8 @@ module Nuri
 
 			def initialize(options={})
 				# registering the component
-				self.register('HPCloud', 'hpcloud')
+				#self.register('HPCloud', 'hpcloud')
+				self.register('Cloud', 'hpcloud')
 			end
 
 			def update_state

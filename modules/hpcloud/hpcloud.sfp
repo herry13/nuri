@@ -1,5 +1,0 @@
-include "modules/cloud/cloud.sfp"
-include "modules/vm/vm.sfp"
-
-class HPCloud extends Cloud {
-}
