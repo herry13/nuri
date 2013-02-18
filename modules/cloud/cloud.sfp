@@ -6,21 +6,23 @@ class Cloud {
 
 	procedure delete_vm(vm isref VM) {
 		condition {
-			vm.created = true
+			this.running = true
 		}
 		effect {
 			vm.created = false
 			vm.running = false
+			vm.oncloud = null
 		}
 	}
 
 	procedure create_vm(vm isref VM) {
 		condition {
-			vm.created = false
+			this.running = true
 		}
 		effect {
 			vm.created = true
 			vm.running = true
+			vm.oncloud = this
 		}
 	}
 }

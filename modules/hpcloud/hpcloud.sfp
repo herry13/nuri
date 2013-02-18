@@ -2,27 +2,4 @@ include "modules/cloud/cloud.sfp"
 include "modules/vm/vm.sfp"
 
 class HPCloud extends Cloud {
-	running is false
-
-	procedure delete_vm(vm isref VM) {
-		condition {
-			this.running = true
-		}
-		effect {
-			vm.created = false
-			vm.running = false
-			vm.oncloud = null
-		}
-	}
-
-	procedure create_vm(vm isref VM) {
-		condition {
-			this.running = true
-		}
-		effect {
-			vm.created = true
-			vm.running = true
-			vm.oncloud = this
-		}
-	}
 }
