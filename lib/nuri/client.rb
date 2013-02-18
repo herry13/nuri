@@ -224,10 +224,10 @@ module Nuri
 					@bsig_executor.reset
 					@goals.clear
 				rescue Exception => exp
-					Nuri::Util.error 'Failed to reset Nuri client: ' + exp.to_s
+					Nuri::Util.error 'Failed to delete cache data -- ' + exp.to_s
 					return false
 				end
-				Nuri::Util.log 'Succeed reseting Nuri client.'
+				Nuri::Util.log 'Cache data have been deleted.'
 				return true
 			end
 
