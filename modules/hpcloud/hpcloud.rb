@@ -162,7 +162,7 @@ module Nuri
 					end
 
 					if info.state != "ACTIVE"
-						Nuri::Util.error "Too long waiting VM to become active #{name}"
+						Nuri::Util.error "vm[#{name}]: too long waiting VM to become active."
 						self.delete_vm('vm' => name)
 						return false
 					end
