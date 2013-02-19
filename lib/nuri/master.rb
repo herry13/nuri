@@ -157,10 +157,11 @@ module Nuri
 			end
 
 			def deploy_bsig(bsig, debug=false)
-				def send_to_cloud_proxies(node, id, operator=nil, goal=nil)
+				def send_to_cloud_proxies(node, id, operator=nil, goal=nil, operators=nil)
 					@cloud_proxies.each_value do |address|
 						data = {'vm' => node['_self'], 'id' => id}
 						data['operator'] = operator if not operator.nil?
+						data['operators'] = operators if not operators.nil?
 						data['goal'] = goal if not goal.nil?
 						code, _ = put_data(address, Nuri::Port, '/bsig/vm', data)
 						raise Exception, "Failed sending BSig to cloud-proxy: #{address}" if code != '200'
@@ -205,7 +206,7 @@ module Nuri
 						address = node['address']
 						if address.nil?
 							raise Exception, "#{node['name']}'s address is nil" if not self.vm?(node)
-							send_to_cloud_proxies(node, bsig['id'], operator)
+							send_to_cloud_proxies(node, bsig['id'], nil, nil, operators)
 						else
 							data = {'id'=>bsig['id'], 'operators'=>operators}
 							code, _  = put_data(address, Nuri::Port, '/bsig', data)
