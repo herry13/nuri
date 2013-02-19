@@ -120,6 +120,7 @@ module Nuri
 								break
 							else
 								Nuri::Util.debug "#{variable}=#{value} is not changing"
+								Nuri::Util.debug value.inspect + ' == ' + workflow[i]['effect'][variable].inspect
 							end
 						end
 					end

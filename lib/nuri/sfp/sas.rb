@@ -1669,8 +1669,15 @@ module Nuri
 				self.each_value do |param|
 					next if param.var.name == Nuri::Sfp::Sas::GlobalVariable
 					p = param.to_sfw
-					sfw['condition'][ p['name'] ] = p['pre'] if p['pre'] != nil
-					sfw['effect'][ p['name'] ] = p['post'] if p['post'] != nil
+					if not p['pre'].nil?
+						sfw['condition'][p['name']] = (p['pre'].is_a?(SfpNull) ? nil : p['pre'])
+					end
+					if not p['post'].nil?
+						sfw['effect'][p['name']] = (p['post'].is_a?(SfpNull) ? nil : p['post'])
+					end
+
+					#sfw['condition'][ p['name'] ] = p['pre'] if p['pre'] != nil
+					#sfw['effect'][ p['name'] ] = p['post'] if p['post'] != nil
 				end
 				return sfw
 			end
@@ -1736,12 +1743,24 @@ module Nuri
 			end
 
 			def to_sfw
+				pre = @pre
+				pre = @pre.ref if @pre.is_a?(Hash) and @pre.isobject
+				pre = SfpNull.new if @pre.is_a?(Hash) and @pre.isnull
+
+				post = @post
+				post = @post.ref if @post.is_a?(Hash) and @post.isobject
+				post = SfpNull.new if @post.is_a?(Hash) and @post.isnull
+
 				return {
 						'name' => @var.name,
-						'pre' => (@pre.is_a?(Hash) ? @pre.tostring : @pre),
-						'post' => (@post.is_a?(Hash) ? @post.tostring: @post)
+						'pre' => pre,
+						'post' => post
 					}
 			end
+		end
+
+		class SfpNull
+			attr_accessor :type
 		end
 	end
 end
