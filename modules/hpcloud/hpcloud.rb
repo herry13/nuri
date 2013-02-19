@@ -10,7 +10,6 @@ module Nuri
 
 			def initialize(options={})
 				# registering the component
-				#self.register('HPCloud', 'hpcloud')
 				self.register('Cloud', 'hpcloud')
 			end
 
@@ -26,7 +25,7 @@ module Nuri
 						url = URI.parse(config['auth_uri'])
 						@state['running'] = self.is_port_open?(url.host, url.port)
 					rescue Exception => exp
-						Nuri::Util.log 'HPCloud update state error: ' + exp.to_s
+						Nuri::Util.log "#{@name} update state error: " + exp.to_s
 					end
 				end
 
@@ -104,12 +103,12 @@ module Nuri
 			end
 
 			def save_config(config)
-				config_file = Nuri::Util.home_dir + '/modules/hpcloud/config.sfp'
+				config_file = Nuri::Util.home_dir + "/modules/#{@name}/config.sfp"
 				File.open(ConfigFile, 'w') { |f| f.write(JSON.generate(config)) }
 			end
 
 			def read_config
-				config_file = Nuri::Util.home_dir + '/modules/hpcloud/config.sfp'
+				config_file = Nuri::Util.home_dir + "/modules/#{@name}/config.sfp"
 				return {} if not File.exist?(config_file)
 				return Nuri::Sfp::Parser.parse_file(config_file)['config']
 			end
@@ -187,7 +186,7 @@ module Nuri
 
 					# get self-address
 					my_address = self.get_state("$.#{Nuri::Util.whoami?}.address").to_s
-					cloud = "#{Nuri::Util.whoami?}.hpcloud"
+					cloud = "#{Nuri::Util.whoami?}.#{@name}"
 					
 					# create a list of trusted nodes
 					config = self.read_config
@@ -196,7 +195,7 @@ module Nuri
 
 					Nuri::Util.log "vm[#{name}]: installing nuri client"
 					# install nuri on newly created VM
-					dir = Nuri::Util.home_dir + "/modules/hpcloud"
+					dir = Nuri::Util.home_dir + "/modules/#{@name}"
 					pub_key_file = dir + "/" + key_name + ".pem"
 					script_file = dir + "/nuri.sh"
 					options = "-i #{pub_key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
