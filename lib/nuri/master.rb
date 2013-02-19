@@ -269,6 +269,8 @@ module Nuri
 						# update system information
 						self.update_system
 
+						#self.reset
+
 						# execute the action in sequential
 						if plan['type'] == 'sequential'
 							success = self.sequential_execution(plan)
