@@ -163,9 +163,31 @@ module Nuri
 						data['operator'] = operator if not operator.nil?
 						data['goal'] = goal if not goal.nil?
 						code, _ = put_data(address, Nuri::Port, '/bsig/vm', data)
-						raise Exception, 'Failed sending BSig to cloud-proxy: ' + address.to_s if code != '200'
+						raise Exception, "Failed sending BSig to cloud-proxy: #{address}" if code != '200'
 					end
-					#raise Exception, 'proxies: ' + data.inspect.to_s
+				end
+
+				def group_operators_by_node(operators)
+					groups = {}
+					operators.each do |operator|
+						node = self.get_node(operator['name'])
+						raise Exception, "Cannot find node of operator: #{operator['name']}" if node.nil?
+						groups[node] = [] if not groups.has_key?(node)
+						groups[node] << operator
+					end
+					groups
+				end
+
+				def group_goals_by_node(goals, goal_operators)
+					groups = {}
+					goals.each do |variable, value|
+						operator = goal_operators[variable]
+						node = self.get_node(operator)
+						raise Exception, "Cannot find node of operator: #{operator['name']}" if node.nil?
+						groups[node] = {} if not groups.has_key?(node)
+						groups[node][variable] = value
+					end
+					groups
 				end
 
 				begin
@@ -177,6 +199,21 @@ module Nuri
 					# reset existing BSig model
 					self.reset
 
+					nodes = []
+					# send BSig operators to clients
+					group_operators_by_node(bsig['operators']).each do |node,operators|
+						address = node['address']
+						if address.nil?
+							raise Exception, "#{node['name']}'s address is nil" if not self.vm?(node)
+							send_to_cloud_proxies(node, bsig['id'], operator)
+						else
+							data = {'id'=>bsig['id'], 'operators'=>operators}
+							code, _  = put_data(address, Nuri::Port, '/bsig', data)
+							raise Exception, "Failed sending BSig policies:#{code},#{address}" if code != '200'
+							nodes << address
+						end
+					end
+=begin
 					# send BSig operators to clients
 					nodes = []
 					bsig['operators'].each do |operator|
@@ -202,7 +239,6 @@ module Nuri
 					# send BSig goal to clients
 					bsig['goal'].each do |variable,value|
 						operator = bsig['goal_operator'][variable]
-						#node = self.get_node(variable)
 						node = self.get_node(operator)
 						return false if node.nil?
 
@@ -215,6 +251,19 @@ module Nuri
 							if code != '200'
 								raise Exception, "sending BSig goal:#{code},#{address}"
 							end
+							nodes << address
+						end
+					end
+=end
+					group_goals_by_node(bsig['goal'], bsig['goal_operator']).each do |node,goal|
+						address = node['address']
+						if address.nil?
+							raise Exception, "#{node['name']}'s address is nil" if not self.vm?(node)
+							send_to_cloud_proxies(node, bsig['id'], nil, goal)
+						else
+							data = {'id'=>bsig['id'], 'goal'=>goal}
+							code, _ = put_data(address, Nuri::Port, '/bsig', data)
+							raise Exception, "sending BSig goal:#{code},#{address}" if code != '200'
 							nodes << address
 						end
 					end

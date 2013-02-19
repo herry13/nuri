@@ -267,6 +267,13 @@ module Nuri
 			# been repaired. If success, then return [true,nil]. Otherwise return
 			# [false, <disrepair-remote-flaws>]
 			def repair_remote_flaws(remote_flaws)
+				# re-evaluate remote flaws
+				remote_flaws.each do |variable,value|
+					if self.get_state(variable) == value
+						remote_flaws.delete(variable)
+					end
+				end
+
 				remote_flaws = remote_flaws.clone
 				# Send request to remote node to repair the remote flaws periodically until
 				# no such flaws exists.
