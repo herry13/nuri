@@ -161,8 +161,9 @@ module Nuri
 			# 2) request VM's state to cloud-proxy
 
 			# HACK!
-			state = {'running'=>false,'created'=>false}
+			state = {'running'=>false, 'created'=>false, 'oncloud'=>nil}
 			first, rest = path.split('.', 2)
+			return state if rest.to_s.length <= 0
 			return state.at?(rest)
 		end
 
@@ -171,6 +172,7 @@ module Nuri
 
 			address = address.to_s
 			path = path.to_s
+#Nuri::Util.log '===>>> ' + path + '::' + address
 
 			#return nil if address.length <= 0
 			return Nuri::Undefined.new(path) if address.length <= 0
