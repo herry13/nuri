@@ -233,7 +233,7 @@ module Nuri
 					raise Exception, exp.to_s
 				ensure
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
-					#system 'rm -rf ' + tmp_dir
+					system 'rm -rf ' + tmp_dir
 				end
 
 				return nil, nil
@@ -259,6 +259,7 @@ module Nuri
 				when 'blind' then '--search "astar(blind())"'
 				when 'cg' then '--search "lazy_greedy(cg(cost_type=2))"'
 				when 'cea' then '--search "lazy_greedy(cea(cost_type=2))"'
+				when 'mad' then '--search "lazy_greedy(mad())"'
 				else '--search "lazy_greedy(ff(cost_type=0))"'
 			end
 		end
@@ -276,8 +277,8 @@ module Nuri
 			command = case os
 				when 'linux' then "cd #{dir}; " +
 				                  "#{planner}/preprocess < #{sas_file} 2>/dev/null 1>/dev/null; " +
-				                  "timeout #{timeout} nice #{planner}/downward < output " +
-				                  "#{params} --plan-file #{plan_file}"
+				                  "timeout #{timeout} nice #{planner}/downward #{params} " +
+				                  "--plan-file #{plan_file} < output"
 				when 'macos', 'darwin' then "cd #{dir}; #{planner}/preprocess < #{sas_file} 1> /dev/null; " +
 				                            "timeout #{timeout} #{planner}/downward #{params} " +
 				                            "--plan-file #{plan_file} < #{tmp_dir}/output 1> /dev/null;"
@@ -301,11 +302,11 @@ module Nuri
 
 			def solve
 				# 1) solve with FF
-				planner1 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'ff')
+				planner1 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cg')
 				Kernel.system(planner1)
 				# 1b) if not found, try CEA
 				if not File.exist?(@plan_file)
-					planner2 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cg')
+					planner2 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'ff')
 					Kernel.system(planner2)
 				end
 				# 1c) if not found, try CG
@@ -314,6 +315,8 @@ module Nuri
 					Kernel.system(planner3)
 					return false if not File.exist?(@plan_file)
 				end
+
+				Nuri::Util.debug 'Optimise the workflow...'
 
 				# 2) remove unselected operators
 				new_sas = @sas_file + '.2'

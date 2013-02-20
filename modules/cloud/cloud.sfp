@@ -7,6 +7,7 @@ class Cloud {
 	procedure delete_vm(vm isref VM) {
 		condition {
 			this.running = true
+			vm.oncloud = this
 		}
 		effect {
 			vm.created = false
