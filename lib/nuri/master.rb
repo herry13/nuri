@@ -357,6 +357,7 @@ module Nuri
 					state = get_state
 					action['effect'].each do |key,value|
 						val = state.at?(key)
+						val = nil if val.is_a?(Hash) and val.isnull
 						if val != value
 							puts 'Failed verifying: ' + key + '=' + value.to_s + ' <> ' + val.to_s
 							raise Nuri::ExecutionFailedException, action['name']

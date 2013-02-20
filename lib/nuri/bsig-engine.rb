@@ -121,7 +121,7 @@ module Nuri
 						end
 					rescue Exception => exp
 						Nuri::Util.error 'Error when executing the BSig: ' + exp.to_s
-						Nuri::Util.error exp.backtrace
+						#Nuri::Util.error exp.backtrace
 					ensure
 						@lock.synchronize { @active = false }
 					end
@@ -229,9 +229,14 @@ module Nuri
 						local_flaws[path] = value
 					elsif not @owner.local?(component_path)
 						address = @owner.address?(component_path)
-						raise Exception, 'Cannot find component: ' + component_path if address.nil?
-						remote_flaws[address] = {} if not remote_flaws.has_key?(address)
-						remote_flaws[address][path] = value
+						if address.nil?
+							# TODO -- this case should not raise an exception
+							#raise Exception, 'Cannot find component: ' + component_path
+							raise RemoteNotAvailableException, "Component: #{component_path}"
+						else
+							remote_flaws[address] = {} if not remote_flaws.has_key?(address)
+							remote_flaws[address][path] = value
+						end
 					else
 						local_flaws[path] = value
 					end
@@ -318,9 +323,15 @@ module Nuri
 			def achieve_condition(operator)
 				label = "#{operator['name']}(#{operator['parameters'].inspect})"
 				Nuri::Util.debug "achieving condition: #{label}"
-				# check flaws of operator's condition, and
-				# separate then between local and remote flaws
-				remote_flaws, local_flaws = get_condition_flaws(operator['condition'])
+
+				begin
+					# check flaws of operator's condition, and
+					# separate then between local and remote flaws
+					remote_flaws, local_flaws = get_condition_flaws(operator['condition'])
+				rescue RemoteNotAvailableException => rex
+					Nuri::Util.warn rex.to_s
+					return false
+				end
 
 				# Operator's conditions are satisfied
 				if remote_flaws.length <= 0 and local_flaws.length <= 0
@@ -415,6 +426,7 @@ module Nuri
 			end
 		end
 
+		class RemoteNotAvailableException < Exception; end
 		class DisrepairLocalFlawException < Exception; end
 		class DisrepairRemoteFlawException < Exception; end
 
