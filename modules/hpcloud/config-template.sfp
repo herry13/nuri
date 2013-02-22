@@ -1,0 +1,13 @@
+config {
+	description = ""
+	master = ""
+	account_id = ""
+	auth_uri = ""
+	tenant_id = ""
+	zone = ""
+	secret_key = ""
+
+	default_flavor_id = 100
+	default_image_id = 75845
+	default_key_name = "default.pem"
+}
