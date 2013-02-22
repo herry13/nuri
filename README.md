@@ -66,14 +66,14 @@ Running Nuri client on managed node
 
 3. Start client daemon:
 
-		$ sudo ./bin/nuri.rb client start
+		$ sudo ./bin/client start
 
 4. To check whether the daemon has run, open the following URL in your browser: *http://localhost:1313/state*.
    If you get an error, you may need to reconfigure your firewall to open port 1313. 
 
 5. To stop the Nuri client daemon:
 
-		$ sudo ./bin/nuri.rb client stop
+		$ sudo ./bin/client stop
 
 
 Controlling Nuri clients from master node
@@ -102,15 +102,15 @@ Controlling Nuri clients from master node
 
 2. Get current state of all nodes from master node:
 
-		$ bin/nuri.rb console pull
+		$ ./bin/master pull
 
 3. Generate a workflow to implement the desired state
 
-		$ bin/nuri.rb console plan
+		$ ./bin/master plan
 
 4. Achieving the goal and global constraints specified in *etc/main.sfp* of master node by automatically generating and executing a workflow. The workflow execution is scheduled centrally by master node where each step sends a command to target client node. See *Distributed Execution* if you want to use distributed approach.
 
-		$ bin/nuri.rb console apply
+		$ ./bin/master apply
 
 
 Distributed Execution
@@ -119,7 +119,7 @@ In this approach, the goal and the global constraints are achieved by generating
 
 This approach can be used using command:
 
-	$ bin/nuri.rb console apply-bsig
+	$ ./bin/master bsig
 
 
 Documentation
