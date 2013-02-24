@@ -1,12 +1,17 @@
 config {
 	description = ""
+
+	// master node's address
 	master = ""
+
+	// HPCloud account information
 	account_id = ""
 	auth_uri = ""
 	tenant_id = ""
 	zone = ""
 	secret_key = ""
 
+	// Default properties of the VM
 	default_flavor_id = 100
 	default_image_id = 75845
 	default_key_name = "default.pem"
