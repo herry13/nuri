@@ -30,18 +30,7 @@ module Nuri
 			end
 
 			def open_connection
-				begin
-					@conn = Fog::Compute.new(:provider => "HP",
-					                         :hp_account_id => @account_id,
-					                         :hp_auth_uri => @auth_uri,
-					                         :hp_tenant_id => @tenant_id,
-					                         :hp_secret_key => @secret_key,
-				   	                      :hp_avl_zone => @zone)
-				rescue Exception => exp
-					Nuri::Util "Cannot open connection to cloud's end point: #{@name}"
-					return false
-				end
-				return true
+				return false
 			end
 
 			def get_address(params={})
