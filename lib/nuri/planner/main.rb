@@ -126,37 +126,7 @@ module Nuri
 					end
 				end
 				return goal, goal_op
-				#@sas_task.final_state.each do |g|
-				#	variable, value = @parser.variable_name_and_value(g[:id], g[:value])
-				#	# search the supporting operator
-				#	(workflow.length-1).downto(0) do |i|
-				#		if workflow[i]['effect'].has_key?(variable)
-				#			if workflow[i]['effect'][variable] == value
-				#				data[variable] = workflow[i]['name']
-				#				break
-				#			else
-				#				raise Exception, "#{variable}=#{value} is not supported by last possible operator"
-				#			end
-				#		end
-				#	end
-				#end
-				#data
 			end
-
-=begin
-			def bsig_goal
-				goal = {}
-				@sas_task.goal_state.each do |g|
-					variable, value = @parser.variable_name_and_value(g[:id], g[:value])
-					goal[variable] = value
-				end
-				#@sas_task.final_state.each do |g|
-				#	var_name, var_value = @parser.variable_name_and_value(g[:id], g[:value])
-				#	goal[var_name] = var_value
-				#end
-				return goal
-			end
-=end
 
 			def get_sequential_plan
 				json = { 'type'=>'sequential', 'workflow'=>nil, 'version'=>'1', 'total'=>0 }

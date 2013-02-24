@@ -214,48 +214,7 @@ module Nuri
 							nodes << address
 						end
 					end
-=begin
-					# send BSig operators to clients
-					nodes = []
-					bsig['operators'].each do |operator|
-						node = self.get_node(operator['name'])
-						if node.nil?
-							Nuri::Util.error "Cannot find node of operator: #{operator['name']}"
-							return false
-						end
 
-						address = node['address']
-						if address.nil? and self.vm?(node)
-							send_to_cloud_proxies(node, bsig['id'], operator)
-						else
-							data = {'id' => bsig['id'], 'operator' => operator}
-							code, _ = put_data(address, Nuri::Port, '/bsig', data)
-							if code != '200'
-								raise Exception, "sending BSig operator:#{code},#{address}"
-							end
-							nodes << address
-						end
-					end
-
-					# send BSig goal to clients
-					bsig['goal'].each do |variable,value|
-						operator = bsig['goal_operator'][variable]
-						node = self.get_node(operator)
-						return false if node.nil?
-
-						address = node['address']
-						if address.nil? and self.vm?(node)
-							send_to_cloud_proxies(node, bsig['id'], nil, {variable => value})
-						else
-							data = {'id' => bsig['id'], 'goal' => {variable => value}}
-							code, _ = put_data(address, Nuri::Port, '/bsig', data)
-							if code != '200'
-								raise Exception, "sending BSig goal:#{code},#{address}"
-							end
-							nodes << address
-						end
-					end
-=end
 					group_goals_by_node(bsig['goal'], bsig['goal_operator']).each do |node,goal|
 						address = node['address']
 						if address.nil?
