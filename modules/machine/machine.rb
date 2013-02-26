@@ -25,12 +25,12 @@ module Nuri
 				
 				system_info = Nuri::Util.get_system_information
 				@state["domainname"] = Nuri::Util.domainname
+				@state["ip_addr"] = Nuri::Util.local_ip
 				if system_info.has_key?(@name) and system_info[@name].to_s.length > 0
 					@state['address'] = system_info[@name]
 				else
-					@state['address'] = @state['domainname']
+					@state['address'] = @state['ip_addr'] #@state['domainname']
 				end
-				@state["ip_addr"] = Nuri::Util.local_ip
 				@state["version"] = `uname -r`.strip
 				@state["arch"] = `uname -p`.strip
 				@state["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i

@@ -58,6 +58,8 @@ module Nuri
 				self.update_cloud_proxies
 				vms = self.get_all_vm_addresses
 
+puts vms.inspect
+
 				# retrieve node's current state
 				current_state = {'_context'=>'state', '_self'=>'initial'}
 				@main['system'].each do |key,node|
