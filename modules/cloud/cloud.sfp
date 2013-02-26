@@ -19,6 +19,7 @@ class Cloud {
 	procedure create_vm(vm isref VM) {
 		condition {
 			this.running = true
+			vm.created = false
 		}
 		effect {
 			vm.created = true

@@ -2,6 +2,7 @@
 
 TRUSTED="$1"
 CLOUD="$2"
+NURI_VERSION="0.3.2"
 
 echo "Installing required softwares and libraries..."
 sudo apt-get -y update
@@ -10,7 +11,7 @@ sudo gem install webrick json antlr3
 echo "...OK"
 
 echo "Download Nuri binaries..."
-/usr/bin/wget -O nuri.tgz -o /dev/null https://github.com/herry13/nuri/tarball/master
+/usr/bin/wget -O nuri.tgz -o /dev/null https://github.com/herry13/nuri/tarball/$NURI_VERSION
 echo "...OK"
 
 if [ -f "nuri.tgz" ]; then
