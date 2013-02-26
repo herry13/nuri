@@ -86,7 +86,6 @@ module Nuri
 		# Return the address of the VM with its proxy
 		# [<address>, <proxy_name>]
 		def get_vm_address_by_name(vm_name)
-			data = {'name' => vm_name}
 			@cloud_proxies.each do |name,address|
 				next if address.length <= 0
 				next if not Nuri::Util.is_nuri_active?(address)
@@ -94,6 +93,7 @@ module Nuri
 				CloudComponents.each do |component|
 					next if not cloud_component_available?(name, component, address)
 					begin
+						data = {'name' => vm_name}
 						path = "/function/#{name}/#{component}/get_vm_address"
 						code, body = self.put_data(address, Nuri::Port, path, data)
 						if code == '200'
@@ -119,7 +119,6 @@ module Nuri
 
 				CloudComponents.each do |component|
 					next if not cloud_component_available?(name, component, address)
-puts name + ':' + component
 					begin
 						code, body = self.put_data(address.to_s, Nuri::Port,
 							"/function/#{name}/#{component}/get_vms")
