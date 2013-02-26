@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'fog'
+require 'sshkey'
 
 module Nuri
 	module Module
@@ -20,9 +21,9 @@ module Nuri
 				@state['description'] = (config.has_key?('description') ? config['description'] : '')
 
 				# check running status
-				if not config['auth_uri'].nil?
+				if not config['auth_url'].nil?
 					begin
-						url = URI.parse(config['auth_uri'])
+						url = URI.parse(config['auth_url'])
 						@state['running'] = self.is_port_open?(url.host, url.port)
 					rescue Exception => exp
 						Nuri::Util.log "#{@name} update state error: " + exp.to_s
@@ -36,12 +37,14 @@ module Nuri
 			def open_connection
 				begin
 					config = self.read_config
-					@conn = Fog::Compute.new(:provider => "HP",
-					                         :hp_account_id => config['account_id'],
-					                         :hp_auth_uri => config['auth_uri'],
-					                         :hp_tenant_id => config['tenant_id'],
-					                         :hp_secret_key => config['secret_key'],
-				   	                      :hp_avl_zone => config['zone'])
+					@conn = Fog::Compute.new({
+						:provider => 'Rackspace',
+						:rackspace_api_key => config['api_key'],
+						:rackspace_username => config['username'],
+						:rackspace_auth_url => config['auth_url'],
+						:rackspace_endpoint => config['endpoint_url'],
+						:version => :v2,
+					})
 				rescue Exception => exp
 					Nuri::Util.warn "Cannot open connection to cloud's end point: #{@name}"
 					@conn = nil
@@ -114,19 +117,6 @@ module Nuri
 			end
 
 			# SFP method
-			def set_account(params={})
-				config = self.read_config
-				params.each { |k,v| config[k] = v }
-				self.save_config(config)
-				return true
-			end
-			def set_account_id(params={}); self.set_account(params); end
-			def set_auth_uri(params={}); self.set_account(params); end
-			def set_tenant_id(params={}); self.set_account(params); end
-			def set_secret_key(params={}); self.set_account(params); end
-			def set_zone(params={}); self.set_account(params); end
-
-			# SFP method
 			def create_vm(params={})
 				self.open_connection if @conn.nil?
 				return false if @conn.nil?
@@ -141,17 +131,23 @@ module Nuri
 				flavor_id = config['default_flavor_id']
 				image_id = config['default_image_id']
 				key_name = config['default_key_name']
+				key_path = File.expand_path("~/.ssh/#{key_name}")
+
+				ssh_key = SSHKey.new(File.read(key_path), :comment => "rackspace-key")
 
 				# create VM
 				Nuri::Util.log "vm[#{name}]: creating"
-				new_server = @conn.servers.create(
+				new_server = @conn.servers.bootstrap({
 					:name => name,
 					:flavor_id => flavor_id,
 					:image_id => image_id,
-					:key_name => key_name,
-					:security_groups => ['default'],
-					:metadata => {'name' => name})
+					:public_key => ssh_key.ssh_public_key,
+					:private_key => ssh_key.private_key,
+				})
+				#:metadata => {'name' => name},
 				if not new_server.nil?
+					new_server.wait_for { ready? }
+
 					# wait until the new VM "ACTIVE"
 					counter = 120
 					info = self.get_info(name)
@@ -196,15 +192,16 @@ module Nuri
 					Nuri::Util.log "vm[#{name}]: installing nuri client"
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/#{@name}"
-					pub_key_file = dir + "/" + key_name + ".pem"
+					#pub_key_file = dir + "/" + key_name + ".pem"
+					key_file = key_path
 					script_file = dir + "/nuri.sh"
-					options = "-i #{pub_key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+					options = "-i #{key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					remote_command = "'/bin/bash -s \"#{trusted}\" \"#{cloud}\"' < #{script_file}"
-					cmd = "/usr/bin/ssh #{options} ubuntu@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
+					cmd = "/usr/bin/ssh #{options} root@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 
 					if Nuri::Helper::Command.exec(cmd)
 						remote_command = "'/usr/bin/sudo nuri/bin/nuri.rb client start'"
-						cmd = "timeout 5 /usr/bin/ssh #{options} ubuntu@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
+						cmd = "timeout 5 /usr/bin/ssh #{options} root@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 						Nuri::Helper::Command.exec(cmd)
 						succeed = Nuri::Util.is_nuri_active?(address)
 						counter = 30

@@ -13,5 +13,5 @@ config {
 	// Default properties of the VM
 	default_flavor_id = 2
 	default_image_id = "5cebb13a-f783-4f8c-8058-c4182c724ccd"
-	default_key_name = "default"
+	default_key_name = "id_rsa"
 }
