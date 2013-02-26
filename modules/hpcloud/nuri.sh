@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#MASTER="nena.inf.ed.ac.uk"
 TRUSTED="$1"
 CLOUD="$2"
 
