@@ -8,7 +8,7 @@ config {
 	api_key = ""
 	username = ""
 	auth_url = ""
-	endpoint = ""
+	endpoint_url = ""
 
 	// Default properties of the VM
 	default_flavor_id = 2

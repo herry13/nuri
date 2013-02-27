@@ -1,6 +1,18 @@
 How to use HPCloud module
 =========================
 
+Require Packages
+----------------
+- libxml2-dev
+- libxslt-dev
+
+Install HPCloud hpfog library
+-----------------------------
+	$ curl -sL https://docs.hpcloud.com/file/hpfog-0.0.18.gem > hpfog-0.0.18.gem
+	$ gem install hpfog-0.0.18.gem
+
+Configuring
+-----------
 1. Rename "config-template.sfp" to "config.sfp"
 2. Replace "ssh_private_key-template.pem" with your own SSH private
    key. The module will use this key for installing Nuri through
