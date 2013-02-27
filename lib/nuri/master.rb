@@ -11,7 +11,7 @@ module Nuri
 			attr_accessor :main, :do_verify_execution
 
 			def initialize
-				@do_verify_execution = true
+				@do_verify_execution = false
 				self.load(false)
 				@main = Nuri::Resource.get_root
 				self.init_cloud

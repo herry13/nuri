@@ -38,6 +38,8 @@ module Nuri
 			return nil
 		end
 
+		class TranslationException < Exception; end
+
 		# include 'Sas' module to enable processing Sfp into Finite-Domain Representation (FDR)
 		#
 		# TODO:
@@ -57,8 +59,9 @@ module Nuri
 
 			def to_sas
 				begin
+					@unknown_value = ::Nuri::Unknown.new
+
 					@arrays = Hash.new
-	
 					if @parser_arrays != nil
 						@parser_arrays.each do |k,v|
 							first, rest = k.explode[1].explode
@@ -148,7 +151,7 @@ module Nuri
 
 					### normalize sometime formulae ###
 					if @root.has_key?('sometime')
-						raise Exception, 'Invalid sometime constraint' if
+						raise TranslationException, 'Invalid sometime constraint' if
 							not normalize_formula(@root['sometime'])
 					end
 
@@ -172,6 +175,8 @@ module Nuri
 					# detect and merge mutually inclusive operators
 					self.search_and_merge_mutually_inclusive_operators
 
+					self.add_unknown_value_to_nonstatic_variables
+
 					#self.dump_types
 					#self.dump_vars
 					#self.dump_operators
@@ -180,7 +185,8 @@ module Nuri
 
 					return create_output
 				rescue Exception => e
-					Nuri::Util.error e.to_s + "\n" + e.bracktrace.to_s
+					Nuri::Util.error e.to_s
+					raise e
 				end
 			end
 
@@ -286,7 +292,7 @@ module Nuri
 			def process_global_constraint
 				### normalize global constraint formula ###
 				if @root.has_key?('global') and @root['global'].isconstraint
-					raise Exception, 'Invalid global constraint' if 
+					raise TranslationException, 'Invalid global constraint' if 
 							not normalize_formula(@root['global'], true)
 
 					if GlobalConstraintMethod == 1
@@ -359,7 +365,7 @@ module Nuri
 			end
 
 			def process_goal(goal)
-				raise Exception, 'invalid goal constraint' if not normalize_formula(goal)
+				raise TranslationException, 'invalid goal constraint' if not normalize_formula(goal)
 				if goal['_type'] == 'and'
 					map = and_equals_constraint_to_map(goal)
 					map.each { |name,value|
@@ -416,8 +422,15 @@ module Nuri
 				variable_index.each { |i|
 					if @variables[i].init.is_a?(Hash) and @variables[i].init.isnull
 						out += "0\n"
+					elsif @variables[i].init.is_a?(::Nuri::Unknown)
+						out += "#{@variables[i].length-1}\n"
 					else
-						out += @variables[i].index(@variables[i].init).to_s + "\n"
+						val = @variables[i].index(@variables[i].init).to_s
+						out += "#{val}\n"
+						if val.length <= 0
+							raise TranslationException,
+								"Unknown init: #{@variables[i].name} = #{@variables[i].init.inspect}"
+						end
 					end
 				}
 				out += "end_state\n"
@@ -697,6 +710,13 @@ module Nuri
 				}
 			end
 
+			def add_unknown_value_to_nonstatic_variables
+				@variables.each_value { |variable|
+					next if variable.is_final
+					variable << @unknown_value
+				}
+			end
+
 			def apply_global_constraint_method_1(operator)
 				return true if not @root.has_key?('global') or not @root['global'].isconstraint
 				operator[@global_var.name] = Parameter.new(@global_var, true, false)
@@ -855,7 +875,7 @@ module Nuri
 					# TODO
 					#puts 'nested right: ' + left + ' = ' + right['_value']
 
-					raise Exception, 'not implemented: normalized_nested_right'
+					raise TranslationException, 'not implemented: normalized_nested_right'
 				end
 
 				def normalize_nested_right_only(left, right, formula)
@@ -877,7 +897,7 @@ module Nuri
 					#last_names1 = Array.new
 					#ref_combinator(bucket1, rest, names, nil, last_names1)
 
-					raise Exception, 'not implemented: normalized_nested_left_right'
+					raise TranslationException, 'not implemented: normalized_nested_left_right'
 				end
 
 				def normalize_nested_left_only(left, right, formula)
@@ -1097,7 +1117,7 @@ module Nuri
 										remove_not_and_iterator_constraint(c_not)
 									}
 								else
-									raise Exception, 'unknown rules: ' + v['_type']
+									raise TranslationException, 'unknown rules: ' + v['_type']
 								end
 							end
 						}
@@ -1381,7 +1401,7 @@ module Nuri
 					if value.isobject
 						value['_classes'].each { |c| @bucket[c] << value }
 					elsif value.isset
-						raise Exception, 'not implemented -- set: ' + value['_isa']
+						raise TranslationException, 'not implemented -- set: ' + value['_isa']
 					end
 				elsif value.is_a?(Array)
 					if value.length > 0

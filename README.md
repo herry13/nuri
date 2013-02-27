@@ -14,6 +14,7 @@ Requirements
 - Linux Ubuntu 12.04
 - required packages
 	- ruby (>= 1.8.7)
+	- ruby-dev
 	- rubygems
 	- libz-dev
 	- libaugeas-ruby
@@ -21,6 +22,8 @@ Requirements
 	- webrick
 	- json
 	- antlr3
+
+For a better performance, it is recommeneded to use ruby >= 1.9
 
 To Install
 ----------
