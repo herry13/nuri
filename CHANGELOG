@@ -1,3 +1,10 @@
+27-02-2013 -- 0.3.2
++ Add a new module "rackspace" that manages Rackspace Compute V2 (Next-Gen)
+
+25-02-2013 -- 0.3.1
++ Fix a bug on the planner when a variable's initial value equals <sfp::unknown>.
+  This is fixed by adding <sfp::unknown> to domain of all non-static variables.
+
 18-02-2013 -- 0.3.1
 + send a BSig-goal to a node that supports the goal
 + the BSig-goal of uncreated VM will be sent to cloud-proxy, which will be

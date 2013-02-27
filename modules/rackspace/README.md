@@ -1,8 +1,9 @@
 Requirements
 ------------
-- Ruby Gems
+- ruby (>= 1.9)
+- ruby gems
 	- fog (>= 1.9)
-	- sshkey
+	- sshkey (>= 1.4)
 
 Configuring
 -----------

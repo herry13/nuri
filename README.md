@@ -3,7 +3,7 @@ Nuri
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/nuri
 - last update: 08-02-2013
-- version: 0.3.2 (alpha)
+- version: 0.3.2
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
@@ -44,13 +44,17 @@ To Install
 
 Available Modules
 -----------------
-- Machine -- standard Machine
-- VM -- Virtual Machine
-- Apache -- Apache Web Server
-- Mysql -- Mysql Database Server
-- Apachelb -- Apache Load Balancer
+- Machine            -- standard Machine
+- VM                 -- Virtual Machine
+- Apache             -- Apache Web Server
+- Mysql              -- Mysql Database Server
+- Apachelb           -- Apache Load Balancer
 - Tikiweb and Tikidb -- TikiWiki Content Management System
-- HPCloud -- HPCloud computing management
+- HPCloud            -- HPCloud compute (information on how to use this module
+                        can be found in file "module/hpcloud/README.md")
+- Rackspace          -- Rackspace compute V2 (Next-gen) (information on how to
+                        use this module can be found in file 
+                        "module/rackspace/README.md")
 
 Running Nuri client on managed node
 -----------------------------------
