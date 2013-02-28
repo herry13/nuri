@@ -44,17 +44,18 @@ To Install
 
 Available Modules
 -----------------
-- Machine            -- standard Machine
-- VM                 -- Virtual Machine
-- Apache             -- Apache Web Server
-- Mysql              -- Mysql Database Server
-- Apachelb           -- Apache Load Balancer
-- Tikiweb and Tikidb -- TikiWiki Content Management System
-- HPCloud            -- HPCloud compute (information on how to use this module
+- machine            -- standard Machine
+- vm                 -- Virtual Machine
+- apache             -- Apache Web Server
+- mysql              -- Mysql Database Server
+- apachelb           -- Apache Load Balancer
+- tikiweb and tikidb -- TikiWiki Content Management System
+- hpCloud            -- HPCloud compute (information on how to use this module
                         can be found in file "module/hpcloud/README.md")
-- Rackspace          -- Rackspace compute V2 (Next-gen) (information on how to
+- rackspace          -- Rackspace compute V2 (Next-gen) (information on how to
                         use this module can be found in file 
                         "module/rackspace/README.md")
+- aws                -- Amazon Web Service compute
 
 Running Nuri client on managed node
 -----------------------------------
