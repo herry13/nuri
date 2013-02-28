@@ -115,7 +115,7 @@ module Nuri
 				return Socket.gethostbyname(Socket.gethostname).first
 			else
 				result = result[3].split(" ")
-				return result[3].chop
+				return (result[3].nil? ? '' : result[3].chop)
 			end
 		end
 
