@@ -141,16 +141,19 @@ module Nuri
 				flavor_id = config['default_flavor_id']
 				image_id = config['default_image_id']
 				key_name = config['default_key_name']
+				username = config['default_username']
 
 				# create VM
 				Nuri::Util.log "vm[#{name}]: creating"
-				new_server = @conn.servers.create(
+				new_server = @conn.servers.create({
 					:name => name,
 					:flavor_id => flavor_id,
 					:image_id => image_id,
 					:key_name => key_name,
 					:security_groups => ['default'],
-					:metadata => {'name' => name})
+					:metadata => {'name' => name},
+				})
+
 				if not new_server.nil?
 					# wait until the new VM "ACTIVE"
 					counter = 120
@@ -200,11 +203,11 @@ module Nuri
 					script_file = dir + "/nuri.sh"
 					options = "-i #{pub_key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					remote_command = "'/bin/bash -s \"#{trusted}\" \"#{cloud}\"' < #{script_file}"
-					cmd = "/usr/bin/ssh #{options} ubuntu@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
+					cmd = "/usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 
 					if Nuri::Helper::Command.exec(cmd)
 						remote_command = "'/usr/bin/sudo nuri/bin/nuri.rb client start'"
-						cmd = "timeout 5 /usr/bin/ssh #{options} ubuntu@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
+						cmd = "timeout 5 /usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 						Nuri::Helper::Command.exec(cmd)
 						succeed = Nuri::Util.is_nuri_active?(address)
 						counter = 30

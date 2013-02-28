@@ -13,4 +13,5 @@ config {
 	default_flavor_id = "t1.micro"
 	default_image_id = "ami-0ad04363"
 	default_key_name = "id_rsa"
+	default_username = "ubuntu"
 }

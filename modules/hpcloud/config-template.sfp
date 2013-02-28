@@ -14,5 +14,6 @@ config {
 	// Default properties of the VM
 	default_flavor_id = 100
 	default_image_id = 75845
-	default_key_name = "default.pem"
+	default_key_name = "default"
+	default_username = "ubuntu"
 }

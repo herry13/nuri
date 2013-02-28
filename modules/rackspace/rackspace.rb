@@ -134,6 +134,7 @@ module Nuri
 					image_id = config['default_image_id']
 					key_name = config['default_key_name']
 					key_path = File.expand_path("~/.ssh/#{key_name}")
+					username = config['default_username']
 	
 					ssh_key = SSHKey.new(File.read(key_path), :comment => "")
 	
@@ -202,11 +203,11 @@ module Nuri
 						script_file = dir + "/nuri.sh"
 						options = "-i #{key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 						remote_command = "'/bin/bash -s \"#{trusted}\" \"#{cloud}\"' < #{script_file}"
-						cmd = "/usr/bin/ssh #{options} root@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
+						cmd = "/usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 	
 						if Nuri::Helper::Command.exec(cmd)
 							remote_command = "'/usr/bin/sudo nuri/bin/nuri.rb client start'"
-							cmd = "timeout 5 /usr/bin/ssh #{options} root@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
+							cmd = "timeout 5 /usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 							Nuri::Helper::Command.exec(cmd)
 							succeed = Nuri::Util.is_nuri_active?(address)
 							counter = 30
