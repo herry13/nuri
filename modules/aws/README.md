@@ -14,8 +14,10 @@ Configuring
 2) Copy file "config-template.sfp" to "config.sfp"
 
 3) Put your Rackspace account information in file "config.sfp".
-   The account information that need to be specified: username,
-   API key, authentication URL, and endpoint URL.
+   The account information that need to be specified:
+   - access key id
+	- secret access key
+	- region
 
 4) Generate a pair of RSA private and public key and put them
    in your "~/.ssh/" directory. The key usually has name "id_rsa",
