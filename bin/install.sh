@@ -1,6 +1,7 @@
 #!/bin/sh
 
 read -p "What is the address of master node? " TRUSTED
+TRUSTED="\"$TRUSTED\""
 
 echo "Installing required softwares and libraries..."
 sudo apt-get -y update
