@@ -2,7 +2,7 @@ module Nuri
 	module CloudHelper
 		VMComponent = '$.VM'
 		CloudComponent = '$.Cloud'
-		CloudComponents = ['hpcloud', 'rackspace']
+		CloudComponents = ['hpcloud', 'rackspace', 'aws']
 
 		class CloudProcedureModifier
 			def initialize(vm_name)
