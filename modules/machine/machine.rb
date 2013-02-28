@@ -35,10 +35,6 @@ module Nuri
 				@state["arch"] = `uname -p`.strip
 				@state["cpus"] = `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i
 				@state['running'] = true
-
-				# Nuri's version
-				remote = `/usr/bin/git rev-parse origin`.chop
-				@state['nuri_latest'] = (remote == Nuri::Util.nuri_version)
 			end
 
 			def start
