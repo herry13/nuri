@@ -4,10 +4,40 @@ TRUSTED="$1"
 CLOUD="$2"
 NURI_VERSION="0.3.2"
 
+
+##### SET HOSTNAME #####
+SCRIPT="/etc/ec2-hostname.sh"
+echo "USER_DATA=$3" >> $SCRIPT
+echo 'HOSTNAME=`echo $USER_DATA`' >> $SCRIPT
+echo 'IPV4=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/public-ipv4`' >> $SCRIPT
+echo 'hostname $HOSTNAME' >> $SCRIPT
+echo 'echo $HOSTNAME > /etc/hostname' >> $SCRIPT
+echo 'cat<<EOF > /etc/hosts' >> $SCRIPT
+echo '127.0.0.1 localhost' >> $SCRIPT
+echo '$IPV4 $HOSTNAME' >> $SCRIPT
+echo '::1 ip6-localhost ip6-loopback' >> $SCRIPT
+echo 'fe00::0 ip6-localnet' >> $SCRIPT
+echo 'ff00::0 ip6-mcastprefix' >> $SCRIPT
+echo 'ff02::1 ip6-allnodes' >> $SCRIPT
+echo 'ff02::2 ip6-allrouters' >> $SCRIPT
+echo 'ff02::3 ip6-allhosts' >> $SCRIPT
+echo 'EOF' >> $SCRIPT
+chmod +x $SCRIPT
+echo "/bin/sh $SCRIPT" > /etc/rc.local
+
+$SCRIPT
+
+
+##### NURI Installation #####
 echo "Installing required softwares and libraries..."
 sudo apt-get -y update
-sudo apt-get -y install make ruby ruby-dev rubygems libz-dev libaugeas-ruby make gcc
-sudo gem install webrick json antlr3
+sudo apt-get -y install make gcc
+sudo apt-get -y update
+sudo apt-get -y install make gcc
+sudo apt-get -y update
+sudo apt-get -y install make gcc
+sudo apt-get -y install ruby ruby-dev rubygems libz-dev libaugeas-ruby
+gem install --no-ri --no-rdoc webrick json antlr3
 echo "...OK"
 
 echo "Download Nuri binaries..."
@@ -37,24 +67,3 @@ if [ -f "nuri.tgz" ]; then
 	echo "...OK"
 fi
 
-##### SET HOSTNAME #####
-SCRIPT="/etc/ec2-hostname.sh"
-echo "USER_DATA=$3" >> $SCRIPT
-echo 'HOSTNAME=`echo $USER_DATA`' >> $SCRIPT
-echo 'IPV4=`/usr/bin/curl -s http://169.254.169.254/latest/meta-data/public-ipv4`' >> $SCRIPT
-echo 'hostname $HOSTNAME' >> $SCRIPT
-echo 'echo $HOSTNAME > /etc/hostname' >> $SCRIPT
-echo 'cat<<EOF > /etc/hosts' >> $SCRIPT
-echo '127.0.0.1 localhost' >> $SCRIPT
-echo '$IPV4 $HOSTNAME' >> $SCRIPT
-echo '::1 ip6-localhost ip6-loopback' >> $SCRIPT
-echo 'fe00::0 ip6-localnet' >> $SCRIPT
-echo 'ff00::0 ip6-mcastprefix' >> $SCRIPT
-echo 'ff02::1 ip6-allnodes' >> $SCRIPT
-echo 'ff02::2 ip6-allrouters' >> $SCRIPT
-echo 'ff02::3 ip6-allhosts' >> $SCRIPT
-echo 'EOF' >> $SCRIPT
-chmod +x $SCRIPT
-echo "/bin/sh $SCRIPT" > /etc/rc.local
-
-$SCRIPT

@@ -6,8 +6,13 @@ NURI_VERSION="0.3.2"
 
 echo "Installing required softwares and libraries..."
 sudo apt-get -y update
-sudo apt-get -y install make ruby ruby-dev rubygems libz-dev libaugeas-ruby
-sudo gem install webrick json antlr3
+sudo apt-get -y install make gcc
+sudo apt-get -y update
+sudo apt-get -y install make gcc
+sudo apt-get -y update
+sudo apt-get -y install make gcc
+sudo apt-get -y install ruby ruby-dev rubygems libz-dev libaugeas-ruby
+sudo gem install --no-ri --no-rdoc webrick json antlr3
 echo "...OK"
 
 echo "Download Nuri binaries..."

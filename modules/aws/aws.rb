@@ -175,13 +175,13 @@ puts 'test2'
 					options = "-i #{key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					remote_command = "'/usr/bin/sudo /bin/bash -s \"#{trusted}\" \"#{cloud}\" \"#{name}\"' < #{script_file}"
 					ssh_cmd = "/usr/bin/ssh #{options} #{username}@#{address}"
-					cmd = "#{ssh_cmd} #{remote_command} 1>/dev/null 2>/dev/null"
+					cmd = "#{ssh_cmd} #{remote_command} " #1>/dev/null 2>/dev/null"
 
 Nuri::Util.log cmd
 
 					if Nuri::Helper::Command.exec(cmd)
 						remote_command = "'/usr/bin/sudo nuri/bin/nuri.rb client start'"
-						cmd = "timeout 5 /usr/bin/ssh #{options} root@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
+						cmd = "timeout 5 /usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 						Nuri::Helper::Command.exec(cmd)
 						succeed = Nuri::Util.is_nuri_active?(address)
 						counter = 30
