@@ -1,0 +1,16 @@
+include "modules/cloud/vm.sfp"
+include "modules/cloud/cloud.sfp"
+
+class HPCloud extends Cloud {
+	procedure create_vm_small_ubuntu_quantal(vm isref VM) {
+		condition {
+			this.running = true
+			vm.created = false
+		}
+		effect {
+			vm.created = true
+			vm.running = true
+			vm.oncloud = this
+		}
+	}
+}

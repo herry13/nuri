@@ -4,4 +4,6 @@ include "modules/cloud/cloud.sfp"
 class VM extends Machine {
 	created is false
 	oncloud isref Cloud
+	flavor_id is ""
+	image_id is ""
 }
