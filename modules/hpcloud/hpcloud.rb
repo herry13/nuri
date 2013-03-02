@@ -16,19 +16,9 @@ module Nuri
 			def update_state
 				self.reset
 				config = self.read_config
-				# set cloud name
+
 				@state['description'] = (config.has_key?('description') ? config['description'] : '')
-
-				# check running status
-				if not config['auth_uri'].nil?
-					begin
-						url = URI.parse(config['auth_uri'])
-						@state['running'] = self.is_port_open?(url.host, url.port)
-					rescue Exception => exp
-						Nuri::Util.log "#{@name} update state error: " + exp.to_s
-					end
-				end
-
+				@state['running'] = self.open_connection
 				@state['vms'] = {}
 				self.get_vms.each_key { |name| @state['vms'][name] = true }
 			end
@@ -37,7 +27,7 @@ module Nuri
 				begin
 					config = self.read_config
 					@conn = Fog::Compute.new(:provider => "HP",
-					                         :hp_account_id => config['account_id'],
+					                         :hp_access_key => config['access_key'],
 					                         :hp_auth_uri => config['auth_uri'],
 					                         :hp_tenant_id => config['tenant_id'],
 					                         :hp_secret_key => config['secret_key'],

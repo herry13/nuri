@@ -5,11 +5,11 @@ config {
 	master = ""
 
 	// HPCloud account information
-	account_id = ""
+	access_key = ""
+	secret_key = ""
 	auth_uri = ""
 	tenant_id = ""
 	zone = ""
-	secret_key = ""
 
 	// Default properties of the VM
 	default_flavor_id = 100
