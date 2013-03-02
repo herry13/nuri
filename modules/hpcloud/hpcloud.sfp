@@ -1,4 +1,4 @@
-include "modules/cloud/vm.sfp"
+include "modules/vm/vm.sfp"
 include "modules/cloud/cloud.sfp"
 
 class HPCloud extends Cloud {
