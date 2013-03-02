@@ -10,7 +10,7 @@ Version = '0.2.1(alpha)'
 
 def console
 	def print_help
-		puts 'Usage: nuri.rb console <command>
+		puts 'Usage: nuri console <command>
 
 commands:
   main              print the content of "main.sfp"
@@ -96,7 +96,7 @@ end
 
 def planner
 	def print_help
-		puts "Usage: nuri.rb planner [option] <file>
+		puts "Usage: nuri planner [option] <file>
 
 options:
   <none>    solve an SFp planning problem in <file> and print the solution
@@ -153,7 +153,7 @@ end
 
 def client
 	def print_help
-		puts "Usage: nuri.rb client <command>
+		puts "Usage: nuri client <command>
 
 commands:
   state [details]   print the current state of this node
@@ -216,7 +216,7 @@ if __FILE__ == $0
 	#elsif ARGV.length <= 0
 	#	client
 	else
-		puts "Usage: nuri.rb [mode]
+		puts "Usage: nuri [mode]
 
 modes:
   console     managing clients through command line

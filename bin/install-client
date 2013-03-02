@@ -6,7 +6,7 @@ TRUSTED="\"$TRUSTED\""
 echo "Installing required softwares and libraries..."
 sudo apt-get -y update
 sudo apt-get -y install ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 make gcc
-sudo gem install webrick antlr3 json
+sudo gem install webrick antlr3 json fog
 echo "...OK"
 
 echo "Download Nuri binaries..."
