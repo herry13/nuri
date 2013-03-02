@@ -1,6 +1,6 @@
 #!/bin/sh
 
-NURI="./bin/nuri.rb"
+NURI="./bin/nuri"
 
 while [ "a" = "a" ]; do
 	QTIME=$(date)
