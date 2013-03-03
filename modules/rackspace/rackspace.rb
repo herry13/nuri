@@ -206,7 +206,7 @@ module Nuri
 						cmd = "/usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 	
 						if Nuri::Helper::Command.exec(cmd)
-							remote_command = "'/usr/bin/sudo nuri/bin/nuri.rb client start'"
+							remote_command = "'/usr/bin/sudo nuri/bin/nuri client start'"
 							cmd = "timeout 5 /usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 							Nuri::Helper::Command.exec(cmd)
 							succeed = Nuri::Util.is_nuri_active?(address)

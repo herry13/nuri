@@ -118,25 +118,48 @@ module Nuri
 			def set_zone(params={}); self.set_account(params); end
 
 			# SFP method
+			def create_vm_small_ubuntu_quantal(params={})
+				name = params['vm']
+				name = name[2, name.length-2] if name[0,2] == '$.'
+				return create_vm_with_flavor_and_image_ids({
+					:name => name,
+					:flavor_id => "101",
+					:image_id => "75839",
+				})
+			end
+
 			def create_vm(params={})
+				name = params['vm']
+				name = name[2, name.length-2] if name[0,2] == '$.'
+
+				config = self.read_config
+				return create_vm_with_flavor_and_image_ids({
+					:name => name,
+					:flavor_id => config['default_flavor_id'],
+					:image_id => config['default_image_id'],
+				})
+			end
+
+			def create_vm_with_flavor_and_image_ids(params={})
 				self.open_connection if @conn.nil?
 				return false if @conn.nil?
 
-				name = params['vm']
-				name = name[2, name.length-2] if name[0,2] == '$.'
+				name = params[:name]
+				image_id = params[:image_id]
+				flavor_id = params[:flavor_id]
 
 				# return true if there is a VM with given name
 				@conn.servers.each { |s| return true if s.name == name }
 
 				config = self.read_config
-				flavor_id = config['default_flavor_id']
-				image_id = config['default_image_id']
 				key_name = config['default_key_name']
 				username = config['default_username']
 
+				success = false
+
 				# create VM
 				Nuri::Util.log "vm[#{name}]: creating"
-				new_server = @conn.servers.create({
+				server = @conn.servers.create({
 					:name => name,
 					:flavor_id => flavor_id,
 					:image_id => image_id,
@@ -145,20 +168,14 @@ module Nuri
 					:metadata => {'name' => name},
 				})
 
-				if not new_server.nil?
-					# wait until the new VM "ACTIVE"
-					counter = 120
-					info = self.get_info(name)
-					while info.state != "ACTIVE" and counter > 0
-						counter -= 1
-						sleep 1
-						info = self.get_info(name)
-					end
+				begin
+					Nuri::Util.log "vm[#{name}]: waiting to be ready"
+					server.wait_for { ready? }
 
+					info = self.get_info(name)
 					if info.state != "ACTIVE"
 						Nuri::Util.error "vm[#{name}]: too long waiting VM to become active."
-						self.delete_vm('vm' => name)
-						return false
+						break
 					end
 					Nuri::Util.log "vm[#{name}]: active"
 
@@ -173,8 +190,7 @@ module Nuri
 
 					if not self.is_port_open?(address, 22)
 						Nuri::Util.error "Cannot connect to SSH server of: #{name}"
-						self.delete_vm('vm' => name)
-						return false
+						break
 					end
 					Nuri::Util.log "vm[#{name}]: ssh-server is running"
 
@@ -197,15 +213,18 @@ module Nuri
 					cmd = "/usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 
 					if Nuri::Helper::Command.exec(cmd)
-						remote_command = "'/usr/bin/sudo nuri/bin/nuri.rb client start'"
+						remote_command = "'/usr/bin/sudo nuri/bin/nuri client start'"
 						cmd = "timeout 5 /usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
 						Nuri::Helper::Command.exec(cmd)
-						succeed = Nuri::Util.is_nuri_active?(address)
+
 						counter = 30
-						while not succeed and counter > 0
+						while not Nuri::Util.is_nuri_active?(address) and counter > 0
 							counter -= 1
 							sleep 1
-							succeed = Nuri::Util.is_nuri_active?(address)
+						end
+						if not Nuri::Util.is_nuri_active?(address)
+							Nuri::Util.error "Cannot start Nuri on the new VM: #{name}"
+							break
 						end
 						Nuri::Util.log "vm[#{name}]: nuri client is active"
 
@@ -222,25 +241,23 @@ module Nuri
 						if not bsig_helper.send_bsig(name, address) or
 						   not bsig_helper.activate_bsig(name, address)
 							Nuri::Util.error "Cannot send and activate BSig model of VM: #{name},#{address}"
-							succeed = false
+							break
 						end
 
 					else
 						Nuri::Util.error "Cannot install Nuri on the new VM: #{name}"
-						succeed = false
+						break
 					end
 
-					if not succeed
-						Nuri::Util.error "Cannot start Nuri on the new VM: #{name}"
-						self.delete_vm('vm' => name)
-					else
-						return true
-					end
-				else
-					Nuri::Util.error "Cannot create VM: #{name}"
+					success = true
+				end while false
+
+				if not success
+					Nuri::Util.error "Failed creating VM: #{name}"
+					self.delete_vm('vm' => name)
 				end
 
-				false
+				return success
 			end
 
 			# SFP method

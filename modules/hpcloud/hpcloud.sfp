@@ -3,6 +3,7 @@ include "modules/cloud/cloud.sfp"
 
 class HPCloud extends Cloud {
 	procedure create_vm_small_ubuntu_quantal(vm isref VM) {
+		cost is 10
 		condition {
 			this.running = true
 			vm.created = false
@@ -11,6 +12,8 @@ class HPCloud extends Cloud {
 			vm.created = true
 			vm.running = true
 			vm.oncloud = this
+			vm.flavor_id = "101"
+			vm.image_id = "75839"
 		}
 	}
 }
