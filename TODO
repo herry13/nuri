@@ -1,8 +1,0 @@
-- update HPCloud module to provide description (read/write)
-  - image ID
-  - flavor ID
-  - key name
-- create Openstack module using Fog library
-+ create Rackspace module using Fog library
-+ create AWS module using Fog library
-- add "condition" to "procedure" map on each BSig-operator
