@@ -11,7 +11,7 @@ Most parts of Nuri is written in Ruby except the solver which is written in C++.
 
 Requirements
 ------------
-- Linux Ubuntu 12.04
+- Linux Ubuntu (>= 12.04)
 - required packages
 	- ruby (>= 1.8.7)
 	- ruby-dev
