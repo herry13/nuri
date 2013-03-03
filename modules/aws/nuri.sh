@@ -2,7 +2,7 @@
 
 TRUSTED="$1"
 CLOUD="$2"
-NURI_VERSION="0.3.2"
+NURI_VERSION="master"
 
 
 ##### SET HOSTNAME #####
