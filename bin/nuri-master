@@ -1,6 +1,6 @@
 #!/bin/sh
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
-NURI="$DIR/nuri.rb"
+NURI="$DIR/nuri"
 
-$NURI client $@
+$NURI console $@

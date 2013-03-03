@@ -1,22 +1,16 @@
-#!/bin/bash
+#!/bin/sh
 
-TRUSTED="$1"
-CLOUD="$2"
-NURI_VERSION="0.3.2"
+read -p "What is the address of master node? " TRUSTED
+TRUSTED="\"$TRUSTED\""
 
 echo "Installing required softwares and libraries..."
 sudo apt-get -y update
-sudo apt-get -y install make gcc
-sudo apt-get -y update
-sudo apt-get -y install make gcc
-sudo apt-get -y update
-sudo apt-get -y install make gcc
-sudo apt-get -y install ruby ruby-dev rubygems libz-dev libaugeas-ruby
-sudo gem install --no-ri --no-rdoc webrick json antlr3
+sudo apt-get -y install ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 make gcc
+sudo gem install webrick antlr3 json fog
 echo "...OK"
 
 echo "Download Nuri binaries..."
-/usr/bin/wget -O nuri.tgz -o /dev/null https://github.com/herry13/nuri/tarball/$NURI_VERSION
+/usr/bin/wget -O nuri.tgz -o /dev/null https://github.com/herry13/nuri/tarball/master
 echo "...OK"
 
 if [ -f "nuri.tgz" ]; then
@@ -32,8 +26,6 @@ if [ -f "nuri.tgz" ]; then
 	cp etc/nuri-template.sfp etc/nuri.sfp
 	sed -i 's/^\s*trusted.*/\ttrusted is \(__TRUSTED__\)/g' etc/nuri.sfp
 	sed -i "s/__TRUSTED__/$TRUSTED/g" etc/nuri.sfp
-	sed -i "s/host/virtual_machine is true\n\thost/g" etc/nuri.sfp
-	sed -i "s/virtual/oncloud is $CLOUD\n\tvirtual/g" etc/nuri.sfp
 
 	# delete unused file
 	cd ..

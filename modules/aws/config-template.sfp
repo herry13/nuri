@@ -1,0 +1,17 @@
+config {
+	description = ""
+
+	// master node's address
+	master = ""
+
+	// AWS account information
+	access_key_id = ""
+	secret_access_key = ""
+	region = ""
+
+	// Default properties of the VM
+	default_flavor_id = "t1.micro"
+	default_image_id = "ami-0ad04363"
+	default_key_name = "id_rsa"
+	default_username = "ubuntu"
+}

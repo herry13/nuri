@@ -2,6 +2,7 @@ module Nuri
 	module CloudHelper
 		VMComponent = '$.VM'
 		CloudComponent = '$.Cloud'
+		CloudComponents = ['hpcloud', 'rackspace', 'aws']
 
 		class CloudProcedureModifier
 			def initialize(vm_name)
@@ -32,21 +33,6 @@ module Nuri
 
 		def vm?(node); not node['_classes'].rindex(VMComponent).nil?; end
 
-		def cloudproxy?(node)
-			node.each { |k,v|
-				next if k[0,1] == '_'
-				next if not v.is_a?(Hash) or not v.isobject
-				v.each { |name,comp|
-					next if name[0,1] == '_'
-					next if not comp.is_a?(Hash) or not comp.isobject
-					next if comp['_classes'].rindex(CloudComponent).nil?
-					next if not comp['running']
-					return true
-				}
-			}
-			false
-		end
-
 		def add_cloud_proxy(node)
 			if node['address'].to_s.length > 0
 				@cloud_proxies[ node['_self'] ] = node['address']
@@ -57,17 +43,29 @@ module Nuri
 
 		# Return true if given node (name,address) is a cloud proxy, otherwise false.
 		def cloud_proxy?(name, address)
-			path = "/state/#{name}/hpcloud/running"
-			code, body = self.get_data(address, Nuri::Port, path)
-			if code == '200'
-				data = JSON.parse(body)
-				return true if data['value'] == true
+			CloudComponents.each do |component|
+				return true if cloud_component_available?(name, component, address)
+			end
+			false
+		end
+
+		def cloud_component_available?(name, component, address)
+			begin
+				path = "/state/#{name}/#{component}/running"
+				code, body = self.get_data(address, Nuri::Port, path)
+				if code == '200'
+					data = JSON.parse(body)
+					return true if data['value'] == true
+				end
+			rescue
 			end
 			false
 		end
 
 		# for each children nodes, check if it is a cloud proxy by checking
-		# whether $.<node>.hpcloud.running == true
+		# whether $.<node>.<cloud_component>.running == true
+		#
+		# see CloudComponents for values of <cloud_component>
 		def update_cloud_proxies
 			return nil if @main.nil? or not @main.has_key?('system')
 			@main['system'].each do |name, value|
@@ -88,19 +86,23 @@ module Nuri
 		# Return the address of the VM with its proxy
 		# [<address>, <proxy_name>]
 		def get_vm_address_by_name(vm_name)
-			@cloud_proxies.each do |key,address|
+			@cloud_proxies.each do |name,address|
 				next if address.length <= 0
 				next if not Nuri::Util.is_nuri_active?(address)
-				begin
-					data = {'name' => vm_name}
-					path = "/function/#{key}/hpcloud/get_vm_address"
-					code, body = self.put_data(address, Nuri::Port, path, data)
-					if code == '200'
-						data = JSON.parse(body)
-						return data['value'], key if not data['value'].nil?
+
+				CloudComponents.each do |component|
+					next if not cloud_component_available?(name, component, address)
+					begin
+						data = {'name' => vm_name}
+						path = "/function/#{name}/#{component}/get_vm_address"
+						code, body = self.put_data(address, Nuri::Port, path, data)
+						if code == '200'
+							data = JSON.parse(body)
+							return data['value'], name if not data['value'].nil?
+						end
+					rescue Exception => e
+						Nuri::Util.error 'Cannot get VM address: ' + vm_name + ' - ' + e.to_s
 					end
-				rescue Exception => e
-					Nuri::Util.error 'Cannot get VM address: ' + vm_name + ' - ' + e.to_s
 				end
 			end
 			return nil, nil
@@ -111,18 +113,22 @@ module Nuri
 		# - value is the address of the VM
 		def get_all_vm_addresses
 			addresses = {}
-			@cloud_proxies.each do |key,address|
+			@cloud_proxies.each do |name,address|
 				next if address.length <= 0
 				next if not Nuri::Util.is_nuri_active?(address)
-				begin
-					code, body = self.put_data(address.to_s, Nuri::Port,
-						"/function/#{key}/hpcloud/get_vms")
-					if code == '200'
-						data = JSON.parse(body)
-						data['value'].each { |k,v| addresses[k] = v }
+
+				CloudComponents.each do |component|
+					next if not cloud_component_available?(name, component, address)
+					begin
+						code, body = self.put_data(address.to_s, Nuri::Port,
+							"/function/#{name}/#{component}/get_vms")
+						if code == '200'
+							data = JSON.parse(body)
+							data['value'].each { |k,v| addresses[k] = v }
+						end
+					rescue Exception => e
+						Nuri::Util.log 'Cannot get VMs address from proxy: ' + address + ' - ' + e.to_s
 					end
-				rescue Exception => e
-					Nuri::Util.log 'Cannot get VMs address from proxy: ' + address + ' - ' + e.to_s
 				end
 			end
 			return addresses

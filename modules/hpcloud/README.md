@@ -1,11 +1,24 @@
 How to use HPCloud module
 =========================
-1. Download and install "hpfog" ruby gem from HPCloud website
-2. Rename "config-template.sfp" to "config.sfp"
-3. Replace "ssh_private_key-template.pem" with your own SSH private
+
+Require Packages
+----------------
+- libxml2-dev
+- libxslt-dev
+
+Install HPCloud hpfog gem
+-------------------------
+How to install hpfog gem can be found in:
+
+	https://docs.hpcloud.com/bindings/fog/compute
+
+Configuring
+-----------
+1. Rename "config-template.sfp" to "config.sfp"
+2. Replace "ssh_private_key-template.pem" with your own SSH private
    key. The module will use this key for installing Nuri through
    SSH remote command
-4. Edit "config.sfp" using any text editor
+3. Edit "config.sfp" using any text editor
 	- set the value of attribute "master" with the address of Nuri
      master node which will be trusted by Nuri client
 	- put the information of your HPCloud account i.e. "description"

@@ -452,8 +452,12 @@ module Nuri
 				total = 0
 				@operators.each_value { |op|
 					next if op.total_preposts <= 0
-					total += 1
-					ops += op.to_sas(@root['initial'], @variables) + "\n"
+					# HACK! - an exception may arise if a value in condition or effect is not in variable's domain
+					begin
+						ops += op.to_sas(@root['initial'], @variables) + "\n"
+						total += 1
+					rescue Exception => exp
+					end
 				}
 				out += "#{total}\n"
 				out += ops
@@ -1346,12 +1350,23 @@ module Nuri
 			end
 
 			def get_type(name, value, parent)
+=begin
 				type = self.isa?(value)
 				if type == nil and parent.is_a?(Hash) and parent.has_key?('_isa')
 					isa = @main.root.at?(parent['_isa'])
 					type = isa.type?(name) if isa != nil
 					return type if type != nil
 				end
+=end
+				type = nil
+				if parent.has_key?('_isa')
+					isa = @main.root.at?(parent['_isa'])
+					if not isa.nil?
+						type = isa.type?(name)
+						return type if not type.nil?
+					end
+				end
+				type = self.isa?(value)
 
 				return "(#{value['_isa']})" if value.is_a?(Hash) and value.isset and value.has_key?('_isa')
 
@@ -1670,9 +1685,17 @@ module Nuri
 				sas = "begin_operator\n#{@name}"
 				@params.each { |k,v| sas += " #{k}=#{v}" if k != '$.this' } if @params != nil
 				sas += "\n#{prevail.length}\n"
-				prevail.each { |p| sas += p.to_sas(root, variables) + "\n" }
+				prevail.each { |p|
+					line = p.to_sas(root, variables)
+					raise TranslationException if line[line.length-1] == ' '
+					sas += "#{line}\n"
+				}
 				sas += "#{prepost.length}\n"
-				prepost.each { |p| sas += p.to_sas(root, variables) + "\n" }
+				prepost.each { |p|
+					line = p.to_sas(root, variables, false)
+					raise TranslationException if line[line.length-1] == ' '
+					sas += "#{line}\n"
+				}
 				sas += "#{@cost}\nend_operator"
 				return sas
 			end
@@ -1742,7 +1765,7 @@ module Nuri
 				return Parameter.new(@var, @pre, @post)
 			end
 
-			def to_sas(root, variables)
+			def to_sas(root, variables, prevail=true)
 				# resolve the reference
 				#pre = ( (@pre.is_a?(String) and @pre.isref) ? root.at?(@pre) : @pre )
 				#post = ( (@post.is_a?(String) and @post.isref) ? root.at?(@post) : @post )
@@ -1752,7 +1775,9 @@ module Nuri
 				pre = ( (pre.is_a?(Hash) and pre.isnull) ? 0 : (pre == nil ? -1 : @var.index(pre)) )
 				post = ( (post.is_a?(Hash) and post.isnull) ? 0 : @var.index(post) )
 
-				return "#{@var.id} #{pre}" if post == nil
+				raise TranslationException if not prevail and post.nil?
+
+				return "#{@var.id} #{pre}" if post.nil?
 				return "0 #{@var.id} #{pre} #{post}"
 			end
 

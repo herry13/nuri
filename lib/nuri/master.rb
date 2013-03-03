@@ -11,7 +11,7 @@ module Nuri
 			attr_accessor :main, :do_verify_execution
 
 			def initialize
-				@do_verify_execution = true
+				@do_verify_execution = false
 				self.load(false)
 				@main = Nuri::Resource.get_root
 				self.init_cloud
@@ -409,8 +409,6 @@ module Nuri
 					while path != '$'
 						path = path.to_top
 						n = root.at?(path)
-						#node = n if not n.nil? and not n.is_a?(Nuri::Undefined) and
-						#            n['_classes'].rindex(MainComponent) != nil
 						node = n if n.is_a?(Hash) and not n['_classes'].rindex(MainComponent).nil?
 					end
 				end

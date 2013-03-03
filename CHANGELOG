@@ -1,3 +1,13 @@
+28-02-2013 -- 0.3.2
++ rename files in bin directory
+  + bin/nuri.rb => bin/nuri
+  + bin/client => bin/nuri-client
+  + bin/master => bin/nuri-master
+  + bin/bsig-status.sh => bin/bsig-status
+  + bin/install.sh => bin/install-client
++ Add a new module "rackspace" that manages Rackspace Compute V2 (Next-Gen)
++ Add a new module "aws" that manages Amazon Web Service EC2 (compute) 
+
 25-02-2013 -- 0.3.1
 + Fix a bug on the planner when a variable's initial value equals <sfp::unknown>.
   This is fixed by adding <sfp::unknown> to domain of all non-static variables.
