@@ -15,13 +15,14 @@ Requirements
 - required packages
 	- ruby (>= 1.8.7)
 	- ruby-dev
-	- rubygems
+	- rubygems (if you use ruby <= 1.8.7)
 	- libz-dev
 	- libaugeas-ruby
 - required Ruby Gems
 	- webrick
 	- json
 	- antlr3
+	- fog
 
 For a better performance, it is recommended to use ruby >= 1.9
 
@@ -35,7 +36,7 @@ To Install
 
 		$ sudo apt-get update
 		$ sudo apt-get install make ruby ruby-dev rubygems libz-dev libaugeas-ruby
-		$ sudo gem install webrick json antlr3
+		$ sudo gem install webrick json antlr3 fog
 
 - Clone the Nuri software from Github repository:
 
@@ -74,14 +75,14 @@ Running Nuri client on managed node
 
 3. Start client daemon:
 
-		$ sudo ./bin/client start
+		$ sudo ./bin/nuri-client start
 
 4. To check whether the daemon has run, open the following URL in your browser: *http://localhost:1313/state*.
    If you get an error, you may need to reconfigure your firewall to open port 1313. 
 
 5. To stop the Nuri client daemon:
 
-		$ sudo ./bin/client stop
+		$ sudo ./bin/nuri-client stop
 
 
 Controlling Nuri clients from master node
@@ -110,15 +111,17 @@ Controlling Nuri clients from master node
 
 2. Get current state of all nodes from master node:
 
-		$ ./bin/master pull
+		$ ./bin/nuri-master pull
 
 3. Generate a workflow to implement the desired state
 
-		$ ./bin/master plan
+		$ ./bin/nuri-master plan
+
+   You could execute the (generated) plan by type "y" and <enter>.
 
 4. Achieving the goal and global constraints specified in *etc/main.sfp* of master node by automatically generating and executing a workflow. The workflow execution is scheduled centrally by master node where each step sends a command to target client node. See *Distributed Execution* if you want to use distributed approach.
 
-		$ ./bin/master apply
+		$ ./bin/nuri-master apply
 
 
 Distributed Execution
@@ -127,7 +130,7 @@ In this approach, the goal and the global constraints are achieved by generating
 
 This approach can be used using command:
 
-	$ ./bin/master bsig
+	$ ./bin/nuri-master bsig
 
 
 Documentation
@@ -141,13 +144,15 @@ To build:
     $ cd doc
     $ ./build.sh
 
-SFp Language
+SFP Language
 ------------
 - primitive types: Boolean, String, Integer
 - non-primitive type: any user-defined Class
 - abstract data-structure: Array (1-dimension), and Set
 - example of configuration task:
 	https://github.com/herry13/nuri/tree/master/test/planning/
+- more information about SFP can be found in:
+	https://github.com/herry13/nuri/wiki/SFP-language
 
 **Class**
 - could have one or more attributes with a primitive/non-primitive type
