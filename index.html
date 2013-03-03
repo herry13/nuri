@@ -6,59 +6,53 @@
 	<body>
 	<div id="main">
 
-		<div class="title">Nuri <span id="keywords">The Automated Workflow Configuration Tool</span></div>
-
+		<div>
 			<a href="https://github.com/herry13/nuri/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
 			<a href="https://github.com/herry13/nuri/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
 			<a href="https://github.com/herry13/nuri" id="view-on-github" class="button"><span>View on Github</span></a>
-
-		<table id="top-table"><tr>
-		<td>		
-		<div id="conversation">
-			Mr.X: How do you configure your Cloud infrastructure?<br/>
-			User: <i>I manually configure my Cloud.</i><br/>
-			Mr.X: It is error-prone and time-consuming.<br/>
-			User: <i>I could use imperative scripts.</i><br/>
-			Mr.X: There is no guarantee that you run the right script.<br/>
-			User: <i>I could use a declarative configuration tool such as Puppet, Chef or LCFG.</i><br/>
-			Mr.X: To implement your specification, they execute the actions in indeterminate order which highly likely produces the wrong sequence.<br/>
-			User: <i>I could use IBM Tivoli, Microsoft System Center or ControlTier to execute a workflow.</i><br/>
-			Mr.X: They are similar with imperative scripts where you must compose or choose the right workflow manually.<br/>
-			User: <i>Is there any better solution?</i><br/>
-			Mr.X: Yes, you can use Nuri.
 		</div>
-		</td>
+		<br/>
 
-		<td>
-		<div id="sidebox">
-			<div class="subtitle">Key Features</div>
-			<ul>
-				<li>Object-oriented specification language</li>
-				<li>Automated composition and orchestration of workflow</li>
-				<li>Enable unattended, autonomic reconfiguration</li>
-				<li>Achive the desired state as well as preserving the global constraint</li>
-			</ul>
-	
-			<div class="subtitle">Resources</div>
-			<ul>
-				<li><a href="http://github.com/herry13/nuri">Github Repository</a></li>
-				<li><a href="https://github.com/herry13/nuri/wiki/SFP-language">SFP language</a> <sup>(new!)</sup></li>
-				<li><a href="http://youtu.be/T3hhN2iM9K0">Demonstration Video</a> <sup>(new!)</sup></li>
-				<li><a href="http://youtu.be/otjfUsDGctQ">Representation video in LISA 2011 Conference</a></li>
-			</ul>
-	
-			<div class="subtitle">Contact</div>
-			<a href=".."><b>Herry</b></a> - h.herry [at] sms.ed.ac.uk; herry13 [at] gmail.com
-			<br/><br/>
-			<a href="https://github.com/herry13/nuri/blob/master/LICENSE">BSD License</a><br/>
-			Powered by Ruby
-		</div>
-		</td>
-		</tr></table>
+		<div class="title">Nuri <span id="keywords">The Automated Workflow Configuration Tool</span></div>
 
  		<div id="buzzword">"Define your desired state and let Nuri achieves it for you"</div>
 
-		<div id="architecture"><img src="architecture.png" border="0" width="800px" /></div>
+		<div id="architecture"><img src="architecture.png" border="0" width="600px" /></div>
+
+		<div id="description"><h2>Why use Nuri</h2>
+During the process of a configuration change, the order of the actions must be carefully chosen to maintain certain global constraints throughout the entire transition. Nuri is a configuration tool which can automatically generate and execute a workflow to move from one (declarative) configuration state to another while respecting any such constraints.<br/>
+Some tools allow you to define such workflow manually. However, even in a small system, a very large number of workflows can be required to cater for every eventuality. And choosing an appropriate workflow to suit a particular desired state is not always obvious - indeed such manual workflows are conceptually similar to the imperative scripts which are no longer popular because of their unreliability.</div>
+
+		<div id="resources">
+			<h2>Key Features</h2>
+			<ul>
+				<li>Automated composition of workflow</li>
+				<li>Enable unattended, autonomic, and distributed reconfiguration and auto-recovery</li>
+				<li>Achieve a desired state, and also preserve global constraints</li>
+				<li>A declarative configuration language: objects and procedures</li>
+				<li>Orchestrate or choreograph workflows</li>
+			</ul>
+			<h2>Demo Videos</h2>
+			<ul>
+				<li><a href="http://youtu.be/wMGchBSOJoA">Managing TikiWiki CMS with Nuri</a></li>
+				<li><a href="http://youtu.be/6DH6FReTPTI">Installing Nuri client</a></li>
+			</ul>
+			<h2>Presentation Video</h2>
+			<ul>
+				<li><a href="http://youtu.be/otjfUsDGctQ">LISA 2011 Conference</a></li>
+			</ul>
+		</div>
+
+		<div id="contact">
+			<h2>Contact</h2>
+			Herry &ndash; herry13 [at] gmail.com
+		</div>
+
+		<div id="footer">
+			<a href="https://github.com/herry13/nuri/blob/master/LICENSE">BSD License</a> |
+			Powered by <a href="http://www.ruby-lang.org">Ruby</a> |
+			&copy; 2013
+		</div>
 
 	</div>
 	</body>
