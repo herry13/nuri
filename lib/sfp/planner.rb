@@ -222,7 +222,10 @@ module Nuri
 end
 
 if $0 == __FILE__
-	if ARGV.length > 0
+	if ARGV.length > 1 and ARGV[0] == '-p'
+		sfp = Nuri::Sfp::Parser.to_sfp(File.read(ARGV[1]))
+		puts Nuri::Sfp::to_pretty_json(sfp)
+	elsif ARGV.length > 0
 		solver = Nuri::Planner::Solver.new
 		puts solver.solve_file(ARGV[0], true)
 	else

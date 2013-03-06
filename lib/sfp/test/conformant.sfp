@@ -1,0 +1,48 @@
+class Service {
+	running is false
+	procedure start {
+		conditions {
+			this.running is false
+		}
+		effects {
+			this.running is true
+		}
+	}
+	procedure stop {
+		conditions {
+			this.running is true
+		}
+		effects {
+			this.running is false
+		}
+	}
+}
+class Client {
+	refer isref Service
+	procedure redirect (s isref Service) {
+		conditions { }
+		effects {
+			this.refer is s
+		}
+	}
+}
+// generate all possible states with constraint solver
+initial state {
+	s1 isa Service {
+		running either (true, false)
+	}
+	s2 isa Service {
+		running either (true, false)
+	}
+	pc isa Client {
+		refer either (s1, s2)
+	}
+}
+goal constraint {
+	s1.running is false
+	s2.running is true
+	pc.refer is s2
+}
+global constraint {
+	pc.refer.running is true
+}

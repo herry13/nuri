@@ -126,6 +126,15 @@ attribute
 		{	@now[$ID.text] = $reference_type.val	}
 	|	ID set_type NL+
 		{	@now[$ID.text] = $set_type.val	}
+	|	ID probability_op set_value NL+
+		{ 	
+			@is_conformant = true
+			@now[$ID.text] = { '_self' => $ID.text,
+				'_context' => 'either',
+				'_parent' => @now,
+				'_values' => $set_value.val
+			}
+		}
 	|	object_def NL+
 	;
 
@@ -222,7 +231,7 @@ op_param
 	;
 
 op_conditions
-	:	'condition' '{' NL*
+	:	'conditions' '{' NL*
 		{
 			@now['_condition']['_parent'] = @now
 			@now = @now['_condition']
@@ -233,7 +242,7 @@ op_conditions
 	;
 
 op_effects
-	:	'effect' '{' NL*
+	:	'effects' '{' NL*
 		{
 			@now['_effect']['_parent'] = @now
 			@now = @now['_effect']
@@ -293,7 +302,7 @@ parameter
 	;
 
 conditions
-	:	'condition'
+	:	'conditions'
 		{
 			@now['_condition']['_parent'] = @now
 			@now = @now['_condition']
@@ -304,7 +313,7 @@ conditions
 	;
 
 effects
-	:	'effect'
+	:	'effects'
 		{
 			@now['_effect']['_parent'] = @now
 			@now = @now['_effect']
@@ -881,6 +890,10 @@ set_type returns [val]
 				'_values' => []
 			}
 		}
+	;
+
+probability_op
+	:	'either'
 	;
 
 equals_op

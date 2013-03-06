@@ -1,8 +1,8 @@
 class S {
 	foo is true
 	procedure change {
-		condition { }
-		effect {
+		conditions { }
+		effects {
 			this.foo is false
 		}
 	}

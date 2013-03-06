@@ -167,15 +167,13 @@ module Nuri
 	
 					#self.dump_types
 					#self.dump_operators
-					#self.dump_vars
+					self.dump_vars
 	
 					@vars = @variables.values
 
 					return create_output
 				rescue Exception => e
-pp e
-puts e.backtrace
-					Nuri::Util.log e.to_s
+					raise e
 				end
 			end
 
@@ -1252,7 +1250,8 @@ puts e.backtrace
 				value = @init.at?(value) if isref
 				type = (isfinal ? self.isa?(value) : self.get_type(name, value, parent))
 				if type == nil
-					Nuri::Util.log "Unrecognized type of variable: " + var_name
+					#Nuri::Util.log "Unrecognized type of variable: " + var_name
+					raise TranslationException, "Unrecognized type of variable: #{var_name}"
 				else
 					value = null_value(type) if value == nil
 					isset = true if type[0,1] == '('
