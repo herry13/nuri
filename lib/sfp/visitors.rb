@@ -1,5 +1,28 @@
 module Nuri
 	module Sfp
+		# An example of class Visitor which can be used to traverse from one node to
+		# another node (bread first). This is based on 'Visitor' pattern.
+		class Visitor
+			def visit(name, value, parent); end
+		end
+
+		class ConformantVariables
+			attr_reader :var_values
+			def initialize
+				@var_values = {}
+			end
+
+			def visit(name, value, parent)
+				if value.is_a?(Hash) and value.iseither
+					ref = parent.ref.push(name)
+					@var_values[ref] = value['_values']
+				end
+				return true if value.is_a?(Hash) and value.isobject
+				false
+			end
+		end
+
+		# eliminate '_parent' key/value from a Hash object to avoid cyclic references
 		class ParentEliminator
 			def visit(name, value, parent)
 				value.delete('_parent') if value.is_a?(Hash) and value.has_key?('_parent')
@@ -107,6 +130,5 @@ module Nuri
 				true
 			end
 		end
-
 	end
 end

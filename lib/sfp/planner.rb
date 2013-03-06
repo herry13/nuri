@@ -36,9 +36,7 @@ module Nuri
 			def solve(problem, json=false, parallel=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.parse(problem)
-				@plan, @sas_task = self.solve_sas(@parser.to_sas)
-				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
-				return (json ? JSON.pretty_generate(plan) : plan)
+				return self.solve_classical_task({:json => json, :parallel => parallel})
 			end
 
 			# solve given configuration problem in SFP data structure
@@ -46,9 +44,7 @@ module Nuri
 			def solve_sfp(root, json=false, parallel=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.root = root
-				@plan, @sas_task = self.solve_sas(@parser.to_sas)
-				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
-				return (json ? JSON.pretty_generate(plan) : plan)
+				return self.solve_classical_task({:json => json, :parallel => parallel})
 			end
 
 			# solve the configuration problem in given file
@@ -56,10 +52,13 @@ module Nuri
 			def solve_file(file, json=false, parallel=false, sas=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.parse_file(file)
-				@plan, @sas_task = self.solve_sas(@parser.to_sas)
-				return @plan if sas
-				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
-				return (json ? JSON.pretty_generate(plan) : plan)
+				if @parser.conformant
+					# solve conformant planning task
+					return self.solve_conformant_task({:json => json})
+				else
+					return self.solve_classical_task({:json => json,
+						:parallel => parallel, :sas => sas})
+				end
 			end
 
 			def to_bsig(json=false, parallel=true)
@@ -74,6 +73,54 @@ module Nuri
 			end
 
 			protected
+			def solve_conformant_task(params={})
+				# TODO
+				# 1) generate all possible initial states
+				#    remove states that do not satisfy the global constraint
+				def get_possible_partial_initial_states(init)
+					def combinators(variables, var_values, index=0, result={}, bucket=[])
+						if index >= variables.length
+							# collect
+							bucket << result.clone
+						else
+							var = variables[index]
+							var_values[var].each do |value|
+								result[var] = value
+								combinators(variables, var_values, index+1, result, bucket)
+							end
+						end
+						bucket
+					end
+					# collect variables with non-deterministic value
+					collector = Nuri::Sfp::ConformantVariables.new
+					init.accept(collector)
+					vars = collector.var_values.keys
+					combinators(vars, collector.var_values)
+				end
+
+				# 2) for each initial states, generate a plan (if possible)
+				#    for given goal state
+				def get_possible_plans(partial_inits)
+					# TODO
+				end
+
+				# 3) merge the plans into one
+				def merge_plans(plans)
+					# TODO
+				end
+
+				partial_inits = get_possible_partial_initial_states(@parser.root['initial'])
+				plans = get_possible_plans(partial_inits)
+				merged_plan = merge_plans(plans)
+			end
+
+			def solve_classical_task(params={})
+				@plan, @sas_task = self.solve_sas(@parser.to_sas)
+				return @plan if params[:sas]
+				plan = (params[:parallel] ? self.get_parallel_plan : self.get_sequential_plan)
+				return (params[:json] ? JSON.pretty_generate(plan) : plan)
+			end
+
 			def bsig_template
 				return {'version' => 1, 'operators' => [], 'id' => Time.now.getutc.to_i, 'goal' => []}
 			end

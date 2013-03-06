@@ -128,7 +128,7 @@ attribute
 		{	@now[$ID.text] = $set_type.val	}
 	|	ID probability_op set_value NL+
 		{ 	
-			@is_conformant = true
+			@conformant = true
 			@now[$ID.text] = { '_self' => $ID.text,
 				'_context' => 'either',
 				'_parent' => @now,

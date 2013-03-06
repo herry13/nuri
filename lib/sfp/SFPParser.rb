@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.2.1-SNAPSHOT Jul 31, 2010 19:34:52
 # Ruby runtime library version: 1.8.11
 # Input grammar file: SFP.g
-# Generated at: 2013-03-06 15:46:58
+# Generated at: 2013-03-06 16:26:23
 # 
 
 # ~~~> start load path setup
@@ -1401,7 +1401,7 @@ module SFP
 
           # --> action
            	
-          			@is_conformant = true
+          			@conformant = true
           			@now[__ID50__.text] = { '_self' => __ID50__.text,
           				'_context' => 'either',
           				'_parent' => @now,

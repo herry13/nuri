@@ -151,6 +151,10 @@ Hash.send(:define_method, 'isnull') {
 	return (self.has_key?('_context') and self['_context'] == 'null')
 }
 
+Hash.send(:define_method, 'iseither') {
+	return (self['_context'] == 'either')
+}
+
 Hash.send(:define_method, 'tostring') {
 	return 'null' if self.isnull
 	return self.ref

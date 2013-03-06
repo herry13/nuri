@@ -4,6 +4,7 @@ module Nuri
 		# in file or as a string
 		class Parser
 			attr_accessor :root, :root_dir
+			attr_reader :conformant
 
 			# Parse SFP file and return its JSON representation
 			def self.parse_file(file)
@@ -36,6 +37,7 @@ module Nuri
 						File.expand_path('.') : @root_dir)
 				parser.home_dir = File.dirname(f.path)
 				parser.sfp
+				@conformant = parser.conformant
 				@root = parser.root
 				@parser_arrays = parser.arrays
 			end
