@@ -49,6 +49,8 @@ module Nuri
 				def collect_state(current, node, state)
 					if state.nil?
 						Nuri::Util.warn "Cannot get the current state of: #{node['_self']}"
+					elsif state.is_a?(Nuri::Unknown) or state.is_a?(Nuri::Undefined)
+						current[node['_self']] = state
 					else
 						state.each { |k,v| current[k] = v }
 					end
@@ -60,14 +62,14 @@ module Nuri
 
 				# retrieve node's current state
 				current_state = {'_context'=>'state', '_self'=>'initial'}
-				@main['system'].each do |key,node|
-					next if key[0,1] == '_' or node['_classes'].rindex(MainComponent).nil?
+				@main['system'].each do |name,node|
+					next if name[0,1] == '_' or node['_classes'].rindex(MainComponent).nil?
 					state = nil
 					if self.vm?(node) # node is a virtual machine
-						if vms.has_key?(key) # the VM exists (has been created)
-							address = vms[key].to_s
+						if vms.has_key?(name) # the VM exists (has been created)
+							address = vms[name].to_s
 							state = self.get_node_state(address) if address.length > 0
-							state[key]['created'] = true if not state.nil?
+							state[name]['created'] = true if not state.nil?
 						else
 							# the VM does not exist
 							state = self.create_vm_template(node)
@@ -91,7 +93,7 @@ module Nuri
 				rescue Exception => e
 					Nuri::Util.log 'Cannot get state of node: "' + address.to_s + '" -- ' + e.to_s
 				end
-				nil
+				Nuri::Unknown.new
 			end
 
 			def create_task(state=nil, sfp_main=nil)
