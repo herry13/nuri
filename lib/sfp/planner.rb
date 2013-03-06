@@ -41,12 +41,12 @@ module Nuri
 
 			# solve the configuration problem in given file
 			# return a plan either in JSON or SFW format, or nil if there is no solution
-			def solve_file(file, json=false, parallel=false, sas=false)
+			def solve_file(file, json=false, parallel=false, sas_plan=false)
 				@parser = Nuri::Sfp::Parser.new
 				@parser.parse_file(file)
 				sas = @parser.to_sas
 				@plan, @sas_task = self.solve_sas(sas)
-				return @plan if sas
+				return @plan if sas_plan
 				plan = (parallel ? self.get_parallel_plan : self.get_sequential_plan)
 				return (json ? JSON.pretty_generate(plan) : plan)
 			end
@@ -223,9 +223,8 @@ end
 
 if $0 == __FILE__
 	if ARGV.length > 0
-		solver = Solver.new
-		plan = solver.solve_file(ARGV[0])
-		puts plan.inspect
+		solver = Nuri::Planner::Solver.new
+		puts solver.solve_file(ARGV[0], true)
 	else
 		puts "Usage: planner.rb <problem-file>\n\n"
 	end
