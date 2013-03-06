@@ -7,6 +7,13 @@ module Nuri
 			end
 		end
 
+		class ParentGenerator
+			def visit(name, value, parent)
+				value['_parent'] = parent if value.is_a?(Hash)
+				return true
+			end
+		end
+
 		class ProcedureEliminator
 			def visit(name, value, parent)
 				if value.is_a?(Hash) and value.isprocedure
@@ -43,8 +50,15 @@ module Nuri
 				if value.is_a?(Hash)
 					value['_parent'] = parent
 					value['_self'] = name
-					value['_context'] = 'object' if not value.has_key?('_context') and
-							value.has_key?('_isa')
+					if not value.has_key?('_context')
+						value['_context'] = 'object'
+						if value.has_key?('_isa')
+						else
+							value['_isa'] = '$.Object'
+						end
+					end
+					#value['_context'] = 'object' if not value.has_key?('_context') and
+					#		value.has_key?('_isa')
 					Nuri::Sfp::Sfplibs.expand_object(value, @root) if value.isobject
 				end
 				return true
@@ -81,5 +95,18 @@ module Nuri
 				true
 			end
 		end
+
+		class NullModifier
+			def visit(name, value, parent)
+				return false if value.is_a?(Hash) and value.isprocedure
+
+				if value.is_a?(Hash) and value.isnull
+					parent[name] = nil
+					return false
+				end
+				true
+			end
+		end
+
 	end
 end

@@ -1,3 +1,18 @@
+module Nuri
+	# An object of this class will be returned as the value of a non-exist variable
+	class Undefined
+		attr_accessor :path
+		def initialize(path=nil); @path = path; end
+		def to_s; (@path.nil? ? "<sfp::undefined>" : "<sfp::undefined[#{@path}]>"); end
+	end
+
+	class Unknown
+		attr_accessor :path
+		def initialize(path=nil); @path = path; end
+		def to_s; (@path.nil? ? "<sfp::unknown>" : "<sfp::unknown[#{@path}]>"); end
+	end
+end
+
 # return a fullpath of reference of this context
 Hash.send(:define_method, "ref") {
 	return '$' if not self.has_key?('_parent') or self['_parent'] == nil
@@ -25,7 +40,9 @@ Hash.send(:define_method, "accept") { |visitor|
 
 # resolve a reference, return nil if there's no value with given address
 Hash.send(:define_method, "at?") { |addr|
-	return nil if not addr.is_a?(String)
+	#return nil if not addr.is_a?(String)
+	#return Nuri::Undefined.new if not addr.is_a?(String)
+	return Nuri::Unknown.new if not addr.is_a?(String)
 	addrs = addr.split('.', 2)
 
 	if addrs[0] == '$'
@@ -36,6 +53,7 @@ Hash.send(:define_method, "at?") { |addr|
 		return self.at?(addrs[1])
 	elsif addrs[0] == 'parent'
 		return nil if not self.has_key?('_parent')
+		return self['_parent'] if addrs[1].nil?
 		return self['_parent'].at?(addrs[1])
 	elsif self.has_key?(addrs[0])
 		if addrs.length == 1 
@@ -44,7 +62,10 @@ Hash.send(:define_method, "at?") { |addr|
 			return self[addrs[0]].at?(addrs[1]) if self[addrs[0]].is_a?(Hash) and addrs[1] != ''
 		end
 	end
-	return nil
+
+	#return nil
+	#return Nuri::Undefined.new
+	return Nuri::Unknown.new
 }
 
 Hash.send(:define_method, "type?") { |name|
@@ -179,5 +200,4 @@ String.send(:define_method, 'to_top') {
 	parts = self.split('.')
 	return self[0, self.length - parts[parts.length-1].length - 1]
 }
-
 

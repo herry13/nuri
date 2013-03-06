@@ -3,13 +3,16 @@ module Nuri
 		class Task
 			attr_reader :variables, :mutexes, :operators, :axioms, :init, :goal
 			attr_reader :global_variable, :global_operators
-			attr_accessor :sas_plan
+			attr_accessor :sas_plan, :goal_operator_name
 
 			GlobalVariable = 'global'
 			GlobalOperator = 'globalop'
 			GoalOperator = 'goal'
+			GoalVariable = 'goal'
 
 			def initialize(sas_file)
+				@goal_operator_name = nil
+
 				f = File.new(sas_file, "r")
 				### read version
 				f.gets
@@ -113,23 +116,48 @@ module Nuri
 				return sfw, init, sfw.length
 			end
 
+			def goal_state
+				goal = []
+				if @goal_operator_name.nil?
+					@goal.each { |var| goal << {:id => var.index, :value => var.goal} }
+				else
+					@operators.each do |op|
+						if op.name == @goal_operator_name
+							op.prevails.each { |param|
+								goal << {:id => param.var.index, :value => param.prevail}
+							}
+							break
+						end
+					end
+				end
+				goal
+			end
+
 			def final_state
 				state = @init.clone
 				self.collect_operators.each { |op| state.apply!(op) }
 				final = []
+				#for i in 0..(state.length-1)
+				#	final <<  {:id => i, :value => state[i]} #if state[i] != @init[i]
+				#end
 				for i in 0..(state.length-1)
-					final <<  {:id => i, :value => state[i]} if state[i] != @init[i]
+					next if @variables[i].is_global or @variables[i].is_goal
+					final << {:id => i, :value => state[i]}
 				end
 				return final
 			end
 
 			protected
 			def self.is_global_variable?(variable_name)
-				return variable_name.split('_')[2] == GlobalVariable
+				return (variable_name.split('_')[2] == GlobalVariable)
 			end
 
 			def self.is_global_operator?(operator_name)
 				return (operator_name.split('-')[1] == GlobalOperator)
+			end
+
+			def self.is_goal_variable?(variable_name)
+				return (variable_name.split('-')[1] == GoalVariable)
 			end
 
 			def self.is_goal_operator?(operator_name)
@@ -200,54 +228,6 @@ module Nuri
 							end
 						end
 					end
-=begin
-					plan[i].prevails.each do |p|
-						(i-1).downto(0) do |j|
-							if plan[j].support_assignment?(p[:var], p[:prevail])
-								plan[i].predecessors << plan[j]
-								#break
-							end
-						end
-					end
-					plan[i].pre_posts.each do |p|
-						next if p[:pre] < 0
-						(i-1).downto(0) do |j|
-							if plan[j].support_assignment?(p[:var], p[:pre])
-								plan[i].predecessors << plan[j]
-								#break
-							end
-						end
-					end
-=end
-=begin
-					op1 = plan[i]
-					(i-1).downto(0) do |j|
-						op2 = plan[j]
-						op1.predecessors << op2 if op2.support?(op1)
-					end
-=end
-				end
-			end
-
-			def remove_transitive_predecessors2(plan)
-				# remove duplicates in predecessors list
-				@operators.each { |op| op.predecessors.uniq! }
-
-				# remove "transitive" directed-edge
-				plan.each do |op1|
-					valid_predecessors = []
-					while op1.predecessors.length > 0
-						op2 = op1.predecessors.pop
-						valid = true
-						op1.predecessors.each do |op3|
-							if op3.predecessors.index(op2) != nil
-								valid = false
-								break
-							end
-						end
-						valid_predecessors << op2 if valid
-					end
-					op1.predecessors = valid_predecessors
 				end
 			end
 
@@ -392,6 +372,7 @@ end
 				# promotion
 			end
 
+			# TODO -- Fix bugs
 			def to_stage_workflow(plan, states)
 begin
 				current_state = states[states.length-1].clone
@@ -410,7 +391,15 @@ begin
 					counter += 1
 				end
 
-				return nil, nil if not current_state.equals?(@init)
+				begin
+					#current_state.each_index { |i|
+					#	next if current_state[i] == @init[i]
+					#	puts i.to_s + ' ' + current_state[i].to_s + ' != ' + @init[i].to_s
+					#}
+					#puts current_state.inspect
+					#puts @init.inspect
+					return nil, nil
+				end if not current_state.equals?(@init)
 				return stages.reverse, states.reverse
 rescue Exception => e
 	$stderr.puts e.to_s
@@ -508,7 +497,6 @@ end
 					valid = true
 					@goal.each do |var|
 						if state[var.index] != var.goal
-							#puts var.name + ': ' + state[var.index].to_s + ' - ' + var.goal.to_s
 							valid = false
 						end
 					end
@@ -891,7 +879,7 @@ end
 
 		class Variable
 			attr_accessor :init, :goal
-			attr_reader :name, :axiom_layer, :length, :is_global, :index
+			attr_reader :name, :axiom_layer, :length, :index, :is_global, :is_goal
 
 			def initialize(params={})
 				if params.has_key?(:io)
@@ -900,6 +888,7 @@ end
 					self.read_parameters(params)
 				end
 				@is_global = Task::is_global_variable?(@name)
+				@is_goal = Task::is_goal_variable?(@name)
 				@index = params[:index]
 			end
 

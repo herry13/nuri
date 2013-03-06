@@ -2,7 +2,7 @@ module Nuri
 	module Sfp
 		module Sfplibs
 			attr_accessor :root_dir, :home_dir
-			attr_reader :root, :used_classes, :arrays, :is_conformant
+			attr_reader :root, :used_classes, :arrays
 
 			def init
 				@root = Hash.new
@@ -12,7 +12,6 @@ module Nuri
 				@unexpanded_classes = Array.new
 				@used_classes = Array.new
 				@arrays = Hash.new
-				@is_conformant = false
 			end
 
 			def next_id
