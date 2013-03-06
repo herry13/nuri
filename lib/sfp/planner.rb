@@ -1,5 +1,8 @@
-require 'nuri/sfp/main'
-require 'nuri/planner/sas'
+#!/usr/bin/env ruby
+
+libdir = File.expand_path(File.dirname(__FILE__))
+require libdir + '/main'
+require libdir + '/sas'
 
 module Nuri
 	module Planner
@@ -138,8 +141,8 @@ module Nuri
 
 				os = `uname -s`.downcase.strip
 				planner = case os
-					when 'linux' then File.dirname(__FILE__) + '/linux'
-					when 'macos', 'darwin' then File.dirname(__FILE__) + '/macos'
+					when 'linux' then File.dirname(__FILE__) + '/solver/linux'
+					when 'macos', 'darwin' then File.dirname(__FILE__) + '/solver/macos'
 					else nil
 				end
 				raise UnsupportedPlatformException, os + ' is not supported' if planner == nil
@@ -215,5 +218,15 @@ module Nuri
 
 		class NoSolutionException < Exception
 		end
+	end
+end
+
+if $0 == __FILE__
+	if ARGV.length > 0
+		solver = Solver.new
+		plan = solver.solve_file(ARGV[0])
+		puts plan.inspect
+	else
+		puts "Usage: planner.rb <problem-file>\n\n"
 	end
 end
