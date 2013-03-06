@@ -85,7 +85,7 @@ module Nuri
 						begin
 							if daemon
 								# get and save process' PIDs in file "var/nuri.pid"
-								data = `ps x|grep "nuri.rb client"|grep -v grep|awk '{print $1}'`
+								data = `ps x|grep "nuri client"|grep -v grep|awk '{print $1}'`
 								data = data.split("\n")
 								if data.length > 0
 									pid = data[1].to_i.to_s + "," + $$.to_s
