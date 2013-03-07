@@ -3,6 +3,9 @@ module Nuri
 		# main class which processes configuration description in SFP language either
 		# in file or as a string
 		class Parser
+			# enable this class to process SFP into FDR (SAS+)
+			include Nuri::Sfp::SasTranslator
+
 			attr_accessor :root, :root_dir
 			attr_reader :conformant
 
@@ -81,8 +84,6 @@ module Nuri
 				return Nuri::Sfp.to_json(root)
 			end
 
-			# enable this class to process SFP into FDR (SAS+)
-			include Nuri::Sfp::Sas
 		end
 
 		def self.to_json(sfp)

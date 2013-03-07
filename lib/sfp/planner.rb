@@ -102,20 +102,39 @@ module Nuri
 				#    for given goal state
 				def get_possible_plans(partial_inits)
 					# TODO
+					solutions = []
+					partial_inits.each do |partial_init|
+						parser = Nuri::Sfp::Parser.new
+						parser.root = Nuri::Sfp.deep_clone(@parser.root)
+						init = parser.root['initial']
+						partial_init.each do |path,value|
+							parent, var = path.extract
+							parent = init.at?(parent)
+							parent[var] = value
+						end
+						plan, sas_task = self.solve_sas(parser)
+						solution = {:partial_init => partial_init,
+						            :plan => plan,
+						            :sas_task => sas_task}
+						solutions << solution
+					end
+					solutions
 				end
 
 				# 3) merge the plans into one
-				def merge_plans(plans)
+				def merge_plans(solutions)
 					# TODO
+					solutions.each { |sol| puts sol[:partial_init].inspect + " => " + sol[:plan].inspect }
+					nil
 				end
 
 				partial_inits = get_possible_partial_initial_states(@parser.root['initial'])
-				plans = get_possible_plans(partial_inits)
-				merged_plan = merge_plans(plans)
+				solutions = get_possible_plans(partial_inits)
+				merged_plan = merge_plans(solutions)
 			end
 
 			def solve_classical_task(params={})
-				@plan, @sas_task = self.solve_sas(@parser.to_sas)
+				@plan, @sas_task = self.solve_sas(@parser)
 				return @plan if params[:sas]
 				plan = (params[:parallel] ? self.get_parallel_plan : self.get_sequential_plan)
 				return (params[:json] ? JSON.pretty_generate(plan) : plan)
@@ -199,15 +218,16 @@ module Nuri
 				return json
 			end
 
-			def extract_sas_plan(sas_plan)
+			def extract_sas_plan(sas_plan, parser)
 				actions = Array.new
 				sas_plan.split("\n").each do |sas_operator|
 					op_name = sas_operator[1,sas_operator.length-2].split(' ')[0]
-					actions << Action.new(@parser.operators[op_name])
+					actions << Action.new(parser.operators[op_name])
 				end
 			end
 
-			def solve_sas(sas)
+			def solve_sas(parser)
+				sas = parser.to_sas
 				return nil if sas == nil
 
 				tmp_dir = '/tmp/nuri_' + (rand * 100000).to_i.abs.to_s
@@ -230,7 +250,7 @@ module Nuri
 					plan = (File.exist?(plan_file) ? File.read(plan_file) : nil)
 
 					if plan != nil
-						plan = extract_sas_plan(plan)
+						plan = self.extract_sas_plan(plan, parser)
 						sas_task = Nuri::Sas::Task.new(sas_file)
 						sas_task.sas_plan = plan
 
@@ -251,7 +271,7 @@ module Nuri
 					raise exp
 				ensure
 					File.delete('plan_numbers_and_cost') if File.exist?('plan_numbers_and_cost')
-					#system 'rm -rf ' + tmp_dir
+					system 'rm -rf ' + tmp_dir
 				end
 
 				return nil, nil

@@ -40,14 +40,14 @@ module Nuri
 
 		class TranslationException < Exception; end
 
-		# include 'Sas' module to enable processing Sfp into Finite-Domain Representation (FDR)
+		# include 'SasTranslator' module to enable processing Sfp into Finite-Domain Representation (FDR)
 		#
 		# TODO:
 		# - nested reference on right-side statement (value of EQUALS/NOT-EQUALS)
 		# - a first-order logic formula
 		# - enumeration of values of particular type
 		# - SET abstract data-type, membership operators
-		module Sas
+		module SasTranslator
 			GlobalOperator = '-globalop-'
 			GlobalVariable = '_global_var'
 			GoalOperator = '-goal-'
@@ -60,7 +60,7 @@ module Nuri
 			def to_sas
 				begin
 					@unknown_value = ::Nuri::Unknown.new
-
+	
 					@arrays = Hash.new
 					if @parser_arrays != nil
 						@parser_arrays.each do |k,v|
@@ -80,7 +80,7 @@ module Nuri
 					}
 					@operators = Hash.new
 					@axioms = Array.new
-	
+
 					@g_operators = []
 	
 					# collect classes
@@ -136,8 +136,6 @@ module Nuri
 					# set domain values for each variable
 					self.set_variable_values
 
-self.dump_vars
-	
 					# identify immutable variables
 					#self.identify_immutable_variables
 
@@ -470,10 +468,10 @@ self.dump_vars
 			end
 
 			def reset_operators_name
-				Nuri::Sfp::Sas.reset_operator_id
+				Nuri::Sfp::SasTranslator.reset_operator_id
 				ops = Hash.new
 				@operators.each_value { |op|
-					op.id = Nuri::Sfp::Sas.next_operator_id
+					op.id = Nuri::Sfp::SasTranslator.next_operator_id
 					@operators.delete(op.name)
 					op.update_name
 					ops[op.name] = op
@@ -582,7 +580,7 @@ self.dump_vars
 				keys = map_cond.keys.concat(map_eff.keys)
 
 				# combine map_cond & map_eff if any of them has >1 items
-				op_id = Nuri::Sfp::Sas.next_operator_id
+				op_id = Nuri::Sfp::SasTranslator.next_operator_id
 				sas_op = Operator.new(op.ref, op['_cost'])
 				sas_op.params = op['_parameters']
 
@@ -813,7 +811,7 @@ self.dump_vars
 
 				def array_to_or_constraint(arr)
 					c = {'_context'=>'constraint', '_type'=>'or'}
-					arr.each { |v| c[Nuri::Sfp::Sas.next_constraint_key] = v }
+					arr.each { |v| c[Nuri::Sfp::SasTranslator.next_constraint_key] = v }
 					return c
 				end
 
@@ -861,11 +859,11 @@ self.dump_vars
 				def normalize_nested_right_only_multiple_values(left, right, formula)
 					# TODO -- evaluate this method
 					ref = right['_value']
-					key1 = Nuri::Sfp::Sas.next_constraint_key
+					key1 = Nuri::Sfp::SasTranslator.next_constraint_key
 					c_or = create_or_constraint(key1, formula)
 					@variables[ref].each do |v|
 						value = ( (v.is_a?(Hash) and v.isobject) ? v.ref : v)
-						key2 = Nuri::Sfp::Sas.next_constraint_key
+						key2 = Nuri::Sfp::SasTranslator.next_constraint_key
 						c_and = create_and_constraint(key2, c_or)
 						#c_and[ref] = create_equals_constraint(value) ## HACK! -- this should be uncomment
 						c_and[left] = create_equals_constraint(value) if right['_type'] == 'equals'
@@ -912,7 +910,7 @@ self.dump_vars
 					ref_combinator(bucket, rest, names, right)
 					formula.delete(left)
 					if bucket.length > 0
-						key = Nuri::Sfp::Sas.next_constraint_key
+						key = Nuri::Sfp::SasTranslator.next_constraint_key
 						formula[key] = array_to_or_constraint(bucket)
 						to_and_or_graph(formula[key])
 						return key
@@ -995,7 +993,7 @@ self.dump_vars
 					# dot-product the nodes
 					def cross_product_and(bucket, names, formula, values=Hash.new, index=0)
 						if index >= names.length
-							key = Nuri::Sfp::Sas.next_constraint_key
+							key = Nuri::Sfp::SasTranslator.next_constraint_key
 							c = create_and_constraint(key, formula)
 							values.each { |k,v| c[k] = v }
 							if flatten_and_or_graph(c)
@@ -1056,11 +1054,11 @@ self.dump_vars
 							if v['_type'] == 'or' or v['_type'] == 'and'
 								not_equals_statement_to_or_constraint(v)
 							elsif v['_type'] == 'not-equals'
-								key1 = Nuri::Sfp::Sas.next_constraint_key
+								key1 = Nuri::Sfp::SasTranslator.next_constraint_key
 								c_or = create_or_constraint(key1, formula)
 								get_list_not_value_of(k, v['_value']).each do |val1|
 									val1 = val1.ref if val1.is_a?(Hash) and val1.isobject
-									key2 = Nuri::Sfp::Sas.next_constraint_key
+									key2 = Nuri::Sfp::SasTranslator.next_constraint_key
 									c_and = create_and_constraint(key2, c_or)
 									c_and[k] = create_equals_constraint(val1)
 									c_or[key2] = c_and
@@ -1073,7 +1071,7 @@ self.dump_vars
 				end
 
 				def substitute_template(grounder, template, parent)
-					id = Nuri::Sfp::Sas.next_constraint_key
+					id = Nuri::Sfp::SasTranslator.next_constraint_key
 					c_and = Nuri::Sfp.deep_clone(template)
 					c_and['_self'] = id
 					c_and.accept(grounder)
@@ -1103,7 +1101,7 @@ self.dump_vars
 									v.keys.each { |k1|
 										next if k1[0,1] == '_'
 										v1 = v[k1]
-										k2 = Nuri::Sfp::Sas.next_constraint_key
+										k2 = Nuri::Sfp::SasTranslator.next_constraint_key
 										c_not = create_not_constraint(k2, v)
 										c_not[k1] = v1
 										v1['_parent'] = c_not
@@ -1115,7 +1113,7 @@ self.dump_vars
 									v.keys.each { |k1|
 										next if k1[0,1] == '_'
 										v1 = v[k1]
-										k2 = Nuri::Sfp::Sas.next_constraint_key
+										k2 = Nuri::Sfp::SasTranslator.next_constraint_key
 										c_not = create_not_constraint(k2, v)
 										c_not[k1] = v1
 										v1['_parent'] = c_not
@@ -1571,7 +1569,7 @@ self.dump_vars
 			attr_reader :ref
 
 			def initialize(ref, cost=1, id=nil)
-				@id = (id == nil ? Nuri::Sfp::Sas.next_operator_id : id)
+				@id = (id == nil ? Nuri::Sfp::SasTranslator.next_operator_id : id)
 				@cost = cost
 				@ref = ref
 				@modifier_id = nil
@@ -1712,7 +1710,7 @@ self.dump_vars
 				} if @params != nil
 
 				self.each_value do |param|
-					next if param.var.name == Nuri::Sfp::Sas::GlobalVariable
+					next if param.var.name == Nuri::Sfp::SasTranslator::GlobalVariable
 					p = param.to_sfw
 					if not p['pre'].nil?
 						sfw['condition'][p['name']] = (p['pre'].is_a?(SfpNull) ? nil : p['pre'])
@@ -1733,7 +1731,7 @@ self.dump_vars
 			attr_accessor :id, :target
 
 			def initialize
-				@id = Nuri::Sfp::Sas.next_axiom_id
+				@id = Nuri::Sfp::SasTranslator.next_axiom_id
 			end
 
 			def to_s
