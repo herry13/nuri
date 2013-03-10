@@ -1,0 +1,22 @@
+include "cloud-classes.sfp"
+
+// generate all possible states with constraint solver
+initial state {
+	s1 isa Service {
+		running either (true, false)
+	}
+	s2 isa Service {
+		running either (true, false)
+	}
+	s3 isa Service {
+		running either (true, false)
+	}
+	pc isa Client {
+		refer either (s1, s2)
+	}
+}
+goal constraint {
+	pc.refer.running is true
+}
+global constraint {
+}

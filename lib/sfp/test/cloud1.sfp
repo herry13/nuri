@@ -1,0 +1,33 @@
+include "cloud-classes.sfp"
+
+// generate all possible states with constraint solver
+initial state {
+	cloud1 isa Cloud {
+		running either ( true, false )
+	}
+	cloud2 isa Cloud {
+		running either ( true, false )
+	}
+
+	vm1 isa VM
+	vm2 isa VM
+
+	s1 isa Service
+	s2 isa Service
+}
+
+goal constraint {
+	s1 {
+		running is true
+		on_machine is vm1
+	}
+
+	s2 {
+		running is true
+		on_machine is vm2
+	}
+}
+
+global constraint {
+	if s2.running then s1.running
+}

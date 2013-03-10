@@ -1,0 +1,123 @@
+class Machine {
+	running is false
+	address is ""
+
+	procedure start {
+		conditions {
+			this.running is false
+		}
+		effects {
+			this.running is true
+		}
+	}
+	procedure stop {
+		conditions {
+			this.running is true
+		}
+		effects {
+			this.running is false
+		}
+	}
+}
+
+class VM extends Machine {
+	created is false
+
+	procedure start {
+		conditions {
+			this.created is true
+		}
+		effects {
+			this.running is true
+		}
+	}
+	procedure stop {
+		conditions {
+			this.created is true
+		}
+		effects {
+			this.running is false
+		}
+	}
+}
+
+class Cloud {
+	running is false
+
+	procedure create_vm(vm isref VM) {
+		conditions {
+			this.running is true
+			vm.created is false
+		}
+		effects {
+			vm.created is true
+		}
+	}
+	procedure delete_vm(vm isref VM) {
+		conditions {
+			this.running is true
+			vm.created is true
+		}
+		effects {
+			vm.created is false
+		}
+	}
+}
+
+class Service {
+	installed is false
+	running is false
+	on_machine isref Machine
+
+	procedure install ( m isref Machine ) {
+		conditions {
+			m.running is true
+			this.installed is false
+		}
+		effects {
+			this.on_machine is m
+			this.installed is true
+		}
+	}
+	procedure uninstall {
+		conditions {
+			this.on_machine.running is true
+			this.installed is true
+		}
+		effects {
+			this.on_machine is null
+			this.installed is false
+		}
+	}
+
+	procedure start {
+		conditions {
+			this.installed is true
+			this.running is false
+		}
+		effects {
+			this.running is true
+		}
+	}
+	procedure stop {
+		conditions {
+			this.installed is true
+			this.running is true
+		}
+		effects {
+			this.running is false
+		}
+	}
+}
+
+class Client {
+	refer isref Service
+
+	procedure redirect (s isref Service) {
+		conditions {
+		}
+		effects {
+			this.refer is s
+		}
+	}
+}

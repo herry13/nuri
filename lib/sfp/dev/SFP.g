@@ -605,7 +605,7 @@ constraint_statement returns [key, val]
 			$key = self.next_id.to_s
 			$val = c_or
 		}
-	|	reference ('isnt'|'not') 'in' set_value
+	|	reference ('isnot'|'isnt'|'not') 'in' set_value
 		{
 			c_and = { '_context'=>'constraint', '_type'=>'and', '_parent'=>@now }
 			$set_value.val.each { |v|
@@ -619,6 +619,15 @@ constraint_statement returns [key, val]
 
 			#$key = $reference.val
 			#$val = { '_context' => 'constraint', '_type' => 'not-in', '_value' => $set_value.val }
+		}
+	|	reference 'has' value
+		{
+			c_has = { '_context' => 'constraint',
+				'_type' => 'has',
+				'_parent' => @now,
+				'_owner' => $reference.val,
+				'_value' => $value.val
+			}
 		}
 	|	reference binary_comp comp_value
 		{
@@ -904,6 +913,7 @@ equals_op
 not_equals_op
 	:	'!='
 	|	'isnt'
+	|	'isnot'
 	;
 
 binary_op

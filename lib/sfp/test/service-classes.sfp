@@ -1,0 +1,105 @@
+include "cloud-classes.sfp"
+
+class LoadBalancer extends Service {
+	webs isset WebService
+
+	procedure start {
+		conditions {
+			this.installed is true
+			this.running is false
+			exist (this.webs as web) {
+				web.running is true
+			}
+		}
+		effects {
+			this.running is true
+		}
+	}
+}
+
+class WebService extends Service {
+	depend_on isref AppService
+
+	procedure redirect ( app isref AppService ) {
+		conditions {
+			this.installed is true
+			app.running is true
+		}
+		effects {
+			this.depend_on is app
+		}
+	}
+	procedure start {
+		conditions {
+			this.installed is true
+			this.running is false
+			this.depend_on.running is true
+		}
+		effects {
+			this.running is true
+		}
+	}
+	procedure stop {
+		conditions {
+			this.installed is true
+			this.running is true
+			forall (LoadBalancer as lb) {
+				if lb.webs has this then lb.running is false
+			}
+		}
+		effects {
+			this.running is false
+		}
+	}
+}
+
+class AppService extends Service {
+	depend_on isref DatabaseService
+
+	procedure redirect ( db isref DatabaseService ) {
+		conditions {
+			this.installed is true
+			db.running is true
+		}
+		effects {
+			this.depend_on is db
+		}
+	}
+	procedure start {
+		conditions {
+			this.installed is true
+			this.running is false
+			this.depend_on.running is true
+		}
+		effects {
+			this.running is true
+		}
+	}
+	procedure stop {
+		conditions {
+			this.installed is true
+			this.running is true
+			forall (WebService as ws) {
+				if ws.depend_on is this then ws.running is false
+			}
+		}
+		effects {
+			this.running is false
+		}
+	}
+}
+
+class DatabaseService extends Service {
+	procedure stop {
+		conditions {
+			this.installed is true
+			this.running is true
+			forall (AppService as app) {
+				if app.depend_on is this then app.running is false
+			}
+		}
+		effects {
+			this.running is false
+		}
+	}
+}

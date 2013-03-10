@@ -1,0 +1,43 @@
+include "service-classes.sfp"
+
+// generate all possible states with constraint solver
+initial state {
+	/*cloud1 isa Cloud {
+		running either ( true, false )
+	}
+	cloud2 isa Cloud {
+		running either ( true, false )
+	}*/
+	mycloud isa Cloud {
+		running is true
+	}
+
+	vm1 isa VM
+	vm2 isa VM
+	vm3 isa VM
+	vm4 isa VM
+
+	lb1 isa LoadBalancer
+	//ws1 isa WebService
+	app1 isa AppService
+	db1 isa DatabaseService
+}
+
+goal constraint {
+	lb1 {
+		installed is true
+		on_machine is vm1
+	}
+	//ws1.installed is true
+	app1 {
+		installed is true
+		on_machine is vm3
+	}
+	db1 {
+		running is true
+		on_machine is vm4
+	}
+}
+
+global constraint {
+}

@@ -1,0 +1,21 @@
+include "cloud-classes.sfp"
+
+initial state {
+	s1 isa Service {
+		running either (true, false)
+	}
+	s2 isa Service {
+		running either (true, false)
+	}
+	pc isa Client {
+		refer either (s1, s2)
+	}
+}
+goal constraint {
+	s1.running is false
+	s2.running is true
+	pc.refer is s2
+}
+global constraint {
+	pc.refer.running is true
+}
