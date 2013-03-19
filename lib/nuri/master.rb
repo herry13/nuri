@@ -272,6 +272,16 @@ module Nuri
 				self.execute_workflow(plan)
 			end
 
+			def execute_plan_file(plan_file)
+				begin
+					plan = JSON.parse( File.read(plan_file) )
+					return self.execute_workflow(plan)
+				rescue Exception => exp
+					Nuri::Util.error exp.to_s
+				end
+				false
+			end
+
 			def execute_workflow(plan)
 				#state = get_state
 				success = true
@@ -287,7 +297,7 @@ module Nuri
 							success = self.sequential_execution(plan)
 						elsif plan['type'] == 'parallel'
 							# TODO -- implement parallel scheduler
-							success = false
+							success = self.parallel_execution(plan)
 						else
 							success = false
 						end
@@ -296,6 +306,12 @@ module Nuri
 					end
 				end
 				success
+			end
+
+			def parallel_execution(plan)
+				# HACK - convert parallel to sequential
+				plan['workflow'].sort! { |x,y| x['id'] <=> y['id'] }
+				return sequential_execution(plan)
 			end
 
 			def sequential_execution(plan)
@@ -448,9 +464,20 @@ module Nuri
 			master.apply(false, debug)
 		end
 
+		def self.execute_plan_file(params={})
+			master = Nuri::Master::Daemon.new
+			master.execute_plan_file(params[:plan_file])
+		end
+
 		def self.pull
 			master = Nuri::Master::Daemon.new
 			return master.get_state
+		end
+
+		def self.justPlan
+			master = Nuri::Master::Daemon.new
+			plan = master.get_plan(nil, false, true);
+			puts JSON.pretty_generate(plan) + "\n"
 		end
 
 		def self.plan(params={})
