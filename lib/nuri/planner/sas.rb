@@ -7,6 +7,8 @@ module Nuri
 
 			GlobalVariable = 'global'
 			GlobalOperator = 'globalop'
+			SometimeVariable = 'sometime'
+			SometimeOperator = 'sometime'
 			GoalOperator = 'goal'
 			GoalVariable = 'goal'
 
@@ -109,6 +111,7 @@ module Nuri
 					plan[i].predecessors.each do |op|
 						op_name = op.name.split(' ')[0]
 						j = name_index[op_name]
+						next if j.nil? # HACK!
 						sfw[j]['successors'] << i
 						sfw[i]['predecessors'] << j
 					end
@@ -154,6 +157,14 @@ module Nuri
 
 			def self.is_global_operator?(operator_name)
 				return (operator_name.split('-')[1] == GlobalOperator)
+			end
+
+			def self.is_sometime_operator?(operator_name)
+				return (operator_name.split('-')[1] == SometimeOperator)
+			end
+
+			def self.is_sometime_variable?(variable_name)
+				return (variable_name.split('-')[1] == SometimeVariable)
 			end
 
 			def self.is_goal_variable?(variable_name)
@@ -273,43 +284,64 @@ module Nuri
 			end
 
 			def plan_with_trajectory_to_partial_order
-begin
-				# get the operators
-				plan = collect_operators
+				begin
+					# get the operators
+					plan = collect_operators
+	
+					# supporting operators
+					set_predecessors(plan)
+	
+					# adversary predecessors
+					add_adversary_predecessors(plan)
+	
+					# fill-in blank-precondition (pre := -1) by simulating the plan
+					states = simulate_plan(plan)
+	
+					# generate the stage-workflow
+					stages, states = to_stage_workflow(plan, states)
+					#puts '==> failed' if stages.nil?
+					return nil if stages.nil?
+	
+					# generate the partial-order workflow
+					if not stages.nil?
+						to_partial_order_workflow(stages, states)
+					end
+	
+					#stages.each { |stage|
+					#	puts "-- stage -- "
+					#	stage.each { |op| puts op.name }
+					#}
+	
+					remove_transitive_predecessors(plan)
 
-				# supporting operators
-				set_predecessors(plan)
+					plan = remove_sometime_operators(plan)
 
-				# adversary predecessors
-				add_adversary_predecessors(plan)
-
-				# fill-in blank-precondition (pre := -1) by simulating the plan
-				states = simulate_plan(plan)
-
-				# generate the stage-workflow
-				stages, states = to_stage_workflow(plan, states)
-				#puts '==> failed' if stages.nil?
-				return nil if stages.nil?
-
-				# generate the partial-order workflow
-				if not stages.nil?
-					to_partial_order_workflow(stages, states)
+					return plan
+	
+				rescue Exception => e
+					$stderr.puts e.to_s
+					$stderr.puts e.backtrace
 				end
-
-				#stages.each { |stage|
-				#	puts "-- stage -- "
-				#	stage.each { |op| puts op.name }
-				#}
-
-				remove_transitive_predecessors(plan)
-
-				return plan
-
-rescue Exception => e
-	$stderr.puts e.to_s
-	$stderr.puts e.backtrace
-end
 				return nil
+			end
+
+			def remove_sometime_operators(plan, parallel=true)
+				sometimes = []
+				plan.each { |op| sometimes << op if Task.is_sometime_operator?(op.name) }
+				plan.delete_if { |op| sometimes.include?(op) }
+				plan.each do |op|
+					sometimes.each do |op1|
+						index = op.predecessors.index(op1)
+						if not index.nil?
+							op1.predecessors.each { |op2|
+								op.predecessors << op2 if plan.include?(op2)
+							}
+							op1.predecessors.delete_at(index)
+							op1.predecessors.uniq!
+						end
+					end
+				end
+				plan
 			end
 
 			def set_global(state, valid=true)
@@ -473,6 +505,8 @@ end
 
 				# remove transitive predecessors
 				remove_transitive_predecessors(plan)
+
+				plan = remove_sometime_operators(plan)
 
 				return plan
 			end

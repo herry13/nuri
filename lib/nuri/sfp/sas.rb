@@ -50,6 +50,8 @@ module Nuri
 		module Sas
 			GlobalOperator = '-globalop-'
 			GlobalVariable = '_global_var'
+			SometimeOperatorPrefix = '-sometime-'
+			SometimeVariablePrefix = '-sometime-'
 			GoalOperator = '-goal-'
 			GoalVariable = '-goal-'
 
@@ -330,12 +332,12 @@ module Nuri
 				@root['sometime'].each do |k,v|
 					next if k[0,1] == '_'
 					# dummy-variable
-					var = Variable.new('sometime_' + k, '$.Boolean', -1, false, true)
+					var = Variable.new(SometimeVariablePrefix + k, '$.Boolean', -1, false, true)
 					var << true
 					var << false
 					@variables[var.name] = var
 					# dummy-operator
-					op = Operator.new('-sometime-' + k, 0)
+					op = Operator.new(SometimeOperatorPrefix + k, 0)
 					eff = Parameter.new(var, false, true)
 					op[eff.var.name] = eff
 					map = and_equals_constraint_to_map(v)
@@ -1701,9 +1703,16 @@ module Nuri
 			end
 
 			def to_sfw
-				id, name = @name.split('$', 2)
-				sfw = { 'name' => '$' + name, 'parameters' => {},
-					'condition' => {}, 'effect' => {} }
+				if not (@name =~ /.*\$.*/)
+					id , name = @name.split('-', 2)
+				else
+					id, name = @name.split('$', 2)
+				end
+
+				sfw = { 'name' => '$' + name,
+				        'parameters' => {},
+				        'condition' => {},
+				        'effect' => {} }
 
 				@params.each { |k,v|
 					sfw['parameters'][k.to_s] = v if k != '$.this'
