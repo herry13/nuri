@@ -3,7 +3,10 @@ include "modules/service/service.sfp"
 class Nurilabs extends Service {
 	install_path = "/opt/nurilabs"
 	port = 8080
+
 	git_version = "master"
+	server {
+	}
 
 	procedure set_install_path (path isref String) {
 		condition {
@@ -11,6 +14,28 @@ class Nurilabs extends Service {
 		}
 		effect {
 			this.install_path = path
+		}
+	}
+
+	procedure enable_ssl {
+		condition {
+			this.running = false
+			this.installed = true
+			this.server.ssl = false
+		}
+		effect {
+			this.server.ssl = true
+		}
+	}
+
+	procedure disable_ssl {
+		condition {
+			this.running = false
+			this.installed = true
+			this.server.ssl = true
+		}
+		effect {
+			this.server.ssl = false
 		}
 	}
 }

@@ -30,6 +30,8 @@ module Nuri
 				sconf = JSON.parse(File.read(sconf_file))
 				@state['port'] = sconf['port'].to_i
 
+				@state['server'] = sconf
+
 				return @state
 			end
 
@@ -105,15 +107,15 @@ module Nuri
 		
 			def set_port(params={})
 				return false if not params.has_key?('target')
-				config = self.read_config
-				config_file = config['install_path'] + '/server/config.json'
-				if File.exists?(config_file)
-					data = JSON.parse(File.read(config_file))
-					data['port'] = params['target'].to_i
-					File.open(config_file, 'w') { |f| f.write(JSON.pretty_generate(data)) }
-					return true
-				end
-				false
+				return self.set_server_config('port', params['target'].to_i)
+			end
+
+			def enable_ssl
+				return self.set_server_config('ssl', true)
+			end
+
+			def disable_ssl
+				return self.set_server_config('ssl', false)
 			end
 
 			def set_install_path(params={})
@@ -124,6 +126,18 @@ module Nuri
 			end
 
 			protected
+			def set_server_config(key, value)
+				config = self.read_config
+				config_file = config['install_path'] + '/server/config.json'
+				if File.exists?(config_file)
+					data = JSON.parse(File.read(config_file))
+					data[key] = value
+					File.open(config_file, 'w') { |f| f.write(JSON.pretty_generate(data)) }
+					return true
+				end
+				false
+			end
+
 			ConfigFile = File.expand_path(File.dirname(__FILE__)) + '/config.json'
 			def read_config
 				return JSON.parse(File.read(ConfigFile)) if File.exists?(ConfigFile)
