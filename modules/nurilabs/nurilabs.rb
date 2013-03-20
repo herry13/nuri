@@ -104,11 +104,12 @@ module Nuri
 			end
 		
 			def set_port(params={})
+				return false if not params.has_key?('target')
 				config = self.read_config
 				config_file = config['install_path'] + '/server/config.json'
 				if File.exists?(config_file)
 					data = JSON.parse(File.read(config_file))
-					data['port'] = params['port'].to_i
+					data['port'] = params['target'].to_i
 					File.open(config_file, 'w') { |f| f.write(JSON.pretty_generate(data)) }
 					return true
 				end
