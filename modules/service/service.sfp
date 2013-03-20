@@ -4,7 +4,9 @@ class Service {
 	port = 0
 	
 	procedure install {
-		condition { }
+		condition {
+			this.installed = false
+		}
 		effect {
 			this.installed = true
 		}
@@ -13,6 +15,7 @@ class Service {
 	procedure uninstall {
 		condition {
 			this.running = false
+			this.installed = true
 		}
 		effect {
 			this.installed = false
@@ -22,6 +25,7 @@ class Service {
 	procedure start {
 		condition {
 			this.installed = true
+			this.running = false
 		}
 		effect {
 			this.running = true
@@ -29,7 +33,9 @@ class Service {
 	}
 
 	procedure stop {
-		condition { }
+		condition {
+			this.running = true
+		}
 		effect {
 			this.running = false
 		}

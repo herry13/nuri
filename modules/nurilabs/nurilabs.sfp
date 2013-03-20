@@ -1,0 +1,17 @@
+include "modules/service/service.sfp"
+
+class Nurilabs extends Service {
+	install_path = "/opt/nurilabs"
+	port = 8080
+	git_version = "master"
+
+	procedure set_install_path (path isref String) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.install_path = path
+		}
+	}
+}
+

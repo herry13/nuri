@@ -384,10 +384,12 @@ module Nuri
 					false
 				end
 
-				print '- executing ' + action['name'] + JSON.generate(action['parameters']) + '...'
+				print '- executing ' + action['id'].to_s + ':' + action['name'] + JSON.generate(action['parameters']) + '...'
 				if node.has_key?('address')
+					print '+...'
 					succeed = remote_execute(action, node['address'])
 				else
+					print '-...'
 					succeed = local_execute(action)
 				end
 				puts (succeed ? 'OK' : 'Failed')
@@ -414,7 +416,7 @@ module Nuri
 			def get_node(path)
 				return nil if not path.isref
 				node = nil
-	
+
 				# 1) find in "localhost"
 				first, _ = path.explode[1].explode
 				if first == Nuri::Util.hostname
@@ -424,13 +426,14 @@ module Nuri
 				# 2) find in the "system" (remote-host)
 				if @main.is_a?(Hash) and @main.has_key?('system')
 					root = @main['system']
-					while path != '$'
-						path = path.to_top
-						n = root.at?(path)
+					xpath = path
+					while xpath != '$'
+						xpath = xpath.to_top
+						n = root.at?(xpath)
 						node = n if n.is_a?(Hash) and not n['_classes'].rindex(MainComponent).nil?
 					end
 				end
-	
+
 				# update node's state if it's a VM on the cloud
 				if not node.nil? and self.vm?(node)
 					node['address'], cloud_proxy = self.get_vm_address_by_name(node['_self'])

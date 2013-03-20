@@ -37,7 +37,7 @@ module Nuri
 				@state['port'] = (data.length > 0 ?	@state["port"] = data.split(' ')[1].to_i : 0)
 
 				# document root
-				data = (File.file?(ConfigFile) ?	`/bin/grep -e "DocumentRoot " #{ConfigFile}` : "")
+				data = (File.file?(ConfigFile) ? `/bin/grep -e "DocumentRoot " #{ConfigFile}` : "")
 				@state['document_root'] = (data.length > 0 ? data.strip.split(' ')[1] : '')
 
 				# ServerName
