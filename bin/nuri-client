@@ -3,4 +3,4 @@
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 NURI="$DIR/nuri"
 
-$NURI client $@
+nice $NURI client $@
