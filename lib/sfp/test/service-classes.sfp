@@ -1,5 +1,51 @@
 include "cloud-classes.sfp"
 
+class Service {
+	installed is false
+	running is false
+	on_machine isref Machine
+
+	procedure install ( m isref Machine ) {
+		conditions {
+			m.running is true
+			this.installed is false
+		}
+		effects {
+			this.on_machine is m
+			this.installed is true
+		}
+	}
+	procedure uninstall {
+		conditions {
+			this.on_machine.running is true
+			this.installed is true
+		}
+		effects {
+			this.on_machine is null
+			this.installed is false
+		}
+	}
+
+	procedure start {
+		conditions {
+			this.installed is true
+			this.running is false
+		}
+		effects {
+			this.running is true
+		}
+	}
+	procedure stop {
+		conditions {
+			this.installed is true
+			this.running is true
+		}
+		effects {
+			this.running is false
+		}
+	}
+}
+
 class LoadBalancer extends Service {
 	webs isset WebService
 

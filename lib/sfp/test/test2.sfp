@@ -1,0 +1,20 @@
+include "test2.inc"
+
+// generate all possible states with constraint solver
+initial state {
+	s1 isa Service
+	s2 isa Service
+	s3 isa Service
+}
+goal constraint {
+	s1.running
+	s2.running
+	s3.running
+}
+global constraint {
+	if {
+		s1.running
+	} then {
+		(s2.running or s3.running)
+	}
+}
