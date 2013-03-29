@@ -1,6 +1,12 @@
 #!/bin/sh
 
-read -p "What is the address of master node? " TRUSTED
+TRUSTED=""
+if [ "$1" = "-silent" ]; then
+	TRUSTED=$2
+else
+	read -p "What is the address of master node? " TRUSTED
+end
+
 TRUSTED="\"$TRUSTED\""
 
 echo "Installing required softwares and libraries..."
