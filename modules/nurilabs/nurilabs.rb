@@ -27,10 +27,11 @@ module Nuri
 				end
 
 				sconf_file = "#{config['install_path']}/server/config.json"
-				sconf = JSON.parse(File.read(sconf_file))
-				@state['port'] = sconf['port'].to_i
-
-				@state['server'] = sconf
+				if File.exist?(sconf_file)
+					sconf = JSON.parse(File.read(sconf_file))
+					@state['port'] = sconf['port'].to_i
+					@state['server'] = sconf
+				end
 
 				return @state
 			end
