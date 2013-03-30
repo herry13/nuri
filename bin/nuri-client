@@ -3,4 +3,9 @@
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 NURI="$DIR/nuri"
 
-nice $NURI client $@
+if [ "$1" = "restart" ]; then
+	$NURI client stop
+	nice $NURI client start
+else
+	nice $NURI client $@
+fi
