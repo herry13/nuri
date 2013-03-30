@@ -46,7 +46,7 @@ module Nuri
 			end
 		
 			def uninstall
-				return false if not Nuri::Helper::Repository.remove('ppa:hadoop-ubuntu/stable')
+				Nuri::Helper::Repository.remove('ppa:hadoop-ubuntu/stable')
 				return Nuri::Helper::Package.uninstall('hadoop')
 			end
 		
