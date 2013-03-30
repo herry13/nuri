@@ -1,5 +1,5 @@
 include "modules/service/service.sfp"
 
-class Nurilabs extends Hadoop {
+class Hadoop extends Service {
 }
 
