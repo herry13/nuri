@@ -197,6 +197,7 @@ module Nuri
 			end
 
 			def self.add(repo)
+=begin
 				_, name = repo.split(":", 2)
 				name.gsub!(/\//, "-")
 				name += "-"
@@ -215,6 +216,11 @@ module Nuri
 					return Nuri::Helper::Repository.update
 				end
 				true
+=end
+				if not Nuri::Helper::Package.installed?('python-software-properties')
+					return false if not Nuri::Helper::Package.install('python-software-properties')
+				end
+				return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y #{repo}")
 			end
 
 			def self.remove(repo)
