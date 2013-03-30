@@ -3,7 +3,7 @@ require 'json'
 
 module Nuri
 	module Module
-		class Nurilabs
+		class Hadoop
 			include Nuri::Resource
 
 			def initialize
