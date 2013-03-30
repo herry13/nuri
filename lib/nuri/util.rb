@@ -191,6 +191,30 @@ module Nuri
 	end
 
 	module Helper
+		module Repository
+			def self.update
+				return Nuri::Helper::Command.exec("/usr/bin/apt-get -y update")
+			end
+
+			def self.add(repo)
+				_, name = repo.split(":", 2)
+				name.gsub!(/\//, "-")
+				name += "-"
+				available = false
+				Dir.new("/etc/apt/sources.list.d").each do |filename|
+					if filename[0, name.length] == name
+						available = true
+						break
+					end
+				end
+				if not available
+					return false if not Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y #{repo}")
+					return Nuri::Helper::Repository.update
+				end
+				true
+			end
+		end
+
 		module Package
 			def self.installed?(package)
 				package = package.to_s
@@ -214,23 +238,23 @@ module Nuri
 				package = package.to_s
 				return false if package.length <= 0
 				return true if installed?(package)
-				system("/usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-				if (system("/usr/bin/apt-get -y install #{package} 2>/dev/null") == false)
-					system("/usr/bin/apt-get -y update 2>/dev/null")
+				Nuri::Helper::Command.exec("/usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+				if (Nuri::Helper::Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == false)
+					Nuri::Helper::Command.exec("/usr/bin/apt-get -y update 2>/dev/null")
 				else
 					return true
 				end
-				return (system("/usr/bin/apt-get -y install #{package} 2>/dev/null") == true)
+				return (Nuri::Helper::Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == true)
 			end
 
 			def self.uninstall(package)
 				package = package.to_s
 				return false if package.length <= 0
 				return true if not installed?(package)
-				system("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-				if (system("sudo /usr/bin/apt-get -y --purge remove #{package} 2>/dev/null") == true)
-					system("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-					system("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+				Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+				if (Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge remove #{package} 2>/dev/null") == true)
+					Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+					Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
 					return true
 				end
 				return false
