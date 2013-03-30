@@ -208,10 +208,20 @@ module Nuri
 					end
 				end
 				if not available
+					if not Nuri::Helper::Package.installed?('python-software-properties')
+						return false if not Nuri::Helper::Package.install('python-software-properties')
+					end
 					return false if not Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y #{repo}")
 					return Nuri::Helper::Repository.update
 				end
 				true
+			end
+
+			def self.remove(repo)
+				if not Nuri::Helper::Package.installed?('python-software-properties')
+					return false if not Nuri::Helper::Package.install('python-software-properties')
+				end
+				return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
 			end
 		end
 

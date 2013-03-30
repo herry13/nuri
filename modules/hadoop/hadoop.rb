@@ -41,14 +41,12 @@ module Nuri
 			end
 
 			def install
-				Nuri::Helper::Package.install('python-software-properties') if
-					not Nuri::Helper::Package.installed?('python-software-properties')
-				Nuri::Helper::Repository.add('ppa:hadoop-ubuntu/stable')
-				Nuri::Helper::Package.install('hadoop')
-				true
+				return false if not Nuri::Helper::Repository.add('ppa:hadoop-ubuntu/stable')
+				return Nuri::Helper::Package.install('hadoop')
 			end
 		
 			def uninstall
+				return false if not Nuri::Helper::Repository.remove('ppa:hadoop-ubuntu/stable')
 				return Nuri::Helper::Package.uninstall('hadoop')
 			end
 		
