@@ -14,7 +14,7 @@ module Nuri
 			def update_state
 				self.reset
 
-				@config['installed'] = Nuri::Helper::Package.installed?('hadoop')
+				#@config['installed'] = Nuri::Helper::Package.installed?('hadoop')
 =begin
 				config = self.read_config
 				config.each { |k,v| @state[k] = v if @state.has_key?(k) }
