@@ -6,8 +6,8 @@ class Hadoop extends Service {
 	namenode_port = 10815
 	job_tracker_port = 10816
 	hadoop_tmp_dir = "/var/lib/hadoop/cache"
-	masters isref Hadoop
-	slaves isref Hadoop
+	master isref Hadoop
+	slaves isset Hadoop
 
 	procedure start {
 		condition {

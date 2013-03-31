@@ -90,22 +90,18 @@ module Nuri
 			end
 		
 			protected
-			def set_server_config(key, value)
-				config = self.read_config
-				config_file = config['install_path'] + '/server/config.json'
-				if File.exists?(config_file)
-					data = JSON.parse(File.read(config_file))
-					data[key] = value
-					File.open(config_file, 'w') { |f| f.write(JSON.pretty_generate(data)) }
-					return true
-				end
-				false
-			end
-
 			ConfigFile = File.expand_path(File.dirname(__FILE__)) + '/config.json'
 			def read_config
 				return JSON.parse(File.read(ConfigFile)) if File.exists?(ConfigFile)
-				return {'install_path' => '/opt/nurilabs', 'port' => 8080, 'git_version' => 'master'}
+				return {
+				         'is_master': false,
+				         'is_slave': false,
+				         'master': nil,
+				         'slaves': [],
+				         'hadoop_tmp_dir': '/var/lib/hadoop/cache',
+				         'namenode_port': 10815,
+				         'job_tracker_port': 10816
+				       }
 			end
 
 			def save_config(config)
