@@ -15,7 +15,7 @@ class Hadoop extends Service {
 			this.running = false
 			this.is_master = true
 		}
-		effects {
+		effect {
 			this.running = true
 		}
 	}
@@ -26,7 +26,7 @@ class Hadoop extends Service {
 			this.running = true
 			this.is_master = true
 		}
-		effects {
+		effect {
 			this.running = false
 		}
 	}
