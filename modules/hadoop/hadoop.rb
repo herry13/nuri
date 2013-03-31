@@ -14,11 +14,12 @@ module Nuri
 			def update_state
 				self.reset
 
-				@state['installed'] = Nuri::Helper::Package.installed?('hadoop')
-=begin
 				config = self.read_config
 				config.each { |k,v| @state[k] = v if @state.has_key?(k) }
 
+				@state['installed'] = Nuri::Helper::Package.installed?('hadoop')
+
+=begin
 				@state['installed'] = File.exists?("#{config['install_path']}/server/server.js")
 
 				if config.has_key?('pid')
@@ -94,13 +95,13 @@ module Nuri
 			def read_config
 				return JSON.parse(File.read(ConfigFile)) if File.exists?(ConfigFile)
 				return {
-				         'is_master': false,
-				         'is_slave': false,
-				         'master': nil,
-				         'slaves': [],
-				         'hadoop_tmp_dir': '/var/lib/hadoop/cache',
-				         'namenode_port': 10815,
-				         'job_tracker_port': 10816
+				         'is_master'=> false,
+				         'is_slave'=> false,
+				         'master'=> nil,
+				         'slaves'=> [],
+				         'hadoop_tmp_dir'=> '/var/lib/hadoop/cache',
+				         'namenode_port'=> 10815,
+				         'job_tracker_port'=> 10816
 				       }
 			end
 
