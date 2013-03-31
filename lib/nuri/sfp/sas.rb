@@ -58,6 +58,7 @@ module Nuri
 			GlobalConstraintMethod = 1 # 1: proposed method, 2: patrik's, 3: concurrent-actions
 
 			attr_accessor :root, :variables, :types, :operators, :axioms
+			attr_reader :goals
 
 			def to_sas
 				begin
@@ -368,6 +369,7 @@ module Nuri
 
 			def process_goal(goal)
 				raise TranslationException, 'invalid goal constraint' if not normalize_formula(goal)
+				@goals = []
 				if goal['_type'] == 'and'
 					map = and_equals_constraint_to_map(goal)
 					map.each { |name,value|
@@ -381,6 +383,7 @@ module Nuri
 							var << var.init
 						end
 					}
+					@goals << map
 				elsif goal['_type'] == 'or'
 					count = 0
 					var = Variable.new(GoalVariable, '$.Boolean', -1, false, true)
@@ -399,6 +402,7 @@ module Nuri
 							op[@variables[k1].name] = Parameter.new(@variables[k1], v1, nil)
 						}
 						@operators[op.name] = op
+						@goals << map
 					}
 				end
 			end
@@ -602,9 +606,20 @@ module Nuri
 				end
 			end
 
+=begin
+			def substitute_goal_value_in_effects(procedure)
+				effects = procedure['_effect']
+				effects.each_key do |key|
+					effects[key]
+				end
+			end
+=end
+
 			# process all object procedures in order to get
 			# grounded SAS-operator
 			def process_procedure(procedure, object)
+				#substitute_goal_value_in_effects(procedure)
+
 				operators = ground_procedure_parameters(procedure)
 				if operators != nil
 					invalid_operators = []
