@@ -787,6 +787,14 @@ mutation_statement returns [key, val]
 				'_value' => $value.val
 			}
 		}
+	|	reference equals_op '@goal'
+		{
+			$key = $reference.val
+			$val = { '_context' => 'mutation',
+				'_type' => '@goal',
+				'_value' => '@goal'
+			}
+		}
 	;
 
 set_value returns [val]
