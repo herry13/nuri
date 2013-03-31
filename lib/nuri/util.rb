@@ -184,10 +184,6 @@ module Nuri
 			end
 			false
 		end
-
-		#private
-		#def initialize; end
-
 	end
 
 	module Helper
@@ -197,26 +193,6 @@ module Nuri
 			end
 
 			def self.add(repo)
-=begin
-				_, name = repo.split(":", 2)
-				name.gsub!(/\//, "-")
-				name += "-"
-				available = false
-				Dir.new("/etc/apt/sources.list.d").each do |filename|
-					if filename[0, name.length] == name
-						available = true
-						break
-					end
-				end
-				if not available
-					if not Nuri::Helper::Package.installed?('python-software-properties')
-						return false if not Nuri::Helper::Package.install('python-software-properties')
-					end
-					return false if not Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y #{repo}")
-					return Nuri::Helper::Repository.update
-				end
-				true
-=end
 				if not Nuri::Helper::Package.installed?('python-software-properties')
 					return false if not Nuri::Helper::Package.install('python-software-properties')
 				end

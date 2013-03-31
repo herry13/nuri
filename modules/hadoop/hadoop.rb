@@ -42,7 +42,10 @@ module Nuri
 
 			def install
 				return false if not Nuri::Helper::Repository.add('ppa:hadoop-ubuntu/stable')
-				return Nuri::Helper::Package.install('hadoop')
+				if Nuri::Helper::Package.install('hadoop')
+					return Nuri::Helper::Command.exec('echo "export JAVA_HOME=/usr" >> /etc/hadoop/conf/hadoop-env.sh')
+				end
+				false
 			end
 		
 			def uninstall

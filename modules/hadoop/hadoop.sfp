@@ -1,5 +1,52 @@
 include "modules/service/service.sfp"
 
 class Hadoop extends Service {
+	is_master = false
+	is_slave = false
+	namenode_port = 10815
+	job_tracker_port = 10816
+	hadoop_tmp_dir = "/var/lib/hadoop/cache"
+	masters isref Hadoop
+	slaves isref Hadoop
+
+	procedure start {
+		condition {
+			this.installed = true
+			this.running = false
+			this.is_master = true
+		}
+		effects {
+			this.running = true
+		}
+	}
+
+	procedure stop {
+		condition {
+			this.installed = true
+			this.running = true
+			this.is_master = true
+		}
+		effects {
+			this.running = false
+		}
+	}
+
+	/*
+	procedure update_config {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.is_master = @goal
+			this.is_slave = @goal
+			this.hadoop_tmp_dir = @goal
+			this.namenode_port = @goal
+			this.job_tracker_port = @goal
+			this.slaves = @goal
+			this.masters = @goal
+		}
+	}
+	*/
 }
 
