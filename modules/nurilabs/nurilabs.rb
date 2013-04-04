@@ -77,7 +77,7 @@ module Nuri
 				config = self.read_config
 
 				server_path = "#{config['install_path']}/server/server.js"
-				cmd = "/usr/bin/nohup /usr/bin/node #{server_path} " +
+				cmd = "/bin/sh /usr/bin/nohup /usr/bin/node #{server_path} " +
 				      " 1>/tmp/nohup_nurilabs 2>/tmp/nohup_nurilabs &"
 				return false if not Nuri::Helper::Command.exec(cmd)
 
