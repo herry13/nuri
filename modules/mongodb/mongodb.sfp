@@ -1,5 +1,6 @@
 include "modules/service/service.sfp"
 
 class Mongodb extends Service {
+	port = 27017
 }
 
