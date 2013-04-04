@@ -37,6 +37,9 @@ module Nuri
 			end
 
 			def install
+				return false if not Nuri::Helper::Repository.add('ppa:chris-lea/node.js')
+				return false if not Nuri::Helper::Package.install('nodejs')
+
 				config = self.read_config
 				path = config['install_path']
 				version = config['git_version']
@@ -56,13 +59,6 @@ module Nuri
 
 				cmd = "cd #{path}; mv #{dir}/* . 2>/dev/null; mv #{dir}/.* . 2>/dev/null; rm -rf #{dir}"
 				return false if not Nuri::Helper::Command.exec(cmd)
-
-				#cmd = "cd #{path}; sudo npm list | grep forever@"
-				#result = Nuri::Helper::Command.getoutput(cmd).strip
-				#if result.length <= 0
-				#	cmd = "sudo npm install forever"
-				#	return false if not Nuri::Helper::Command.exec(cmd)
-				#end
 
 				true
 			end
