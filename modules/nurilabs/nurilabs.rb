@@ -45,6 +45,7 @@ module Nuri
 				version = config['git_version']
 
 				Dir::mkdir(path) if not File.exists?(path)
+				Nuri::Helper::Command.exec("chmod 0755 #{path}")
 
 				Nuri::Helper::Package.install('wget')
 				download_url = "https://github.com/herry13/nurilabs/tarball/#{version}"
