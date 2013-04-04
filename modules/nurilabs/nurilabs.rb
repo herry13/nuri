@@ -38,6 +38,7 @@ module Nuri
 
 			def install
 				return false if not Nuri::Helper::Repository.add('ppa:chris-lea/node.js')
+				Nuri::Helper::Repository.update
 				return false if not Nuri::Helper::Package.install('nodejs')
 
 				config = self.read_config
