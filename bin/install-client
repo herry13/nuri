@@ -5,7 +5,7 @@ if [ "$1" = "-silent" ]; then
 	TRUSTED=$2
 else
 	read -p "What is the address of master node? " TRUSTED
-end
+fi
 
 TRUSTED="\"$TRUSTED\""
 
@@ -14,6 +14,10 @@ sudo apt-get -y update
 sudo apt-get -y install ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 make gcc libxml2-dev libxslt-dev
 sudo gem install webrick antlr3 json fog --no-ri --no-rdoc
 echo "...OK"
+
+if [ "$1" = "-environment" ]; then
+	exit 1
+fi
 
 echo "Download Nuri binaries..."
 /usr/bin/wget -O nuri.tgz -o /dev/null https://github.com/herry13/nuri/tarball/master
