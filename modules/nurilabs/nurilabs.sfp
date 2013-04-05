@@ -3,13 +3,9 @@ include "modules/service/service.sfp"
 class Nurilabs extends Service {
 	install_path = "/opt/nurilabs"
 	port = 8080
-
-	git_version = "master"
-	server {
-		ssl = false
-		recaptcha_private_key = ""
-		recaptcha_public_key = ""
-	}
+	ssl = false
+	recaptcha_private_key = ""
+	recaptcha_public_key = ""
 
 	procedure install {
 		condition {
@@ -17,9 +13,9 @@ class Nurilabs extends Service {
 		}
 		effect {
 			this.installed = true
-			this.server.ssl = false
-			this.server.recaptcha_private_key = ""
-			this.server.recaptcha_public_key = ""
+			this.ssl = false
+			this.recaptcha_private_key = ""
+			this.recaptcha_public_key = ""
 			this.port = 8080
 		}
 	}
@@ -37,10 +33,10 @@ class Nurilabs extends Service {
 		condition {
 			this.running = false
 			this.installed = true
-			this.server.ssl = false
+			this.ssl = false
 		}
 		effect {
-			this.server.ssl = true
+			this.ssl = true
 		}
 	}
 
@@ -48,24 +44,24 @@ class Nurilabs extends Service {
 		condition {
 			this.running = false
 			this.installed = true
-			this.server.ssl = true
+			this.ssl = true
 		}
 		effect {
-			this.server.ssl = false
+			this.ssl = false
 		}
 	}
 
 	procedure set_recaptcha_public_key(key isref String) {
 		condition { }
 		effect {
-			this.server.recaptcha_public_key = key
+			this.recaptcha_public_key = key
 		}
 	}
 
 	procedure set_recaptcha_private_key(key isref String) {
 		condition { }
 		effect {
-			this.server.recaptcha_private_key = key
+			this.recaptcha_private_key = key
 		}
 	}
 }
