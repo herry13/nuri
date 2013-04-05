@@ -10,12 +10,13 @@ class Nurilabs extends Service {
 		recaptcha_private_key = ""
 	}
 
-	procedure install {
+	procedure uninstall {
 		condition {
-			this.installed = false
+			this.installed = true
+			this.running = false
 		}
 		effect {
-			this.installed = true
+			this.installed = false
 			this.server.ssl = false
 			this.server.recaptcha_private_key = ""
 		}
