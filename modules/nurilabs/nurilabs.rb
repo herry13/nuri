@@ -62,7 +62,8 @@ module Nuri
 				cmd = "cd #{path}; mv #{dir}/* . 2>/dev/null; mv #{dir}/.* . 2>/dev/null; rm -rf #{dir}"
 				return false if not Nuri::Helper::Command.exec(cmd)
 
-				return false if not Nuri::Helper::Command.exec("cd #{path}/server; cp config-template.json config.json")
+				cmd = "cp #{path}/server/config-template.json #{path}/server/config.json"
+				return false if not Nuri::Helper::Command.exec(cmd)
 
 				true
 			end
@@ -118,6 +119,10 @@ module Nuri
 
 			def disable_ssl
 				return self.set_server_config('ssl', false)
+			end
+
+			def set_recaptcha_privatekey(params={})
+				return self.set_server_config('recaptcha_private_key', params['key'])
 			end
 
 			def set_install_path(params={})

@@ -6,6 +6,8 @@ class Nurilabs extends Service {
 
 	git_version = "master"
 	server {
+		ssl = false
+		recaptcha_private_key = ""
 	}
 
 	procedure set_install_path (path isref String) {
@@ -36,6 +38,13 @@ class Nurilabs extends Service {
 		}
 		effect {
 			this.server.ssl = false
+		}
+	}
+
+	procedure set_recaptcha_privatekey(key isref String) {
+		condition { }
+		effect {
+			this.server.recaptcha_private_key = key
 		}
 	}
 }
