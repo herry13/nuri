@@ -17,7 +17,7 @@ class Nurilabs extends Service {
 		effect {
 			this.installed = true
 			this.server.ssl = false
-			this.recaptcha_private_key = ""
+			this.server.recaptcha_private_key = ""
 		}
 	}
 
