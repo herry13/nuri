@@ -26,11 +26,23 @@ module Nuri
 					@state['running'] = false
 				end
 
+				@state['server'] = {}
 				sconf_file = "#{config['install_path']}/server/config.json"
 				if File.exist?(sconf_file)
 					sconf = JSON.parse(File.read(sconf_file))
 					@state['port'] = sconf['port'].to_i
 					@state['server'] = sconf
+				end
+
+				file = "#{config['install_path']}/web/recaptcha_public_key.js"
+				data = (File.exist?(file) ? File.read(file).split("\n") : "");
+				data = data[0].to_s.split("=");
+				if data.length > 1
+					data = data[1].strip
+					data = data.gsub(/;$/, '').strip
+					@state['server']['recaptcha_public_key'] = data[1, data.length-1]
+				else
+					@state['server']['recaptcha_public_key'] = ""
 				end
 
 				return @state
@@ -121,7 +133,19 @@ module Nuri
 				return self.set_server_config('ssl', false)
 			end
 
-			def set_recaptcha_privatekey(params={})
+			def set_recaptcha_public_key(params={})
+				return false if not File.exist?("#{config['install_path']}/web")
+				file = "#{config['install_path']}/web/recaptcha_public_key.js"
+				data = "var recaptcha_public_key = \"#{params['key']}\";"
+				begin
+					File.open(file, 'w') { |f| f.write(data) }
+				rescue
+					return false
+				end
+				true
+			end
+
+			def set_recaptcha_private_key(params={})
 				return self.set_server_config('recaptcha_private_key', params['key'])
 			end
 

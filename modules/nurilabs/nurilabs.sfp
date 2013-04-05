@@ -8,6 +8,7 @@ class Nurilabs extends Service {
 	server {
 		ssl = false
 		recaptcha_private_key = ""
+		recaptcha_public_key = ""
 	}
 
 	procedure install {
@@ -18,6 +19,7 @@ class Nurilabs extends Service {
 			this.installed = true
 			this.server.ssl = false
 			this.server.recaptcha_private_key = ""
+			this.server.recaptcha_public_key = ""
 			this.port = 8080
 		}
 	}
@@ -50,6 +52,13 @@ class Nurilabs extends Service {
 		}
 		effect {
 			this.server.ssl = false
+		}
+	}
+
+	procedure set_recaptcha_publickey(key isref String) {
+		condition { }
+		effect {
+			this.server.recaptcha_public_key = key
 		}
 	}
 
