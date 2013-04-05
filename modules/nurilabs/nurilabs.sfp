@@ -10,6 +10,17 @@ class Nurilabs extends Service {
 		recaptcha_private_key = ""
 	}
 
+	procedure install {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.installed = true
+			this.server.ssl = false
+			this.recaptcha_private_key = ""
+		}
+	}
+
 	procedure set_install_path (path isref String) {
 		condition {
 			this.installed = false
