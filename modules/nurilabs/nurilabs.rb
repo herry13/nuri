@@ -26,7 +26,6 @@ module Nuri
 					@state['running'] = false
 				end
 
-				@state['server'] = {}
 				sconf_file = "#{config['install_path']}/server/config.json"
 				if File.exist?(sconf_file)
 					sconf = JSON.parse(File.read(sconf_file))
@@ -41,8 +40,6 @@ module Nuri
 					data = data[1].strip
 					data = data.gsub(/;$/, '').strip
 					@state['server']['recaptcha_public_key'] = data[1, data.length-1]
-				else
-					@state['server']['recaptcha_public_key'] = ""
 				end
 
 				return @state
