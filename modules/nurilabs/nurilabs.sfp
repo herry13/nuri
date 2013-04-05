@@ -55,14 +55,14 @@ class Nurilabs extends Service {
 		}
 	}
 
-	procedure set_recaptcha_publickey(key isref String) {
+	procedure set_recaptcha_public_key(key isref String) {
 		condition { }
 		effect {
 			this.server.recaptcha_public_key = key
 		}
 	}
 
-	procedure set_recaptcha_privatekey(key isref String) {
+	procedure set_recaptcha_private_key(key isref String) {
 		condition { }
 		effect {
 			this.server.recaptcha_private_key = key
