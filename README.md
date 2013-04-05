@@ -3,7 +3,7 @@ Nuri
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/nuri
 - last update: 03-03-2013
-- version: 0.3.2
+- version: 0.3.3
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
@@ -57,6 +57,9 @@ Available Modules
                         use this module can be found in file 
                         "module/rackspace/README.md")
 - aws                -- Amazon Web Service compute
+- nurilabs           -- A web-based interface for Nuri master
+- mongodb            -- MongoDB NoSQL Database Server
+
 
 Running Nuri client on managed node
 -----------------------------------

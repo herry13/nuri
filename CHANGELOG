@@ -1,3 +1,6 @@
+05-04-2013 -- 0.3.3
++ add new modules "nurilabs" and "mongodb"
+
 06-03-2013 -- 0.3.2
 + set the state of an "offline" node with <sfp::unknown> value
 
