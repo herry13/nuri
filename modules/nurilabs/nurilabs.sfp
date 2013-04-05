@@ -18,6 +18,7 @@ class Nurilabs extends Service {
 			this.installed = true
 			this.server.ssl = false
 			this.server.recaptcha_private_key = ""
+			this.port = 8080
 		}
 	}
 
