@@ -18,6 +18,8 @@ Requirements
 	- rubygems (if you use ruby <= 1.8.7)
 	- libz-dev
 	- libaugeas-ruby
+	- libxml2-dev
+	- libxslt-dev
 - required Ruby Gems
 	- webrick
 	- json
@@ -35,7 +37,7 @@ To Install
 - Install required packages and gems
 
 		$ sudo apt-get update
-		$ sudo apt-get install make ruby ruby-dev rubygems libz-dev libaugeas-ruby
+		$ sudo apt-get install make ruby ruby-dev rubygems libz-dev libaugeas-ruby libxml2-dev libxslt-dev
 		$ sudo gem install webrick json antlr3 fog
 
 - Clone the Nuri software from Github repository:
