@@ -2,8 +2,8 @@ Nuri
 ====
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/nuri
-- last update: 03-03-2013
-- version: 0.3.3
+- last update: 09-04-2013
+- version: 0.3.4(alpha)
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
 
@@ -54,12 +54,14 @@ Available Modules
 	- **rackspace**          - Rackspace compute V2 (Next-gen) (read "module/rackspace/README.md")
 	- **aws**                - Amazon Web Service EC2
 - http server
-	- **apache**             - Apache Web Server
+	- **apache**             - Apache web server
+	- **nginx**              - Nginx web server
 - load balancer
-	- **apachelb**           - Apache Load Balancer
+	- **apachelb**           - Apache load balancer
 - database server
-	- **mysql**              - Mysql Database Server
-	- **mongodb**            - MongoDB NoSQL Database Server
+	- **mysql**              - Mysql database server
+	- **mariadb**            - MariaDB database server
+	- **mongodb**            - MongoDB (NoSQL) database server
 - web application
 	- **tikiweb**            - application layer (PHP) part of Tiki Wiki CMS
 	- **tikidb**             - database layer part of Tiki Wiki CMS
