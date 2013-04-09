@@ -18,6 +18,8 @@ Requirements
 	- rubygems (if you use ruby <= 1.8.7)
 	- libz-dev
 	- libaugeas-ruby
+	- libxml2-dev
+	- libxslt-dev
 - required Ruby Gems
 	- webrick
 	- json
@@ -35,7 +37,7 @@ To Install
 - Install required packages and gems
 
 		$ sudo apt-get update
-		$ sudo apt-get install make ruby ruby-dev rubygems libz-dev libaugeas-ruby
+		$ sudo apt-get install make ruby ruby-dev rubygems libz-dev libaugeas-ruby libxml2-dev libxslt-dev
 		$ sudo gem install webrick json antlr3 fog
 
 - Clone the Nuri software from Github repository:
@@ -45,20 +47,23 @@ To Install
 
 Available Modules
 -----------------
-- machine            -- standard Machine
-- vm                 -- Virtual Machine
-- apache             -- Apache Web Server
-- mysql              -- Mysql Database Server
-- apachelb           -- Apache Load Balancer
-- tikiweb and tikidb -- TikiWiki Content Management System
-- hpCloud            -- HPCloud compute (information on how to use this module
-                        can be found in file "module/hpcloud/README.md")
-- rackspace          -- Rackspace compute V2 (Next-gen) (information on how to
-                        use this module can be found in file 
-                        "module/rackspace/README.md")
-- aws                -- Amazon Web Service compute
-- nurilabs           -- A web-based interface for Nuri master
-- mongodb            -- MongoDB NoSQL Database Server
+- **machine**            - a standard physical machine
+- **vm**                 - a virtual machine
+- cloud (IaaS)
+	- **hpcloud**            - HPCloud compute (read "module/hpcloud/README.md")
+	- **rackspace**          - Rackspace compute V2 (Next-gen) (read "module/rackspace/README.md")
+	- **aws**                - Amazon Web Service EC2
+- http server
+	- **apache**             - Apache Web Server
+- load balancer
+	- **apachelb**           - Apache Load Balancer
+- database server
+	- **mysql**              - Mysql Database Server
+	- **mongodb**            - MongoDB NoSQL Database Server
+- web application
+	- **tikiweb**            - application layer (PHP) part of Tiki Wiki CMS
+	- **tikidb**             - database layer part of Tiki Wiki CMS
+	- **nurilabs**           - A web-based interface for Nuri master
 
 
 Running Nuri client on managed node
