@@ -1,5 +1,6 @@
 05-04-2013 -- 0.3.4(alpha)
 + add new modules: nginx and mariadb
+- replace nohup with forever in nurilabs
 
 05-04-2013 -- 0.3.3
 + add new modules "nurilabs" and "mongodb"
