@@ -1,0 +1,6 @@
+include "modules/service/service.sfp"
+
+class Nginx extends Service {
+	port = 80
+}
+

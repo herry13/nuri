@@ -53,6 +53,11 @@ module Nuri
 			def stop
 				return Nuri::Helper::Command.exec '/usr/bin/service mysql stop'
 			end
+
+			def set_port(params={})
+				# TODO -- params['target']
+				return false
+			end
 		end
 	end
 end
