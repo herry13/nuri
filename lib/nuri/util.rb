@@ -192,18 +192,34 @@ module Nuri
 				return Nuri::Helper::Command.exec("/usr/bin/apt-get -y update")
 			end
 
-			def self.add(repo)
+			def self.add(repo, key=nil)
 				if not Nuri::Helper::Package.installed?('python-software-properties')
 					return false if not Nuri::Helper::Package.install('python-software-properties')
 				end
-				return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y #{repo}")
+
+				if repo[0,4] == "ppa:" # personal repository
+					return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y #{repo}")
+				else # public repository
+					codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
+					cmd = "/us/bin/apt-key adv --recv-keys --keyserver keyserver.ubuntu.com #{key}"
+					return false if not Command.exec(cmd)
+					cmd = "/usr/bin/add-apt-repository 'deb #{repo} #{codename} main'"
+					return Command.exec(cmd)
+				end
 			end
 
 			def self.remove(repo)
 				if not Nuri::Helper::Package.installed?('python-software-properties')
 					return false if not Nuri::Helper::Package.install('python-software-properties')
 				end
-				return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
+
+				if repo[0,4] == "ppa:" # personal repository
+					return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
+				else # public repository
+					codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
+					cmd = "/usr/bin/add-apt-repository -r 'deb #{repo} #{codename} main'"
+					return Command.exec(cmd)
+				end
 			end
 		end
 
