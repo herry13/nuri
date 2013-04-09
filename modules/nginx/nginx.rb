@@ -16,14 +16,18 @@ module Nuri
 
 				@state['installed'] = Nuri::Helper::Package.installed?('nginx')
 				if @state['installed']
-					@state['running'] = (data =~ /Nginx is stopped/).nil?
+					data = Nuri::Helper::Command.getoutput("/usr/bin/service nginx status")
+					@state['running'] = (data =~ /nginx is not running/).nil?
 				end
 
 				return @state
 			end
 
 			def install
-				return Nuri::Helper::Package.install('nginx')
+				return (
+					Nuri::Helper::Package.install('nginx') and
+					self.stop
+				)
 			end
 		
 			def uninstall
