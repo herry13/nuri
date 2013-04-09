@@ -189,19 +189,19 @@ module Nuri
 	module Helper
 		module Repository
 			def self.update
-				return Nuri::Helper::Command.exec("/usr/bin/apt-get -y update")
+				return Command.exec("/usr/bin/apt-get -y update")
 			end
 
 			def self.add(repo, key=nil)
-				if not Nuri::Helper::Package.installed?('python-software-properties')
-					return false if not Nuri::Helper::Package.install('python-software-properties')
+				if not Package.installed?('python-software-properties')
+					return false if not Package.install('python-software-properties')
 				end
 
 				if repo[0,4] == "ppa:" # personal repository
-					return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y #{repo}")
+					return Command.exec("/usr/bin/add-apt-repository -y #{repo}")
 				else # public repository
 					codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
-					cmd = "/us/bin/apt-key adv --recv-keys --keyserver keyserver.ubuntu.com #{key}"
+					cmd = "/usr/bin/apt-key adv --recv-keys --keyserver keyserver.ubuntu.com #{key}"
 					return false if not Command.exec(cmd)
 					cmd = "/usr/bin/add-apt-repository 'deb #{repo} #{codename} main'"
 					return Command.exec(cmd)
@@ -209,12 +209,12 @@ module Nuri
 			end
 
 			def self.remove(repo)
-				if not Nuri::Helper::Package.installed?('python-software-properties')
+				if not Package.installed?('python-software-properties')
 					return false if not Nuri::Helper::Package.install('python-software-properties')
 				end
 
 				if repo[0,4] == "ppa:" # personal repository
-					return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
+					return Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
 				else # public repository
 					codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
 					cmd = "/usr/bin/add-apt-repository -r 'deb #{repo} #{codename} main'"
@@ -246,23 +246,23 @@ module Nuri
 				package = package.to_s
 				return false if package.length <= 0
 				return true if installed?(package)
-				Nuri::Helper::Command.exec("/usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-				if (Nuri::Helper::Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == false)
-					Nuri::Helper::Command.exec("/usr/bin/apt-get -y update 2>/dev/null")
+				Command.exec("/usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+				if (Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == false)
+					Command.exec("/usr/bin/apt-get -y update 2>/dev/null")
 				else
 					return true
 				end
-				return (Nuri::Helper::Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == true)
+				return (Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == true)
 			end
 
 			def self.uninstall(package)
 				package = package.to_s
 				return false if package.length <= 0
 				return true if not installed?(package)
-				Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-				if (Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge remove #{package} 2>/dev/null") == true)
-					Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-					Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+				Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+				if (Command.exec("sudo /usr/bin/apt-get -y --purge remove #{package} 2>/dev/null") == true)
+					Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+					Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
 					return true
 				end
 				return false
