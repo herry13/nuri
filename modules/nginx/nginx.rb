@@ -122,8 +122,7 @@ server {
 "
 				if config['php_module']
 					default += "   location ~ \.php$ {
-      fastcgi_split_path_info ^(.+\.php)(/.+)$
-      #fastcgi_pass 127.0.0.1:9000;
+      fastcgi_split_path_info ^(.+\.php)(/.+)$;
       fastcgi_pass unix:/var/run/php5-fpm.sock;
       fastcgi_index index.php;
       include fastcgi_params;
