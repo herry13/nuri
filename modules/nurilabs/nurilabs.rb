@@ -24,15 +24,6 @@ module Nuri
 					server_path = "\e[90m#{server_path}\e[39m"
 					@state['running'] = (data[4] == server_path)
 				end
-=begin
-				if config.has_key?('pid')
-					cmd = "ps h #{config['pid']}"
-					output = Nuri::Helper::Command.getoutput(cmd).strip
-					@state['running'] = (output.length > 0)
-				else
-					@state['running'] = false
-				end
-=end
 
 				@state['server'] = {}
 				sconf_file = "#{config['install_path']}/server/config.json"
@@ -97,28 +88,6 @@ module Nuri
 		
 			def start
 				config = self.read_config
-
-=begin
-				server_path = "#{config['install_path']}/server/server.js"
-				cmd = "/usr/bin/nohup /usr/bin/node #{server_path} " +
-				      " 1>/tmp/nohup_nurilabs 2>/tmp/nohup_nurilabs &"
-				return false if not Nuri::Helper::Command.exec(cmd)
-
-				pid_file = "#{config['install_path']}/server/pid"
-				counter = 0
-				begin
-					sleep(1)
-					counter += 1
-				end until File.exists?(pid_file) or counter > 10
-				return false if not File.exists?(pid_file)
-				config['pid'] = File.read(pid_file).to_i
-
-				self.save_config(config)
-
-				File.delete(pid_file)
-
-				true
-=end
 				server_path = "#{config['install_path']}/server/server.js"
 				cmd = "/usr/bin/forever start #{server_path}"
 				return Nuri::Helper::Command.exec(cmd)
@@ -126,12 +95,6 @@ module Nuri
 		
 			def stop
 				config = self.read_config
-				#if config.has_key?('pid')
-				#	cmd = "sudo kill -9 #{config['pid']}"
-				#	return false if not Nuri::Helper::Command.exec(cmd)
-				#	config.delete('pid')
-				#end
-				#true
 				server_path = "#{config['install_path']}/server/server.js"
 				cmd = "/usr/bin/forever stop #{server_path}"
 				return Nuri::Helper::Command.exec(cmd)

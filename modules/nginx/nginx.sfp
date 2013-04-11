@@ -27,6 +27,26 @@ class Nginx extends Service {
 		}
 	}
 
+	procedure enable_php_mysql_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_mysql_module = true
+		}
+	}
+
+	procedure disable_php_mysql_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_mysql_module = false
+		}
+	}
+
 	procedure enable_php_module {
 		condition {
 			this.installed = true
