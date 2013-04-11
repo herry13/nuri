@@ -4,6 +4,8 @@ class Nginx extends Service {
 	port = 80
 	document_root = "/usr/share/nginx/www"
 	server_name = "localhost"
+	php_module = false
+	php_mysql_module = false
 
 	procedure set_document_root(path isref String) {
 		condition {
@@ -22,6 +24,26 @@ class Nginx extends Service {
 		}
 		effect {
 			this.server_name = name
+		}
+	}
+
+	procedure enable_php_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_module = true
+		}
+	}
+
+	procedure disable_php_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_module = false
 		}
 	}
 }

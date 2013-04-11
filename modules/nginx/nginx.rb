@@ -18,7 +18,14 @@ module Nuri
 				if @state['installed']
 					data = Nuri::Helper::Command.getoutput("/usr/bin/service nginx status")
 					@state['running'] = (data =~ /nginx is not running/).nil?
+					# default website configuration
 					self.read_config.each { |k,v| @state[k] = v }
+					# PHP module
+					@state['php_module'] = (
+						Nuri::Helper::Package.installed?('php5-fpm') and
+						Nuri::Helper::Service.running?('php5-fpm')
+					)
+					@state['php_mysql_module'] = Nuri::Helper::Package.installed?('php5-mysql')
 				end
 
 				return @state
@@ -53,7 +60,7 @@ module Nuri
 
 			def set_document_root(params={})
 				config = self.read_config
-				config['document_root'] = params['root'].to_s
+				config['document_root'] = params['path'].to_s
 				return self.save_config(config)
 			end
 
@@ -63,19 +70,37 @@ module Nuri
 				return self.save_config(config)
 			end
 
+			def enable_php_module
+				return false if
+					not Nuri::Helper::Package.install('php5-fpm') or
+					not Nuri::Helper::Service.start('php5-fpm')
+				config = self.read_config
+				config['php_module'] = true
+				return self.save_config(config)
+			end
+
+			def disable_php_module
+				Nuri::Helper::Package.uninstall('php5-fpm')
+				config = self.read_config
+				config['php_module'] = false
+				return self.save_config(config)
+			end
+
 			protected
 			def read_config
 				config = {}
 				config_file = "/etc/nginx/sites-enabled/default"
 				File.read(config_file).each_line do |line|
-					parts = line.strip.gsub(/;$/, '').split(" ")
+					parts = line.strip.gsub(/;$/, '').split(" ", 2)
 					case parts[0]
 					when "listen"
-						config['port'] = parts[1]
+						config['port'] = parts[1].to_i
 					when "root"
 						config['document_root'] = parts[1]
 					when "server_name"
 						config['server_name'] = parts[1]
+					when "location"
+						config['php_module'] = (parts[1] == '~ \.php$ {')
 					end
 				end
 				config
@@ -94,8 +119,18 @@ server {
    location / {
       try_files $uri $uri/ /index.html;
    }
-}
 "
+				if config['php_module']
+					default += "   location ~ \.php$ {
+      fastcgi_split_path_info ^(.+\.php)(/.+)$
+      #fastcgi_pass 127.0.0.1:9000;
+      fastcgi_pass unix:/var/run/php5-fpm.sock;
+      fastcgi_index index.php;
+      include fastcgi_params;
+   }
+"
+				end
+				default += "}\n"
 				config_file = "/etc/nginx/sites-enabled/default"
 				File.open(config_file, 'w') { |f| f.write(default) }
 				true
