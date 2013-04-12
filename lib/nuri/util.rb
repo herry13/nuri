@@ -265,47 +265,114 @@ module Nuri
 
 		module Package
 			def self.installed?(package)
-				package = package.to_s
-				return false if package.length <= 0
-				data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
-				return true if (data[0].to_s == package)
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.add(repo)
+				when 'sl'
+					return Redhat.add(repo)
+				end
 				false
 			end
 
 			def self.version?(package)
-				package = package.to_s
-				return false if package.length <= 0
-				data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
-				if data[0].to_s == package
-					return data[1]
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.add(repo)
+				when 'sl'
+					return Redhat.add(repo)
 				end
-				""
+				false
 			end
 
 			def self.install(package)
-				package = package.to_s
-				return false if package.length <= 0
-				return true if installed?(package)
-				Command.exec("/usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-				if (Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == false)
-					Command.exec("/usr/bin/apt-get -y update 2>/dev/null")
-				else
-					return true
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.add(repo)
+				when 'sl'
+					return Redhat.add(repo)
 				end
-				return (Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == true)
+				false
 			end
 
 			def self.uninstall(package)
-				package = package.to_s
-				return false if package.length <= 0
-				return true if not installed?(package)
-				Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-				if (Command.exec("sudo /usr/bin/apt-get -y --purge remove #{package} 2>/dev/null") == true)
-					Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-					Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-					return true
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.add(repo)
+				when 'sl'
+					return Redhat.add(repo)
 				end
-				return false
+				false
+			end
+
+			module Redhat
+				def self.installed?(package)
+					data = Command.getoutput("rpmquery #{package}").strip
+					return (data.length > 0)
+				end
+
+				def self.version?(package)
+					data = Command.getoutput("rpmquery #{package}").strip
+					if data.length > package.length
+						return data[package.length, data.length-package.length]
+					end
+					''
+				end
+
+				def self.install(package)
+					cmd = "yum -y install #{package}"
+					return Command.exec(cmd)
+				end
+
+				def self.uninstall(package)
+					cmd = "yum -y erase #{package}"
+					return Command.exec(cmd)
+				end
+			end
+
+			module Debian
+				def self.installed?(package)
+					package = package.to_s
+					return false if package.length <= 0
+					data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
+					return true if (data[0].to_s == package)
+					false
+				end
+	
+				def self.version?(package)
+					package = package.to_s
+					return false if package.length <= 0
+					data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
+					if data[0].to_s == package
+						return data[1]
+					end
+					""
+				end
+	
+				def self.install(package)
+					package = package.to_s
+					return false if package.length <= 0
+					return true if installed?(package)
+					Command.exec("/usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+					if (Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == false)
+						Command.exec("/usr/bin/apt-get -y update 2>/dev/null")
+					else
+						return true
+					end
+					return (Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == true)
+				end
+	
+				def self.uninstall(package)
+					package = package.to_s
+					return false if package.length <= 0
+					return true if not installed?(package)
+					Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+					if (Command.exec("sudo /usr/bin/apt-get -y --purge remove #{package} 2>/dev/null") == true)
+						Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+						Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+						return true
+					end
+					return false
+				end
 			end
 		end
 
