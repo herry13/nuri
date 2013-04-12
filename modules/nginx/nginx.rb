@@ -108,6 +108,7 @@ module Nuri
 			def read_config
 				config = {}
 				config_file = "/etc/nginx/sites-enabled/default"
+				return config if not File.exist?(config_file)
 				File.read(config_file).each_line do |line|
 					parts = line.strip.gsub(/;$/, '').split(" ", 2)
 					case parts[0]
