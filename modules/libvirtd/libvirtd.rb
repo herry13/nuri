@@ -25,7 +25,7 @@ module Nuri
 					line.strip!
 					next if line.length <= 0
 					parts = line.split(" ")
-					vms[parts[1]] = (parts[2] == 'running')
+					vms[parts[1]] = { 'running' => (parts[2] == 'running') }
 				end
 				@state['vms'] = vms
 
