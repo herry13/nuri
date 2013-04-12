@@ -267,9 +267,9 @@ module Nuri
 			def self.installed?(package)
 				case Nuri::Util.platform
 				when 'ubuntu'
-					return Debian.add(package)
+					return Debian.installed?(package)
 				when 'sl'
-					return Redhat.add(package)
+					return Redhat.installed?(package)
 				end
 				false
 			end
@@ -277,9 +277,9 @@ module Nuri
 			def self.version?(package)
 				case Nuri::Util.platform
 				when 'ubuntu'
-					return Debian.add(package)
+					return Debian.version?(package)
 				when 'sl'
-					return Redhat.add(package)
+					return Redhat.version?(package)
 				end
 				false
 			end
@@ -287,9 +287,9 @@ module Nuri
 			def self.install(package)
 				case Nuri::Util.platform
 				when 'ubuntu'
-					return Debian.add(package)
+					return Debian.install(package)
 				when 'sl'
-					return Redhat.add(package)
+					return Redhat.install(package)
 				end
 				false
 			end
@@ -297,9 +297,9 @@ module Nuri
 			def self.uninstall(package)
 				case Nuri::Util.platform
 				when 'ubuntu'
-					return Debian.add(package)
+					return Debian.uninstall(package)
 				when 'sl'
-					return Redhat.add(package)
+					return Redhat.uninstall(package)
 				end
 				false
 			end
