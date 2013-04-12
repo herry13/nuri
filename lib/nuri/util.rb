@@ -152,6 +152,7 @@ module Nuri
 
 		def self.nuri_version; return ''; end
 
+=begin
 		def self.uninstalled?(package)
 			success = ( system("/usr/bin/apt-get -y --purge remove #{package}") == true )
 			system('/usr/bin/apt-get -y autoremove') if success
@@ -169,6 +170,7 @@ module Nuri
 			end
 			return ( system("/usr/bin/apt-get -y install #{package} 2>/dev/null 1>/dev/null") == true )
 		end
+=end
 
 		def self.is_nuri_active?(address)
 			begin
@@ -189,36 +191,74 @@ module Nuri
 	module Helper
 		module Repository
 			def self.update
-				return Command.exec("/usr/bin/apt-get -y update")
-			end
-
-			def self.add(repo, key=nil)
-				if not Package.installed?('python-software-properties')
-					return false if not Package.install('python-software-properties')
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.update
+				when 'sl'
+					return Redhat.update
 				end
-
-				if repo[0,4] == "ppa:" # personal repository
-					return Command.exec("/usr/bin/add-apt-repository -y #{repo}")
-				else # public repository
-					codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
-					cmd = "/usr/bin/apt-key adv --recv-keys --keyserver keyserver.ubuntu.com #{key}"
-					return false if not Command.exec(cmd)
-					cmd = "/usr/bin/add-apt-repository 'deb #{repo} #{codename} main'"
-					return Command.exec(cmd)
-				end
+				false
 			end
 
 			def self.remove(repo)
-				if not Package.installed?('python-software-properties')
-					return false if not Nuri::Helper::Package.install('python-software-properties')
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.remove(repo)
+				when 'sl'
+					return Redhat.remove(repo)
 				end
+				false
+			end
 
-				if repo[0,4] == "ppa:" # personal repository
-					return Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
-				else # public repository
-					codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
-					cmd = "/usr/bin/add-apt-repository -r 'deb #{repo} #{codename} main'"
-					return Command.exec(cmd)
+			def self.add(repo, key=nil)
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.add(repo)
+				when 'sl'
+					return Redhat.add(repo)
+				end
+				false
+			end
+
+			module Redhat
+				def self.update; false; end
+				def self.remove(repo); false; end
+				def self.add(repo, key=nil); false; end
+			end
+
+			module Debian
+				def self.update
+					return Command.exec("/usr/bin/apt-get -y update")
+				end
+	
+				def self.add(repo, key=nil)
+					if not Package.installed?('python-software-properties')
+						return false if not Package.install('python-software-properties')
+					end
+	
+					if repo[0,4] == "ppa:" # personal repository
+						return Command.exec("/usr/bin/add-apt-repository -y #{repo}")
+					else # public repository
+						codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
+						cmd = "/usr/bin/apt-key adv --recv-keys --keyserver keyserver.ubuntu.com #{key}"
+						return false if not Command.exec(cmd)
+						cmd = "/usr/bin/add-apt-repository 'deb #{repo} #{codename} main'"
+						return Command.exec(cmd)
+					end
+				end
+	
+				def self.remove(repo)
+					if not Package.installed?('python-software-properties')
+						return false if not Nuri::Helper::Package.install('python-software-properties')
+					end
+	
+					if repo[0,4] == "ppa:" # personal repository
+						return Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
+					else # public repository
+						codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
+						cmd = "/usr/bin/add-apt-repository -r 'deb #{repo} #{codename} main'"
+						return Command.exec(cmd)
+					end
 				end
 			end
 		end
@@ -284,10 +324,11 @@ module Nuri
 		end
 
 		module Service
+			ServiceCommand = (File.exist?('/usr/bin/service') ? '/usr/bin/service' : '/sbin/service')
 			def self.running?(service)
 				service = service.to_s
 				return false if service.length <= 0
-				data = `/usr/bin/service #{service} status 2>/dev/null`
+				data = `#{ServiceCommand} #{service} status 2>/dev/null`
 				return (not (data =~ /is running/).nil? or not (data =~ /start\/running/).nil?)
 			end
 
@@ -295,7 +336,7 @@ module Nuri
 				service = service.to_s
 				return false if service.length <= 0
 				return true if running?(service)
-				cmd = "/usr/bin/sudo /usr/bin/service #{service} start 2>/dev/null"
+				cmd = "/usr/bin/sudo #{ServiceCommand} #{service} start 2>/dev/null"
 				cmd += " 1>/dev/null" if not debug
 				return (system(cmd) == true)
 			end
@@ -304,7 +345,7 @@ module Nuri
 				service = service.to_s
 				return false if service.length <= 0
 				return true if not running?(service)
-				cmd = "/usr/bin/sudo /usr/bin/service #{service} stop 2>/dev/null"
+				cmd = "/usr/bin/sudo #{ServiceCommand} #{service} stop 2>/dev/null"
 				cmd += " 1>/dev/null" if not debug
 				return (system(cmd) == true)
 			end
