@@ -15,7 +15,7 @@ module Nuri
 				self.reset
 
 				@state['installed'] = Nuri::Helper::Package.installed?('libvirt')
-				@state['running'] = Nuri::Helper::Package.running?('libvirtd')
+				@state['running'] = Nuri::Helper::Service.running?('libvirtd')
 
 				return @state
 			end
