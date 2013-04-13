@@ -17,13 +17,12 @@ module Nuri
 				config.each { |k,v| @state[k] = v if @state.has_key?(k) }
 
 				@state['installed'] = File.exists?("#{config['install_path']}/server/server.js")
-
-				if config.has_key?('pid')
-					cmd = "ps h #{config['pid']}"
-					output = Nuri::Helper::Command.getoutput(cmd).strip
-					@state['running'] = (output.length > 0)
-				else
-					@state['running'] = false
+				if @state['installed']
+					server_path = "#{config['install_path']}/server/server.js"
+					cmd = "/usr/bin/forever list | /bin/grep #{server_path}"
+					data = Nuri::Helper::Command.getoutput(cmd).to_s.split(" ")
+					server_path = "\e[90m#{server_path}\e[39m"
+					@state['running'] = (data[4] == server_path)
 				end
 
 				@state['server'] = {}
@@ -77,7 +76,8 @@ module Nuri
 				cmd = "cp #{path}/server/config-template.json #{path}/server/config.json"
 				return false if not Nuri::Helper::Command.exec(cmd)
 
-				true
+				cmd = "/usr/bin/npm -g install forever"
+				return Nuri::Helper::Command.exec(cmd)
 			end
 		
 			def uninstall
@@ -88,36 +88,16 @@ module Nuri
 		
 			def start
 				config = self.read_config
-
 				server_path = "#{config['install_path']}/server/server.js"
-				cmd = "/usr/bin/nohup /usr/bin/node #{server_path} " +
-				      " 1>/tmp/nohup_nurilabs 2>/tmp/nohup_nurilabs &"
-				return false if not Nuri::Helper::Command.exec(cmd)
-
-				pid_file = "#{config['install_path']}/server/pid"
-				counter = 0
-				begin
-					sleep(1)
-					counter += 1
-				end until File.exists?(pid_file) or counter > 10
-				return false if not File.exists?(pid_file)
-				config['pid'] = File.read(pid_file).to_i
-
-				self.save_config(config)
-
-				File.delete(pid_file)
-
-				true
+				cmd = "/usr/bin/forever start #{server_path}"
+				return Nuri::Helper::Command.exec(cmd)
 			end
 		
 			def stop
 				config = self.read_config
-				if config.has_key?('pid')
-					cmd = "sudo kill -9 #{config['pid']}"
-					return false if not Nuri::Helper::Command.exec(cmd)
-					config.delete('pid')
-				end
-				true
+				server_path = "#{config['install_path']}/server/server.js"
+				cmd = "/usr/bin/forever stop #{server_path}"
+				return Nuri::Helper::Command.exec(cmd)
 			end
 		
 			def set_port(params={})

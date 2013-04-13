@@ -152,6 +152,7 @@ module Nuri
 
 		def self.nuri_version; return ''; end
 
+=begin
 		def self.uninstalled?(package)
 			success = ( system("/usr/bin/apt-get -y --purge remove #{package}") == true )
 			system('/usr/bin/apt-get -y autoremove') if success
@@ -169,6 +170,7 @@ module Nuri
 			end
 			return ( system("/usr/bin/apt-get -y install #{package} 2>/dev/null 1>/dev/null") == true )
 		end
+=end
 
 		def self.is_nuri_active?(address)
 			begin
@@ -189,67 +191,188 @@ module Nuri
 	module Helper
 		module Repository
 			def self.update
-				return Nuri::Helper::Command.exec("/usr/bin/apt-get -y update")
-			end
-
-			def self.add(repo)
-				if not Nuri::Helper::Package.installed?('python-software-properties')
-					return false if not Nuri::Helper::Package.install('python-software-properties')
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.update
+				when 'sl'
+					return Redhat.update
 				end
-				return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y #{repo}")
+				false
 			end
 
 			def self.remove(repo)
-				if not Nuri::Helper::Package.installed?('python-software-properties')
-					return false if not Nuri::Helper::Package.install('python-software-properties')
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.remove(repo)
+				when 'sl'
+					return Redhat.remove(repo)
 				end
-				return Nuri::Helper::Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
+				false
+			end
+
+			def self.add(repo, key=nil)
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.add(repo)
+				when 'sl'
+					return Redhat.add(repo)
+				end
+				false
+			end
+
+			module Redhat
+				def self.update; false; end
+				def self.remove(repo); false; end
+				def self.add(repo, key=nil); false; end
+			end
+
+			module Debian
+				def self.update
+					return Command.exec("/usr/bin/apt-get -y update")
+				end
+	
+				def self.add(repo, key=nil)
+					if not Package.installed?('python-software-properties')
+						return false if not Package.install('python-software-properties')
+					end
+	
+					if repo[0,4] == "ppa:" # personal repository
+						return Command.exec("/usr/bin/add-apt-repository -y #{repo}")
+					else # public repository
+						codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
+						cmd = "/usr/bin/apt-key adv --recv-keys --keyserver keyserver.ubuntu.com #{key}"
+						return false if not Command.exec(cmd)
+						cmd = "/usr/bin/add-apt-repository 'deb #{repo} #{codename} main'"
+						return Command.exec(cmd)
+					end
+				end
+	
+				def self.remove(repo)
+					if not Package.installed?('python-software-properties')
+						return false if not Nuri::Helper::Package.install('python-software-properties')
+					end
+	
+					if repo[0,4] == "ppa:" # personal repository
+						return Command.exec("/usr/bin/add-apt-repository -y -r #{repo}")
+					else # public repository
+						codename = Command.getoutput(". /etc/lsb-release; echo $DISTRIB_CODENAME")
+						cmd = "/usr/bin/add-apt-repository -r 'deb #{repo} #{codename} main'"
+						return Command.exec(cmd)
+					end
+				end
 			end
 		end
 
 		module Package
 			def self.installed?(package)
-				package = package.to_s
-				return false if package.length <= 0
-				data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
-				return true if (data[0].to_s == package)
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.installed?(package)
+				when 'sl'
+					return Redhat.installed?(package)
+				end
 				false
 			end
 
 			def self.version?(package)
-				package = package.to_s
-				return false if package.length <= 0
-				data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
-				if data[0].to_s == package
-					return data[1]
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.version?(package)
+				when 'sl'
+					return Redhat.version?(package)
 				end
-				""
+				false
 			end
 
 			def self.install(package)
-				package = package.to_s
-				return false if package.length <= 0
-				return true if installed?(package)
-				Nuri::Helper::Command.exec("/usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-				if (Nuri::Helper::Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == false)
-					Nuri::Helper::Command.exec("/usr/bin/apt-get -y update 2>/dev/null")
-				else
-					return true
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.install(package)
+				when 'sl'
+					return Redhat.install(package)
 				end
-				return (Nuri::Helper::Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == true)
+				false
 			end
 
 			def self.uninstall(package)
-				package = package.to_s
-				return false if package.length <= 0
-				return true if not installed?(package)
-				Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-				if (Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge remove #{package} 2>/dev/null") == true)
-					Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-					Nuri::Helper::Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
-					return true
+				case Nuri::Util.platform
+				when 'ubuntu'
+					return Debian.uninstall(package)
+				when 'sl'
+					return Redhat.uninstall(package)
 				end
-				return false
+				false
+			end
+
+			module Redhat
+				def self.installed?(package)
+					data = Command.getoutput("rpmquery #{package}").strip
+					return (data.length > 0)
+				end
+
+				def self.version?(package)
+					data = Command.getoutput("rpmquery #{package}").strip
+					if data.length > package.length
+						return data[package.length, data.length-package.length]
+					end
+					''
+				end
+
+				def self.install(package)
+					cmd = "yum -y install #{package}"
+					return Command.exec(cmd)
+				end
+
+				def self.uninstall(package)
+					cmd = "yum -y erase #{package}"
+					return Command.exec(cmd)
+				end
+			end
+
+			module Debian
+				def self.installed?(package)
+					package = package.to_s
+					return false if package.length <= 0
+					data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
+					return true if (data[0].to_s == package)
+					false
+				end
+	
+				def self.version?(package)
+					package = package.to_s
+					return false if package.length <= 0
+					data = `/usr/bin/dpkg-query -W #{package} 2> /dev/null`.strip.chop.split(' ')
+					if data[0].to_s == package
+						return data[1]
+					end
+					""
+				end
+	
+				def self.install(package)
+					package = package.to_s
+					return false if package.length <= 0
+					return true if installed?(package)
+					Command.exec("/usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+					if (Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == false)
+						Command.exec("/usr/bin/apt-get -y update 2>/dev/null")
+					else
+						return true
+					end
+					return (Command.exec("/usr/bin/apt-get -y install #{package} 2>/dev/null") == true)
+				end
+	
+				def self.uninstall(package)
+					package = package.to_s
+					return false if package.length <= 0
+					return true if not installed?(package)
+					Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+					if (Command.exec("sudo /usr/bin/apt-get -y --purge remove #{package} 2>/dev/null") == true)
+						Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+						Command.exec("sudo /usr/bin/apt-get -y --purge autoremove 2>/dev/null")
+						return true
+					end
+					return false
+				end
 			end
 		end
 
@@ -268,10 +391,11 @@ module Nuri
 		end
 
 		module Service
+			ServiceCommand = (File.exist?('/usr/bin/service') ? '/usr/bin/service' : '/sbin/service')
 			def self.running?(service)
 				service = service.to_s
 				return false if service.length <= 0
-				data = `/usr/bin/service #{service} status 2>/dev/null`
+				data = `#{ServiceCommand} #{service} status 2>/dev/null`
 				return (not (data =~ /is running/).nil? or not (data =~ /start\/running/).nil?)
 			end
 
@@ -279,7 +403,7 @@ module Nuri
 				service = service.to_s
 				return false if service.length <= 0
 				return true if running?(service)
-				cmd = "/usr/bin/sudo /usr/bin/service #{service} start 2>/dev/null"
+				cmd = "/usr/bin/sudo #{ServiceCommand} #{service} start 2>/dev/null"
 				cmd += " 1>/dev/null" if not debug
 				return (system(cmd) == true)
 			end
@@ -288,7 +412,7 @@ module Nuri
 				service = service.to_s
 				return false if service.length <= 0
 				return true if not running?(service)
-				cmd = "/usr/bin/sudo /usr/bin/service #{service} stop 2>/dev/null"
+				cmd = "/usr/bin/sudo #{ServiceCommand} #{service} stop 2>/dev/null"
 				cmd += " 1>/dev/null" if not debug
 				return (system(cmd) == true)
 			end

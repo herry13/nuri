@@ -1,0 +1,5 @@
+include "modules/service/service.sfp"
+
+class Libvirtd extends Service {
+}
+

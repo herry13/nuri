@@ -1,0 +1,70 @@
+include "modules/service/service.sfp"
+
+class Nginx extends Service {
+	port = 80
+	document_root = "/usr/share/nginx/www"
+	server_name = "localhost"
+	php_module = false
+	php_mysql_module = false
+
+	procedure set_document_root(path isref String) {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.document_root = path
+		}
+	}
+
+	procedure set_server_name(name isref String) {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.server_name = name
+		}
+	}
+
+	procedure enable_php_mysql_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_mysql_module = true
+		}
+	}
+
+	procedure disable_php_mysql_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_mysql_module = false
+		}
+	}
+
+	procedure enable_php_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_module = true
+		}
+	}
+
+	procedure disable_php_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_module = false
+		}
+	}
+}
+
