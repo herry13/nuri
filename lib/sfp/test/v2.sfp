@@ -1,0 +1,22 @@
+schema S {
+	foo = true
+
+	procedure change {
+		conditions { }
+		effects {
+			this.foo is false
+		}
+	}
+}
+
+a extends S
+b extends S
+
+constraint goal {
+	a.foo is false
+	b.foo is false
+}
+
+constraint global {
+	a.foo is false
+}
