@@ -1,6 +1,9 @@
 05-04-2013 -- 0.3.4(alpha)
 + add new modules: nginx and mariadb
-- replace nohup with forever in nurilabs
++ replace nohup with forever in nurilabs
++ add v init script "bin/nuri-init"
++ modify "bin/install-client" to install v init script to enable
+  start/stop nuri-client deamon through "service"
 
 05-04-2013 -- 0.3.3
 + add new modules "nurilabs" and "mongodb"

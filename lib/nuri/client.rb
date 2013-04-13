@@ -46,6 +46,7 @@ module Nuri
 				@server.shutdown
 				pid_file = Nuri::Util.pid_file
 				File.delete(pid_file) if File.exist?(pid_file)
+				File.delete(pid_file + ".1") if File.exist?(pid_file + ".1")
 			end
 
 			# start client's HTTP server to accept connection
@@ -91,6 +92,8 @@ module Nuri
 									pid = data[1].to_i.to_s + "," + $$.to_s
 									Nuri::Util.log "Nuri client daemon is running with PID ##{pid}"
 									File.open(Nuri::Util.pid_file, 'w') { |f| f.write(pid) }
+									pid1 = data[1].to_i.to_s
+									File.open(Nuri::Util.pid_file + ".1", 'w') { |f| f.write(pid1) }
 								end
 							end
 						rescue Exception => exp

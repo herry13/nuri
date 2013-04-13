@@ -1,14 +1,34 @@
-#!/bin/sh
-
-#sed "s/^DAEMON=.*/DAEMON=nuri/" nuri-init
+#!/bin/bash
 
 setup_configuration_file() {
 	# setup configuration file
 	echo -n "Setup configuration file..."
-	cp etc/nuri-template.sfp etc/nuri.sfp
-	sed -i 's/^\s*trusted.*/\ttrusted is \(__TRUSTED__\)/g' etc/nuri.sfp
-	sed -i "s/__TRUSTED__/$TRUSTED/g" etc/nuri.sfp
+	CONFIG_FILE="$1/etc/nuri.sfp"
+	if [ -f "$CONFIG_FILE" ]; then
+		# backup existing file
+		mv $CONFIG_FILE "$CONFIG_FILE.bak"
+	fi
+	cp "$1/etc/nuri-template.sfp" $CONFIG_FILE
+	sed -i 's/^\s*trusted.*/\ttrusted is \(__TRUSTED__\)/g' $CONFIG_FILE
+	sed -i "s/__TRUSTED__/$TRUSTED/g" $CONFIG_FILE
 	echo "OK"
+}
+
+setup_init_script() {
+	INIT_FILE="$1/bin/nuri-init"
+	DAEMON="$1/bin/nuri-client"
+	DAEMON=${DAEMON//\//\\\/}
+	sudo cp $INIT_FILE /etc/init.d/nuri
+	sudo sed -i "s/^DAEMON=.*/DAEMON=\"$DAEMON\"/" /etc/init.d/nuri
+	HOME=${1//\//\\\/}
+	sudo sed -i "s/^HOME=.*/HOME=\"$HOME\"/" /etc/init.d/nuri
+	cd /etc/rc0.d; sudo ln -sf ../init.d/nuri K30nuri
+	cd /etc/rc1.d; sudo ln -sf ../init.d/nuri K30nuri
+	cd /etc/rc2.d; sudo ln -sf ../init.d/nuri S30nuri
+	cd /etc/rc3.d; sudo ln -sf ../init.d/nuri S30nuri
+	cd /etc/rc4.d; sudo ln -sf ../init.d/nuri S30nuri
+	cd /etc/rc5.d; sudo ln -sf ../init.d/nuri S30nuri
+	cd /etc/rc6.d; sudo ln -sf ../init.d/nuri K30nuri
 }
 
 install_required_softwares() {
@@ -20,7 +40,6 @@ install_required_softwares() {
 	echo "...OK"
 }
 
-#DEST="$( cd "$( dirname "$0" )" && pwd )/nuri"
 DEST="$( pwd )/nuri"
 TRUSTED=""
 if [ "$1" = "-silent" ]; then
@@ -35,35 +54,39 @@ fi
 
 TRUSTED="\"$TRUSTED\""
 
-#install_required_softwares
+install_required_softwares
 
 if [ "$1" = "-environment" ]; then
-	setup_configuration_file
-	exit 1
+	DIR="$( cd "$( dirname "$0" )" && cd .. && pwd )"
+	setup_configuration_file $DIR
+	setup_init_script $DIR
+	exit 0
 fi
 
 # download binaries from github repository
-echo "Download binaries..."
+echo -n "Download binaries..."
 /usr/bin/wget -O /tmp/nuri.tgz -o /dev/null https://github.com/herry13/nuri/tarball/master
-echo "...OK"
+echo "OK"
 
 if [ -f "/tmp/nuri.tgz" ]; then
 	cd /tmp
 
 	# extract
-	/bin/tar xvf nuri.tgz
+	echo -n "Extract the files..."
+	/bin/tar xvf nuri.tgz 1>/dev/null 2>/dev/null
 	# locate the directory, rename it, then change current directory
 	DIR=`/bin/ls | grep 'herry13-nuri'`
 	mv $DIR $DEST
 	rm -f nuri.tgz
+	echo "OK"
 
 	cd $DEST
 
-	setup_configuration_file
+	setup_configuration_file "$DEST"
 
-	# delete unused file
-	#cd ..
-	#rm -f nuri.tgz
+	setup_init_script "$DEST"
 
-	echo "finished"
+	echo "Finished!"
 fi
+
+exit 0

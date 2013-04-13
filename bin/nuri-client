@@ -1,11 +1,21 @@
-#!/bin/sh
+#!/bin/bash
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 NURI="$DIR/nuri"
+PIDFILE="$(cd "$DIR" && cd .. && pwd )/var/nuri.pid"
 
 if [ "$1" = "restart" ]; then
 	$NURI client stop
 	nice $NURI client start
+elif [ -f "$PIDFILE" ] && [ "$1" = "start" ]; then
+	# check if the nuri daemon is running
+	PIDS="$( cat "$PIDFILE" )"
+	IFS=',' read -a PIDS <<< "$PIDS"
+	DATA="$( ps "${PIDS[0]}" | grep nuri )"
+	if [ "$DATA" = "" ]; then
+		# daemon is not running
+		nice $NURI client $@
+	fi
 else
 	nice $NURI client $@
 fi

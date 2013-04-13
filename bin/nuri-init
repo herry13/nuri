@@ -11,7 +11,8 @@
 ### END INIT INFO
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/home/herry/nuri/bin/nuri-client
+HOME="/opt/nuri"
+DAEMON="/opt/nuri/bin/nuri-client"
 NAME=nuri
 DESC=nuri
 
@@ -31,18 +32,23 @@ case "$1" in
 		fi
 		$DAEMON start
 		echo "$NAME."
+		sleep 1
+		ln -sf "$HOME/var/nuri.pid.1" "/var/run/nuri.pid"
 		;;
 
 	stop)
 		echo -n "Stopping $DESC: "
 		$DAEMON stop
 		echo "$NAME."
+		rm -f "/var/run/nuri.pid"
 		;;
 
 	restart)
 		echo -n "Restarting $DESC: "
 		$DAEMON restart
 		echo "$NAME."
+		sleep 1
+		ln -sf "$HOME/var/nuri.pid.1" "/var/run/nuri.pid"
 		;;
 
 	status)
