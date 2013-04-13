@@ -15,6 +15,7 @@ setup_configuration_file() {
 }
 
 setup_init_script() {
+	echo -n "Setup v init script..."
 	INIT_FILE="$1/bin/nuri-init"
 	DAEMON="$1/bin/nuri-client"
 	DAEMON=${DAEMON//\//\\\/}
@@ -29,6 +30,7 @@ setup_init_script() {
 	cd /etc/rc4.d; sudo ln -sf ../init.d/nuri S30nuri
 	cd /etc/rc5.d; sudo ln -sf ../init.d/nuri S30nuri
 	cd /etc/rc6.d; sudo ln -sf ../init.d/nuri K30nuri
+	echo "OK"
 }
 
 install_required_softwares() {
@@ -60,6 +62,7 @@ if [ "$1" = "-environment" ]; then
 	DIR="$( cd "$( dirname "$0" )" && cd .. && pwd )"
 	setup_configuration_file $DIR
 	setup_init_script $DIR
+	echo "Finish setup the environment!"
 	exit 0
 fi
 
