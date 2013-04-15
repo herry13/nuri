@@ -48,14 +48,14 @@ module Nuri
 
 				# install required packages
 				# mysql-client (optional: memcached)
-				return false if not Nuri::Helper::Package.installed?('mysql-client')
+				return false if not Nuri::Helper::Package.install('mysql-client')
 
 				# install required PHP5 modules
 				# php5-tidy php-pear php5-xcache php5-gd php5-xmlrpc php-xml-parser phpmyadmin
-				return false if not Nuri::Helper::Package.installed?('php5-gd')
-				return false if not Nuri::Helper::Package.installed?('php-pear')
-				return false if not Nuri::Helper::Package.installed?('php5-xmlrpc')
-				return false if not Nuri::Helper::Package.installed?('php-xml-parser')
+				return false if not Nuri::Helper::Package.install('php5-gd')
+				return false if not Nuri::Helper::Package.install('php-pear')
+				return false if not Nuri::Helper::Package.install('php5-xmlrpc')
+				return false if not Nuri::Helper::Package.install('php-xml-parser')
 
 				# download and extract tikiwiki to destination folder
 				doc_root = self.get_state('webserver.document_root')
