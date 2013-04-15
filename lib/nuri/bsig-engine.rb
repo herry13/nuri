@@ -183,7 +183,9 @@ module Nuri
 				# sort in ascending order
 				#candidates.sort! { |x,y| x['distance'] <=> y['distance'] }
 				# sort in decending order
-				candidates.sort! { |x,y| y['distance'] <=> x['distance'] }
+				#candidates.sort! { |x,y| y['distance'] <=> x['distance'] }
+				return candidates.sample if candidates.respond_to?('sample')
+				return candidates.choice if candidates.respond_to?('choice')
 
 				# Return the operator with the lowest distance
 				return candidates.last
