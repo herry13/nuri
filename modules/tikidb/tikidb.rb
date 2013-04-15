@@ -67,7 +67,7 @@ module Nuri
 			end
 
 			def install(params={})
-				return false if not Nuri::Util.installed?('mysql-client')
+				return false if not Nuri::Helper::Package.installed?('mysql-client')
 
 				db_name = self.get_state('db_name').to_s
 				if db_name != nil and db_name != ''
@@ -89,7 +89,7 @@ module Nuri
 			end
 	
 			def uninstall(params={})
-				return false if not Nuri::Util.installed?('mysql-client')
+				return false if not Nuri::Helper::Package.installed?('mysql-client')
 				db_name = self.get_state('db_name')
 
 				if db_name != nil 
