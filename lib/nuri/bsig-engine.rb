@@ -276,7 +276,8 @@ module Nuri
 			def repair_remote_flaws(remote_flaws)
 				# re-evaluate remote flaws
 				remote_flaws.each do |variable,value|
-					if self.get_state(variable) == value
+					#if self.get_state(variable) == value
+					if @owner.get_state(variable) == value
 						remote_flaws.delete(variable)
 					end
 				end

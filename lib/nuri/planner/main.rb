@@ -272,16 +272,16 @@ module Nuri
 
 			def solve
 				# 1) solve with FF
-				planner1 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cg')
+				planner1 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'ff')
 				Kernel.system(planner1)
 				# 1b) if not found, try CEA
 				if not File.exist?(@plan_file)
-					planner2 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'ff')
+					planner2 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cea')
 					Kernel.system(planner2)
 				end
 				# 1c) if not found, try CG
 				if not File.exists?(@plan_file)
-					planner3 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cea')
+					planner3 = ::Nuri::Planner.command(@dir, @sas_file, @plan_file, 'cg')
 					Kernel.system(planner3)
 					return false if not File.exist?(@plan_file)
 				end

@@ -1439,7 +1439,10 @@ module Nuri
 					if value.length > 0
 						type = get_type(value[0])
 						if type != nil
-							@bucket["(#{type})"] << value
+							type = "(#{type})" # an array
+							#raise Exception, "type not found: #{type}" if not @bucket.has_key?(type)
+							@bucket[type] = [] if not @bucket.has_key?(type)
+							@bucket["#{type}"] << value
 						elsif value[0].is_a?(String) and value[0].isref
 							val = @sas.root['initial'].at?(value[0])
 							return true if val == nil
