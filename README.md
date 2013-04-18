@@ -2,7 +2,7 @@ Nuri
 ====
 - author: Herry (herry13@gmail.com)
 - website: http://homepages.inf.ed.ac.uk/s0978621/nuri
-- last update: 09-04-2013
+- last update: 16-04-2013
 - version: 0.3.4
  
 Nuri is an automated workflow configuration tool. It allows you to manage nodes' configuration by automatically generating the workflows to achieve the desired state defined in goal & global constraints. The workflow execution will control by a master node to satisfy particular ordering constraint.
@@ -72,8 +72,8 @@ Available Modules
 	- **nurilabs**           - A web-based interface for Nuri master
 
 
-Running with Standalone Mode
-----------------------------
+Standalone Mode
+---------------
 1. Define your desired state as goal/global constraint in SFP language into a file.
 
 2. Assume you defined your goal/global constraint in file "local.sfp", then to apply the configuration, invoke command:
