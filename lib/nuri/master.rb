@@ -10,9 +10,10 @@ module Nuri
 
 			attr_accessor :main, :do_verify_execution
 
-			def initialize
+			# @param :main_file : path of main configuration file (default: etc/main.sfp)
+			def initialize(params={})
 				@do_verify_execution = false
-				self.load(false)
+				self.init({:master=>true, :main_file=>params[:main_file]})
 				@main = Nuri::Resource.get_root
 				self.init_cloud
 			end
@@ -196,11 +197,11 @@ module Nuri
 				begin
 					Nuri::Util.log "Sending BSig: #{bsig['id']}"
 
-					# update system information
-					self.update_system
-
 					# reset existing BSig model
 					self.reset
+
+					# update system information
+					self.update_system
 
 					nodes = []
 					# send BSig operators to clients
@@ -253,10 +254,6 @@ module Nuri
 				end
 
 				return true
-			end
-
-			def set_main_file(mainfile)
-				@main = self.parse_main_file(mainfile)
 			end
 
 			def get_plan(state=nil, json=false, parallel=false)
@@ -487,19 +484,23 @@ module Nuri
 			parallel = (params.has_key?(:parallel) ? params[:parallel] : false)
 			mainfile = (params.has_key?(:mainfile) ? params[:mainfile] : nil)
 
-			master = Nuri::Master::Daemon.new
-			puts 'Generating the workflow...'
+			print 'Generating the workflow: '
 			if not mainfile.nil?
-				master.set_main_file(mainfile)
+				master = Nuri::Master::Daemon.new({:main_file => mainfile})
 				plan = master.get_plan(nil, false, parallel)
 			else
+				master = Nuri::Master::Daemon.new
 				plan = master.get_plan(nil, false, parallel)
 			end
 
 			if plan.nil? or plan['workflow'].nil?
-				puts "\nno solution!"
+				puts "no solution!\n"
 			else
-				puts "#{JSON.pretty_generate(plan)}\n"
+				if params[:details]
+					puts "\n#{JSON.pretty_generate(plan)}\n"
+				else
+					plan['workflow'].each { |proc| puts "- #{proc['name']}#{JSON.generate(proc['parameters'])}" }
+				end
 				if plan['workflow'].length > 0
 					print "Execute the workflow [y/N]? "
 					if STDIN.gets.chomp.upcase == 'Y'
@@ -507,18 +508,18 @@ module Nuri
 						puts "Execution " + (master.execute_workflow(plan) ? "success!" : "failed!")
 					end
 				end
-				puts ''
 			end
+			puts ''
 		end
 
 		def self.bsig
 			master = Nuri::Master::Daemon.new
-			puts 'Generating the Behavioural Signature (BSig) model...'
+			print 'Generating the Behavioural Signature model: '
 			bsig = master.get_bsig
 			if bsig.nil?
-				puts 'no solution!'
+				puts "no solution!\n"
 			else
-				puts "#{JSON.pretty_generate(bsig)}\n"
+				puts "\n#{JSON.pretty_generate(bsig)}\n"
 				if bsig['operators'].length > 0
 					print "Deploy the BSig model [y/N]? "
 					if STDIN.gets.chomp.upcase == 'Y'

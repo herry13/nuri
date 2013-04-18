@@ -19,10 +19,12 @@ module Nuri
 				@state['installed'] = File.exists?("#{config['install_path']}/server/server.js")
 				if @state['installed']
 					server_path = "#{config['install_path']}/server/server.js"
-					cmd = "/usr/bin/forever list | /bin/grep #{server_path}"
-					data = Nuri::Helper::Command.getoutput(cmd).to_s.split(" ")
-					server_path = "\e[90m#{server_path}\e[39m"
-					@state['running'] = (data[4] == server_path)
+					if File.exist?('/usr/bin/forever')
+						cmd = "/usr/bin/forever list | /bin/grep #{server_path}"
+						data = Nuri::Helper::Command.getoutput(cmd).to_s.split(" ")
+						server_path = "\e[90m#{server_path}\e[39m"
+						@state['running'] = (data[4] == server_path)
+					end
 				end
 
 				@state['server'] = {}

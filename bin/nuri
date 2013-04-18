@@ -6,7 +6,7 @@ $: << File.expand_path(File.dirname(__FILE__) + "/..")
 require "nuri/planner/main"
 require "nuri/main"
 
-Version = '0.2.1(alpha)'
+Version = '0.3.4(alpha)'
 
 def console
 	def print_help
@@ -14,14 +14,22 @@ def console
 
 commands:
   main              print the content of "main.sfp"
+
   state [details]   pull and print the current state of all managed nodes
-  plan [main-file]  auto-generate a workflow to achieve the goal state;
+
+  plan [-details] [main-file]
+                    auto-generate a workflow to achieve the goal state;
                     user can also execute the workflow in order to achieve
-                    the goal state
+                    the goal state. Give "-details" argument if you want
+                    to print conditions and effects of each procedure.
+
   update-system     push system information to all managed nodes
+
   bsig              generate a Behavioural Signature (BSig) model;
                     deploy the BSig model to managed nodes
+
   status            print the status of the Behavioural Signature model
+
   reset             delete existing BSig model; stop BSig execution agent;
                     delete existing system information
 
@@ -45,7 +53,13 @@ commands:
 		end
 
 	elsif ARGV[1] == 'plan'
-		plan = Nuri::Master.plan(:parallel => false, :mainfile => ARGV[2])
+		details = (ARGV[2] == '-details')
+		mainfile = (details ? ARGV[3] : ARGV[2])
+		plan = Nuri::Master.plan({
+			:parallel => false,
+			:mainfile => mainfile,
+			:details => details
+		})
 
 	elsif ARGV[1] == 'just-plan'
 		Nuri::Master.justPlan
@@ -160,26 +174,30 @@ end
 
 def client
 	def print_help
-		puts "Usage: nuri client <command>
+		puts 'Usage: nuri client <command>
 
 commands:
-  state [details]   print the current state of this node
-  start             start the Nuri client daemon
-  stop              stop the Nuri client daemon
-  debug             start the Nuri client but not as a daemon
-  reset             clear all caches e.g. BSig model
+  state [details]   Print the current state of this node.
 
-"
+  start             Start the Nuri client daemon.
+
+  stop              Stop the Nuri client daemon.
+
+  debug             Start the Nuri client but not as a daemon.
+
+  reset             Clear all caches e.g. BSig model.
+
+  apply [sfp-file]  Plan and apply the desired state specified
+                    in "sfp-file" on localhost.
+
+'
 	end
 
 	if ARGV[1] == 'state'
-		client = Nuri::Client::Daemon.new
-		state = client.get_state
-		state = {} if state == nil
-		state.accept(Nuri::Sfp::PrettyStateGenerator.new) if
-				ARGV.length < 3 or ARGV[2] != 'details'
-		puts Nuri::Sfp.to_pretty_json(state) if state != nil
+		Nuri::Client.print_state
 
+	elsif ARGV[1] == 'apply'
+		Nuri::Client.local_plan({:sfp_file => ARGV[2]})
 
 	elsif ARGV[1] == 'start'
 		Nuri::Util.log 'Start Nuri client daemon...'

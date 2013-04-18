@@ -17,16 +17,30 @@ require 'modules/vm/vm'
 
 module Nuri
 	module Config
-		attr_reader :config, :root, :system
+		attr_reader :config, :root, :system, :main_file
 
 		AbstractModules = ['machine', 'vm', 'cloud']
 		MainComponent = '$.Machine'
 		DefaultReadTimeout = 1800 # 30 mins
 
-		def load(client=true)
-			self.read_config if client
+		# @params :master : true for master node, false for client node
+		# @params :main_file : path of main configuration file
+		def init(params={:master=>false})
+			self.read_config if not params[:master]
+
+			# set main configuration file
+			if params[:main_file].to_s.strip.length <= 0
+				@main_file = "/etc/nuri/main.sfp"
+				@main_file = Nuri::Util.home_dir + "/etc/main.sfp" if not File.exist?(@main_file)
+			else
+				@main_file = params[:main_file]
+			end
+
+			# load main configuration file
 			Nuri::Resource.set_root(self.get_main)
-			self.load_modules #if client
+
+			# load modules
+			self.load_modules
 		end
 
 		def set_system_information(system)
@@ -35,9 +49,7 @@ module Nuri
 
 		def get_main
 			begin
-				mainfile = "/etc/nuri/main.sfp"
-				mainfile = Nuri::Util.home_dir + "/etc/main.sfp" if not File.exist?(mainfile)
-				return self.parse_main_file(mainfile)
+				return self.parse_main_file(@main_file)
 			rescue Exception => exp
 				Nuri::Util.error "Cannot load main description" + " -- " + exp.to_s
 				Nuri::Util.error exp.backtrace.to_s

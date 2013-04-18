@@ -19,7 +19,7 @@ module Nuri
 				@goals = {}
 				@system_nodes = []
 
-				self.load
+				self.init
 			end
 
 			# Check if the HTTP requester is from any trusted host
@@ -591,6 +591,71 @@ module Nuri
 			rescue Exception => exp
 				Nuri::Util.error exp.to_s + "\n" + exp.backtrace.to_s
 			end
+		end
+
+		def self.print_state
+			client = Nuri::Client::Daemon.new
+			state = client.get_state
+			state = {} if state == nil
+			state.accept(Nuri::Sfp::PrettyStateGenerator.new) if
+					ARGV.length < 3 or ARGV[2] != 'details'
+			puts Nuri::Sfp.to_pretty_json(state) if state != nil
+		end
+
+		def self.local_plan(params={})
+			def clean_parameters(params)
+				p = {}
+				params.each { |k,v| p[k[2, k.length-2]] = params[k] }
+				p
+			end
+
+			if params[:sfp_file].to_s.strip.length <= 0
+				puts 'Please specify desired configuration file!'
+				return
+			end
+
+			raise Exception, "Invalid SFP configuration file: #{params[:sfp_file]}" if not File.exist?(params[:sfp_file])
+
+			client = Nuri::Client::Daemon.new
+
+			# read desired state
+			sfp_task = client.parse_main_file(params[:sfp_file])
+
+			# create SFP planning task
+			sfp_task['initial'] = client.get_state
+			sfp_task.accept(Nuri::Sfp::SfpGenerator.new(sfp_task))
+
+			# compute the plan
+			planner = Nuri::Planner::Solver.new
+			plan = planner.solve_sfp(sfp_task, false, false)
+
+			#puts JSON.pretty_generate(plan)
+			if plan.nil? or plan['workflow'].nil?
+				puts 'no solution!'
+
+			elsif plan['workflow'].length <= 0
+				puts "The desired state is already achieved!"
+
+			else plan['workflow'].length > 0
+				plan['workflow'].each { |proc| puts "- #{proc['name']}#{JSON.generate(proc['parameters'])}" }
+				print "Execute the workflow [y/N]? "
+				if STDIN.gets.strip.upcase == 'Y'
+					puts "\nExecuting the plan..."
+					success = true
+					plan['workflow'].each do |proc|
+						print "executing: #{proc['name']}#{JSON.generate(proc['parameters'])}    "
+						success = client.execute(proc)
+						puts (success ? "[OK]" : "[FAILED]")
+						break if not success
+					end
+					if not success
+						puts "\nExecution failed!"
+					else
+						puts "\nExecution success!"
+					end
+				end
+			end
+			puts ''
 		end
 
 	end
