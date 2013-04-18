@@ -49,7 +49,7 @@ Available Modules
 -----------------
 - **machine**            - a standard physical machine
 - **vm**                 - a virtual machine
-- cloud (IaaS)
+- public cloud (IaaS)
 	- **hpcloud**            - HPCloud compute (read "module/hpcloud/README.md")
 	- **rackspace**          - Rackspace compute V2 (Next-gen) (read "module/rackspace/README.md")
 	- **aws**                - Amazon Web Service EC2
@@ -87,10 +87,13 @@ Running Nuri client on managed node
 
 		$ sudo ./bin/nuri-client start
 
-4. To check whether the daemon has run, open the following URL in your browser: *http://localhost:1313/state*.
+   To check whether the daemon has run, access the following URL with curl:
+   
+   		$ curl http://localhost:1313/state
+   		
    If you get an error, you may need to reconfigure your firewall to open port 1313. 
 
-5. To stop the Nuri client daemon:
+4. To stop the Nuri client daemon:
 
 		$ sudo ./bin/nuri-client stop
 
@@ -100,11 +103,11 @@ Controlling Nuri clients from master node
 1. Create main specification file *etc/main.sfp*. The following example specifies configuration of two client nodes i.e. *host1* and *host2* where both runs apache service.
 
 		system {
-		  host1 isa Node {
-		    domainname is "host1.domain.com"
+		  host1 isa Machine {
+		    address is "host1.domain.com"
 		  }
-		  hpvm12 isa Node {
-		    domainname is "host2.domain.com"
+		  hpvm12 isa Machine {
+		    address is "host2.domain.com"
 		  }
 		}
 
