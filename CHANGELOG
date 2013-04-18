@@ -1,3 +1,7 @@
+05-04-2013 -- 0.3.4
++ enable standalone mode
++ enable master node to apply desired state specified in given configuration file
+
 05-04-2013 -- 0.3.4(alpha)
 + add new modules: nginx and mariadb
 + replace nohup with forever in nurilabs
