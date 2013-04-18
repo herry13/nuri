@@ -84,8 +84,10 @@ Running with Standalone Mode
 
 
 
-Running Nuri client on managed node
------------------------------------
+Managing Multiple Nodes
+-----------------------
+### Running Nuri client on managed node
+
 1. Create Nuri client's configuration file 'etc/nuri.sfp'. You could copy from
    the template file 'etc/nuri-template.sfp'.
 
@@ -114,8 +116,8 @@ Running Nuri client on managed node
 		$ sudo ./bin/nuri-client stop
 
 
-Controlling Nuri clients from master node
------------------------------------------
+### Controlling Nuri clients from master node
+
 1. Create main specification file *etc/main.sfp*. The following example specifies configuration of two client nodes i.e. *host1* and *host2* where both runs apache service.
 
 		system {
@@ -153,8 +155,8 @@ Controlling Nuri clients from master node
 		$ ./bin/nuri-master apply
 
 
-Distributed Execution
----------------------
+### Distributed Execution
+
 In this approach, the goal and the global constraints are achieved by generating the workflow by master node. Then, the workflow is splitted-up and distributed to the clients where each client will receive only related parts. To start the execution, master node will send activation commands to all clients. This will enable the clients to execution their parts independently and cooperate each other whenever some dependencies between the actions exist. The communication between clients does not depend on master node.
 
 This approach can be used using command:
