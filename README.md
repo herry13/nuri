@@ -17,16 +17,20 @@ Requirements
 	- ruby-dev
 	- rubygems (if you use ruby <= 1.8.7)
 	- libz-dev
-	- libaugeas-ruby
-	- libxml2-dev
-	- libxslt-dev
 - required Ruby Gems
 	- webrick
 	- json
 	- antlr3
-	- fog
 
 For a better performance, it is recommended to use ruby >= 1.9
+
+Some **extra packages/gems** are required by some modules:
+- extra packages
+ 	- libaugeas-ruby (mysql)
+ 	- libxml2-dev (hpcloud, rackspace, aws)
+ 	- libxslt-dev (hpcloud, rackspace, aws)
+- extra gems
+	- fog (hpcloud, rackspace, aws)
 
 To Install
 ----------
