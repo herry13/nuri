@@ -109,14 +109,16 @@ module Nuri
 
 		def self.domainname(ip=nil)
 			ip = self.local_ip if ip == nil
-			result = `nslookup #{ip}`
-			result = result.split("\n")
-			if result.length < 4
-				return Socket.gethostbyname(Socket.gethostname).first
-			else
-				result = result[3].split(" ")
-				return (result[3].nil? ? '' : result[3].chop)
+			if File.exist?('/usr/bin/nslookup')
+				result = `nslookup #{ip}`.split("\n")
+				if result.length < 4
+					return Socket.gethostbyname(Socket.gethostname).first
+				else
+					result = result[3].split(" ")
+					return (result[3].nil? ? '' : result[3].chop)
+				end
 			end
+			ip
 		end
 
 		def self.temp_dir
