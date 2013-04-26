@@ -1,6 +1,6 @@
 include "modules/service/service.sfp"
 
-class Hadoop extends Service {
+schema Hadoop extends Service {
 	is_master = false
 	is_slave = false
 	namenode_port = 10815

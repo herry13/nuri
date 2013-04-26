@@ -1,6 +1,6 @@
 include "modules/apache/apache.sfp"
 
-class Apachelb extends Service {
+schema Apachelb extends Service {
 	port = 80
 	members isset Machine
 	server_name = ""

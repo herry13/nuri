@@ -1,6 +1,6 @@
 include "modules/service/service.sfp"
 
-class Nurilabs extends Service {
+schema Nurilabs extends Service {
 	install_path = "/opt/nurilabs"
 	port = 8080
 	ssl = false

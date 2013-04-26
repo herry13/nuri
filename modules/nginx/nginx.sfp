@@ -1,6 +1,6 @@
 include "modules/service/service.sfp"
 
-class Nginx extends Service {
+schema Nginx extends Service {
 	port = 80
 	document_root = "/usr/share/nginx/www"
 	server_name = "localhost"

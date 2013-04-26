@@ -1,7 +1,7 @@
 include "modules/machine/machine.sfp"
 include "modules/cloud/cloud.sfp"
 
-class VM extends Machine {
+schema VM extends Machine {
 	created is false
 	oncloud isref Cloud
 	flavor_id is ""

@@ -1,4 +1,4 @@
-class Machine {
+schema Machine {
 	running = false
 	created = true
 	address = ""

@@ -1,7 +1,7 @@
 include "modules/apache/apache.sfp"
 include "modules/mysql/mysql.sfp"
 
-class Tikidb {
+schema Tikidb {
 	installed  = false
 	db_name = "tikiwiki"
 	db_user = "tiki"

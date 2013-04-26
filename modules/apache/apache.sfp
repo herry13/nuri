@@ -1,6 +1,6 @@
 include "modules/service/service.sfp"
 
-class Apache extends Service {
+schema Apache extends Service {
 	port = 80
 	document_root = "/var/www"
 	php_module = false

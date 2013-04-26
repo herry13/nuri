@@ -1,5 +1,5 @@
 include "modules/service/service.sfp"
 
-class Libvirtd extends Service {
+schema Libvirtd extends Service {
 }
 

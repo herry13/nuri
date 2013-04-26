@@ -1,6 +1,6 @@
 include "modules/service/service.sfp"
 
-class Mongodb extends Service {
+schema Mongodb extends Service {
 	port = 27017
 }
 

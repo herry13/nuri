@@ -1,4 +1,4 @@
-class Service {
+schema Service {
 	installed = false
 	running = false
 	port = 0

@@ -1,14 +1,8 @@
-class Service {
+schema Service {
 	running is no
 	depend isref Service
 }
 
-class WebService extends Service
+schema WebService extends Service
 
-class DBService extends Service
-
-/*class AppService extends Service
-
-class MailService extends Service
-
-class FtpService extends Service*/
+schema DBService extends Service

@@ -1,6 +1,6 @@
 include "modules/service/service.sfp"
 
-class Mysql extends Service {
+schema Mysql extends Service {
 	port = 3306
 	root_password = ""
 	public = false
