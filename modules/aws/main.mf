@@ -1,4 +1,3 @@
 author: Herry
 version: 1.0
-main-class: Nuri::Module::AWS
-sfp-class: Cloud
+ruby-class: Nuri::Module::AWS

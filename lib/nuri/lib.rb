@@ -180,11 +180,11 @@ module Nuri
 
 					# read module manifest file (main.mf)
 					manifest = self.parse_module_manifest(manifest_file)
-					next if manifest['main-class'].to_s.strip == ''
+					next if manifest['ruby-class'].to_s.strip == ''
 
 					# load the module based on information in the manifest file
 					require 'modules/' + mod + '/' + mod
-					m = eval("#{manifest['main-class']}.new")
+					m = eval("#{manifest['ruby-class']}.new")
 					m.name = mod if m.name == nil or m.name == ''
 					machine.add(m) if not m.is_abstract
 					Nuri::Util.log "Successfully loaded module " + mod

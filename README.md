@@ -178,14 +178,14 @@ To build:
 SFP Language
 ------------
 - primitive types: Boolean, String, Integer
-- non-primitive type: any user-defined Class
+- non-primitive type: any user-defined Schema
 - abstract data-structure: Array (1-dimension), and Set
 - example of configuration task:
 	https://github.com/herry13/nuri/tree/master/test/planning/
 - more information about SFP can be found in:
 	https://github.com/herry13/nuri/wiki/SFP-language
 
-**Class**
+**Schema**
 - could have one or more attributes with a primitive/non-primitive type
 - could have one or more procedures to make changes the value of the attributes
 
@@ -231,8 +231,8 @@ The user could define the following constraints in the procedure's **condition**
 		x.attribute = y
 	}
 
-	// class quantification
-	forall (MyClass as x) {  // apply for all objects of MyClass
+	// type quantification
+	forall (MyType as x) {  // apply for all objects of MyType
 		x.attribute = y
 	}
 
