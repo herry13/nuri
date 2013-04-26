@@ -484,7 +484,7 @@ module Nuri
 			parallel = (params.has_key?(:parallel) ? params[:parallel] : false)
 			mainfile = (params.has_key?(:mainfile) ? params[:mainfile] : nil)
 
-			print 'Generating the workflow: '
+			puts 'Generating the workflow: '
 			if not mainfile.nil?
 				master = Nuri::Master::Daemon.new({:main_file => mainfile})
 				plan = master.get_plan(nil, false, parallel)
@@ -507,6 +507,8 @@ module Nuri
 						puts "Executing the plan..."
 						puts "Execution " + (master.execute_workflow(plan) ? "success!" : "failed!")
 					end
+				else
+					puts "The system is already at the goal state!"
 				end
 			end
 			puts ''
