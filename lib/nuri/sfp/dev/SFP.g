@@ -87,7 +87,7 @@ composite
 	;
 
 class_definition
-	:	'class' ID
+	:	('class'|'schema') ID
 		{
 			@now[$ID.text] = { '_self' => $ID.text,
 				'_context' => 'class',
