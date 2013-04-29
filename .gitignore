@@ -2,3 +2,5 @@
 .yardoc
 .DS_Store
 .*
+bsig.sh
+central.sh

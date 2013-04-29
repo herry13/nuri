@@ -70,7 +70,9 @@ module Nuri
 						if vms.has_key?(name) # the VM exists (has been created)
 							address = vms[name].to_s
 							state = self.get_node_state(address) if address.length > 0
-							state[name]['created'] = true if not state.nil?
+							if state.is_a?(Hash) and state[name].is_a?(Hash)
+								state[name]['created'] = true if not state.nil?
+							end
 						else
 							# the VM does not exist
 							state = self.create_vm_template(node)
@@ -501,13 +503,13 @@ module Nuri
 				else
 					plan['workflow'].each { |proc| puts "- #{proc['name']}#{JSON.generate(proc['parameters'])}" }
 				end
-				if plan['workflow'].length > 0
+				if plan['workflow'].length > 0 and not params[:noexec]
 					print "Execute the workflow [y/N]? "
 					if STDIN.gets.chomp.upcase == 'Y'
 						puts "Executing the plan..."
 						puts "Execution " + (master.execute_workflow(plan) ? "success!" : "failed!")
 					end
-				else
+				elsif not params[:noexec]
 					puts "The system is already at the goal state!"
 				end
 			end
