@@ -2,7 +2,7 @@
 .yardoc
 .DS_Store
 .*
-bsig.sh
-central.sh
-plan.sh
+bsig*
+central*
+plan*
 logs
