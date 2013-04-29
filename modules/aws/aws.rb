@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'fog'
-require 'sshkey'
 
 module Nuri
 	module Module
