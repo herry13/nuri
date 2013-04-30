@@ -48,9 +48,12 @@ module Nuri
 					while not @failed and not action[:executed]
 						# execute the action
 						op_str = action_to_string(action)
-						#Nuri::Util.debug "[ExecutorThread: #{tid}] #{op_str}"
+						Nuri::Util.puts "[ExecutorThread: #{tid}] #{op_str}"
 						#success = true
-						success = @owner.execute_action { action }
+						for i in 1..3
+							success = @owner.execute_action { action }
+							break if success
+						end
 
 						# check if execution failed
 						if success
@@ -85,8 +88,10 @@ module Nuri
 								
 						else
 							Nuri::Util.error "Failed executing #{op_str}!"
-							@failed = true # set global flag
-							@mutex.synchronize { @actions_failed << action }
+							@mutex.synchronize {
+								@failed = true # set global flag
+								@actions_failed << action
+							}
 						end
 					end
 
@@ -119,6 +124,8 @@ module Nuri
 			begin
 				sleep 1
 			end while @threads.length > 0
+
+			Nuri::Util.log "Using #{@thread_id} threads in execution."
 
 			return (not @failed)
 		end

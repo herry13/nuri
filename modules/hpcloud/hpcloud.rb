@@ -228,6 +228,8 @@ module Nuri
 					while not self.is_port_open?(address, 22) and counter > 0
 						sleep 1
 						counter -= 1
+						info = self.get_info(name)
+						address = info.public_ip_address
 					end
 					Nuri::Util.log "vm[#{name}]: ip=#{address}"
 
