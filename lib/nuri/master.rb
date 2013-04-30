@@ -1,5 +1,6 @@
 require 'net/http'
 require 'base64'
+require 'thread'
 
 module Nuri
 	module Master
@@ -7,11 +8,13 @@ module Nuri
 			include Nuri::Config
 			include Nuri::NetHelper
 			include Nuri::CloudHelper
+			include Nuri::Execution
 
 			attr_accessor :main, :do_verify_execution
 
 			# @param :main_file : path of main configuration file (default: etc/main.sfp)
 			def initialize(params={})
+				@mutex_update_system = Mutex.new
 				@do_verify_execution = false
 				self.init({:master=>true, :main_file=>params[:main_file]})
 				@main = Nuri::Resource.get_root
@@ -289,14 +292,12 @@ module Nuri
 						# update system information
 						self.update_system
 
-						#self.reset
-
 						# execute the action in sequential
 						if plan['type'] == 'sequential'
 							success = self.sequential_execution(plan)
 						elsif plan['type'] == 'parallel'
-							# TODO -- implement parallel scheduler
-							success = self.parallel_execution(plan)
+							#success = self.parallel_execution(plan)
+							success = self.parallel_execute({:plan => plan})
 						else
 							success = false
 						end
@@ -307,28 +308,18 @@ module Nuri
 				success
 			end
 
-			def parallel_execution(plan)
-				# HACK - convert parallel to sequential
-				plan['workflow'].sort! { |x,y| x['id'] <=> y['id'] }
-				return sequential_execution(plan)
-			end
-
 			def sequential_execution(plan)
-				plan['workflow'].each do |action|
-					node = self.get_node(action['name'])
-					if node == nil
-						Nuri::Util.log "Cannot find module of action: #{action['name']}"
-						return false
-					else
-						return false if not self.execute(action, node)
-					end
-					self.update_system
-					#state = get_state
-				end
+				plan['workflow'].each { |action| return false if not execute_action(action) }
 				true
 			end
 
-			def execute(action, node)
+			def execute_action(action)
+				node = self.get_node(action['name'])
+				if node.nil?
+					Nuri::Util.log "Cannot find module of action: #{action['name']}"
+					return false
+				end
+
 				def verify(action)
 					state = get_state
 					action['effect'].each do |key,value|
@@ -383,15 +374,17 @@ module Nuri
 					false
 				end
 
-				print '- executing ' + action['id'].to_s + ':' + action['name'] + JSON.generate(action['parameters']) + '...'
 				if node.has_key?('address')
-					print '+...'
+					Nuri::Util.puts "Executing[1] #{action['id']}:#{action['name']}#{JSON.generate(action['parameters'])} [Wait]"
 					succeed = remote_execute(action, node['address'])
 				else
-					print '-...'
+					Nuri::Util.puts "Executing[2] #{action['id']}:#{action['name']}#{JSON.generate(action['parameters'])} [Wait]"
 					succeed = local_execute(action)
 				end
-				puts (succeed ? 'OK' : 'Failed')
+				result = (succeed ? 'OK' : 'Failed')
+				Nuri::Util.puts "Executing #{action['id']}:#{action['name']}#{JSON.generate(action['parameters'])} [#{result}]"
+
+				self.update_system
 
 				succeed
 			end
@@ -442,16 +435,18 @@ module Nuri
 			end
 
 			def update_system
-				system = self.get_system_information
-				system.each_value do |target|
-					next if target.nil? or target.to_s.length <= 0
-					next if not Nuri::Util.is_nuri_active?(target)
-					begin
-						post_data(target, Nuri::Port, '/system', system)
-					rescue Exception => e
-						Nuri::Util.log 'Cannot send system information to ' + target.to_s + ' (' + e.to_s + ')'
+				@mutex_update_system.synchronize {
+					system = self.get_system_information
+					system.each_value do |target|
+						next if target.nil? or target.to_s.length <= 0
+						next if not Nuri::Util.is_nuri_active?(target)
+						begin
+							post_data(target, Nuri::Port, '/system', system)
+						rescue Exception => e
+							Nuri::Util.log 'Cannot send system information to ' + target.to_s + ' (' + e.to_s + ')'
+						end
 					end
-				end
+				}
 			end
 
 		end
@@ -466,27 +461,16 @@ module Nuri
 			master.apply(false, debug)
 		end
 
-		def self.execute_plan_file(params={})
-			master = Nuri::Master::Daemon.new
-			master.execute_plan_file(params[:plan_file])
-		end
-
 		def self.pull
 			master = Nuri::Master::Daemon.new
 			return master.get_state
-		end
-
-		def self.justPlan
-			master = Nuri::Master::Daemon.new
-			plan = master.get_plan(nil, false, true);
-			puts JSON.pretty_generate(plan) + "\n"
 		end
 
 		def self.plan(params={})
 			parallel = (params.has_key?(:parallel) ? params[:parallel] : false)
 			mainfile = (params.has_key?(:mainfile) ? params[:mainfile] : nil)
 
-			puts 'Generating the workflow: '
+			puts 'Generating the workflow...' if params[:interactive]
 			if not mainfile.nil?
 				master = Nuri::Master::Daemon.new({:main_file => mainfile})
 				plan = master.get_plan(nil, false, parallel)
@@ -496,54 +480,94 @@ module Nuri
 			end
 
 			if plan.nil? or plan['workflow'].nil?
-				puts "no solution!\n"
+				puts "no solution!\n" if params[:interactive]
 			else
 				if params[:details]
-					puts "\n#{JSON.pretty_generate(plan)}\n"
+					puts "\n#{JSON.pretty_generate(plan)}\n" if params[:interactive]
 				else
-					plan['workflow'].each { |proc| puts "- #{proc['name']}#{JSON.generate(proc['parameters'])}" }
+					plan['workflow'].each { |proc|
+						puts "- #{proc['name']}#{JSON.generate(proc['parameters'])}"
+					}
 				end
-				if plan['workflow'].length > 0 and not params[:noexec]
-					print "Execute the workflow [y/N]? "
-					if STDIN.gets.chomp.upcase == 'Y'
-						puts "Executing the plan..."
+
+				if params[:exec].to_s == 'true'
+					if plan['workflow'].length <= 0
+						puts "The system is already at the goal state!"
+					else
+						puts "Executing the workflow..."
 						puts "Execution " + (master.execute_workflow(plan) ? "success!" : "failed!")
 					end
-				elsif not params[:noexec]
-					puts "The system is already at the goal state!"
-				end
-			end
-			puts ''
-		end
-
-		def self.bsig
-			master = Nuri::Master::Daemon.new
-			print 'Generating the Behavioural Signature model: '
-			bsig = master.get_bsig
-			if bsig.nil?
-				puts "no solution!\n"
-			else
-				puts "\n#{JSON.pretty_generate(bsig)}\n"
-				if bsig['operators'].length > 0
-					print "Deploy the BSig model [y/N]? "
-					if STDIN.gets.chomp.upcase == 'Y'
-						print 'Deploying the Behavioural Signature model...'
-						puts (master.deploy_bsig(bsig) ? 'OK' : 'Failed')
+				elsif params[:exec].to_s == 'ask'
+					if plan['workflow'].length <= 0
+						puts "The system is already at the goal state!"
+					else
+						print "Execute the workflow [y/N]? " if params[:interactive]
+						if STDIN.gets.chomp.upcase == 'Y'
+							puts "Executing the workflow..."
+							result = master.execute_workflow(plan)
+							puts "Execution " + (result ? "success!" : "failed!")
+						end
 					end
 				end
 			end
 			puts ''
 		end
 
-		def self.get_bsig
+		def self.execute_plan(params={})
+			if params[:plan].nil?
+				if params[:file].nil?
+					puts 'The workflow file is not defined!' if params[:interactive]
+					return false
+				end
+				if not File.exist?(params[:file])
+					puts 'The workflow file is not exist!' if params[:interactive]
+					return false
+				end
+				print 'Loading the workflow file...' if params[:interactive]
+				params[:plan] = JSON.parse(File.read(params[:file]))
+				puts 'OK' if params[:interactive]
+			end
 			master = Nuri::Master::Daemon.new
-			return master.get_bsig
+			puts "Executing the workflow..." if params[:interactive]
+			result = master.execute_workflow(params[:plan])
+			puts "Execution " + (result ? "success!" : "failed!") if params[:interactive]
 		end
 
-		def self.apply_bsig(params={})
-			debug = (params.has_key?(:debug) ? params[:debug] : false)
-			master = Nuri::Master::Daemon.new
-			return master.apply_bsig(debug)
+		def self.bsig(params={})
+			mainfile = (params.has_key?(:mainfile) ? params[:mainfile] : nil)
+			master = (mainfile.nil? ? Nuri::Master::Daemon.new : Nuri::Master::Daemon.new({:main_file => mainfile}))
+
+			print 'Generating the Behavioural Signature model: ' if params[:interactive]
+			bsig = master.get_bsig
+			if bsig.nil?
+				puts (params[:interactive] ? "no solution!\n" :
+				                             JSON.generate({:version => 1, :operators => nil}))
+			else
+				puts "\n#{JSON.pretty_generate(bsig)}\n"
+
+				if params[:deploy].to_s == 'true'
+					if bsig['operators'].length <= 0
+						puts (params[:interactive] ? 'The system is already at the goal state!' :
+				                                     JSON.generate({:version => 1, :operators => []}))
+					else
+						print 'Deploying the Behavioural Signature model...' if params[:interactive]
+						puts (master.deploy_bsig(bsig) ? 'OK' : 'Failed')
+					end
+
+				elsif params[:deploy].to_s == 'ask'
+					if bsig['operators'].length <= 0
+						puts 'The system is already at the goal state!'
+					else
+						print "Deply the Behavioural Signature model [y/N]? "
+						if STDIN.gets.chomp.upcase == 'Y'
+							print 'Deploying the Behavioural Signature model...' if params[:interactive]
+							result = master.deploy_bsig(bsig)
+							puts (result ? 'OK' : 'Failed') if params[:interactive]
+						end
+					end
+				end
+			end
+			puts ''
 		end
 
 		def self.start_bsig
@@ -596,23 +620,6 @@ module Nuri
 		def self.debug_sfp
 			master = Nuri::Master::Daemon.new
 			master.debug_sfp
-		end
-
-		def self.exec(params={})
-			sfw_file = (params.has_key?(:planfile) ? params[:planfile] : nil)
-			raise Exception, 'Invalid file' if not File.exist?(sfw_file)
-			plan = nil
-			File.open(sfw_file) { |f| plan = JSON[ f.read ] }
-			if plan != nil
-				master = Nuri::Master::Daemon.new
-				if master.execute_workflow(plan)
-					puts 'Execution success!'
-				else
-					puts 'Execution failed!'
-				end
-			else
-				puts 'Invalid workflow (sfw) file'
-			end
 		end
 
 		def self.reset

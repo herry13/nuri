@@ -55,27 +55,28 @@ commands:
 	elsif ARGV[1] == 'plan'
 		details = (ARGV[2] == '-details')
 		mainfile = (details ? ARGV[3] : ARGV[2])
-		plan = Nuri::Master.plan({
-			:parallel => false,
-			:mainfile => mainfile,
-			:details => details
-		})
+		Nuri::Master.plan({:mainfile => mainfile, :exec => 'ask', :parallel => false,
+		                   :details => details, :interactive => true})
 
 	elsif ARGV[1] == 'just-plan'
-		Nuri::Master.plan({:mainfile => ARGV[2], :noexec => true})
+		Nuri::Master.plan({:mainfile => ARGV[2], :exec => false})
 
 	elsif ARGV[1] == 'just-plan-par'
-		Nuri::Master.plan({:parallel => true, :mainfile => ARGV[2], :noexec => true, :details => true})
+		Nuri::Master.plan({:mainfile => ARGV[2], :exec => false, :parallel => true,
+		                   :details => true})
 
 	elsif ARGV[1] == 'plan-par'
-		Nuri::Master.plan({:parallel => true, :mainfile => ARGV[2], :details => true})
+		Nuri::Master.plan({:mainfile => ARGV[2], :exec => 'ask', :parallel => true,
+		                   :details => true, :interactive => true})
 
 	elsif ARGV[1] == 'bsig'
-		Nuri::Master.bsig
+		Nuri::Master.bsig({:mainfile => ARGV[2], :deploy => 'ask', :interactive => true})
+
+	elsif ARGV[1] == 'just-bsig'
+		Nuri::Master.bsig({:mainfile => ARGV[2], :deploy => false})
 
 	elsif ARGV[1] == 'apply-bsig'
-		puts 'Applying BSig model...'
-		puts (Nuri::Master.apply_bsig({:debug => true}) ? 'OK' : 'Failed')
+		Nuri::Master.bsig({:mainfile => ARGV[2], :deploy => true})
 
 	elsif ARGV[1] == 'start-bsig'
 		puts 'Start BSig executor...'
@@ -84,6 +85,9 @@ commands:
 	elsif ARGV[1] == 'status-bsig' or ARGV[1] == 'status'
 		puts 'Checking BSig status...'
 		Nuri::Master.status_bsig
+
+	elsif ARGV[1] == 'execute'
+		Nuri::Master.execute_plan({:file => ARGV[2], :interactive => true})
 
 	elsif ARGV[1] == 'json'
 		Nuri::Master.debug_json
@@ -94,18 +98,12 @@ commands:
 	elsif ARGV[1] == 'sfp'
 		Nuri::Master.debug_sfp
 
+	# @deprecated
 	elsif ARGV[1] == 'apply'
 		debug = (ARGV[2] == 'debug')
 		puts 'Generating and executing the workflow...'
 		result = Nuri::Master.apply(:debug => debug)
 		puts (result ? 'OK' : 'Failed')
-
-	elsif ARGV[1] == 'exec-plan'
-		result = Nuri::Master.execute_plan_file(:plan_file => ARGV[2])
-		puts (result ? 'OK' : 'Failed')
-
-	elsif ARGV[1] == 'exec' and ARGV.length >= 3
-		result = Nuri::Master.exec(:planfile => ARGV[2])
 
 	elsif ARGV[1] == 'update-system'
 		Nuri::Master.update_system

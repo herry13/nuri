@@ -15,7 +15,7 @@ module Nuri
 			end
 			
 			def self.get_label(action, withparameters=true)
-				label = clean(action["name"])
+				label = action["id"].to_s + ":" + clean(action["name"])
 				if withparameters and ActionLabelWithParameters
 					label += "("
 					if action["parameters"].length > 0

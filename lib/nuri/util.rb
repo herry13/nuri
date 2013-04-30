@@ -8,11 +8,24 @@ module Nuri
 	module Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
 		@@logger = Logger.new(@@home_dir + "/var/message.log", Nuri::MaxLogAge, Nuri::MaxLogFileSize)
+		@@logger_stdout = Logger.new(STDOUT)
 		@@system = nil
 		@@debug = false
 		@@lock_util = Mutex.new
 
 		@@oncloud = nil
+
+		def self.init
+			@@logger_stdout.formatter = proc do |severity, datetime, progname, msg|
+				"[#{severity[0]}, #{datetime}] #{msg}\n"
+			end
+
+			@@logger.formatter = proc do |severity, datetime, progname, msg|
+				"[#{severity[0]}, #{datetime}] #{msg}\n"
+			end
+		end
+
+		def self.puts(msg); @@logger_stdout.info(msg); end
 
 		def self.set_oncloud(cloud); @@oncloud = cloud; end
 		def self.get_oncloud; @@oncloud; end
@@ -59,25 +72,29 @@ module Nuri
 
 		def self.warn(msg=nil)
 			@@logger.warn msg if msg != nil
-			puts "[warn] #{msg}" if @@debug
+			#puts "[warn] #{msg}" if @@debug
+			@@logger_stdout.warn msg if @@debug
 			return @@logger
 		end
 
 		def self.log(msg=nil)
 			@@logger.info msg if msg != nil
-			puts "[info] #{msg}" if @@debug
+			#puts "[info] #{msg}" if @@debug
+			@@logger_stdout.info msg if @@debug
 			return @@logger
 		end
 
 		def self.debug(msg=nil)
 			@@logger.debug msg if not msg.nil?
-			puts "[debug] #{msg}" if @@debug
+			#puts "[debug] #{msg}" if @@debug
+			@@logger_stdout.debug msg if @@debug
 			return @@logger
 		end
 
 		def self.error(msg=nil)
 			@@logger.error msg if not msg.nil?
-			puts "[error] #{msg}" if @@debug
+			#puts "[error] #{msg}" if @@debug
+			@@logger_stdout.error msg if @@debug
 			return @@logger
 		end
 
