@@ -5,15 +5,19 @@ require 'rubygems'
 require 'logger'
 require 'json'
 require 'uri'
+
 # Nuri libraries
 require 'nuri/util'
 require 'nuri/resource'
+require 'nuri/exec-engine'
 require 'nuri/sfp/main'
 require 'nuri/planner/main'
-require 'nuri/ssl'
+
 # Nuri modules
 require 'modules/machine/machine'
 require 'modules/vm/vm'
+
+Nuri::Util.init
 
 module Nuri
 	module Config
@@ -25,7 +29,7 @@ module Nuri
 
 		# @params :master : true for master node, false for client node
 		# @params :main_file : path of main configuration file
-		def init(params={:master=>false})
+		def init(params={:master => false})
 			self.read_config if not params[:master]
 
 			# set main configuration file
