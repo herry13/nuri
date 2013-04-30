@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'fog'
+require 'thread'
 
 module Nuri
 	module Module
@@ -10,6 +11,8 @@ module Nuri
 
 			def initialize(options={})
 				# registering the component
+				@mutex = Mutex.new
+
 				self.register('Cloud', 'aws')
 			end
 
@@ -103,7 +106,40 @@ module Nuri
 			end
 
 			# SFP method
+			def delete_vm(params={})
+				self.open_connection if @conn.nil?
+				return false if @conn.nil?
+
+				name = params['vm']
+				name = name[2, name.length-2] if name[0,2] == '$.'
+
+				server = get_vm_by_name(name)
+
+				# delete if VM with given name exists
+				if not server.nil?
+					server.destroy
+					server.wait_for { not server.ready? }
+				end
+
+				# update system information
+				system = Nuri::Util.get_system_information
+				system[name] = nil
+				Nuri::Util.set_system_information(system)
+				# broadcast system information
+				Nuri::Util.broadcast_system_information
+
+				return true
+			end
+
+			# SFP method
 			def create_vm(params={})
+				@mutex.synchronize {
+					self.create_vm2(params)
+				}
+			end
+
+			protected
+			def create_vm2(params={})
 				begin
 					self.open_connection if @conn.nil?
 					return false if @conn.nil?
@@ -112,10 +148,8 @@ module Nuri
 					name = params['vm']
 					name = name[2, name.length-2] if name[0,2] == '$.'
 	
-puts 'test1'
 					# return true if there is a VM with given name
 					@conn.servers.each { |s| return true if s.ready? and s.tags['Name'] == name }
-puts 'test2'
 	
 					config = self.read_config
 					flavor_id = config['default_flavor_id']
@@ -225,33 +259,7 @@ puts 'test2'
 				false
 			end
 
-			# SFP method
-			def delete_vm(params={})
-				self.open_connection if @conn.nil?
-				return false if @conn.nil?
 
-				name = params['vm']
-				name = name[2, name.length-2] if name[0,2] == '$.'
-
-				server = get_vm_by_name(name)
-
-				# delete if VM with given name exists
-				if not server.nil?
-					server.destroy
-					server.wait_for { not server.ready? }
-				end
-
-				# update system information
-				system = Nuri::Util.get_system_information
-				system[name] = nil
-				Nuri::Util.set_system_information(system)
-				# broadcast system information
-				Nuri::Util.broadcast_system_information
-
-				return true
-			end
-
-			protected
 			def get_vm_by_name(name)
 				self.open_connection if @conn.nil?
 				if not @conn.nil?
