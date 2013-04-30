@@ -176,6 +176,9 @@ module Nuri
 						:name => name,
 						:flavor_id => config['default_flavor_id'],
 						:image_id => config['default_image_id'],
+						:ssh_key_name => config['default_ssh_key_name'],
+						:ssh_username => config['default_ssh_username'],
+						:master_node => config['master_node'],
 					})
 				}
 			end
@@ -192,9 +195,8 @@ module Nuri
 				# return true if there is a VM with given name
 				@conn.servers.each { |s| return true if s.name == name }
 
-				config = self.read_config
-				key_name = config['default_key_name']
-				username = config['default_username']
+				key_name = params[:ssh_key_name]
+				username = params[:ssh_username]
 
 				success = false
 
@@ -241,13 +243,13 @@ module Nuri
 					
 					# create a list of trusted nodes
 					config = self.read_config
-					trusted = '\"' + config['master'] + '\"'
+					trusted = '\"' + params[:master_node] + '\"'
 					trusted += ', \"' + my_address + '\"' if my_address.length > 0
 
 					Nuri::Util.log "vm[#{name}]: installing nuri client"
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/#{@name}"
-					pub_key_file = dir + "/" + key_name + ".pem"
+					pub_key_file = File.expand_path("~/.ssh/#{key_name}.pem")
 					script_file = dir + "/nuri.sh"
 					options = "-i #{pub_key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					remote_command = "'/bin/bash -s \"#{trusted}\" \"#{cloud}\"' < #{script_file}"

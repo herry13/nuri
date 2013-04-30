@@ -2,7 +2,7 @@ config {
 	description = ""
 
 	// master node's address
-	master = ""
+	master_node = ""
 
 	// HPCloud account information
 	access_key = ""
@@ -14,6 +14,6 @@ config {
 	// Default properties of the VM
 	default_flavor_id = 100
 	default_image_id = 75845
-	default_key_name = "default"
-	default_username = "ubuntu"
+	default_ssh_key_name = "default"
+	default_ssh_username = "ubuntu"
 }
