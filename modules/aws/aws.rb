@@ -169,8 +169,8 @@ puts 'test2'
 					Nuri::Util.log "vm[#{name}]: installing nuri client"
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/#{@name}"
-					key_file = File.expand_path("~/.ssh/#{key_name}.pem")
-					script_file = dir + "/nuri.sh"
+					key_file = File.expand_path(dir + "/#{key_name}.pem")
+					script_file = File.expand_path(dir + "/nuri.sh")
 					options = "-i #{key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					remote_command = "'/usr/bin/sudo /bin/bash -s \"#{trusted}\" \"#{cloud}\" \"#{name}\"' < #{script_file}"
 					ssh_cmd = "/usr/bin/ssh #{options} #{username}@#{address}"

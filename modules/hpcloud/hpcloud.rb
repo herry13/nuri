@@ -249,8 +249,8 @@ module Nuri
 					Nuri::Util.log "vm[#{name}]: installing nuri client"
 					# install nuri on newly created VM
 					dir = Nuri::Util.home_dir + "/modules/#{@name}"
-					pub_key_file = File.expand_path("~/.ssh/#{key_name}.pem")
-					script_file = dir + "/nuri.sh"
+					pub_key_file = File.expand_path(dir + "/#{key_name}.pem")
+					script_file = File.expand_path(dir + "/nuri.sh")
 					options = "-i #{pub_key_file} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					remote_command = "'/bin/bash -s \"#{trusted}\" \"#{cloud}\"' < #{script_file}"
 					cmd = "/usr/bin/ssh #{options} #{username}@#{address} #{remote_command} 1>/dev/null 2>/dev/null"
