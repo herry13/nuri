@@ -8,13 +8,17 @@ module Nuri
 			include Nuri::Config
 			include Nuri::NetHelper
 			include Nuri::CloudHelper
-			include Nuri::Execution
 
 			attr_accessor :main, :do_verify_execution
 
 			# @param :main_file : path of main configuration file (default: etc/main.sfp)
 			def initialize(params={})
 				@mutex_update_system = Mutex.new
+				@mutex_get_system_information = Mutex.new
+
+				@executor = Object.new
+				@executor.extend(Nuri::Executor)
+
 				@do_verify_execution = false
 				self.init({:master=>true, :main_file=>params[:main_file]})
 				@main = Nuri::Resource.get_root
@@ -292,28 +296,23 @@ module Nuri
 						# update system information
 						self.update_system
 
-						# execute the action in sequential
-						if plan['type'] == 'sequential'
-							success = self.sequential_execution(plan)
-						elsif plan['type'] == 'parallel'
-							#success = self.parallel_execution(plan)
-							success = self.parallel_execute({:plan => plan})
-						else
-							success = false
-						end
+						# execute the plan by invoking the executor
+						success = @executor.execute_plan({:plan => plan, :owner => self})
+
 					rescue Timeout::Error
 						success = false
+					rescue Exception => exp
+						success = false
+						Nuri::Util.error exp.to_s
 					end
 				end
 				success
 			end
 
-			def sequential_execution(plan)
-				plan['workflow'].each { |action| return false if not execute_action(action) }
-				true
-			end
+			#def execute_action(action)
+			def execute_action
+				action = yield
 
-			def execute_action(action)
 				node = self.get_node(action['name'])
 				if node.nil?
 					Nuri::Util.log "Cannot find module of action: #{action['name']}"
@@ -329,9 +328,6 @@ module Nuri
 							puts 'Failed verifying: ' + key + '=' + value.to_s + ' <> ' + val.to_s
 							raise Nuri::ExecutionFailedException, action['name']
 						end
-						#if self.get_state(key) != value
-						#	raise Nuri::ExecutionFailedException, action['name']
-						#end
 					end
 				end
 
@@ -344,12 +340,12 @@ module Nuri
 							return true
 						end
 					rescue Timeout::Error
-						Nuri::Util.log "Timeout when executing: " + action['name']
+						Nuri::Util.log "Timeout when executing: #{action['name']}"
 						raise Timeout::Error
 					rescue ExecutionFailedException => efe
-						Nuri::Util.log "Execution failed exception: " + efe.to_s
+						Nuri::Util.log "Execution failed exception: #{efe.to_s}"
 					rescue Exception => e
-						Nuri::Util.log 'Cannot execute remote action: ' + action['name'].to_s + ' -- ' + e.to_s
+						Nuri::Util.log "Cannot execute remote action: #{action['name']} - #{e.to_s} - #{data}"
 					end
 					false
 				end
@@ -387,22 +383,6 @@ module Nuri
 				self.update_system
 
 				succeed
-			end
-
-			def get_system_information
-				system = {}
-				self.update_cloud_proxies
-				@main['system'].each do |key,value|
-					next if key[0,1] == '_'
-					if value.is_a?(Hash) and value.isobject and value['_classes'].rindex(Nuri::Config::MainComponent) != nil
-						if self.vm?(value) # a VM node
-							system[key], _ = self.get_vm_address_by_name(value['_self'])
-						else # a standard Machine
-							system[key] = value['address'].to_s
-						end
-					end
-				end
-				system
 			end
 
 			def get_node(path)
@@ -447,6 +427,24 @@ module Nuri
 						end
 					end
 				}
+			end
+
+			def get_system_information
+				system = {}
+				@mutex_get_system_information.synchronize {
+					self.update_cloud_proxies
+					@main['system'].each do |key,value|
+						next if key[0,1] == '_'
+						if value.is_a?(Hash) and value.isobject and value['_classes'].rindex(Nuri::Config::MainComponent) != nil
+							if self.vm?(value) # a VM node
+								system[key], _ = self.get_vm_address_by_name(value['_self'])
+							else # a standard Machine
+								system[key] = value['address'].to_s
+							end
+						end
+					end
+				}
+				system
 			end
 
 		end

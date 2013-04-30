@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'fog'
+require 'thread'
 
 module Nuri
 	module Module
@@ -11,6 +12,8 @@ module Nuri
 			def initialize(options={})
 				# registering the component
 				#self.register('Cloud', 'hpcloud')
+				@mutex = Mutex.new
+
 				self.register('HPCloud', 'hpcloud')
 			end
 
@@ -128,18 +131,56 @@ module Nuri
 				})
 			end
 
-			def create_vm(params={})
+			# SFP method
+			def delete_vm(params={})
+				self.open_connection if @conn.nil?
+				return false if @conn.nil?
+
 				name = params['vm']
 				name = name[2, name.length-2] if name[0,2] == '$.'
 
-				config = self.read_config
-				return create_vm_with_flavor_and_image_ids({
-					:name => name,
-					:flavor_id => config['default_flavor_id'],
-					:image_id => config['default_image_id'],
-				})
+				# delete if VM with given name exists
+				@conn.servers.each { |s|
+					if s.name == name
+						@conn.delete_server(s.id)
+						# wait until the VM is completely deleted
+						counter = 120
+						info = self.get_info(name)
+						while not info.nil? and counter > 0
+							counter -= 1
+							sleep 1
+							info = self.get_info(name)
+						end
+						break
+					end
+				}
+
+				# update system information
+				system = Nuri::Util.get_system_information
+				system[name] = nil
+				Nuri::Util.set_system_information(system)
+				# broadcast system information
+				Nuri::Util.broadcast_system_information
+
+				return true
 			end
 
+			# SFP method
+			def create_vm(params={})
+				@mutex.synchronize {
+					name = params['vm']
+					name = name[2, name.length-2] if name[0,2] == '$.'
+	
+					config = self.read_config
+					return create_vm_with_flavor_and_image_ids({
+						:name => name,
+						:flavor_id => config['default_flavor_id'],
+						:image_id => config['default_image_id'],
+					})
+				}
+			end
+
+			private
 			def create_vm_with_flavor_and_image_ids(params={})
 				self.open_connection if @conn.nil?
 				return false if @conn.nil?
@@ -260,39 +301,6 @@ module Nuri
 				return success
 			end
 
-			# SFP method
-			def delete_vm(params={})
-				self.open_connection if @conn.nil?
-				return false if @conn.nil?
-
-				name = params['vm']
-				name = name[2, name.length-2] if name[0,2] == '$.'
-
-				# delete if VM with given name exists
-				@conn.servers.each { |s|
-					if s.name == name
-						@conn.delete_server(s.id)
-						# wait until the VM is completely deleted
-						counter = 120
-						info = self.get_info(name)
-						while not info.nil? and counter > 0
-							counter -= 1
-							sleep 1
-							info = self.get_info(name)
-						end
-						break
-					end
-				}
-
-				# update system information
-				system = Nuri::Util.get_system_information
-				system[name] = nil
-				Nuri::Util.set_system_information(system)
-				# broadcast system information
-				Nuri::Util.broadcast_system_information
-
-				return true
-			end
 		end
 	end
 end

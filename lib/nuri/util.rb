@@ -25,18 +25,33 @@ module Nuri
 			end
 		end
 
-		def self.puts(msg); @@logger_stdout.info(msg); end
+		def self.puts(msg)
+			@@logger_stdout.info(msg)
+		end
 
-		def self.set_oncloud(cloud); @@oncloud = cloud; end
-		def self.get_oncloud; @@oncloud; end
+		def self.set_oncloud(cloud)
+			@@oncloud = cloud
+		end
 
-		def self.set_debug(debug=false); @@debug = debug; end
+		def self.get_oncloud
+			@@oncloud
+		end
 
-		def self.home_dir; return @@home_dir; end
+		def self.set_debug(debug=false)
+			@@debug = debug
+		end
 
-		def self.http_log_file; return @@home_dir + "/var/http.log"; end
+		def self.home_dir
+			return @@home_dir
+		end
 
-		def self.pid_file; return @@home_dir + "/var/nuri.pid"; end
+		def self.http_log_file
+			return @@home_dir + "/var/http.log"
+		end
+
+		def self.pid_file
+			return @@home_dir + "/var/nuri.pid"
+		end
 
 		def self.set_system_information(system)
 			@@lock_util.synchronize {

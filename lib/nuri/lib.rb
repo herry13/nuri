@@ -240,10 +240,14 @@ module Nuri
 			address = address.to_s
 			port = port.to_s
 			path = path.to_s
-			raise Exception, 'Invalid parameters' if address.length <= 0 or port.length <= 0 or path.length <= 0
+			raise Exception, "Invalid parameters [address:#{address},port:#{port},path:#{path}]" if
+				address.length <= 0 or port.length <= 0 or path.length <= 0
 			url = URI.parse('http://' + address.to_s + ':' + port.to_s + path.to_s)
 			req = Net::HTTP::Get.new(url.path)
-			res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req) }
+			res = Net::HTTP.start(url.host, url.port) { |http|
+				http.read_timeout = timeout
+				http.request(req)
+			}
 			return res.code, res.body
 		end
 
@@ -252,17 +256,24 @@ module Nuri
 			address = address.to_s
 			port = port.to_s
 			path = path.to_s
-			raise Exception, 'Invalid parameters' if address.length <= 0 or port.length <= 0 or path.length <= 0
+			raise Exception, "Invalid parameters [address:#{address},port:#{port},path:#{path}]" if
+				address.length <= 0 or port.length <= 0 or path.length <= 0
 
 			url = URI.parse('http://' + address.to_s + ':' + port.to_s + path.to_s)
 			req = Net::HTTP::Post.new(url.path)
 			if URI.respond_to?('encode_www_form')
 				data = (data.nil? ? '' : URI.encode_www_form('json' => JSON.generate(data)))
-				res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
+				res = Net::HTTP.start(url.host, url.port) { |http|
+					http.read_timeout = timeout
+					http.request(req, data)
+				}
 			else
 				data = (data.nil? ? '' : {'json' => JSON.generate(data)})
 				req.set_form_data(data)
-				res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req) }
+				res = Net::HTTP.start(url.host, url.port) { |http|
+					http.read_timeout = timeout
+					http.request(req)
+				}
 			end
 			return res.code, res.body
 		end
@@ -272,17 +283,24 @@ module Nuri
 			address = address.to_s
 			port = port.to_s
 			path = path.to_s
-			raise Exception, 'Invalid parameters' if address.length <= 0 or port.length <= 0 or path.length <= 0
+			raise Exception, "Invalid parameters [address:#{address},port:#{port},path:#{path}]" if
+				address.length <= 0 or port.length <= 0 or path.length <= 0
 
 			url = URI.parse('http://' + address.to_s + ':' + port.to_s + path.to_s)
 			req = Net::HTTP::Put.new(url.path)
 			if URI.respond_to?('encode_www_form')
 				data = (data.nil? ? '' : URI.encode_www_form('json' => JSON.generate(data)))
-				res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req, data) }
+				res = Net::HTTP.start(url.host, url.port) { |http|
+					http.read_timeout = timeout
+					http.request(req, data)
+				}
 			else
 				data = (data.nil? ? '' : {'json' => JSON.generate(data)})
 				req.set_form_data(data)
-				res = Net::HTTP.start(url.host, url.port) { |http| http.read_timeout = timeout; http.request(req) }
+				res = Net::HTTP.start(url.host, url.port) { |http|
+					http.read_timeout = timeout
+					http.request(req)
+				}
 			end
 			return res.code, res.body
 		end
