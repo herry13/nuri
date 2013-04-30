@@ -483,7 +483,7 @@ module Nuri
 				puts "no solution!\n" if params[:interactive]
 			else
 				if params[:details]
-					puts "\n#{JSON.pretty_generate(plan)}\n" if params[:interactive]
+					puts "\n#{JSON.pretty_generate(plan)}\n"
 				else
 					plan['workflow'].each { |proc|
 						puts "- #{proc['name']}#{JSON.generate(proc['parameters'])}"

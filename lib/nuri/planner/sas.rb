@@ -287,6 +287,7 @@ module Nuri
 				begin
 					# get the operators
 					plan = collect_operators
+					return plan if plan.length == 0
 	
 					# supporting operators
 					set_predecessors(plan)
@@ -495,6 +496,7 @@ end
 			def plan_without_trajectory_to_partial_order
 				# get the operators
 				plan = collect_operators
+				return plan if plan.length == 0
 
 				# supporting operators
 				set_predecessors(plan)
