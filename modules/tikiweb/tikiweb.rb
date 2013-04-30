@@ -66,7 +66,7 @@ module Nuri
 				if not File.file?(tiki_dir + '/index.php')
 					cmd = 'cd ' + tiki_dir + ';/usr/bin/wget ' + DownloadURL
 					return false if not Nuri::Helper::Command.exec(cmd)
-					cmd = 'cd ' + tiki_dir + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv tiki-9.2/* .; mv tiki-9.2/.* .; rm -rf tiki-9.2'
+					cmd = 'cd ' + tiki_dir + ';tar xvzf tiki-9.2.tar.gz 1>/dev/null 2>/dev/null;rm -f tiki-9.2.tar.gz;mv -f tiki-9.2/* .; mv -f tiki-9.2/.* .; rm -rf tiki-9.2'
 					return false if not Nuri::Helper::Command.exec(cmd)
 				end
 				cmd = "cd #{tiki_dir}; sudo /bin/sh setup.sh -n 1> /dev/null"
