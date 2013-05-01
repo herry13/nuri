@@ -168,20 +168,18 @@ module Nuri
 
 			# SFP method
 			def create_vm(params={})
-				@mutex.synchronize {
-					name = params['vm']
-					name = name[2, name.length-2] if name[0,2] == '$.'
+				name = params['vm']
+				name = name[2, name.length-2] if name[0,2] == '$.'
 	
-					config = self.read_config
-					return create_vm_with_flavor_and_image_ids({
-						:name => name,
-						:flavor_id => config['default_flavor_id'],
-						:image_id => config['default_image_id'],
-						:ssh_key_name => config['default_ssh_key_name'],
-						:ssh_username => config['default_ssh_username'],
-						:master_node => config['master_node'],
-					})
-				}
+				config = self.read_config
+				return create_vm_with_flavor_and_image_ids({
+					:name => name,
+					:flavor_id => config['default_flavor_id'],
+					:image_id => config['default_image_id'],
+					:ssh_key_name => config['default_ssh_key_name'],
+					:ssh_username => config['default_ssh_username'],
+					:master_node => config['master_node'],
+				})
 			end
 
 			private

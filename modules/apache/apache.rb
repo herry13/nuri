@@ -124,55 +124,47 @@ module Nuri
 			end
 
 			def install_php_mysql_module
-				@mutex.synchronize {
-					begin
-						File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-						return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.install('php5-mysql')
-						return false
-					rescue
-					ensure
-						File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
-					end
-				}
+				begin
+					File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
+					return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.install('php5-mysql')
+					return false
+				rescue
+				ensure
+					File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
+				end
 			end
 
 			def uninstall_php_mysql_module
-				@mutex.synchronize {
-					begin
-						File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-						return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.uninstall('php5-mysql')
-						return false
-					rescue
-					ensure
-						File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
-					end
-				}
+				begin
+					File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
+					return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.uninstall('php5-mysql')
+					return false
+				rescue
+				ensure
+					File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
+				end
 			end
 
 			def install_php_module
-				@mutex.synchronize {
-					begin
-						File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-						return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.install('libapache2-mod-php5')
-						return false
-					rescue
-					ensure
-						File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
-					end
-				}
+				begin
+					File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
+					return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.install('libapache2-mod-php5')
+					return false
+				rescue
+				ensure
+					File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
+				end
 			end
 
 			def uninstall_php_module
-				@mutex.synchronize {
-					begin
-						File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-						return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.uninstall('libapache2-mod-php5')
-						return false
-					rescue
-					ensure
-						File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
-					end
-				}
+				begin
+					File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
+					return Nuri::Helper::Service.stop('apache2') if Nuri::Helper::Package.uninstall('libapache2-mod-php5')
+					return false
+				rescue
+				ensure
+					File.delete(NotRunningLockFile) if File.exist?(NotRunningLockFile)
+				end
 			end
 		end
 	end

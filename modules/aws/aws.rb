@@ -133,9 +133,7 @@ module Nuri
 
 			# SFP method
 			def create_vm(params={})
-				@mutex.synchronize {
-					success = self.create_vm2(params)
-				}
+				success = self.create_vm2(params)
 
 				[success, JSON.generate({"update_system" => true})]
 			end
