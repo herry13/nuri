@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'fog'
 require 'thread'
+require 'json'
 
 module Nuri
 	module Module
@@ -302,7 +303,7 @@ module Nuri
 					self.delete_vm('vm' => name)
 				end
 
-				return success
+				return [success, JSON.generate({"update_system" => true})]
 			end
 
 		end

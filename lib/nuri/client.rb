@@ -450,17 +450,22 @@ module Nuri
 				begin
 					status = @owner.execute(cmd)
 					if status.nil?
-						Nuri::Util.error "[Exec: #{cmd['name']}...Failed!] -- cannot find the procedure. " + cmd.inspect
+						Nuri::Util.error "[Exec:#{cmd['name']} => Failed] Cannot find the procedure:#{cmd.inspect}"
 						return 503, '', ''
+
+					elsif status.is_a?(Array) and status[0] == true
+						return 200, 'application/json', status[1]
+
 					elsif status == true
-						Nuri::Util.log "[Exec: #{cmd['name']}...OK]" # -- " + cmd.inspect
+						Nuri::Util.log "[Exec:#{cmd['name']} => OK]"
 						return 200, '', ''
+
 					end
 				rescue Exception => e
 					Nuri::Util.error "Error: " + e.to_s
 					e.backtrace
 				end
-				Nuri::Util.error "[Exec: #{cmd['name']}...Failed!] - cannot execute the procedure:" + cmd['name'].to_s + ",status=" + status.to_s
+				Nuri::Util.error "[Exec:#{cmd['name']} => Failed] Cannot execute the procedure:#{cmd['name']},status=#{status}."
 				return 500, '', ''
 			end
 

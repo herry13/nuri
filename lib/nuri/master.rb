@@ -289,7 +289,6 @@ module Nuri
 			end
 
 			def execute_workflow(plan)
-				#state = get_state
 				success = true
 				if plan['workflow'] != nil
 					begin
@@ -334,10 +333,10 @@ module Nuri
 				def remote_execute(action, address)
 					data = { 'action' => action, 'system' => self.get_system_information }
 					begin
-						code, _ = put_data(address, Nuri::Port, '/exec', data)
+						code, body = put_data(address, Nuri::Port, '/exec', data)
 						if code == '200'
 							verify(action) if @do_verify_execution
-							return true
+							return true, body
 						end
 					rescue Timeout::Error
 						Nuri::Util.log "Timeout when executing: #{action['name']}"
@@ -347,7 +346,7 @@ module Nuri
 					rescue Exception => e
 						Nuri::Util.log "Cannot execute remote action: #{action['name']} - #{e.to_s} - #{data}"
 					end
-					false
+					false, nil
 				end
 
 				def clean_parameters(params)
@@ -370,17 +369,25 @@ module Nuri
 					false
 				end
 
+				data = nil
 				if node.has_key?('address')
 					Nuri::Util.puts "Executing[1] #{action['id']}:#{action['name']}#{JSON.generate(action['parameters'])} [Wait]"
-					succeed = remote_execute(action, node['address'])
+					succeed, data = remote_execute(action, node['address'])
 				else
 					Nuri::Util.puts "Executing[2] #{action['id']}:#{action['name']}#{JSON.generate(action['parameters'])} [Wait]"
 					succeed = local_execute(action)
+					succeed, data = succeed if succeed.is_a?(Array)
 				end
 				result = (succeed ? 'OK' : 'Failed')
 				Nuri::Util.puts "Executing #{action['id']}:#{action['name']}#{JSON.generate(action['parameters'])} [#{result}]"
 
-				self.update_system
+				if data.is_a?(String) and data.strip.length > 0
+					data = JSON.parse(data)
+				end
+
+				if data.is_a?(Hash) and data['update_system']
+					self.update_system
+				end
 
 				succeed
 			end
