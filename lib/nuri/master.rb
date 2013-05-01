@@ -346,7 +346,7 @@ module Nuri
 					rescue Exception => e
 						Nuri::Util.log "Cannot execute remote action: #{action['name']} - #{e.to_s} - #{data}"
 					end
-					false, nil
+					[false, nil]
 				end
 
 				def clean_parameters(params)
