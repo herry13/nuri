@@ -163,7 +163,7 @@ module Nuri
 				# broadcast system information
 				Nuri::Util.broadcast_system_information
 
-				return [success, JSON.generate({"update_system" => true})]
+				return [true, JSON.generate({"update_system" => true})]
 			end
 
 			# SFP method
