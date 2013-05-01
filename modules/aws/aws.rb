@@ -128,14 +128,16 @@ module Nuri
 				# broadcast system information
 				Nuri::Util.broadcast_system_information
 
-				return true
+				return [true, JSON.generate({"update_system" => true})]
 			end
 
 			# SFP method
 			def create_vm(params={})
 				@mutex.synchronize {
-					self.create_vm2(params)
+					success = self.create_vm2(params)
 				}
+
+				[success, JSON.generate({"update_system" => true})]
 			end
 
 			protected

@@ -271,6 +271,7 @@ module Nuri
 
 			def initialize(server, owner)
 				@owner = owner
+				@execution_mutex = Mutex.new
 			end
 
 			def do_GET(request, response)
@@ -442,29 +443,32 @@ module Nuri
 			end
 
 			def execute_action(data)
-				Nuri::Util.log "[Exec: #{data['json']}..."
-				data = JSON[data['json']]
-				cmd = data['action']
-				Nuri::Util.set_system_information(data['system'])
-
-				begin
-					status = @owner.execute(cmd)
-					if status.nil?
-						Nuri::Util.error "[Exec:#{cmd['name']} => Failed] Cannot find the procedure:#{cmd.inspect}"
-						return 503, '', ''
-
-					elsif status.is_a?(Array) and status[0] == true
-						return 200, 'application/json', status[1]
-
-					elsif status == true
-						Nuri::Util.log "[Exec:#{cmd['name']} => OK]"
-						return 200, '', ''
-
+				@execution_mutex.synchronize {
+					Nuri::Util.log "[Exec: #{data['json']}..."
+					data = JSON[data['json']]
+					cmd = data['action']
+					Nuri::Util.set_system_information(data['system'])
+	
+					begin
+						status = @owner.execute(cmd)
+						if status.nil?
+							Nuri::Util.error "[Exec:#{cmd['name']} => Failed] Cannot find the procedure:#{cmd.inspect}"
+							return 503, '', ''
+	
+						elsif status.is_a?(Array) and status[0] == true
+							return 200, 'application/json', status[1]
+	
+						elsif status == true
+							Nuri::Util.log "[Exec:#{cmd['name']} => OK]"
+							return 200, '', ''
+	
+						end
+					rescue Exception => e
+						Nuri::Util.error "Error: " + e.to_s
+						e.backtrace
 					end
-				rescue Exception => e
-					Nuri::Util.error "Error: " + e.to_s
-					e.backtrace
-				end
+				}
+
 				Nuri::Util.error "[Exec:#{cmd['name']} => Failed] Cannot execute the procedure:#{cmd['name']},status=#{status}."
 				return 500, '', ''
 			end
