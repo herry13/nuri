@@ -264,6 +264,7 @@ module Nuri
 				return component.send(function_name) if params.size <= 0
 				return component.send(function_name, params)
 			end
+
 		end
 
 		class Agent < WEBrick::HTTPServlet::AbstractServlet
@@ -286,6 +287,8 @@ module Nuri
 						status, content_type, body = self.get_state(:path => path)
 					elsif path == '/bsig'
 						status, content_type, body = self.get_bsig
+					elsif path == '/log'
+						status, content_type, body = self.get_log
 					else
 						status = 400
 						content_type = body = ''
@@ -501,6 +504,10 @@ module Nuri
 
 				data = Nuri::Sfp.to_json({'value' => state})
 				[200, 'application/json', data]
+			end
+
+			def get_logs
+				[200, 'application/json', JSON.generate({'logs' => Nuri::Util.get_logs})]
 			end
 
 			def get_bsig

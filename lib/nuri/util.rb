@@ -4,10 +4,12 @@ module Nuri
 	Port = 1313
 	MaxLogAge = 7 # 7 days
 	MaxLogFileSize = 2097152
+	MaxGetLogsLines = 100
 
 	module Util
 		@@home_dir = File.expand_path(File.dirname(__FILE__) + "/../..")
-		@@logger = Logger.new(@@home_dir + "/var/message.log", Nuri::MaxLogAge, Nuri::MaxLogFileSize)
+		@@log_file = @@home_dir + "/var/message.log"
+		@@logger = Logger.new(@@log_file, Nuri::MaxLogAge, Nuri::MaxLogFileSize)
 		@@logger_stdout = Logger.new(STDOUT)
 		@@system = nil
 		@@debug = false
@@ -23,6 +25,12 @@ module Nuri
 			@@logger.formatter = proc do |severity, datetime, progname, msg|
 				"[#{severity[0]}, #{datetime}] #{msg}\n"
 			end
+		end
+
+		def self.get_logs
+			numlines = Nuri::Helper::Command.getoutput("cat #{@@log_file} | wc -l").to_s.to_i
+			start = (numlines > MaxGetLogsLines ? (numlines - MaxGetLogsLines + 1) : 1)
+			Nuri::Helper::Command.getoutput("sed -n #{start},#{numlines}p #{@@log_file}")
 		end
 
 		def self.puts(msg)

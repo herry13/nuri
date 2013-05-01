@@ -48,12 +48,13 @@ module Nuri
 					while not @failed and not action[:executed]
 						# execute the action
 						op_str = action_to_string(action)
-						Nuri::Util.puts "[ExecutorThread: #{tid}] #{op_str}"
+						#Nuri::Util.puts "[ExecutorThread: #{tid}] #{op_str}"
 						#success = true
-						for i in 1..3
+						num = @retry
+						begin
 							success = @owner.execute_action { action }
-							break if success
-						end
+							num -= 1
+						end while not success and num > 0
 
 						# check if execution failed
 						if success
@@ -108,6 +109,7 @@ module Nuri
 			end
 
 			@owner = params[:owner]
+			@retry = (params[:retry].nil? ? 2 : params[:retry].to_i)
 
 			@actions = params[:plan]['workflow']
 			@actions.sort! { |x,y| x['id'] <=> y['id'] }

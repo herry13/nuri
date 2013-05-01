@@ -379,7 +379,7 @@ module Nuri
 					succeed, data = succeed if succeed.is_a?(Array)
 				end
 				result = (succeed ? 'OK' : 'Failed')
-				Nuri::Util.puts "Executing #{action['id']}:#{action['name']}#{JSON.generate(action['parameters'])} [#{result}]"
+				Nuri::Util.puts "Status #{action['id']}:#{action['name']}#{JSON.generate(action['parameters'])} [#{result}]"
 
 				if data.is_a?(String) and data.strip.length > 0
 					data = JSON.parse(data)
