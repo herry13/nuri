@@ -287,8 +287,8 @@ module Nuri
 						status, content_type, body = self.get_state(:path => path)
 					elsif path == '/bsig'
 						status, content_type, body = self.get_bsig
-					elsif path == '/log'
-						status, content_type, body = self.get_log
+					elsif path == '/logs'
+						status, content_type, body = self.get_logs
 					else
 						status = 400
 						content_type = body = ''
