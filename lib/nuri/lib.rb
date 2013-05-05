@@ -166,13 +166,24 @@ module Nuri
 			@root.add(machine)
 
 			excluded = []
-			if not @config.nil? and @config.is_a?(Hash) and @config.has_key?('excluded_modules')
-				excluded = @config['excluded_modules']
+			included = []
+			if not @config.nil? and @config.is_a?(Hash)
+				if @config.has_key?('include_modules')
+					included = @config['include_modules']
+				elsif @config.has_key?('exclude_modules')
+					excluded = @config['exclude_modules']
+				elsif @config.has_key?('excluded_modules')
+					excluded = @config['excluded_modules']
+				end
 			end
 
 			# load other modules and put them as machine's children
 			self.get_non_abstract_modules.each do |mod|
-				next if not excluded.index(mod).nil?
+				if included.length > 0
+					next if included.index(mod).nil?
+				elsif not excluded.index(mod).nil?
+					next
+				end
 
 				begin
 					manifest_file = "#{modules_dir}/#{mod}/main.mf"

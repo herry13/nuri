@@ -1,8 +1,9 @@
 module Nuri
 	module Module
-		include Nuri::Resource
 
 		class GangliaMonitor
+			include Nuri::Resource
+
 			def initialize
 				self.register('GangliaMonitor', 'gmond')
 			end
