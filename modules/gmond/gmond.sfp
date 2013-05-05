@@ -1,0 +1,4 @@
+include "modules/service/service.sfp"
+
+schema GangliaMonitor extends Service {
+}
