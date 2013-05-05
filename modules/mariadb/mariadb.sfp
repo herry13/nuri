@@ -1,0 +1,6 @@
+include "modules/service/service.sfp"
+
+schema Mariadb extends Service {
+	port = 3306
+}
+

@@ -1,0 +1,73 @@
+include "modules/service/service.sfp"
+
+schema Nurilabs extends Service {
+	install_path = "/opt/nurilabs"
+	port = 8080
+	ssl = false
+	recaptcha_private_key = ""
+	recaptcha_public_key = ""
+
+	procedure install {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.installed = true
+			this.ssl = false
+			this.recaptcha_private_key = ""
+			this.recaptcha_public_key = ""
+			this.port = 8080
+		}
+	}
+
+	procedure set_install_path (path isref String) {
+		condition {
+			this.installed = false
+		}
+		effect {
+			this.install_path = path
+		}
+	}
+
+	procedure enable_ssl {
+		condition {
+			this.running = false
+			this.installed = true
+			this.ssl = false
+		}
+		effect {
+			this.ssl = true
+		}
+	}
+
+	procedure disable_ssl {
+		condition {
+			this.running = false
+			this.installed = true
+			this.ssl = true
+		}
+		effect {
+			this.ssl = false
+		}
+	}
+
+	procedure set_recaptcha_public_key(key isref String) {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.recaptcha_public_key = key
+		}
+	}
+
+	procedure set_recaptcha_private_key(key isref String) {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.recaptcha_private_key = key
+		}
+	}
+}
+
