@@ -69,6 +69,10 @@ commands:
 		Nuri::Master.plan({:mainfile => ARGV[2], :exec => 'ask', :parallel => true,
 		                   :details => true, :interactive => true})
 
+	elsif ARGV[1] == 'apply-plan'
+		Nuri::Master.plan({:mainfile => ARGV[2], :exec => true,
+		                   :details => true})
+
 	elsif ARGV[1] == 'apply-plan-par'
 		Nuri::Master.plan({:mainfile => ARGV[2], :exec => true, :parallel => true,
 		                   :details => true})

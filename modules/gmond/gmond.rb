@@ -11,7 +11,8 @@ module Nuri
 			def update_state
 				self.reset
 				@state['installed'] = Nuri::Helper::Package.installed?('ganglia-monitor')
-				@state['running'] = Nuri::Helper::Service.running?('ganglia-monitor')
+				data = Nuri::Helper::Command.getoutput('ps ax | grep /usr/sbin/gmond | grep -v "grep"').strip
+				@state['running'] = (data.length > 0)
 				return @state
 			end
 
