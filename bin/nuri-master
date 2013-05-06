@@ -1,6 +1,6 @@
 #!/bin/sh
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
-NURI="$DIR/nuri"
+NURI="/usr/bin/ruby $DIR/nuri"
 
 nice $NURI console $@
