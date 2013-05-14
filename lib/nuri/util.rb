@@ -446,54 +446,18 @@ module Nuri
 				service = service.to_s
 				return false if service.length <= 0
 				return true if running?(service)
-				case Nuri::Util.platform
-				when 'ubuntu'
-					return Debian.start(service, debug)
-				when 'sl'
-					return Redhat.start(service, debug)
-				end
-				false
+				cmd = "/usr/bin/sudo #{ServiceCommand} #{service} start 2>/dev/null"
+				cmd += " 1>/dev/null" if not debug
+				return (system(cmd) == true)
 			end
 
 			def self.stop(service, debug=false)
 				service = service.to_s
 				return false if service.length <= 0
 				return true if not running?(service)
-				case Nuri::Util.platform
-				when 'ubuntu'
-					return Debian.stop(service, debug)
-				when 'sl'
-					return Redhat.stop(service, debug)
-				end
-				false
-			end
-
-			module Debian	
-				def self.start(service, debug=false)
-					cmd = "/usr/bin/sudo #{ServiceCommand} #{service} start 2>/dev/null"
-					cmd += " 1>/dev/null" if not debug
-					return (system(cmd) == true)
-				end
-	
-				def self.stop(service, debug=false)
-					cmd = "/usr/bin/sudo #{ServiceCommand} #{service} stop 2>/dev/null"
-					cmd += " 1>/dev/null" if not debug
-					return (system(cmd) == true)
-				end
-			end
-
-			module Redhat
-				def self.start(service, debug=false)
-					cmd = "#{ServiceCommand} #{service} start 2>/dev/null"
-					cmd += " 1>/dev/null" if not debug
-					return (system(cmd) == true)
-				end
-	
-				def self.stop(service, debug=false)
-					cmd = "#{ServiceCommand} #{service} stop 2>/dev/null"
-					cmd += " 1>/dev/null" if not debug
-					return (system(cmd) == true)
-				end
+				cmd = "/usr/bin/sudo #{ServiceCommand} #{service} stop 2>/dev/null"
+				cmd += " 1>/dev/null" if not debug
+				return (system(cmd) == true)
 			end
 
 		end
