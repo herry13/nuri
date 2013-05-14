@@ -60,7 +60,6 @@ module Nuri
 
 				begin
 					server_type = (daemon ? WEBrick::Daemon : WEBrick::SimpleServer)
-					#log_file = (daemon ? Nuri::Util::http_log_file : nil)
 					log_file = Nuri::Util::http_log_file
 					log = WEBrick::Log.new(log_file, WEBrick::BasicLog::INFO ||
 					                                 WEBrick::BasicLog::ERROR ||
@@ -86,14 +85,11 @@ module Nuri
 						begin
 							if daemon
 								# get and save process' PIDs in file "var/nuri.pid"
-								data = `ps x|grep "nuri client"|grep -v grep|awk '{print $1}'`
-								data = data.split("\n")
+								data = `ps x|grep "nuri client"|grep -v grep|grep -v #{$$}|awk '{print $1}'`
 								if data.length > 0
-									pid = data[1].to_i.to_s + "," + $$.to_s
-									Nuri::Util.log "Nuri client daemon is running with PID ##{pid}"
-									File.open(Nuri::Util.pid_file, 'w') { |f| f.write(pid) }
-									pid1 = data[1].to_i.to_s
-									File.open(Nuri::Util.pid_file + ".1", 'w') { |f| f.write(pid1) }
+									pids = "#{data.to_i} #{$$}"
+									File.open(Nuri::Util.pid_file, 'w') { |f| f.write(pids) }
+									Nuri::Util.log "Nuri client daemon is running with PIDs ##{pids}"
 								end
 							end
 						rescue Exception => exp
@@ -108,7 +104,6 @@ module Nuri
 								put_data('localhost', Nuri::Port, bsig_start_path)
 							rescue Exception
 							end
-							#self.start_bsig_executor
 							sleep 30 #600 # 10 mins
 						end while not @stopped
 					}
@@ -574,13 +569,10 @@ module Nuri
 
 		def self.stop
 			begin
-				pid_file = Nuri::Util.pid_file
-				if File.exist?(pid_file)
-					pids = File.read(pid_file).split(',')
-					cmd1 = "/usr/bin/sudo /bin/kill -9 #{pids[1]}"
-					cmd2 = "/usr/bin/sudo /bin/kill -1 #{pids[0]}"
-					system(cmd1)
-					system(cmd2)
+				if File.exist?(Nuri::Util.pid_file)
+					pids = File.read(Nuri::Util.pid_file).split(" ")
+					cmd = "/usr/bin/sudo /bin/kill -9 #{pids[1]} 2>/dev/null 1>/dev/null"
+					cmd += ";/usr/bin/sudo /bin/kill -1 #{pids[0]} 2>/dev/null 1>/dev/null"
 					raise Exception if (system(cmd) != true)
 					Nuri::Util.log 'Nuri client daemon was stopped'
 				end
