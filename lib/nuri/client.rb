@@ -14,7 +14,8 @@ module Nuri
 			def initialize
 				@master_keys = {}
 
-				@bsig_executor = Nuri::BSig::Executor.new(self)
+				#@bsig_executor = Nuri::BSig::Executor.new(self)
+				@bsig_executor = Nuri::BSig::Executor.new({:owner => self})
 				@lock_goal = Mutex.new
 				@goals = {}
 				@system_nodes = []
@@ -212,7 +213,7 @@ module Nuri
 
 			# Load BSig from cached file if such file exists
 			def update_bsig_executor
-				@bsig_executor.load
+				#@bsig_executor.load
 			end
 
 			def reset
@@ -373,9 +374,14 @@ module Nuri
 				return 200, '', ''
 			end
 
-			def start_bsig_executor; @owner.start_bsig_executor; return 200, '', ''; end
+			def start_bsig_executor
+				@owner.start_bsig_executor
+				[200, '', '']
+			end
 
-			def reset; return (@owner.reset ? 200 : 500), '', ''; end
+			def reset
+				[ (@owner.reset ? 200 : 500), '', '' ]
+			end
 
 			def new_bsig_pre_goal(data)
 				begin
@@ -618,11 +624,11 @@ module Nuri
 			end
 
 			if params[:sfp_file].to_s.strip.length <= 0
-				puts 'Please specify desired configuration file!'
+				puts 'Please specify the desired configuration file!'
 				return
 			end
 
-			raise Exception, "Invalid SFP configuration file: #{params[:sfp_file]}" if not File.exist?(params[:sfp_file])
+			raise Exception, "Configuration file is not exist: #{params[:sfp_file]}" if not File.exist?(params[:sfp_file])
 
 			client = Nuri::Client::Daemon.new
 
