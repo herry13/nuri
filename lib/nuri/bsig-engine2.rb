@@ -113,7 +113,7 @@ class Executor
 		return :no_flaw if flaws.empty?
 
 Nuri::Util.debug "[achieve_local_goal] flaws: #{flaws.inspect}"
-
+		operator = nil
 		@local_mutex.synchronize {
 			operator = self.select_operator(flaws, p[:min_priority_index])
 			return :failure if operator.nil?
