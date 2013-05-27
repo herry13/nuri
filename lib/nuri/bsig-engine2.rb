@@ -111,6 +111,8 @@ class Executor
 		flaws = self.get_flaws(p[:goal])
 		return :no_flaw if flaws.empty?
 
+Nuri::Util.debug "[achieve_local_goal] flaws: #{flaws.inspect}"
+
 		@local_mutex.synchronize {
 			operator = self.select_operator(flaws, p[:min_priority_index])
 			return :failure if operator.nil?
@@ -159,6 +161,7 @@ class Executor
 	#
 	# @return :success if execution is success, otherwise :failure
 	def invoke(operator)
+Nuri::Util.debug "[invoke] operator: #{operator.inspect}"
 		return :success if @owner.execute(operator)
 		:failure
 	end
@@ -192,6 +195,7 @@ class Executor
 					(!operator.nil? and op.priority_index > operator.priority_index)
 			operator = op if op.support(goal)
 		}
+Nuri::Util.debug "[select_operator] operator: #{operator.inspect}"
 		operator
 	end
 
@@ -223,6 +227,7 @@ class Executor
 				end
 			end
 		}
+Nuri::Util.debug "[split_conditions] local: #{local.inspect}, remote: #{remote.inspect}"
 		return local, remote
 	end
 

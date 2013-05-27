@@ -375,7 +375,7 @@ module Nuri
 			end
 
 			def start_bsig_executor
-				@owner.start_bsig_executor
+				#@owner.start_bsig_executor
 				[200, '', '']
 			end
 

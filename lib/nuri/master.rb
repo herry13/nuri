@@ -563,7 +563,7 @@ module Nuri
 					if bsig['operators'].length <= 0
 						puts 'The system is already at the goal state!'
 					else
-						print "Deply the Behavioural Signature model [y/N]? "
+						print "Deploy the Behavioural Signature model [y/N]? "
 						if STDIN.gets.chomp.upcase == 'Y'
 							print 'Deploying the Behavioural Signature model...' if params[:interactive]
 							result = master.deploy_bsig(bsig)
