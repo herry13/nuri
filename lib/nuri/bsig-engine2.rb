@@ -29,7 +29,7 @@ module Operator
 	def support(goal)
 		goal.each { |goal_path,goal_value|
 			self['effect'].each { |eff_path,eff_value|
-				return true if goal_path == eff_path and goal_Value = eff_value
+				return true if goal_path == eff_path and goal_value = eff_value
 			}
 		}
 		false
