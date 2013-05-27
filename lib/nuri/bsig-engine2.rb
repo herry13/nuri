@@ -190,6 +190,7 @@ Nuri::Util.debug "[invoke] operator: #{operator.inspect}"
 	#
 	def select_operator(goal, min_priority_index)
 		operator = nil
+Nuri::Util.debug self.get_local_operators.inspect
 		self.get_local_operators.each { |op|
 			next if op.priority_index > min_priority_index or
 					(!operator.nil? and op.priority_index > operator.priority_index)
