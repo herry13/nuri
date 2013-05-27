@@ -22,6 +22,18 @@ module Operator
 		self['distance'].to_i
 	end
 
+	def name
+		self['name']
+	end
+
+	def conditions
+		self['condition']
+	end
+
+	def effects
+		self['effect']
+	end
+
 	# @param goal => a Hash contains the goal state
 	#
 	# @return true if this operator supports the goal state, otherwise false
@@ -124,8 +136,7 @@ Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
 Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
 		}
 
-Nuri::Util.debug "[split_conditions] : #{operator.inspect}"
-		local, remote = self.split_conditions(operator['condition'])
+		local, remote = self.split_conditions(operator.conditions)
 
 		status = nil
 		begin
