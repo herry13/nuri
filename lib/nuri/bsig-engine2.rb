@@ -68,7 +68,7 @@ class Executor
 
 		begin
 			p = {:min_priority_index => 0}
-			while enabled?
+			while self.enabled?
 				if self.total_satisfier_threads > 0
 					Nuri::Util.debug "Some satisfier threads are active!"
 					break
@@ -103,6 +103,8 @@ class Executor
 	# :min_priority_index => the minimum priority index value of selected operator
 	#
 	def achieve_local_goal(p={})
+		return :on_going if !self.enabled?
+
 		flaws = self.get_flaws(p[:goal])
 		return :no_flaw if flaws.empty?
 
