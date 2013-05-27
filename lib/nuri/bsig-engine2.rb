@@ -67,11 +67,12 @@ class Executor
 		@owner = p[:owner]     # holds the Nuri::Client object
 		@local_mutex = Mutex.new
 
-		@empty_bsig
-		@bsig = @empty_bsig
-
+		@empty_bsig = EmptyBSig
+		
 		@lock = Mutex.new
 		@enabled = false
+
+		self.reset
 	end
 
 	def start
@@ -88,6 +89,10 @@ class Executor
 
 	def stop
 		enable(false)
+	end
+
+	def reset
+		@bsig = @empty_bsig
 	end
 
 	# @params
