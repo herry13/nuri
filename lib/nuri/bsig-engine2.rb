@@ -120,7 +120,7 @@ class Executor
 			sleep 1 if status == :on_going
 		end until status == :no_flaw or status == :failure
 
-		@local_mutex { operator.selected = false if status == :failure }
+		@local_mutex.synchronize { operator.selected = false if status == :failure }
 		return :failure if status == :failure
 
 		status = self.achieve_remote_goal({
@@ -128,14 +128,14 @@ class Executor
 			:goal => remote,
 			:min_priority_index => operator.priority_index + 1
 		})
-		@local_mutex { operator.selected = false if status == :failure }
+		@local_mutex.synchronize { operator.selected = false if status == :failure }
 		return :failure if status == :failure
 
 		status = self.invoke(operator)
-		@local_mutex { operator.selected = false if status == :failure }
+		@local_mutex.synchronize { operator.selected = false if status == :failure }
 		return :failure if status == :failure
 
-		@local_mutex { operator.selected = false }
+		@local_mutex.synchronize { operator.selected = false }
 		return :flaw_repaired
 	end
 
@@ -227,11 +227,11 @@ class Executor
 	end
 
 	def enabled?
-		@lock.synchronise { return @enabled }
+		@lock.synchronize { return @enabled }
 	end
 
 	def enable(enabled=false)
-		@lock.synchronise { @enabled = enabled }
+		@lock.synchronize { @enabled = enabled }
 	end
 
 end
