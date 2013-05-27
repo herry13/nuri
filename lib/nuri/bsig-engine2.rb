@@ -4,6 +4,9 @@ module Nuri
 
 module BSig
 
+# The file where Nuri master saves its BSig model
+MasterBSigFile = Nuri::Util.home_dir + '/var/bsig_system'
+
 def self.bsig_vm_file(id); Nuri::Util.home_dir + '/var/bsig_' + id.to_s + '.vm'; end
 
 module Operator
@@ -78,6 +81,8 @@ class Executor
 	def start
 		enable(true)
 
+		Nuri::Util.debug "Start BSig executor"
+
 		p = {:min_priority_index => 0}
 		while enabled?
 			bsig = self.get_bsig
@@ -89,6 +94,8 @@ class Executor
 
 	def stop
 		enable(false)
+
+		Nuri::Util.debug "Stop BSig executor"
 	end
 
 	def reset
@@ -144,7 +151,7 @@ class Executor
 		return :flaw_repaired
 	end
 
-	private
+	protected
 
 	# @params
 	# operator => an instance of Nuri::BSig::Operator, which is the BSig

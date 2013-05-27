@@ -116,7 +116,7 @@ module Nuri
 				rescue Interrupt
 					Nuri::Util.log 'Exiting.'
 				rescue Exception => e
-					Nuri::Util.error 'Client Daemon error: ' + e.to_s
+					Nuri::Util.error "Client Daemon error: #{e} [#{e.backtrace}]"
 					return false
 				end
 				return true
@@ -223,7 +223,7 @@ module Nuri
 					@bsig_executor.reset
 					@goals.clear
 				rescue Exception => exp
-					Nuri::Util.error 'Failed to delete cache data -- ' + exp.to_s
+					Nuri::Util.error "Failed to delete cache data - #{exp} [#{exp.backtrace}]"
 					return false
 				end
 				Nuri::Util.log 'Cache data have been deleted.'
@@ -319,7 +319,7 @@ module Nuri
 
 			def do_PUT(request, response)
 				if not @owner.trusted_address(request.peeraddr[2])
-					Nuri::Util.warn "Untrusted request from: " + request.peeraddr[2]
+					Nuri::Util.warn "Untrusted request from: #{request.peeraddr[2]}"
 					status = 403
 					content_type, body = ''
 				else
@@ -368,7 +368,7 @@ module Nuri
 
 					File.open(bsig_file, 'w') { |f| f.write(JSON.generate(local)) }
 				rescue Exception => e
-					Nuri::Util.error 'Failed to save BSig VM: ' + e.to_s
+					Nuri::Util.error "Failed to save BSig VM: #{e} [#{e.backtrace}]"
 					return 500, '', ''
 				end
 				return 200, '', ''
@@ -389,7 +389,7 @@ module Nuri
 					# add new pre-goal
 					return 202, '', '' if @owner.add_goal(goal)
 				rescue Exception => exp
-					Nuri::Util.error 'Failed to achieve subgoal: ' + exp.to_s
+					Nuri::Util.error "Failed to achieve subgoal: #{exp} [#{exp.backtrace}]"
 				end
 				return 500, '', ''
 			end
@@ -423,7 +423,7 @@ module Nuri
 					@owner.start_bsig_executor
 
 				rescue Exception => e
-					Nuri::Util.error 'Failed to activate BSig: ' + e.to_s
+					Nuri::Util.error "Failed to activate BSig: #{e} [#{e.backtrace}]"
 					return 500, '', ''
 				end
 				return 200, '', ''
@@ -440,7 +440,7 @@ module Nuri
 					File.open(bsig_file, 'w') { |f| f.write(JSON.generate(local)) }
 					@owner.update_bsig_executor
 				rescue Exception => e
-					Nuri::Util.error 'Failed to save BSig: ' + e.to_s
+					Nuri::Util.error "Failed to save BSig: #{e} [#{e.backtrace}]"
 					return 500, '', ''
 				end
 				return 200, '', ''
@@ -468,7 +468,7 @@ module Nuri
 	
 						end
 					rescue Exception => e
-						Nuri::Util.error "Error: " + e.to_s
+						Nuri::Util.error "Error: #{e} [#{e.backtrace}]"
 						e.backtrace
 					end
 				}
@@ -486,7 +486,7 @@ module Nuri
 					data = {'value' => @owner.call(func_path, params)}
 					return 200, 'application/json', JSON.generate(data)
 				rescue Exception => exp
-					Nuri::Util.error "Error: calling function #{func_path} - " + exp.to_s
+					Nuri::Util.error "Error: calling function #{func_path} - #{exp} [#{exp.backtrace}]"
 				end
 				[500, '', '']
 			end
@@ -526,7 +526,7 @@ module Nuri
 					begin
 						post_data(target, Nuri::Port, '/system', system)
 					rescue Exception => e
-						Nuri::Util.log 'Cannot send system information to ' + target.to_s + ' (' + e.to_s + ')'
+						Nuri::Util.log "Cannot send system information to #{target} - #{e} [#{e.backtrace}]"
 					end
 				end
 			end
@@ -583,7 +583,7 @@ module Nuri
 					Nuri::Util.log 'Nuri client daemon was stopped'
 				end
 			rescue Exception => e
-				Nuri::Util.error 'Cannot stop Nuri client: ' + e.to_s
+				Nuri::Util.error "Cannot stop Nuri client: #{e} [#{e.backtrace}]"
 			end
 		end
 
