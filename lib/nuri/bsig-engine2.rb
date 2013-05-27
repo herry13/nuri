@@ -261,12 +261,10 @@ Nuri::Util.debug "[split_conditions] conditions: #{conditions.inspect}"
 					local[path] = value
 				else
 					address = @owner.address?(component_path)
-					if address.nil?
-						if local_goal.has_key?(path)
-							local[path] = value
-						else
-							raise Exception, "Unavailable remote component: #{component_path}"
-						end
+					if address.is_a?(Nuri::Undefined)
+						raise Exception, "Unavailable remote component: #{component_path}"
+					elsif address.nil?
+						local[path] = value
 					else
 						remote[address] = {} if !remote.has_key?(address)
 						remote[address][path] = value

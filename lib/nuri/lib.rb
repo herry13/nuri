@@ -231,7 +231,9 @@ module Nuri
 			part1, part2, _ = path.split('.', 3) # HACK!
 			node_name = (part1 == '$' ? part2 : part1)
 			system = Nuri::Util.get_system_information
-			return (system.has_key?(node_name) ? system[node_name] : nil)
+			return system[node_name] if system.has_key?(node_name)
+			return Nuri::Undefined.new(path)
+			#return (system.has_key?(node_name) ? system[node_name] : nil)
 		end
 
 		# @return true if given path is local, otherwise false
