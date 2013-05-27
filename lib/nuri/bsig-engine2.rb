@@ -7,17 +7,24 @@ module BSig
 # The file where Nuri master saves its BSig model
 MasterBSigFile = Nuri::Util.home_dir + '/var/bsig_system'
 
-def self.bsig_vm_file(id); Nuri::Util.home_dir + '/var/bsig_' + id.to_s + '.vm'; end
+ActiveBSigIdFile = Nuri::Util.home_dir + '/var/bsig_id'
+
+def self.get_active_id
+	(File.exist?(ActiveBSigIdFile) ? File.read(ActiveBSigIdFile).to_i : nil)
+end
+
+def self.bsig_vm_file(id)
+	Nuri::Util.home_dir + '/var/bsig_' + id.to_s + '.vm'
+end
 
 class Executor
-	ActiveBSigIdFile = Nuri::Util.home_dir + '/var/bsig_id'
 	EmptyBSig = {'id' => nil, 'goal' => {}, 'operators' => []}
 
 	# @return a Hash contains the active BSig model
 	#
 	def get_bsig
-		if File.exist?(ActiveBSigIdFile)
-			id = File.read(ActiveBSigIdFile).to_i
+		id = Nuri::BSig.get_active_id
+		if !id.nil?
 			if @bsig['id'].nil? or @bsig['id'] < id
 				# load the new BSig model
 				fpath = "#{Nuri::Util.home_dir}/var/bsig_#{id}"
@@ -321,6 +328,57 @@ module Operator
 				return true if goal_path == eff_path and goal_value == eff_value
 			}
 		}
+		false
+	end
+end
+
+
+class VMHelper
+	include ::Nuri::NetHelper
+
+	def send_bsig(vm_name, address)
+		begin
+			bsig_id = ::Nuri::BSig.get_active_id
+			return true if bsig_id.nil? # no BSig available
+
+			bsig_file = ::Nuri::BSig.bsig_vm_file(bsig_id)
+			bsig = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {})
+			if bsig.has_key?(vm_name)
+				# send BSig model
+				data = bsig[vm_name]
+				data['id'] = bsig_id
+				#Nuri::Util.log "vm[#{vm_name}]: send BSig model - #{data.inspect}"
+				code, _ = self.put_data(address, Nuri::Port, '/bsig', data)
+				raise Exception, "Return code: #{code}" if code != '200'
+				Nuri::Util.log "vm[#{vm_name}]: send BSig model - #{code}"
+			else
+				Nuri::Util.log "vm[#{vm_name}]: no BSig model"
+			end
+			return true
+		rescue Exception => exp
+			Nuri::Util.error "Cannot send BSig model to VM: #{vm_name},#{address} - #{exp} [#{exp.backtrace}]"
+		end
+		false
+	end
+
+	def activate_bsig(vm_name, address)
+		begin
+			bsig_id = ::Nuri::BSig.get_active_id
+			return true if bsig_id.nil? # no BSig available
+
+			bsig_file = ::Nuri::BSig.bsig_vm_file(bsig_id)
+			bsig = (File.exist?(bsig_file) ? JSON[File.read(bsig_file)] : {})
+			if bsig.has_key?(vm_name)
+				# activate BSig model
+				data = {'id' => bsig_id}
+				code, _ = self.put_data(address, Nuri::Port, '/bsig/activate', data)
+				raise Exception, "Return code: #{code}" if code != '200'
+				Nuri::Util.log "vm[#{vm_name}]: active BSig - #{bsig_id}"
+			end
+			return true
+		rescue Exception => exp
+			Nuri::Util.error "Cannot activate BSig model of VM: #{vm_name},#{address} - #{exp} [#{exp.backtrace}]"
+		end
 		false
 	end
 end
