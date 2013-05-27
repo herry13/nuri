@@ -105,7 +105,7 @@ module Nuri
 								put_data('localhost', Nuri::Port, bsig_start_path)
 							rescue Exception
 							end
-							sleep 30 #600 # 10 mins
+							sleep 5 #600 # 10 mins
 						end while not @stopped
 					}
 
@@ -327,22 +327,31 @@ module Nuri
 					path.chop! if path[path.length-1,1] == '/'
 					if path == '/exec'
 						status, content_type, body = self.execute_action(request.query)
+
 					elsif path == '/bsig'
 						status, content_type, body = self.save_bsig(request.query)
+
 					elsif path == '/bsig/activate'
 						status, content_type, body = self.activate_bsig(request.query)
+
 					elsif path == '/bsig/goal'
 						status, content_type, body = self.new_bsig_pre_goal(request.query)
+
 					elsif path == '/bsig/start'
 						status, content_type, body = [200, '', '']
+
 					elsif path == '/bsig/local_start'
 						status, content_type, body = self.start_bsig_executor
+
 					elsif path == '/bsig/vm'
 						status, content_type, body = self.save_bsig_vm(request.query)
+
 					elsif path == '/reset'
 						status, content_type, body = self.reset
+
 					elsif path[0,10] == '/function/' and path.length > 10
 						status, content_type, body = self.call_function(path, request.query)
+
 					else
 						status = 400
 						content_type = body = ''
@@ -422,7 +431,7 @@ module Nuri
 					File.open(bsig_id_file, 'w') { |f| f.write(bsig_id) }
 
 					# 3) load and deploy BSig by starting the executor
-					@owner.start_bsig_executor
+					#@owner.start_bsig_executor
 
 				rescue Exception => e
 					Nuri::Util.error "Failed to activate BSig: #{e} [#{e.backtrace}]"

@@ -12,8 +12,6 @@ def self.bsig_vm_file(id); Nuri::Util.home_dir + '/var/bsig_' + id.to_s + '.vm';
 module Operator
 	attr_accessor :selected
 
-	# @param signature => a Hash contains the signature of the operator
-	#
 	def init
 		@selected = false
 	end
@@ -39,7 +37,6 @@ module Operator
 	# @return true if this operator supports the goal state, otherwise false
 	#
 	def support(goal)
-#Nuri::Util.debug "[Operator::support] #{goal.inspect} <=> #{self['effect'].inspect}"
 		goal.each { |goal_path,goal_value|
 			self['effect'].each { |eff_path,eff_value|
 				return true if goal_path == eff_path and goal_value == eff_value
@@ -96,12 +93,19 @@ class Executor
 
 		Nuri::Util.debug "Execute local BSig model"
 
-		p = {:min_priority_index => 0}
-		while enabled?
-			bsig = self.get_bsig
-			p[:bsig_id] = bsig['id']
-			p[:goal] = bsig['goal']
-			achieve_local_goal(p)
+		begin
+			p = {:min_priority_index => 0}
+			while enabled?
+				bsig = self.get_bsig
+				p[:bsig_id] = bsig['id']
+				p[:goal] = bsig['goal']
+				if achieve_local_goal(p) == :no_flaw
+					Nuri::Util.debug "The local goal is achieved!"
+					break
+				end
+			end
+		rescue Exception => exp
+			Nuri::Util.error "Error on executing local BSig model: #{exp} [#{exp.backtrace}]"
 		end
 	end
 
@@ -220,10 +224,11 @@ Nuri::Util.debug "[select_operator] operator: #{operator.inspect}"
 	#         remote => a Hash contains the remote conditions
 	#
 	def split_conditions(conditions)
-Nuri::Util.debug "[split_conditions <<] conditions: #{conditions.inspect}"
-		local_goals = self.get_local_goal
+Nuri::Util.debug "[split_conditions] conditions: #{conditions.inspect}"
+		local_goal = self.get_local_goal
 		remote = {}
 		local = {}
+Nuri::Util.debug local_goal.inspect
 		conditions.each { |path,value|
 			if local_goal.has_key?(path) and local_goal[path] == value
 				local[path] = value
