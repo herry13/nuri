@@ -82,7 +82,7 @@ class Executor
 	def start
 		enable(true)
 
-		Nuri::Util.debug "Start BSig executor"
+		Nuri::Util.debug "Execute local BSig model"
 
 		p = {:min_priority_index => 0}
 		while enabled?
@@ -118,6 +118,7 @@ Nuri::Util.debug "[achieve_local_goal] flaws: #{flaws.inspect}"
 			operator = self.select_operator(flaws, p[:min_priority_index])
 			return :failure if operator.nil?
 
+Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
 			return :on_going if operator.selected
 			operator.selected = true
 		}
@@ -192,7 +193,6 @@ Nuri::Util.debug "[invoke] operator: #{operator.inspect}"
 	def select_operator(goal, min_priority_index)
 		operator = nil
 		self.get_local_operators.each { |op|
-#Nuri::Util.debug op.inspect + ": #{op.priority_index} > #{min_priority_index}"
 			next if op.priority_index < min_priority_index or
 					(!operator.nil? and op.priority_index > operator.priority_index)
 			operator = op if op.support(goal)
