@@ -2,8 +2,5 @@
 .yardoc
 .DS_Store
 .*
-bsig*
-central*
-plan*
 logs
 test.sfp
