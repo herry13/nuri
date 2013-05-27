@@ -34,23 +34,18 @@ module Nuri
 				# Balancer members setting
 				data =`/bin/grep "BalancerMember" #{ConfigFile} 2>/dev/null`.chop
 				members = []
-				#xmembers = []
 				data.split("\n").each do |line|
 					member = line.strip.split(' ')
 					next if member[1] == nil
 					_, address = member[1].split('http://', 2)
-					name = Nuri::Util.get_system_information.index(address)
+					name = Nuri::Util.get_system_information.key(address)
 					if not name.nil?
 						ref = '$.' + name
-						#xmembers.push(ref)
 						members.push(ref)
 					end
-					#members.push( member[1] )
 				end
 				members.sort!
-				#xmembers.sort!
 				@state['members'] = members
-				#@state['xmembers'] = xmembers
 
 				return @state
 			end

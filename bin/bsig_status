@@ -1,6 +1,7 @@
 #!/bin/sh
 
-NURI="./bin/nuri"
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+NURI="$DIR/nuri"
 
 while [ "a" = "a" ]; do
 	QTIME=$(date)
