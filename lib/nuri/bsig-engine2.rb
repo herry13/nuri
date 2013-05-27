@@ -75,7 +75,7 @@ class Executor
 	end
 
 	def start
-		set_enabled(true)
+		enable(true)
 
 		p = {:min_priority_index => 0}
 		while enabled?
@@ -87,7 +87,7 @@ class Executor
 	end
 
 	def stop
-		set_enabled(false)
+		enable(false)
 	end
 
 	# @params
