@@ -99,7 +99,7 @@ module Nuri
 
 						# Start BSig reminder
 						Nuri::Util.log 'Starting BSig reminder'
-						bsig_start_path = '/bsig/start'
+						bsig_start_path = '/bsig/local_start'
 						begin
 							begin
 								put_data('localhost', Nuri::Port, bsig_start_path)
@@ -334,6 +334,8 @@ module Nuri
 					elsif path == '/bsig/goal'
 						status, content_type, body = self.new_bsig_pre_goal(request.query)
 					elsif path == '/bsig/start'
+						status, content_type, body = [200, '', '']
+					elsif path == '/bsig/local_start'
 						status, content_type, body = self.start_bsig_executor
 					elsif path == '/bsig/vm'
 						status, content_type, body = self.save_bsig_vm(request.query)
@@ -375,7 +377,7 @@ module Nuri
 			end
 
 			def start_bsig_executor
-				#@owner.start_bsig_executor
+				@owner.start_bsig_executor
 				[200, '', '']
 			end
 
