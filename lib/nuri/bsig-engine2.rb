@@ -19,7 +19,7 @@ module Operator
 	end
 
 	def priority_index
-		self['id']
+		self['distance'].to_i
 	end
 
 	# @param goal => a Hash contains the goal state
@@ -108,7 +108,7 @@ class Executor
 	# :min_priority_index => the minimum priority index value of selected operator
 	#
 	def achieve_local_goal(p={})
-		p[:flaws] = self.get_flaws(p)
+		p[:flaws] = self.get_flaws(p[:goal])
 		return :no_flaw if flaws.empty?
 
 		@local_mutex.synchronize {
