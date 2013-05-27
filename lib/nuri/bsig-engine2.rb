@@ -108,11 +108,11 @@ class Executor
 	# :min_priority_index => the minimum priority index value of selected operator
 	#
 	def achieve_local_goal(p={})
-		p[:flaws] = self.get_flaws(p[:goal])
+		flaws = self.get_flaws(p[:goal])
 		return :no_flaw if flaws.empty?
 
 		@local_mutex.synchronize {
-			operator = self.select_operator(p[:goal], p[:min_priority_index])
+			operator = self.select_operator(flaws, p[:min_priority_index])
 			return :failure if operator.nil?
 
 			return :on_going if operator.selected
