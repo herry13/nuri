@@ -124,7 +124,7 @@ Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
 Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
 		}
 
-Nuri::Util.debug "[split_conditions] : #{operator['condition']}"
+Nuri::Util.debug "[split_conditions] : #{operator.inspect}"
 		local, remote = self.split_conditions(operator['condition'])
 
 		status = nil
