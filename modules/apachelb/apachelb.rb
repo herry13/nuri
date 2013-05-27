@@ -38,7 +38,7 @@ module Nuri
 					member = line.strip.split(' ')
 					next if member[1] == nil
 					_, address = member[1].split('http://', 2)
-					name = Nuri::Util.get_system_information.key(address)
+					name = Nuri::Util.get_system_information.index(address)
 					if not name.nil?
 						ref = '$.' + name
 						members.push(ref)
