@@ -186,7 +186,6 @@ Nuri::Util.debug "[invoke] operator: #{operator.inspect}"
 	#
 	def get_local_goal
 		self.get_bsig['goal']
-		bsig['goal']
 	end
 
 	# @param goal => a Hash contains the goal state
@@ -212,6 +211,7 @@ Nuri::Util.debug "[select_operator] operator: #{operator.inspect}"
 	#         remote => a Hash contains the remote conditions
 	#
 	def split_conditions(conditions)
+Nuri::Util.debug "[split_conditions] conditions: #{conditions.inspect}"
 		local_goals = self.get_local_goal
 		remote = {}
 		local = {}
