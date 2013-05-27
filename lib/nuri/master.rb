@@ -576,8 +576,8 @@ module Nuri
 		end
 
 		def self.start_bsig
-			master = Nuri::Master::Daemon.new
-			return master.start_bsig
+			#master = Nuri::Master::Daemon.new
+			#return master.start_bsig
 		end
 
 		def self.status_bsig
