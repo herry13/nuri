@@ -144,6 +144,7 @@ Nuri::Util.debug "#{operator.name} => #{operator.selected}"
 	end
 
 	def receive_remote_goal(p={})
+Nuri::Util.debug "[receive_remote_goal] #{p.inspect}"
 		self.register_satisfier
 		status = nil
 		data = {:bsig_id => p['bsig_id'],
@@ -178,6 +179,7 @@ Nuri::Util.debug "[invoke] operator: #{operator.inspect}"
 	# @return :success if all agents that can achieve given goal, otherwise :failure
 	#
 	def achieve_remote_goal(p={})
+Nuri::Util.debug "[achieve_remote_goal] #{p.inspect}"
 		p[:goal].each { |address,remote_goal|
 			data = {:bsig_id => p[:bsig_id],
 			        :goal => remote_goal,
