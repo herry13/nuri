@@ -9,43 +9,6 @@ MasterBSigFile = Nuri::Util.home_dir + '/var/bsig_system'
 
 def self.bsig_vm_file(id); Nuri::Util.home_dir + '/var/bsig_' + id.to_s + '.vm'; end
 
-module Operator
-	attr_accessor :selected
-
-	def init
-		@selected = false
-	end
-
-	def priority_index
-		self['distance'].to_i
-	end
-
-	def name
-		self['name']
-	end
-
-	def conditions
-		self['condition']
-	end
-
-	def effects
-		self['effect']
-	end
-
-	# @param goal => a Hash contains the goal state
-	#
-	# @return true if this operator supports the goal state, otherwise false
-	#
-	def support(goal)
-		goal.each { |goal_path,goal_value|
-			self['effect'].each { |eff_path,eff_value|
-				return true if goal_path == eff_path and goal_value == eff_value
-			}
-		}
-		false
-	end
-end
-
 class Executor
 	ActiveBSigIdFile = Nuri::Util.home_dir + '/var/bsig_id'
 	EmptyBSig = {'id' => nil, 'goal' => {}, 'operators' => []}
@@ -85,6 +48,9 @@ class Executor
 		@lock = Mutex.new
 		@enabled = false
 
+		@remote_lock = Mutex.new
+		@total_satisfier = 0
+
 		self.reset
 	end
 
@@ -96,6 +62,11 @@ class Executor
 		begin
 			p = {:min_priority_index => 0}
 			while enabled?
+				if self.total_satisfier_threads > 0
+					Nuri::Util.debug "Some satisfier threads are active!"
+					break
+				end
+
 				bsig = self.get_bsig
 				p[:bsig_id] = bsig['id']
 				p[:goal] = bsig['goal']
@@ -134,10 +105,10 @@ Nuri::Util.debug "[achieve_local_goal] flaws: #{flaws.inspect}"
 			operator = self.select_operator(flaws, p[:min_priority_index])
 			return :failure if operator.nil?
 
-Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
+Nuri::Util.debug "#{operator.name} => #{operator.selected}"
 			return :on_going if operator.selected
 			operator.selected = true
-Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
+Nuri::Util.debug "#{operator.name} => #{operator.selected}"
 		}
 
 		local, remote = self.split_conditions(operator.conditions)
@@ -172,10 +143,24 @@ Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
 		return :flaw_repaired
 	end
 
+	def receive_remote_goal(p={})
+		self.register_satisfier
+		status = nil
+		data = {:bsig_id => p['bsig_id'],
+		        :min_priority_index => p['min_priority_index'],
+		        :goal => p['goal']}
+		while enabled? and status != :no_flaw and status != :failure
+			status = achieve_local_goal(data)
+			sleep 5 if status == :on_going
+		end
+		self.unregister_satisfier
+		return (status == :no_flaw)
+	end
+
+
 	protected
 
-	# @params
-	# operator => an instance of Nuri::BSig::Operator, which is the BSig
+	# @param operator => an instance of Nuri::BSig::Operator, which is the BSig
 	#             operator to be executed
 	#
 	# @return :success if execution is success, otherwise :failure
@@ -185,8 +170,35 @@ Nuri::Util.debug "[invoke] operator: #{operator.inspect}"
 		:failure
 	end
 
+	# Send a request to remote agent to achieve particular goal
+	#
+	# @param :goal => a Hash of remote goal {<address>}{<remote_goal}
+	# @param :bsig_id => current BSig ID
+	# @param :min_priority_index => minimum priority index of operator
+	# @return :success if all agents that can achieve given goal, otherwise :failure
+	#
 	def achieve_remote_goal(p={})
-		# TODO
+		p[:goal].each { |address,remote_goal|
+			data = {:bsig_id => p[:bsig_id],
+			        :goal => remote_goal,
+			        :min_priority_index => p[:min_priority_index]}
+			code, _ = @owner.put_data(address, Nuri::Port, '/bsig/achieve_goal', data)
+			Nuri::Util.debug 'request remote condition: ' + code + ' -- from: ' + address
+			return :failure if code != '200'
+		}
+		:success
+	end
+
+	def register_satisfier
+		@remote_lock.synchronize { @total_satisfier += 1 }
+	end
+
+	def unregister_satisfier
+		@remote_lock.synchronize { @total_satisfier -= 1 }
+	end
+
+	def total_satisfier_threads
+		@remote_lock.synchronize { return @total_satisfier }
 	end
 
 	# @return an Array of Nuri::BSig::Operator instances
@@ -228,7 +240,7 @@ Nuri::Util.debug "[split_conditions] conditions: #{conditions.inspect}"
 		local_goal = self.get_local_goal
 		remote = {}
 		local = {}
-Nuri::Util.debug local_goal.inspect
+#Nuri::Util.debug local_goal.inspect
 		conditions.each { |path,value|
 			if local_goal.has_key?(path) and local_goal[path] == value
 				local[path] = value
@@ -272,6 +284,45 @@ Nuri::Util.debug "[split_conditions] local: #{local.inspect}, remote: #{remote.i
 	end
 
 end
+
+
+module Operator
+	attr_accessor :selected
+
+	def init
+		@selected = false
+	end
+
+	def priority_index
+		self['distance'].to_i
+	end
+
+	def name
+		self['name']
+	end
+
+	def conditions
+		self['condition']
+	end
+
+	def effects
+		self['effect']
+	end
+
+	# @param goal => a Hash contains the goal state
+	#
+	# @return true if this operator supports the goal state, otherwise false
+	#
+	def support(goal)
+		goal.each { |goal_path,goal_value|
+			self['effect'].each { |eff_path,eff_value|
+				return true if goal_path == eff_path and goal_value == eff_value
+			}
+		}
+		false
+	end
+end
+
 
 end
 

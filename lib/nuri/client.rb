@@ -216,6 +216,10 @@ module Nuri
 				#@bsig_executor.load
 			end
 
+			def receive_remote_goal(data)
+				@bsig_executor.receive_remote_goal(data)
+			end
+
 			def reset
 				begin
 					self.stop_bsig_executor
@@ -337,6 +341,9 @@ module Nuri
 					elsif path == '/bsig/goal'
 						status, content_type, body = self.new_bsig_pre_goal(request.query)
 
+					elsif path == '/bsig/achieve_goal'
+						status, content_type, body = self.achieve_remote_goal(request.query)
+
 					elsif path == '/bsig/start'
 						status, content_type, body = [200, '', '']
 
@@ -392,6 +399,17 @@ module Nuri
 
 			def reset
 				[ (@owner.reset ? 200 : 500), '', '' ]
+			end
+
+			def achieve_remote_goal(data)
+				begin
+					if @owner.receive_remote_goal(JSON[data['json']])
+						return [200, '', '']
+					end
+				rescue Exception => exp
+					Nuri::Util.error "Failed to achieve remote goal: #{exp} [#{exp.backtrace}]"
+				end
+				[500, '', '']
 			end
 
 			def new_bsig_pre_goal(data)
