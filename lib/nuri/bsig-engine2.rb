@@ -213,7 +213,7 @@ Nuri::Util.debug "[select_operator] operator: #{operator.inspect}"
 	#         remote => a Hash contains the remote conditions
 	#
 	def split_conditions(conditions)
-Nuri::Util.debug "[split_conditions] conditions: #{conditions.inspect}"
+Nuri::Util.debug "[split_conditions <<] conditions: #{conditions.inspect}"
 		local_goals = self.get_local_goal
 		remote = {}
 		local = {}
