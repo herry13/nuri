@@ -31,7 +31,7 @@ module Operator
 	# @return true if this operator supports the goal state, otherwise false
 	#
 	def support(goal)
-Nuri::Util.debug "[Operator::support] #{goal.inspect} <=> #{self['effect'].inspect}"
+#Nuri::Util.debug "[Operator::support] #{goal.inspect} <=> #{self['effect'].inspect}"
 		goal.each { |goal_path,goal_value|
 			self['effect'].each { |eff_path,eff_value|
 				return true if goal_path == eff_path and goal_value == eff_value
@@ -125,8 +125,10 @@ Nuri::Util.debug "[achieve_local_goal] flaws: #{flaws.inspect}"
 Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
 			return :on_going if operator.selected
 			operator.selected = true
+Nuri::Util.debug "#{operator['name']} => #{operator.selected}"
 		}
 
+Nuri::Util.debug "[split_conditions]"
 		local, remote = self.split_conditions(operator.conditions)
 
 		status = nil
