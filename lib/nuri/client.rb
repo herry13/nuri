@@ -90,6 +90,7 @@ module Nuri
 								if data.length > 0
 									pids = "#{data.to_i} #{$$}"
 									File.open(Nuri::Util.pid_file, 'w') { |f| f.write(pids) }
+									File.open(Nuri::Util.pid_file + ".1", 'w') { |f| f.write("#{data.to_i}") }
 									Nuri::Util.log "Nuri client daemon is running with PIDs ##{pids}"
 								end
 							end
