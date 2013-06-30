@@ -1,0 +1,6 @@
+include "modules/vm/vm.sfp"
+include "modules/cloud/cloud.sfp"
+
+schema Bonfire extends Cloud {
+	description = "BonFIRE Multi-Site Cloud infrastructure"
+}
