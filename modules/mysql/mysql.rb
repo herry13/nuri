@@ -97,4 +97,12 @@ class Sfp::Module::Mysql < Sfp::Module::Service
 			system("/bin/echo \"#{passwd}\" > /etc/mysql/nuri.cnf") and
 			system('/bin/chmod 0400 /etc/mysql/nuri.cnf'))
 	end
+
+	def set_service_name(p={})
+		true
+	end
+
+	def set_package_name(p={})
+		true
+	end
 end

@@ -39,6 +39,8 @@ class Nuri::Master
 			push_agents_list if @model.length > 0
 		rescue
 		end
+
+		# find a list of cloud proxy
 		@model.accept(@cloudfinder.reset)
 	end
 
@@ -72,18 +74,30 @@ class Nuri::Master
 f1 = SfpFlatten.new
 task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 task['initial'].accept(f1)
-puts JSON.pretty_generate(f1.results)
+#puts "Current state".yellow
+#f1.results.each { |k,v| puts "#{k}: #{v}" }
+#puts JSON.pretty_generate(f1.results)
 #
 f2 = SfpFlatten.new
 get_agents.accept(f2)
-puts JSON.pretty_generate(f2.results)
+puts "Goal state".yellow
+f2.results.each { |k,v|
+	print "#{k}: "
+	puts (f1.results.has_key? k and f1.results[k] != v ?
+		"#{v}".green + " #{f1.results[k]}".red : "#{v}".green)
+}
+#puts JSON.pretty_generate(f2.results)
 
-		# construct goal state		
+		# modify condition of procedures of each VM's component
+		# modification: add constraint "$.vm.created = true"
+		task['initial'].accept(VMProcedureModifier.new)
+
+		# construct goal state		
 		goalgen = GoalGenerator.new
 		get_agents.accept(goalgen)
 		task['goal'] = goalgen.results
 
-		# add global constraint (if exist)
+		# add global constraint (if exist)
 		task['global'] = @model['global'] if @model.has_key?('global')
 
 		# remove old parent links, and then reconstruct SFP parent links
@@ -139,37 +153,31 @@ puts JSON.pretty_generate(f2.results)
 
 	protected
 	def get_not_exist_node_state(name, model)
-		s = {:state => Sfp::Helper.deep_clone(model)}
+		s = {'state' => Sfp::Helper.deep_clone(model)}
 		s.accept(Sfp::Visitor::ParentEliminator.new)
 		s.accept(NotExistNodeState.new)
-		s[:state]['created'] = false
-		s[:state]['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
-		s[:state]
-	end
-
-	class AnyValueRemover
-		def visit(name, value, parent)
-			parent.delete(name) if value.is_a?(Hash) and value['_context'] == 'any_value'
-			true
-		end
+puts JSON.pretty_generate(s)
+		s['state']['created'] = false
+		s['state']['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
+		s['state']
 	end
 
 	SfpUndefinedString = Sfp::Undefined.new(nil, '$.String')
 	SfpUndefinedNumber = Sfp::Undefined.new(nil, '$.Number')
-	SfpUndefinedBoolean = Sfp::Undefined.new(nil, '$.Number')
+	SfpUndefinedBoolean = Sfp::Undefined.new(nil, '$.Boolean')
 	class NotExistNodeState
 		def visit(name, value, parent)
 			return false if name[0,1] == '_'
 			if not value.is_a?(Hash)
-				if value.is_a? String
+				if value.is_a?(String)
 					parent[name] = SfpUndefinedString
-				elsif value.is_a? Fixnum or value.is_a? Float
-					SfpUndefinedNumber
-				elsif value.is_a? TrueClass or value.is_a? FalseClass
-					SfpUndefinedBoolean
+				elsif value.is_a?(Fixnum) or value.is_a?(Float)
+					parent[name] = SfpUndefinedNumber
+				elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
+					parent[name] = SfpUndefinedBoolean
 				else
 puts parent.ref.push(name) + ": " + value.class.name
-					SfpUndefined
+					parent[name] = SfpUndefined
 				end
 			elsif value['_context'] == 'null' or value['_context'] == 'any_value'
 				parent[name] = Sfp::Undefined.new(nil, value['_isa'])
@@ -180,11 +188,22 @@ puts parent.ref.push(name) + ": " + value.class.name
 		end
 	end
 
+	class VMProcedureModifier
+		def visit(name, value, parent)
+			return false if name[0,1] == '_'
+			if value.is_a?(Hash) and value['_context'] == 'procedure'
+				_, agent, _ = parent.ref.split('.', 3)
+				value['_condition']["$.#{agent}.created"] = Sfp::Helper::Constraint.equals(true)
+			end
+			true
+		end
+	end
+
 	def assign_vm_address(state, vms)
 		# Reset sfpAddress, sfpPort, in_cloud of a VM if it's not found in
 		# previously assigned cloud
 		vms.each do |name,model|
-			next if !model['in_cloud'].is_a? String or !model['in_cloud'].isref
+			next if !model['in_cloud'].is_a?(String) or !model['in_cloud'].isref
 			cloud, _ = @cloudfinder.clouds.select { |cloud| model['in_cloud'] == cloud }
 			if !cloud.nil? and !state.at?("#{cloud}.servers").has_key? name
 				vms[name]['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
@@ -344,7 +363,7 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 	end
 
 	def get_exist_vms
-		get_vms.select { |name,model| model['sfpAddress'].is_a? String and
+		get_vms.select { |name,model| model['sfpAddress'].is_a?(String) and
 			model['sfpAddress'] != '' }
 	end
 
@@ -463,7 +482,7 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 		end
 		
 		def visit(name, value, parent)
-			if value.is_a? Hash and value.has_key? '_classes'
+			if value.is_a?(Hash) and value.has_key?('_classes')
 				value['_classes'].each { |s| @schemata << s }
 			end
 			true

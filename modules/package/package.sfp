@@ -3,7 +3,7 @@ schema Package {
 	installed : Bool //= false
 	version : String
 
-	sub install { 
+	sub install {
 		condition {
 			//this.installed = false
 		}
@@ -18,6 +18,13 @@ schema Package {
 		}
 		effect {
 			this.installed = false
+		}
+	}
+
+	sub set_package_name (name isref String) {
+		condition { }
+		effect {
+			this.package_name = name
 		}
 	}
 }

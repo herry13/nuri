@@ -51,7 +51,7 @@ elsif opts[:plan]
 	master.set_model_file(opts)
 	plan = master.get_plan(opts)
 	if plan['workflow'].nil?
-		puts "No solution!".red
+		puts "Plan: no solution!".red
 	elsif opts[:human]
 		puts plan_to_human(plan)
 	else
