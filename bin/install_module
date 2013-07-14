@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [[ "$1" == "" ]] || [[ "$2" == "" ]]
+then
+	echo "Usage: install_module <address> <module-name>"
+else
+	tar cvzf $2.tgz $2
+	curl -i -X PUT $1:1314/modules/$2 -F module=@$2.tgz
+	rm $2.tgz
+fi

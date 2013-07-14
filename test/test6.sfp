@@ -1,0 +1,19 @@
+include "../modules/node/node.sfp"
+include "../modules/apache/apache.sfp"
+
+hpvm7 isa Node {
+	sfpAddress is "hpvm7.diy.inf.ed.ac.uk"
+
+	apache isa Apache {
+		//installed = false
+		running = true
+		//php_module = false
+		//php_mysql_module = false
+		//version = "2.2.22-1ubuntu1."
+
+		is_load_balancer = true
+		lb_method = "bytraffic"
+	}
+
+	
+}

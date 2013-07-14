@@ -1,0 +1,4 @@
+schema Cloud {
+	running : Bool
+	description is ""
+}

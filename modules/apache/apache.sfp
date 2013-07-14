@@ -1,0 +1,164 @@
+include "../service/service.sfp"
+include "../node/node.sfp"
+
+schema Apache extends Service {
+	package_name = "apache2"
+	service_name = "apache2"
+	port : Int // = 80
+	document_root : String //= "/var/www"
+	installed : Bool
+	running : Bool
+	php_module : Bool // = false
+	php_mysql_module : Bool // = false
+	server_name : String // = ""
+
+	// load balancer config
+	is_load_balancer : Bool
+	lb_members isset Node
+	lb_method : String  // byrequests, bytraffic, bybusyness
+
+	/** //-- bug: this is not working
+	libaugeas_ruby isa Package {
+		package_name = "libaugeas-ruby"
+		installed = true
+	}
+	**/
+
+	sub set_port(target isref Integer) {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.port = target
+		}
+	}
+
+	sub install {
+		condition {
+			//this.libaugeas.installed = true
+			//this.installed = false
+		}
+		effect {
+			this.installed = true
+		}
+	}
+
+	sub uninstall {
+		condition {
+			this.installed = true
+			this.running = false
+			this.php_module = false
+			this.php_mysql_module = false
+		}
+		effect {
+			this.installed = false
+		}
+	}
+
+	sub set_document_root (target isref String) {
+		condition {
+			this.running = false
+			this.installed = true
+		}
+		effect {
+			this.document_root = target
+		}
+	}
+
+	sub set_server_name (target isref String) {
+		condition {
+			this.running = false
+			this.installed = true
+		}
+		effect {
+			this.server_name = target
+		}
+	}
+
+	sub install_php_module {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_module = true
+		}
+	}
+
+	sub uninstall_php_module {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.php_module = false
+		}
+	}
+
+	sub install_php_mysql_module {
+		condition {
+			this.php_module = true
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.php_mysql_module = true
+		}
+	}
+
+	sub uninstall_php_mysql_module {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.php_mysql_module = false
+		}
+	}
+
+	sub enable_load_balancer {
+		condition {
+			this.installed = true
+			this.running = false
+			this.is_load_balancer = false
+		}
+		effect {
+			this.is_load_balancer = true
+		}
+	}
+
+	sub disable_load_balancer {
+		condition {
+			this.installed = true
+			this.running = false
+			this.is_load_balancer = true
+		}
+		effect {
+			this.is_load_balancer = false
+		}
+	}
+
+	sub set_lb_members (members isset Node) {
+		condition {
+			this.installed = true
+			this.running = false
+			this.is_load_balancer = true
+			//foreach (members as m) {
+			//	m.running = true
+			//}
+		}
+		effect {
+			this.lb_members = members
+		}
+	}
+
+	sub set_lb_method (target isref String) {
+		condition {
+			this.installed = true
+			this.running = false
+			this.is_load_balancer = true
+		}
+		effect {
+			this.lb_method = target
+		}
+	}
+}

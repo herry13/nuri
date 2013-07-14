@@ -1,0 +1,34 @@
+include "../modules/node/node.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+
+hpvm6 isa Node {
+	sfpAddress = "hpvm6.diy.inf.ed.ac.uk"
+	mysql isa Mysql {
+		running = true
+		//root_password = "mysql"
+		//public = true
+		//installed = false
+	}
+}
+
+hpvm7 isa Node {
+	sfpAddress is "hpvm7.diy.inf.ed.ac.uk"
+
+	apache isa Apache {
+		//installed = false
+		running = true
+		//php_module = false
+		//php_mysql_module = false
+		//version = "2.2.22-1ubuntu1."
+
+		is_load_balancer = true
+		lb_method = "bytraffic"
+		lb_members = ( hpvm6 )
+	}
+}
+
+global constraint {
+	if hpvm7.apache.running then hpvm6.mysql.running
+	//if hpvm6.mysql.running then hpvm7.apache.running
+}

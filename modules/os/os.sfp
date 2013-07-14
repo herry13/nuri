@@ -1,0 +1,10 @@
+schema OS {
+	running : Bool
+
+	sub shutdown {
+		condition { }
+		effect {
+			this.running = false
+		}
+	}
+}

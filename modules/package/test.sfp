@@ -1,0 +1,6 @@
+include "package.sfp"
+
+apache isa Package {
+	package_name = "apache2"
+	installed = true
+}

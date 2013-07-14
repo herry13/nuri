@@ -1,0 +1,8 @@
+include "bonfire.sfp"
+
+a isa Bonfire {
+	experiment is "autocloud"
+	location is "fr-inria"
+	image_name is "BonFIRE Debian Squeeze 10G v5"
+	wan_name is "BonFIRE WAN"
+}

@@ -1,0 +1,18 @@
+include "../modules/node/node.sfp"
+include "../modules/mysql/mysql.sfp"
+
+hpvm6 isa Node {
+	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+
+	mysql isa Mysql {
+		//installed = false
+		//installed = true
+		running = true
+		//running = false
+		//root_password = "nuri"
+		//port = 4000
+		//public = true
+	}
+
+	
+}

@@ -1,0 +1,23 @@
+schema Package {
+	package_name = ""
+	installed : Bool //= false
+	version : String
+
+	sub install { 
+		condition {
+			//this.installed = false
+		}
+		effect {
+			this.installed = true
+		}
+	}
+
+	sub uninstall {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+}

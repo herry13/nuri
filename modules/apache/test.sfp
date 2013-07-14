@@ -1,0 +1,8 @@
+include "apache.sfp"
+
+apache isa Apache
+
+/*augeas isa Package {
+	package_name = "libaugeas-ruby"
+	installed = true
+}*/

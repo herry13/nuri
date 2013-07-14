@@ -1,0 +1,10 @@
+include "../modules/node/node.sfp"
+include "../modules/apache/apache.sfp"
+
+nena isa Node {
+	sfpAddress is "localhost"
+
+	apache isa Apache {
+		version = "2.2.22-1ubuntu1."
+	}
+}

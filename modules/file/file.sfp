@@ -1,0 +1,30 @@
+schema File {
+	path is ""
+	created : Bool
+	content : String
+	user : String
+	group : String
+
+	procedure create (content isref String) {
+		condition { }
+		effect {
+			this.created is true
+			this.content is content
+		}
+	}
+
+	procedure set_ownership(user isref String, group isref String) {
+		condition { }
+		effect {
+			this.user = user
+			this.group = group
+		}
+	}
+
+	procedure remove {
+		condition { }
+		effect {
+			this.created is false
+		}
+	}
+}

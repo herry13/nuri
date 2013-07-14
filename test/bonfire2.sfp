@@ -1,0 +1,36 @@
+include "../modules/machine/machine.sfp"
+include "../modules/bonfire/bonfire.sfp"
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+
+master isa Machine {
+	sfpAddress is "localhost"
+
+	bonfire isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+}
+
+vm1 isa VM {
+	created = true
+	apache isa Apache {
+		installed is false
+	}
+}
+
+vm2 isa VM {
+	created = false //true
+	//mysql isa Mysql {
+	//	installed is false
+	//}
+}
+
+/*
+vm3 isa VM {
+	created = true
+}
+*/

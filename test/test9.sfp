@@ -1,0 +1,8 @@
+include "../modules/node/node.sfp"
+
+canim isa Node {
+	sfpAddress = "localhost"
+
+	//os isa OS
+	a isa OS
+}

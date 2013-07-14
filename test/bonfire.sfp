@@ -1,0 +1,21 @@
+include "../modules/node/node.sfp"
+include "../modules/bonfire/bonfire.sfp"
+include "../modules/file/file.sfp"
+
+hpvm6 isa Node {
+	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+
+	bonfire isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+
+	/*ssh_config isa File {
+		path is "~/.ssh/config"
+		content is "test
+test2
+"
+	}*/
+}

@@ -1,0 +1,4 @@
+uri: https://api.bonfire-project.eu/
+username: 
+password: 
+require: ['ApplicationVndBonfireXml']
