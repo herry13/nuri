@@ -24,7 +24,6 @@ schema Service extends Package {
 	sub start {
 		condition {
 			this.installed = true
-			this.running = false
 		}
 		effect {
 			this.running = true

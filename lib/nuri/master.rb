@@ -160,7 +160,6 @@ f2.results.each { |k,v|
 		s = {'state' => Sfp::Helper.deep_clone(model)}
 		s.accept(Sfp::Visitor::ParentEliminator.new)
 		s.accept(NotExistNodeState.new)
-puts JSON.pretty_generate(s)
 		s['state']['created'] = false
 		s['state']['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
 		s['state']

@@ -4,9 +4,6 @@ schema Package {
 	version : String
 
 	sub install {
-		condition {
-			//this.installed = false
-		}
 		effect {
 			this.installed = true
 		}
@@ -22,7 +19,6 @@ schema Package {
 	}
 
 	sub set_package_name (name isref String) {
-		condition { }
 		effect {
 			this.package_name = name
 		}

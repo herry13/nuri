@@ -15,17 +15,18 @@ master isa Machine {
 	}
 }
 
-/*vm1 isa VM {
+vm1 isa VM {
 	created = true
 	apache isa Apache {
-		installed is false
+		running is true
 	}
-}*/
+}
 
 vm2 isa VM {
 	created = true
 	mysql isa Mysql {
 		installed is true
+		running is true
 	}
 }
 
