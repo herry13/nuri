@@ -110,10 +110,14 @@ f2.results.each { |k,v|
 	end
 
 	def get_node_state(name, model)
-		if send_agent_model(name, model)
-			agent_state = get_agent_state(name, model)
-			raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
-			return agent_state[name]
+		begin
+			if send_agent_model(name, model)
+				agent_state = get_agent_state(name, model)
+				raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
+				return agent_state[name]
+			end
+		rescue Exception => e
+			puts "[WARN] Cannot get the current state of #{name} : #{e}".red
 		end
 		SfpUnknown
 	end
@@ -257,19 +261,25 @@ puts parent.ref.push(name) + ": " + value.class.name
 		{:agent => agent_model}.accept(finder)
 		schemata = finder.schemata.uniq.map { |x| x.sub(/^\$\./, '').downcase }
 
-		# get modules list
-		code, body = get_data(address, port, '/modules')
-		raise Exception, "Unable to get modules list from #{address}:#{port}" if code.to_i != 200
-		modules = JSON[body]
-		schemata.each { |m|
-			if m != 'object' and File.exist? "#{ModulesDir}/#{m}"
-				if not modules.has_key?(m) or modules[m] != get_module_hash(m).to_s
-					print "Push module #{m} to #{name} ".yellow
-					puts (system("cd #{ModulesDir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>/dev/null") ?
-						"[OK]".green : "[Failed]".red)
+		begin
+			# get modules list
+			code, body = get_data(address, port, '/modules')
+			raise Exception, "Unable to get modules list from #{address}:#{port}" if code.to_i != 200
+			modules = JSON[body]
+			schemata.each { |m|
+				if m != 'object' and File.exist? "#{ModulesDir}/#{m}"
+					if not modules.has_key?(m) or modules[m] != get_module_hash(m).to_s
+						print "Push module #{m} to #{name} ".yellow
+						puts (system("cd #{ModulesDir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>/dev/null") ?
+							"[OK]".green : "[Failed]".red)
+					end
 				end
-			end
-		}
+			}
+			return true
+		rescue Exception => e
+			puts "[WARN] Cannot push module to #{name}".red
+		end
+		false
 	end
 
 	def get_module_hash(name)
