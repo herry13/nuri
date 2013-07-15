@@ -119,7 +119,6 @@ schema Apache extends Service {
 		condition {
 			this.installed = true
 			this.running = false
-			this.is_load_balancer = false
 		}
 		effect {
 			this.is_load_balancer = true

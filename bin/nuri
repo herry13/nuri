@@ -41,7 +41,9 @@ if opts[:state]
 	master = Nuri::Master.new
 	master.set_model_file(opts)
 	state = master.get_state(opts)
+	#Nuri::Console.print_state({:state => state}) if opts[:human]
 	state.accept(Sfp::Visitor::PrettyStateGenerator.new)
+	#puts JSON.pretty_generate(state) if opts[:pretty]
 	puts (opts[:pretty] or opts[:human] ? JSON.pretty_generate(state) : JSON.generate(state))
 
 elsif opts[:plan]
@@ -51,7 +53,7 @@ elsif opts[:plan]
 	master.set_model_file(opts)
 	plan = master.get_plan(opts)
 	if plan['workflow'].nil?
-		puts "Plan: no solution!".red
+		puts "Plan: ".yellow + "\nno solution!".red
 	elsif opts[:human]
 		puts plan_to_human(plan)
 	else

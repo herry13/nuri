@@ -11,7 +11,6 @@ module Sfp::Helper::Constraint
 	end
 end
 
-
 class Nuri::Master
 	include Nuri::Net::Helper
 
@@ -71,21 +70,21 @@ class Nuri::Master
 #		task['initial'].accept(Sfp::Visitor::ParentEliminator.new)
 #		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 #
-f1 = SfpFlatten.new
+f1 = Sfp::Helper::SfpFlatten.new
 task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 task['initial'].accept(f1)
 #puts "Current state".yellow
 #f1.results.each { |k,v| puts "#{k}: #{v}" }
 #puts JSON.pretty_generate(f1.results)
 #
-f2 = SfpFlatten.new
-get_agents.accept(f2)
-puts "Goal state".yellow
-f2.results.each { |k,v|
-	print "#{k}: "
-	puts (f1.results.has_key? k and f1.results[k] != v ?
-		"#{v}".green + " #{f1.results[k]}".red : "#{v}".green)
-}
+#f2 = SfpFlatten.new
+#get_agents.accept(f2)
+#puts "Goal state".yellow
+#f2.results.each { |k,v|
+#	print "#{k}: "
+#	puts (f1.results.has_key? k and f1.results[k] != v ?
+#		"#{v}".green + " #{f1.results[k]}".red : "#{v}".green)
+#}
 #puts JSON.pretty_generate(f2.results)
 
 		# modify condition of procedures of each VM's component
@@ -95,7 +94,18 @@ f2.results.each { |k,v|
 		# construct goal state		
 		goalgen = GoalGenerator.new
 		get_agents.accept(goalgen)
+		#@model.accept(goalgen)
 		task['goal'] = goalgen.results
+
+
+puts "Goal state:".yellow
+goalgen.results.each { |k,v|
+	next if k[0,1] == '_'
+	print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
+	print " #{f1.results[k]}".red if f1.results.has_key?(k) and
+		f1.results[k] != v['_value']
+	puts ""
+}
 
 		# add global constraint (if exist)
 		task['global'] = @model['global'] if @model.has_key?('global')
@@ -141,15 +151,19 @@ f2.results.each { |k,v|
 		exist_vms, not_exist_vms = assign_vm_address(state, vms)
 
 		# get state of VM nodes
-		exist_vms.each do |name,model|
-			push_modules(model) if p[:push_modules]
-			template[name] = model
-			state[name] = get_node_state(name, template)
-			template.delete(name)
-		end
-
-		not_exist_vms.each do |name,model|
+		exist_vms.each { |name,model|
+			state[name] = get_exist_node_state(name, model, template, p)
+		}
+		not_exist_vms.each { |name,model|
 			state[name] = get_not_exist_node_state(name, model)
+		}
+		@cloudfinder.clouds.each do |cloud|
+			# for each servers list of a cloud proxy, assign "in_cloud" attribute
+			# to associated VM
+			state.at?("#{cloud}.servers").each { |name, data|
+				next if not vms.has_key?(name)
+				state[name]['in_cloud'] = cloud
+			}
 		end
 
 		state
@@ -163,6 +177,14 @@ f2.results.each { |k,v|
 		s['state']['created'] = false
 		s['state']['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
 		s['state']
+	end
+
+	def get_exist_node_state(name, model, template, p={})
+		push_modules(model) if p[:push_modules]
+		template[name] = model
+		state = get_node_state(name, template)
+		template.delete(name)
+		state
 	end
 
 	SfpUndefinedString = Sfp::Undefined.new(nil, '$.String')
@@ -179,7 +201,7 @@ f2.results.each { |k,v|
 				elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
 					parent[name] = SfpUndefinedBoolean
 				else
-puts parent.ref.push(name) + ": " + value.class.name
+puts "[WARN] Sfp::Undefined => " + parent.ref.push(name) + ": " + value.class.name
 					parent[name] = SfpUndefined
 				end
 			elsif value['_context'] == 'null' or value['_context'] == 'any_value'
@@ -211,7 +233,7 @@ puts parent.ref.push(name) + ": " + value.class.name
 			if !cloud.nil? and !state.at?("#{cloud}.servers").has_key? name
 				vms[name]['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
 				vms[name]['sfpPort'] = {'_context'=>'any_value','_isa'=>'$.Number'}
-				vms[name]['in_cloud'] = {'_context'=>'null','_isa'=>'$.Cloud'}
+				#vms[name]['in_cloud'] = {'_context'=>'null','_isa'=>'$.Cloud'}
 			end
 		end
 
@@ -222,7 +244,7 @@ puts parent.ref.push(name) + ": " + value.class.name
 				next if not vms.has_key?(name)
 				vms[name]['sfpAddress'] = data['ip']
 				vms[name]['sfpPort'] = 1314
-				vms[name]['in_cloud'] = cloud
+				#vms[name]['in_cloud'] = cloud
 			}
 		end
 
@@ -433,34 +455,23 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 			
 		def visit(name, value, parent)
 			return false if name[0,1] == '_'
+
 			if value.is_a?(Hash)
 				return true if value['_context'] == 'object'
-				if value['_context'] == 'set'
-					@results[parent.ref.push(name)] = Sfp::Helper::Constraint.equals(value['_values'])
+
+				if parent.has_key?('_finals') and parent['_finals'].index(name).nil?
+					if value['_context'] == 'set'
+						@results[parent.ref.push(name)] = Sfp::Helper::Constraint.equals(value['_values'])
+					elsif value['_context'] == 'null'
+						# HACK! This should not be commented => null value should not be ignored.
+						#@results[parent.ref.push(name)] = Sfp::Helper::Constraint.equals(value)
+					end
 				end
 				return false
 			end
-
-			@results[ parent.ref.push(name) ] = Sfp::Helper::Constraint.equals(value)
-			false
-		end
-	end
-
-	class SfpFlatten
-		attr_reader :results
-
-		def initialize
-			@results = {}
-		end
-
-		def visit(name, value, parent)
-			return false if name[0,1] == '_'
-			if value.is_a?(Hash)
-				return true if value['_context'] == 'object'
-				return false
+			if parent.has_key?('_finals') and parent['_finals'].index(name).nil?
+				@results[ parent.ref.push(name) ] = Sfp::Helper::Constraint.equals(value)
 			end
-
-			@results[parent.ref.push(name)] = value
 			false
 		end
 	end
@@ -496,5 +507,49 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 			end
 			true
 		end
+	end
+end
+
+class Sfp::Helper::SfpFlatten
+	attr_reader :results
+
+	def initialize
+		@results = {}
+	end
+
+	def visit(name, value, parent)
+		return false if name[0,1] == '_'
+		if value.is_a?(Hash)
+			return true if value['_context'] == 'object'
+			return false
+		end
+
+		@results[parent.ref.push(name)] = value
+		false
+	end
+end
+
+module Sfp::Helper
+	def self.sfp_to_s(v)
+		if v.is_a?(Hash)
+			return "null" if v['_context'] == 'null'
+			return v['_values'].inspect if v['_context'] == 'set'
+			return "<hash>"
+		elsif v.is_a?(String) and v.isref
+			v.sub(/^\$\./, '')
+		end
+		v.inspect
+	end
+end
+
+module Nuri::Console
+	def self.print_state(p={})
+		p[:state].accept(Sfp::Visitor::SfpGenerator.new(p[:state]))
+		f = Sfp::Helper::SfpFlatten.new
+		p[:state].accept(f)
+		f.results.each { |k,v|
+			value = (v.is_a?(String) ? v.sub(/^\$\./, '') : v)
+			puts "- #{k}: #{value}"
+		}
 	end
 end

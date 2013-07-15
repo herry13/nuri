@@ -1,16 +1,17 @@
 include "../package/package.sfp"
 
 schema Service extends Package {
-	service_name = ""
+	final service_name = ""
 	running : Bool // = false
 
+/*
 	sub set_service_name(name isref String) {
 		condition { }
 		effect {
 			this.service_name = name
 		}
 	}
-	
+*/	
 	sub uninstall {
 		condition {
 			this.running = false

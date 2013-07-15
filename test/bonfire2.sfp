@@ -7,9 +7,15 @@ include "../modules/mysql/mysql.sfp"
 master isa Machine {
 	sfpAddress is "localhost"
 
-	bonfire isa Bonfire {
+	bonfireEPCC isa Bonfire {
 		experiment is "autocloud"
 		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+	bonfireINRIA isa Bonfire {
+		experiment is "autocloud"
+		location is "fr-inria"
 		image_name is "BonFIRE Debian Squeeze 10G v5"
 		wan_name is "BonFIRE WAN"
 	}
@@ -20,18 +26,23 @@ vm1 isa VM {
 	apache isa Apache {
 		running is true
 	}
+	in_cloud is master.bonfireINRIA
 }
 
 vm2 isa VM {
 	created = true
 	mysql isa Mysql {
-		installed is true
 		running is true
 	}
+	in_cloud is master.bonfireINRIA
 }
 
-/*
 vm3 isa VM {
 	created = true
+	apache isa Apache {
+		running is true
+		is_load_balancer is true
+	}
+	in_cloud is master.bonfireEPCC
 }
-*/
+
