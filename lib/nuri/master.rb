@@ -105,27 +105,36 @@ class Nuri::Master
 		planner.solve({:sfp => task, :sas_post_processor => self})
 	end
 
+	# post processing SAS after compilation
+	# goal: to add additional effects whenever a VM is deleted
 	def sas_post_processor(parser)
 		return if parser.operators.nil?
 		parser.operators.each do |name, operator|
+			# skip if it's not "delete_vm"
 			next if !(name =~ /\.delete_vm$/) or !operator.params.has_key?('$.vm')
 			vm = operator.params['$.vm'].sub(/^\$\./, '')
 			next if !@map.has_key?(vm)
+
+			# for each not-exist state VM, add an effect
 			@map[vm].each { |k,v|
+				next if operator.has_key?(k) # skip if variable is exist (avoid overwrite)
+				next if k =~ /\.sfpAddress/ or k =~ /\.sfpPort/ # skip "sfpAddress" and "sfpPort"
+				                                                # because these will be assigned dynamically
 				var = parser.variables[k]
 				if v.is_a?(Hash)
-					if v['_context'] == 'null'
-						val = parser.types[v['_value']][0]
-					else
-						raise Exception, "Not implemented yet."
-					end
+					val = parser.types[v['_value']][0] if v['_context'] == 'null'
+					raise Exception, "Not implemented yet." # this may arise on Set values
 				else
 					val = v
 				end
+				# add the value to variable's values
+				var << val  
+				var.uniq!
+
+				# create new parameter, and then add to the operator
 				parameter = Sfp::Parameter.new(var, nil, val)
-				operator[var] = parameter
+				operator[var.name] = parameter
 			}
-#puts operator.inspect
 		end
 	end
 
