@@ -27,9 +27,8 @@ class Nuri::Master
 	attr_reader :model
 
 	def initialize(p={})
-		@cloudfinder = CloudFinder.new
+		@cloudfinder = Sfp::Helper::CloudFinder.new
 		set_model(p)
-		@mock = true
 	end
 
 	def set_model(p={})
@@ -41,6 +40,11 @@ class Nuri::Master
 
 		# find a list of cloud proxy
 		@model.accept(@cloudfinder.reset)
+
+		# create a set of not-exist VMs' state
+		map = generate_not_exist_vm_state
+		# modify delete_vm procedures
+		@model.accept(Sfp::Helper::DeleteVMmodifier.new(map))
 	end
 
 	def set_model_file(p={})
@@ -70,8 +74,8 @@ class Nuri::Master
 #		task['initial'].accept(Sfp::Visitor::ParentEliminator.new)
 #		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 #
-f1 = Sfp::Helper::SfpFlatten.new
 task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
+f1 = Sfp::Helper::SfpFlatten.new
 task['initial'].accept(f1)
 #puts "Current state".yellow
 #f1.results.each { |k,v| puts "#{k}: #{v}" }
@@ -89,12 +93,11 @@ task['initial'].accept(f1)
 
 		# modify condition of procedures of each VM's component
 		# modification: add constraint "$.vm.created = true"
-		task['initial'].accept(VMProcedureModifier.new)
+		task['initial'].accept(VMProcedureModifier)
 
 		# construct goal state		
 		goalgen = GoalGenerator.new
 		get_agents.accept(goalgen)
-		#@model.accept(goalgen)
 		task['goal'] = goalgen.results
 
 
@@ -111,25 +114,12 @@ goalgen.results.each { |k,v|
 		task['global'] = @model['global'] if @model.has_key?('global')
 
 		# remove old parent links, and then reconstruct SFP parent links
-		task.accept(Sfp::Visitor::ParentEliminator.new)
+		task.accept(ParentEliminator)
 #puts JSON.pretty_generate(task)
 		task.accept(Sfp::Visitor::SfpGenerator.new(task))
 
 		planner = Sfp::Planner.new
 		planner.solve({:sfp => task})
-	end
-
-	def get_node_state(name, model)
-		begin
-			if send_agent_model(name, model)
-				agent_state = get_agent_state(name, model)
-				raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
-				return agent_state[name]
-			end
-		rescue Exception => e
-			puts "[WARN] Cannot get the current state of #{name} : #{e}".red
-		end
-		SfpUnknown
 	end
 
 	def get_state(p={})
@@ -152,10 +142,10 @@ goalgen.results.each { |k,v|
 
 		# get state of VM nodes
 		exist_vms.each { |name,model|
-			state[name] = get_exist_node_state(name, model, template, p)
+			state[name] = get_exist_vm_state(name, model, template, p)
 		}
 		not_exist_vms.each { |name,model|
-			state[name] = get_not_exist_node_state(name, model)
+			state[name] = get_not_exist_vm_state(model)
 		}
 		@cloudfinder.clouds.each do |cloud|
 			# for each servers list of a cloud proxy, assign "in_cloud" attribute
@@ -170,58 +160,47 @@ goalgen.results.each { |k,v|
 	end
 
 	protected
-	def get_not_exist_node_state(name, model)
+	def get_node_state(name, model)
+		begin
+			if send_agent_model(name, model)
+				agent_state = get_agent_state(name, model)
+				raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
+				return agent_state[name]
+			end
+		rescue Exception => e
+			puts "[WARN] Cannot get the current state of #{name} : #{e}".red
+		end
+		SfpUnknown
+	end
+
+	def generate_not_exist_vm_state
+		map = {}
+		get_vms.each do |name,model|
+			state = {name => get_not_exist_vm_state(model)}
+			state.accept(ParentGenerator)
+			flatten = Sfp::Helper::SfpFlatten.new
+			state.accept(flatten)
+			map[name] = {}
+			flatten.results.each { |k,v| map[name][k] = v }
+		end
+		map
+	end
+
+	def get_not_exist_vm_state(model)
 		s = {'state' => Sfp::Helper.deep_clone(model)}
-		s.accept(Sfp::Visitor::ParentEliminator.new)
-		s.accept(NotExistNodeState.new)
+		s.accept(ParentEliminator)
+		s.accept(VisitorNotExistNodeState)
 		s['state']['created'] = false
 		s['state']['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
 		s['state']
 	end
 
-	def get_exist_node_state(name, model, template, p={})
+	def get_exist_vm_state(name, model, template, p={})
 		push_modules(model) if p[:push_modules]
 		template[name] = model
 		state = get_node_state(name, template)
 		template.delete(name)
 		state
-	end
-
-	SfpUndefinedString = Sfp::Undefined.new(nil, '$.String')
-	SfpUndefinedNumber = Sfp::Undefined.new(nil, '$.Number')
-	SfpUndefinedBoolean = Sfp::Undefined.new(nil, '$.Boolean')
-	class NotExistNodeState
-		def visit(name, value, parent)
-			return false if name[0,1] == '_'
-			if not value.is_a?(Hash)
-				if value.is_a?(String)
-					parent[name] = SfpUndefinedString
-				elsif value.is_a?(Fixnum) or value.is_a?(Float)
-					parent[name] = SfpUndefinedNumber
-				elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
-					parent[name] = SfpUndefinedBoolean
-				else
-puts "[WARN] Sfp::Undefined => " + parent.ref.push(name) + ": " + value.class.name
-					parent[name] = SfpUndefined
-				end
-			elsif value['_context'] == 'null' or value['_context'] == 'any_value'
-				parent[name] = Sfp::Undefined.new(nil, value['_isa'])
-			elsif value['_context'] != 'object'
-				parent.delete(name)
-			end
-			true
-		end
-	end
-
-	class VMProcedureModifier
-		def visit(name, value, parent)
-			return false if name[0,1] == '_'
-			if value.is_a?(Hash) and value['_context'] == 'procedure'
-				_, agent, _ = parent.ref.split('.', 3)
-				value['_condition']["$.#{agent}.created"] = Sfp::Helper::Constraint.equals(true)
-			end
-			true
-		end
 	end
 
 	def assign_vm_address(state, vms)
@@ -278,7 +257,7 @@ puts "[WARN] Sfp::Undefined => " + parent.ref.push(name) + ": " + value.class.na
 		return if address == '' or port == ''
 
 		name = agent_model['_self']
-		finder = SchemaFinder.new
+		finder = Sfp::Helper::SchemaCollector.new
 		{:agent => agent_model}.accept(finder)
 		schemata = finder.schemata.uniq.map { |x| x.sub(/^\$\./, '').downcase }
 
@@ -321,7 +300,7 @@ puts "[WARN] Sfp::Undefined => " + parent.ref.push(name) + ": " + value.class.na
 		return false if address == '' or port == ''
 
 		agent_model = Sfp::Helper.deep_clone(agent_model)
-		agent_model.accept(Sfp::Visitor::ParentEliminator.new)
+		agent_model.accept(ParentEliminator)
 
 		data = {'model' => JSON.generate(agent_model)}
 		code, _ = put_data(address, port, '/model', data)
@@ -434,7 +413,7 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 		raise Exception, "Cannot find address:port of agent #{agent_name}" if
 			address.length <= 0 or port.length <= 0
 
-		return [200, ''] if false # @mock		
+		return [200, ''] if @mock		
 
 		data = {'action' => JSON.generate(action)}
 		post_data(address, port, '/execute', data)
@@ -476,37 +455,69 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 		end
 	end
 
-	class CloudFinder
-		attr_accessor :clouds
+	SfpUndefinedString = Sfp::Undefined.new(nil, '$.String')
+	SfpUndefinedNumber = Sfp::Undefined.new(nil, '$.Number')
+	SfpUndefinedBoolean = Sfp::Undefined.new(nil, '$.Boolean')
 
-		def reset
-			@clouds = []
-			self
-		end
-
-		def visit(name, value, parent)
-			if value.is_a?(Hash)
-				if value['_context'] == 'object'
-					@clouds << parent.ref.push(name) if value.has_key?('_classes') and value['_classes'].index(CloudSchema)
-					return true
-				end
+	VisitorNotExistNodeState = Object.new
+	def VisitorNotExistNodeState.visit(name, value, parent)
+		return false if name[0,1] == '_'
+		if not value.is_a?(Hash)
+			if value.is_a?(String)
+				parent[name] = SfpUndefinedString
+			elsif value.is_a?(Fixnum) or value.is_a?(Float)
+				parent[name] = SfpUndefinedNumber
+			elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
+				parent[name] = SfpUndefinedBoolean
+			else
+				puts "[WARN] Sfp::Undefined => " + parent.ref.push(name) + ": " + value.class.name
+				parent[name] = SfpUndefined
 			end
-			false
+		elsif value['_context'] == 'null' or value['_context'] == 'any_value'
+			parent[name] = Sfp::Undefined.new(nil, value['_isa'])
+		elsif value['_context'] != 'object'
+			parent.delete(name)
 		end
+		true
 	end
 
-	class SchemaFinder
-		attr_reader :schemata
-		def initialize
-			@schemata = []
+	VMProcedureModifier = Object.new
+	def VMProcedureModifier.visit(name, value, parent)
+		return false if name[0,1] == '_'
+		if value.is_a?(Hash) and value['_context'] == 'procedure'
+			_, agent, _ = parent.ref.split('.', 3)
+			value['_condition']["$.#{agent}.created"] = Sfp::Helper::Constraint.equals(true)
 		end
-		
-		def visit(name, value, parent)
-			if value.is_a?(Hash) and value.has_key?('_classes')
-				value['_classes'].each { |s| @schemata << s }
-			end
-			true
+		true
+	end
+
+	ParentEliminator = ::Sfp::Visitor::ParentEliminator.new
+
+	ParentGenerator = Object.new
+	def ParentGenerator.visit(name, value, parent)
+		value['_parent'] = parent if value.is_a?(Hash)
+		true
+	end
+
+end
+
+
+class Sfp::Helper::DeleteVMmodifier
+	def initialize(map)
+		@map = map
+	end
+
+	def visit(name, value, parent)
+		return false if value.is_a?(Hash) and value['_context'] == 'class'
+
+		if value.is_a?(Hash) and value['_context'] == 'procedure' and
+		  name == 'delete_vm' and value.has_key?('vm')
+			value.delete('vm')
+			
+puts parent.ref.push(name)
+puts value.keys.inspect
 		end
+		true
 	end
 end
 
@@ -521,6 +532,10 @@ class Sfp::Helper::SfpFlatten
 		return false if name[0,1] == '_'
 		if value.is_a?(Hash)
 			return true if value['_context'] == 'object'
+
+			@results[parent.ref.push(name)] = value if value['_context'] == 'null'
+			@results[parent.ref.push(name)] = value if value['_context'] == 'set'
+
 			return false
 		end
 
@@ -539,6 +554,40 @@ module Sfp::Helper
 			v.sub(/^\$\./, '')
 		end
 		v.inspect
+	end
+end
+
+class Sfp::Helper::SchemaCollector
+	attr_reader :schemata
+	def initialize
+		@schemata = []
+	end
+		
+	def visit(name, value, parent)
+		if value.is_a?(Hash) and value.has_key?('_classes')
+			value['_classes'].each { |s| @schemata << s }
+		end
+		true
+	end
+end
+
+class Sfp::Helper::CloudFinder
+	CloudSchema = '$.Cloud'
+	attr_accessor :clouds
+
+	def reset
+		@clouds = []
+		self
+	end
+
+	def visit(name, value, parent)
+		if value.is_a?(Hash)
+			if value['_context'] == 'object'
+				@clouds << parent.ref.push(name) if value.has_key?('_classes') and value['_classes'].index(CloudSchema)
+				return true
+			end
+		end
+		false
 	end
 end
 

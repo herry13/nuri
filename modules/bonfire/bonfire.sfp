@@ -1,5 +1,4 @@
 include "../cloud/cloud.sfp"
-include "../vm/vm.sfp"
 
 schema Bonfire extends Cloud {
 	gateway is "ssh.bonfire.grid5000.fr"
@@ -8,23 +7,4 @@ schema Bonfire extends Cloud {
 	image_name : String
 	wan_name : String
 	servers { }
-
-	sub create_vm (vm isref VM) {
-		condition {
-			vm.created = false
-		}
-		effect {
-			vm.in_cloud = this
-			vm.created = true
-		}
-	}
-
-	sub delete_vm (vm isref VM) {
-		condition {
-			vm.in_cloud = this
-		}
-		effect {
-			vm.created = false
-		}
-	}
 }

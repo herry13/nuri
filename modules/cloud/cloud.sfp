@@ -1,4 +1,24 @@
 schema Cloud {
 	running : Bool
 	description is ""
+
+	sub create_vm (vm isref VM) {
+		condition {
+			vm.created = false
+		}
+		effect {
+			vm.in_cloud = this
+			vm.created = true
+		}
+	}
+
+	sub delete_vm (vm isref VM) {
+		condition {
+			vm.created = true
+			vm.in_cloud = this
+		}
+		effect {
+			vm.created = false
+		}
+	}
 }
