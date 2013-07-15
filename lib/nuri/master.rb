@@ -88,7 +88,7 @@ class Nuri::Master
 		goalgen.results.each { |k,v|
 			next if k[0,1] == '_'
 			print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
-			print " #{f1.results[k]}".red if f1.results.has_key?(k) and
+			print " #{Sfp::Helper.sfp_to_s(f1.results[k])}".red if f1.results.has_key?(k) and
 				f1.results[k] != v['_value']
 			puts ""
 		}
@@ -543,8 +543,8 @@ module Sfp::Helper
 			return "null" if v['_context'] == 'null'
 			return v['_values'].inspect if v['_context'] == 'set'
 			return "<hash>"
-		elsif v.is_a?(String) and v.isref
-			v.sub(/^\$\./, '')
+		elsif v.is_a?(String) and v =~ /^\$\./
+			return v.sub(/^\$\./, '')
 		end
 		v.inspect
 	end
