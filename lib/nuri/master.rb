@@ -42,9 +42,7 @@ class Nuri::Master
 		@model.accept(@cloudfinder.reset)
 
 		# create a set of not-exist VMs' state
-		map = generate_not_exist_vm_state
-		# modify delete_vm procedures
-		@model.accept(Sfp::Helper::DeleteVMmodifier.new(map))
+		@map = generate_not_exist_vm_state
 	end
 
 	def set_model_file(p={})
@@ -71,25 +69,10 @@ class Nuri::Master
 	def get_plan(p={})
 		task = get_schemata
 		task['initial'] = to_state('initial', get_state(p))
-#		task['initial'].accept(Sfp::Visitor::ParentEliminator.new)
-#		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
-#
-task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
-f1 = Sfp::Helper::SfpFlatten.new
-task['initial'].accept(f1)
-#puts "Current state".yellow
-#f1.results.each { |k,v| puts "#{k}: #{v}" }
-#puts JSON.pretty_generate(f1.results)
-#
-#f2 = SfpFlatten.new
-#get_agents.accept(f2)
-#puts "Goal state".yellow
-#f2.results.each { |k,v|
-#	print "#{k}: "
-#	puts (f1.results.has_key? k and f1.results[k] != v ?
-#		"#{v}".green + " #{f1.results[k]}".red : "#{v}".green)
-#}
-#puts JSON.pretty_generate(f2.results)
+
+		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
+		f1 = Sfp::Helper::SfpFlatten.new
+		task['initial'].accept(f1)
 
 		# modify condition of procedures of each VM's component
 		# modification: add constraint "$.vm.created = true"
@@ -100,15 +83,15 @@ task['initial'].accept(f1)
 		get_agents.accept(goalgen)
 		task['goal'] = goalgen.results
 
-
-puts "Goal state:".yellow
-goalgen.results.each { |k,v|
-	next if k[0,1] == '_'
-	print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
-	print " #{f1.results[k]}".red if f1.results.has_key?(k) and
-		f1.results[k] != v['_value']
-	puts ""
-}
+		# print the status of goal state
+		puts "Goal state:".yellow
+		goalgen.results.each { |k,v|
+			next if k[0,1] == '_'
+			print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
+			print " #{f1.results[k]}".red if f1.results.has_key?(k) and
+				f1.results[k] != v['_value']
+			puts ""
+		}
 
 		# add global constraint (if exist)
 		task['global'] = @model['global'] if @model.has_key?('global')
@@ -119,7 +102,31 @@ goalgen.results.each { |k,v|
 		task.accept(Sfp::Visitor::SfpGenerator.new(task))
 
 		planner = Sfp::Planner.new
-		planner.solve({:sfp => task})
+		planner.solve({:sfp => task, :sas_post_processor => self})
+	end
+
+	def sas_post_processor(parser)
+		return if parser.operators.nil?
+		parser.operators.each do |name, operator|
+			next if !(name =~ /\.delete_vm$/) or !operator.params.has_key?('$.vm')
+			vm = operator.params['$.vm'].sub(/^\$\./, '')
+			next if !@map.has_key?(vm)
+			@map[vm].each { |k,v|
+				var = parser.variables[k]
+				if v.is_a?(Hash)
+					if v['_context'] == 'null'
+						val = parser.types[v['_value']][0]
+					else
+						raise Exception, "Not implemented yet."
+					end
+				else
+					val = v
+				end
+				parameter = Sfp::Parameter.new(var, nil, val)
+				operator[var] = parameter
+			}
+#puts operator.inspect
+		end
 	end
 
 	def get_state(p={})
@@ -141,12 +148,9 @@ goalgen.results.each { |k,v|
 		exist_vms, not_exist_vms = assign_vm_address(state, vms)
 
 		# get state of VM nodes
-		exist_vms.each { |name,model|
-			state[name] = get_exist_vm_state(name, model, template, p)
-		}
-		not_exist_vms.each { |name,model|
-			state[name] = get_not_exist_vm_state(model)
-		}
+		exist_vms.each { |name,model| state[name] = get_exist_vm_state(name, model, template, p) }
+		not_exist_vms.each { |name,model| state[name] = get_not_exist_vm_state(model) }
+
 		@cloudfinder.clouds.each do |cloud|
 			# for each servers list of a cloud proxy, assign "in_cloud" attribute
 			# to associated VM
@@ -425,39 +429,9 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 	end
 
 
-	class GoalGenerator
-		attr_reader :results
-
-		def initialize
-			@results = Sfp::Helper::Constraint.and('goal')
-		end
-			
-		def visit(name, value, parent)
-			return false if name[0,1] == '_'
-
-			if value.is_a?(Hash)
-				return true if value['_context'] == 'object'
-
-				if parent.has_key?('_finals') and parent['_finals'].index(name).nil?
-					if value['_context'] == 'set'
-						@results[parent.ref.push(name)] = Sfp::Helper::Constraint.equals(value['_values'])
-					elsif value['_context'] == 'null'
-						# HACK! This should not be commented => null value should not be ignored.
-						#@results[parent.ref.push(name)] = Sfp::Helper::Constraint.equals(value)
-					end
-				end
-				return false
-			end
-			if parent.has_key?('_finals') and parent['_finals'].index(name).nil?
-				@results[ parent.ref.push(name) ] = Sfp::Helper::Constraint.equals(value)
-			end
-			false
-		end
-	end
-
-	SfpUndefinedString = Sfp::Undefined.new(nil, '$.String')
-	SfpUndefinedNumber = Sfp::Undefined.new(nil, '$.Number')
-	SfpUndefinedBoolean = Sfp::Undefined.new(nil, '$.Boolean')
+	SfpUndefinedString = Sfp::Undefined.create('$.String')
+	SfpUndefinedNumber = Sfp::Undefined.create('$.Number')
+	SfpUndefinedBoolean = Sfp::Undefined.create('$.Boolean')
 
 	VisitorNotExistNodeState = Object.new
 	def VisitorNotExistNodeState.visit(name, value, parent)
@@ -474,7 +448,7 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 				parent[name] = SfpUndefined
 			end
 		elsif value['_context'] == 'null' or value['_context'] == 'any_value'
-			parent[name] = Sfp::Undefined.new(nil, value['_isa'])
+			parent[name] = Sfp::Undefined.create(value['_isa'])
 		elsif value['_context'] != 'object'
 			parent.delete(name)
 		end
@@ -501,23 +475,33 @@ puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
 
 end
 
+class Nuri::Master::GoalGenerator
+	attr_reader :results
 
-class Sfp::Helper::DeleteVMmodifier
-	def initialize(map)
-		@map = map
+	def initialize
+		@results = Sfp::Helper::Constraint.and('goal')
 	end
-
+		
 	def visit(name, value, parent)
-		return false if value.is_a?(Hash) and value['_context'] == 'class'
+		return false if name[0,1] == '_'
 
-		if value.is_a?(Hash) and value['_context'] == 'procedure' and
-		  name == 'delete_vm' and value.has_key?('vm')
-			value.delete('vm')
-			
-puts parent.ref.push(name)
-puts value.keys.inspect
+		if value.is_a?(Hash)
+			return true if value['_context'] == 'object'
+
+			if parent.has_key?('_finals') and parent['_finals'].index(name).nil?
+				if value['_context'] == 'set'
+					@results[parent.ref.push(name)] = Sfp::Helper::Constraint.equals(value['_values'])
+				elsif value['_context'] == 'null'
+					# HACK! This should not be commented => null value should not be ignored.
+					#@results[parent.ref.push(name)] = Sfp::Helper::Constraint.equals(value)
+				end
+			end
+			return false
 		end
-		true
+		if parent.has_key?('_finals') and parent['_finals'].index(name).nil?
+			@results[ parent.ref.push(name) ] = Sfp::Helper::Constraint.equals(value)
+		end
+		false
 	end
 end
 
