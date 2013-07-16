@@ -19,31 +19,38 @@ master isa Machine {
 		image_name is "BonFIRE Debian Squeeze 10G v5"
 		wan_name is "BonFIRE WAN"
 	}
+	bonfireHPLABS isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-hplabs"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
 }
 
 vm1 isa VM {
 	created = true
 	apache isa Apache {
 		running is true
+		is_load_balancer is true
 	}
-	in_cloud is master.bonfireINRIA
+	in_cloud is master.bonfireEPCC
 }
 
 vm2 isa VM {
 	created = true
-	mysql isa Mysql {
-		running is true
-	}
-	in_cloud is master.bonfireINRIA
-}
-
-vm3 isa VM {
-	created = true
 	apache isa Apache {
 		running is true
-		port is 80
-		is_load_balancer is true
 	}
-	in_cloud is master.bonfireINRIA
+	in_cloud is master.bonfireEPCC
 }
+vm3 extends vm2
 
+vm4 extends vm2
+
+vm5 extends vm2
+
+vm6 extends vm2
+
+/*vm7 isa VM {
+	created = false
+}*/
