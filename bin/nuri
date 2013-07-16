@@ -18,6 +18,7 @@ EOS
 	opt :push_modules, "Automatically push an unavailable module to target agent."
 	opt :human, "Use human readable format."
 	opt :pretty, "Use pretty JSON format."
+	opt :interactive, "Interactive mode.", :default => true
 end
 
 def plan_to_human(plan)
@@ -54,10 +55,18 @@ elsif opts[:plan]
 	plan = master.get_plan(opts)
 	if plan['workflow'].nil?
 		puts "Plan: ".yellow + "\nno solution!".red
-	elsif opts[:human]
-		puts plan_to_human(plan)
 	else
-		puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
+		puts plan_to_human(plan) if opts[:human]
+		puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan)) if !opts[:human]
+
+		if opts[:interactive]
+			print "Execute the plan [y/N]? "
+			if STDIN.gets.chomp.upcase == 'Y'
+				puts 'Executing the plan...'.yellow
+				opts[:apply] = plan
+				puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
+			end
+		end
 	end
 
 elsif opts[:execute].length > 0
@@ -81,11 +90,9 @@ elsif opts[:apply]
 		else
 			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
 		end
-		if opts[:apply]
-			puts 'Executing the plan...'.yellow
-			opts[:apply] = plan
-			puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
-		end
+		puts 'Executing the plan...'.yellow
+		opts[:apply] = plan
+		puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
 	end
 
 else
