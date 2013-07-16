@@ -415,11 +415,12 @@ puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).insp
 	end
 
 	def execute_sequential_plan(plan, p)
+		puts "Executing a sequential plan..."
 		agents = get_agents
 		begin
 			index = 1
 			plan['workflow'].each do |action|
-				print "#{index}. #{action['name']}... "
+				print "#{index}. #{action['name']} #{JSON.generate(action['parameters'])}... "
 				code, _ = execute_action(action, agents)
 				if code.to_i == 200
 					# if the action is "create_vm" or "delete_vm", then

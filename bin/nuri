@@ -62,7 +62,7 @@ elsif opts[:plan]
 		if opts[:interactive]
 			print "Execute the plan [y/N]? "
 			if STDIN.gets.chomp.upcase == 'Y'
-				puts 'Executing the plan...'.yellow
+				puts 'Executing the plan:'.yellow
 				opts[:apply] = plan
 				puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
 			end
