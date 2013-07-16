@@ -165,7 +165,17 @@ class Nuri::Master
 			# to associated VM
 			state.at?("#{cloud}.servers").each { |name, data|
 				next if not vms.has_key?(name)
-				state[name]['in_cloud'] = cloud
+				if state[name].is_a?(Hash)
+					state[name]['in_cloud'] = cloud
+				elsif state[name].is_a?(Sfp::Unknown)
+					# TODO state[name]
+					state[name] = {
+						'sfpAddress' => @model[name]['sfpAddress'],
+						'sfpPort' => @model[name]['sfpPort'],
+						'in_cloud' => cloud,
+						'os' => SfpUnknown
+					}
+				end
 			}
 		end
 
@@ -225,7 +235,6 @@ class Nuri::Master
 			if !cloud.nil? and !state.at?("#{cloud}.servers").has_key? name
 				vms[name]['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
 				vms[name]['sfpPort'] = {'_context'=>'any_value','_isa'=>'$.Number'}
-				#vms[name]['in_cloud'] = {'_context'=>'null','_isa'=>'$.Cloud'}
 			end
 		end
 
@@ -236,7 +245,6 @@ class Nuri::Master
 				next if not vms.has_key?(name)
 				vms[name]['sfpAddress'] = data['ip']
 				vms[name]['sfpPort'] = 1314
-				#vms[name]['in_cloud'] = cloud
 			}
 		end
 
@@ -375,7 +383,7 @@ class Nuri::Master
 
 		if vms2.length > vms1.length
 			# update the state of new VMs
-puts "\nUpdate state of new VMs: " + (vms2.keys - vms1.keys).inspect
+puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).inspect
 			(vms2.keys - vms1.keys).each { |name|
 				push_modules(vms2[name])
 				template[name] = vms2[name]
@@ -544,7 +552,7 @@ module Sfp::Helper
 			return v['_values'].inspect if v['_context'] == 'set'
 			return "<hash>"
 		elsif v.is_a?(String) and v =~ /^\$\./
-			return v.sub(/^\$\./, '')
+			return v #.sub(/^\$\./, '')
 		end
 		v.inspect
 	end
