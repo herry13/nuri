@@ -83,6 +83,14 @@ class Nuri::Master
 		get_agents.accept(goalgen)
 		task['goal'] = goalgen.results
 
+		# find dead-node, remove from the task, print WARNING to the console
+		dead_nodes = task['initial'].select { |k,v| v.is_a?(Sfp::Unknown) }
+		dead_nodes.each_key { |name|
+			task['initial'].delete(name)
+			task['goal'].keep_if { |k,v| !(k =~ /(\$\.#{name}\.|\$\.#{name}$)/) }
+			puts "[WARN] Removing node #{name} from the task.".red
+		}
+
 		# print the status of goal state
 		puts "Goal state:".yellow
 		goalgen.results.each { |k,v|
@@ -114,6 +122,7 @@ class Nuri::Master
 			next if !(name =~ /\.delete_vm$/) or !operator.params.has_key?('$.vm')
 			vm = operator.params['$.vm'].sub(/^\$\./, '')
 			next if !@map.has_key?(vm)
+			#next if parser.root.at?("$.initial.#{vm}.os").is_a?(Sfp::Unknown)
 
 			# for each not-exist state VM, add an effect
 			@map[vm].each { |k,v|
@@ -168,13 +177,7 @@ class Nuri::Master
 				if state[name].is_a?(Hash)
 					state[name]['in_cloud'] = cloud
 				elsif state[name].is_a?(Sfp::Unknown)
-					# TODO state[name]
-					state[name] = {
-						'sfpAddress' => @model[name]['sfpAddress'],
-						'sfpPort' => @model[name]['sfpPort'],
-						'in_cloud' => cloud,
-						'os' => SfpUnknown
-					}
+					state[name] = get_dead_vm_state(name, cloud)
 				end
 			}
 		end
@@ -183,6 +186,19 @@ class Nuri::Master
 	end
 
 	protected
+	def get_dead_vm_state(name, cloud)
+=begin
+		{
+			'sfpAddress' => @model[name]['sfpAddress'],
+			'sfpPort' => @model[name]['sfpPort'],
+			'created' => !cloud.nil?,
+			'in_cloud' => cloud,
+			'os' => SfpUnknown
+		}
+=end
+		SfpUnknown
+	end
+
 	def get_node_state(name, model)
 		begin
 			if send_agent_model(name, model)
@@ -490,6 +506,11 @@ puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).insp
 		true
 	end
 
+	SfpUnknownRemover = Object.new
+	def SfpUnknownRemover.visit(name, value, parent)
+		parent.delete(name) if value.is_a?(Sfp::Unknown)
+		true
+	end
 end
 
 class Nuri::Master::GoalGenerator
