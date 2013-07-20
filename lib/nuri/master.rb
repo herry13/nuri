@@ -1,5 +1,6 @@
 require 'uri'
 require 'net/http'
+require 'thread'
 
 module Sfp::Helper::Constraint
 	def self.equals(value)
@@ -59,6 +60,7 @@ class Nuri::Master
 			!p[:apply]
 
 		plan = (p[:apply] ? p[:apply] : JSON[File.read(p[:execute])])
+		raise Exception, "Invalid plan!" if plan['workflow'].nil?
 		if plan['type'] == 'sequential'
 			execute_sequential_plan(plan, p)
 		else
@@ -122,7 +124,6 @@ class Nuri::Master
 			next if !(name =~ /\.delete_vm$/) or !operator.params.has_key?('$.vm')
 			vm = operator.params['$.vm'].sub(/^\$\./, '')
 			next if !@map.has_key?(vm)
-			#next if parser.root.at?("$.initial.#{vm}.os").is_a?(Sfp::Unknown)
 
 			# for each not-exist state VM, add an effect
 			@map[vm].each { |k,v|
@@ -421,8 +422,7 @@ puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).insp
 			index = 1
 			plan['workflow'].each do |action|
 				print "#{index}. #{action['name']} #{JSON.generate(action['parameters'])}... "
-				code, _ = execute_action(action, agents)
-				if code.to_i == 200
+				if execute_action(action, agents)
 					# if the action is "create_vm" or "delete_vm", then
 					# update the VMs' address
 					if action['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.(create_vm|delete_vm)/
@@ -434,7 +434,6 @@ puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).insp
 					puts "[Failed]".red
 					return false
 				end
-
 				index += 1
 			end
 			return true
@@ -451,15 +450,112 @@ puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).insp
 		raise Exception, "Cannot find address:port of agent #{agent_name}" if
 			address.length <= 0 or port.length <= 0
 
-		return [200, ''] if @mock		
+		return true if @mock		
 
 		data = {'action' => JSON.generate(action)}
-		post_data(address, port, '/execute', data)
+		code, _ = post_data(address, port, '/execute', data)
+		(code.to_i == 200)
 	end
 
 	def execute_parallel_plan(plan)
-		# TODO
-		false
+		puts "Executing a parallel plan..."
+
+		@agents = get_agents
+		@retry = 2
+
+		@actions = plan['workflow']
+		@actions.sort! { |x,y| x['id'] <=> y['id'] }
+		@actions.each { |op|
+			op[:executed] = false
+			op[:executor] = nil
+			op[:string] = "#{self['id']}: #{action['name']} #{JSON.generate(action['parameters'])}"
+		}		
+
+		@threads = []
+		@actions_failed = []
+		@mutex = Mutex.new
+		@failed = false
+		@thread_id = 0
+
+		def next_thread_id
+			id = 0
+			@mutex.synchronize { @thread_id = id = @thread_id + 1 }
+			id
+		end
+
+		def assign_action_with_id(id)
+			thread_id = next_thread_id
+			action = @actions[id]
+			action[:executor] = thread_id
+			self.thread_execute_action(thread_id, action)
+		end
+
+		def thread_execute_action(tid, action)
+			t = Thread.new {
+				@mutex.synchronize { @threads << tid }
+
+				while not @failed and not action[:executed]
+					# execute the action
+					puts "Executing #{action[:string]} [WAIT]".yellow
+					num = @retry
+					begin
+						success = execute_action(action, @agents)
+						num -= 1
+					end while not success and num > 0
+
+					# check if execution failed
+					if success
+						puts "Executing #{action[:string]} [OK]".green
+						next_actions = []
+						@mutex.synchronize {
+							action[:executed] = true # set executed
+							# select next action to be executed from successor actions list
+							# select a successor action that has not been assigned to any thread yet
+							if action['successors'].length > 0
+								action['successors'].each { |id|
+									if @actions[id][:executor].nil?
+										# check if all predecessors actions have been executed
+										predecessors_ok = true
+										@actions[id]['predecessors'].each { |pid|
+											predecessors_ok = (predecessors_ok and @actions[pid][:executed])
+										}
+										# assign this action to be executed by this thread if all predecessors
+										# have been executed
+										next_actions << id if predecessors_ok
+									end
+								}
+							end
+							next_actions.each { |id| @actions[id][:executor] = tid }
+						}
+						if next_actions.length > 0				
+							# execute the first next actions to this thread
+							action = @actions[next_actions[0]]
+							if next_actions.length > 1
+								# execute other next actions to other threads
+								for i in 1..(next_actions.length-1)
+									assign_action_with_id(next_actions[i])
+								end
+							end
+						end
+
+					else
+						$stderr.puts "Executing #{action[:string]} [FAILED]".red
+						@mutex.synchronize {
+							@failed = true # set global flag to stop the execution
+							@actions_failed << action
+						}
+					end
+				end
+
+				@mutex.synchronize { @threads.delete(tid) }
+			}
+		end
+
+		plan['init'].each { |id| assign_action_with_id(id) }
+		begin
+			sleep 1
+		end while @threads.length > 0
+		(not @failed)
 	end
 
 
