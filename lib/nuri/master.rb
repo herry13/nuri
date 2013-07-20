@@ -112,7 +112,7 @@ class Nuri::Master
 		task.accept(Sfp::Visitor::SfpGenerator.new(task))
 
 		planner = Sfp::Planner.new
-		planner.solve({:sfp => task, :sas_post_processor => self})
+		planner.solve({:sfp => task, :sas_post_processor => self, :parallel => p[:parallel]})
 	end
 
 	# post processing SAS after compilation
@@ -457,7 +457,7 @@ puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).insp
 		(code.to_i == 200)
 	end
 
-	def execute_parallel_plan(plan)
+	def execute_parallel_plan(plan, options)
 		puts "Executing a parallel plan..."
 
 		@agents = get_agents
@@ -468,7 +468,7 @@ puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).insp
 		@actions.each { |op|
 			op[:executed] = false
 			op[:executor] = nil
-			op[:string] = "#{self['id']}: #{action['name']} #{JSON.generate(action['parameters'])}"
+			op[:string] = "#{op['id']}: #{op['name']} #{JSON.generate(op['parameters'])}"
 		}		
 
 		@threads = []
