@@ -13,6 +13,7 @@ EOS
 	opt :model_file, "Model of configuration file.", :default => ''
 	opt :state, "Print the current state of the system in JSON based on given model file."
 	opt :plan, "Print the plan that could bring the system to the desired state as defined in model file."
+	opt :parallel, "Generate a parallel plan.", :short => '-l'
 	opt :execute, "Execute a plan in given file. Note: model file should be specified.", :default => ''
 	opt :apply, "Generate and execute a plan that could bring the system to the desired state."
 	opt :push_modules, "Automatically push an unavailable module to target agent."
@@ -22,18 +23,16 @@ EOS
 end
 
 def plan_to_human(plan)
-	def parallel(plan)
-		return plan
+	return 'No solution plan.'.red if plan['workflow'].nil?
+	return 'The system is at the goal state.'.green if plan['workflow'].length <= 0
+
+	p = 'Plan:'.yellow
+	if plan['type'] == 'sequential'
+		plan['workflow'].each_index { |i| p += "\n#{i+1}. #{plan[i]['name']} #{plan[i]['parameters']}" }
+	else
+		plan['workflow'].each { |op| p += "\n#{op['id']}. #{op['name']} #{op['parameters']} (#{op['predecessors']}, #{op['successors']})" }
 	end
-	
-	def sequential(plan)
-		plan = plan['workflow']
-		p = 'Plan:'.yellow
-		plan.each_index { |i| p += "\n#{i+1}. #{plan[i]['name']} #{plan[i]['parameters']}" }
-		(plan.length > 0 ? p : 'The system is at the goal state.'.green)
-	end
-	return sequential plan if plan['type'] == 'sequential'
-	parallel plan
+	p
 end
 
 if opts[:state]
