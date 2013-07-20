@@ -27,10 +27,11 @@ def plan_to_human(plan)
 	return 'The system is at the goal state.'.green if plan['workflow'].length <= 0
 
 	p = 'Plan:'.yellow
+	actions = plan['workflow']
 	if plan['type'] == 'sequential'
-		plan['workflow'].each_index { |i| p += "\n#{i+1}. #{plan[i]['name']} #{plan[i]['parameters']}" }
+		actions.each_index { |i| p += "\n#{i+1}. #{actions[i]['name']} #{actions[i]['parameters']}" }
 	else
-		plan['workflow'].each { |op| p += "\n#{op['id']}. #{op['name']} #{op['parameters']} (#{op['predecessors']}, #{op['successors']})" }
+		actions.each { |op| p += "\n#{op['id']}. #{op['name']} #{op['parameters']} (#{op['predecessors']}, #{op['successors']})" }
 	end
 	p
 end
