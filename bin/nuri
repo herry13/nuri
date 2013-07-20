@@ -59,7 +59,7 @@ elsif opts[:plan]
 		puts plan_to_human(plan) if opts[:human]
 		puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan)) if !opts[:human]
 
-		if opts[:interactive]
+		if opts[:interactive] and not plan['workflow'].nil? and plan['workflow'].length > 0
 			print "Execute the plan [y/N]? "
 			if STDIN.gets.chomp.upcase == 'Y'
 				puts 'Executing the plan:'.yellow
