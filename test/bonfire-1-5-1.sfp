@@ -27,7 +27,7 @@ vm1 isa VM {
 		running is true
 		is_load_balancer is true
 	}
-	in_cloud is master.bonfireINRIA
+	in_cloud is master.bonfireEPCC
 }
 
 vm2 isa VM {
@@ -35,7 +35,7 @@ vm2 isa VM {
 	apache isa Apache {
 		running is true
 	}
-	in_cloud is master.bonfireINRIA
+	in_cloud is master.bonfireEPCC
 }
 
 vm3 extends vm2
@@ -48,7 +48,7 @@ vm7 isa VM {
 	mysql isa Mysql {
 		running is true
 	}
-	in_cloud is master.bonfireINRIA
+	in_cloud is master.bonfireEPCC
 }
 
 global constraint {
