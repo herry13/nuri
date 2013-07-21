@@ -1,0 +1,34 @@
+include "../mysql/mysql.sfp"
+include "../apache/apache.sfp"
+
+schema Wordpress {
+	installed : Bool
+	http isref Apache
+	database isref Mysql
+	db_name = "wordpress"
+	db_user = "wordpress"
+	db_password = "password"
+	path = "/wp"
+	admin_password = "password"
+
+	sub install {
+		condition {
+			this.http.running = true
+			this.http.php_module = true
+			this.http.php_mysql_module = true
+			this.database.running = true
+		}
+		effect {
+			this.installed = true
+		}
+	}
+
+	sub uninstall {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+}
