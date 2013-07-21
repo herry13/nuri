@@ -277,14 +277,14 @@ class Nuri::Master
 			address = model['sfpAddress'].to_s.strip
 			port = model['sfpPort'].to_s.strip.to_i
 			next if address == '' or port == 0
-			agents[name] = {:address => address, :port => port}
+			agents[name] = {:sfpAddress => address, :sfpPort => port}
 		end
 		data = {'agents' => JSON.generate(agents)}
 
 		# send the list to all agents
 		agents.each do |name, info|
-			code, _ = put_data(info[:address], info[:port], '/agents', data)
-			raise Exception, "Push agents list to #{info[:address]}:#{info[:port]} [Failed]" if code.to_i != 200
+			code, _ = put_data(info[:sfpAddress], info[:sfpPort], '/agents', data)
+			raise Exception, "Push agents list to #{info[:sfpAddress]}:#{info[:sfpPort]} [Failed]" if code.to_i != 200
 		end
 		true
 	end
