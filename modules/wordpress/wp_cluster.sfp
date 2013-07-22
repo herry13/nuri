@@ -1,23 +1,45 @@
-include "../mysql/mysql.sfp"
 include "../apache/apache.sfp"
-include "wp_cluster.sfp"
+include "../mysql/mysql.sfp"
 
-schema Wordpress {
+schema WordpressDB {
 	installed : Bool
-	http isref Apache
 	database isref Mysql
 	db_name = "wordpress"
 	db_user = "wordpress"
 	db_password = "password"
+
+	sub install {
+		condition {
+			this.database.running = true
+			this.database.public = true
+		}
+		effect {
+			this.installed = true
+		}
+	}
+	sub uninstall {
+		condition {
+			this.installed = true
+		}
+		condition {
+			this.installed = false
+		}
+	}
+}
+
+schema WordpressWeb {
+	installed : Bool
+	http isref Apache
+	database isref WordpressDB
 	path = "/wp"
 	source_url = "http://wordpress.org/latest.tar.gz"
 
 	sub install {
 		condition {
-			this.http.running = true
+			this.http.installed = true
 			this.http.php_module = true
 			this.http.php_mysql_module = true
-			this.database.running = true
+			this.database.installed = true
 		}
 		effect {
 			this.installed = true

@@ -1,7 +1,7 @@
+load File.expand_path(File.dirname(__FILE__)) + '/wp_cluster.rb'
+
 class Sfp::Module::Wordpress
 	include Sfp::Resource
-
-	WPDownloadURL = "http://wordpress.org/latest.tar.gz"
 
 	def update_state
 		@state['installed'] = false
@@ -22,7 +22,7 @@ class Sfp::Module::Wordpress
 		@state['db_user'] = @model['db_user']
 		@state['db_password'] = @model['db_password']
 		@state['path'] = @model['path']
-		@state['admin_password'] = @model['admin_password']
+		@state['source_url'] = @model['source_url']
 	end
 
 	def install(p={})
@@ -33,7 +33,7 @@ class Sfp::Module::Wordpress
 		db_address = resolve(@model['database'] + '.parent.sfpAddress')
 		root_password = resolve(@model['database'] + '.root_password')
 
-		system("wget --output-document='/tmp/wp.tgz' #{WPDownloadURL}")
+		system("wget --output-document='/tmp/wp.tgz' #{@model['source_url']}")
 		return false if not File.exist?('/tmp/wp.tgz')
 		system("cd /tmp; tar xvzf wp.tgz")
 
@@ -66,6 +66,8 @@ class Sfp::Module::Wordpress
 		sql4 = "FLUSH PRIVILEGES;"
 		return false if not system("echo \"#{sql4}\" | #{mysql_cmd}")
 
+		system("cd #{home_path}; mv -f index.html index.html.bak")
+
 		true
 	end
 
@@ -78,7 +80,11 @@ class Sfp::Module::Wordpress
 		home_path.gsub! /\/\//, '/'
 
 		# delete all files
-		return false if not system("rm -rf #{home_path}")
+		if @model['path'] != '/'
+			system("rm -rf #{home_path}")
+		else
+			system("cd #{home_path}; mv -f index.html.bak /tmp; rm -rf *; mv -f /tmp/index.html.bak index.html")
+		end
 
 		# uninstall database
 		mysql_cmd = "mysql -u root --password=#{root_password}"
