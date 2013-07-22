@@ -1,5 +1,3 @@
-load File.expand_path(File.dirname(__FILE__)) + '/wp_cluster.rb'
-
 class Sfp::Module::Wordpress
 	include Sfp::Resource
 

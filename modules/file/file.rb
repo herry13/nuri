@@ -6,7 +6,6 @@ module Sfp::Module
 		include Sfp::Resource
 
 		def update_state
-begin
 			path = @model['path'].to_s
 			fullpath = ::File.expand_path(path)
 			@state['path'] = path
@@ -20,9 +19,6 @@ begin
 			else
 				@state['user'] = @state['group'] = ''
 			end
-rescue Exception => e
-				Sfp::Agent.logger.error "Error in updating state #{@state['path']} #{e}\n#{e.backtrace.join("\n")}"
-end
 		end
 
 		def create(p={})

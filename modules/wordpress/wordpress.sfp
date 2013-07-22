@@ -1,6 +1,5 @@
 include "../mysql/mysql.sfp"
 include "../apache/apache.sfp"
-include "wp_cluster.sfp"
 
 schema Wordpress {
 	installed : Bool

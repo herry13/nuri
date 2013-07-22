@@ -1,0 +1,22 @@
+include "../modules/machine/machine.sfp"
+include "../modules/bonfire/bonfire.sfp"
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+
+hpvm6 isa Machine {
+	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+
+	bonfireEPCC isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+	bonfireINRIA isa Bonfire {
+		experiment is "autocloud"
+		location is "fr-inria"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+}

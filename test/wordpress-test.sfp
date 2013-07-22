@@ -9,16 +9,13 @@ test isa Machine {
 	//sfpAddress = "localhost"
 
 	apache isa Apache {
-		running is true
+		//installed = false
 	}
-
-	mysql isa Mysql {
-//		running is true
-//		public is true
-	}
+	mysql isa Mysql
 
 	wp isa Wordpress {
-		installed = false
+		path = "/wp"
+		installed = true
 		http = test.apache
 		database = test.mysql
 	}

@@ -3,26 +3,28 @@ class Sfp::Module::WordpressDB
 
 	def update_state
 		@state['installed'] = false
-		root_password = resolve(@model['database'] + '.root_password')
-		if db_address.is_a?(String) and root_password.is_a?(String) and doc_root.is_a?(String)
+		root_password = (@model['mysql'].nil? ? nil : resolve(@model['mysql'] + '.root_password'))
+		if root_password.is_a?(String)
 			data = `echo "show databases;" | mysql -u root --password=#{root_password} mysql`.strip.split("\n")
 			@state['installed'] = true if data.index(@model['db_name'])
 		end
 
-		@state['database'] = @model['database']
+		@state['mysql'] = @model['mysql']
 		@state['db_name'] = @model['db_name']
 		@state['db_user'] = @model['db_user']
 		@state['db_password'] = @model['db_password']
 	end
 
 	def install(p={})
-		root_password = resolve(@model['database'] + '.root_password')
+		return false if @model['mysql'].nil?
+
+		root_password = resolve(@model['mysql'] + '.root_password')
 
 		# install database
 		mysql_cmd = "mysql -u root --password=#{root_password}"
 		sql1 = "CREATE USER '#{@model['db_user']}'@'%' IDENTIFIED BY '#{@model['db_password']}';"
 		return false if not system("echo \"#{sql1}\" | #{mysql_cmd}")
-		sql2 = "CREATE DATABASE #{@model['db_name']};"
+		sql2 = "DROP DATABASE IF EXISTS #{@model['db_name']}; CREATE DATABASE #{@model['db_name']};"
 		return false if not system("echo \"#{sql2}\" | #{mysql_cmd}")
 		sql3 = "GRANT ALL PRIVILEGES ON #{@model['db_name']}.* TO '#{@model['db_user']}'@'%';"
 		return false if not system("echo \"#{sql3}\" | #{mysql_cmd}")
@@ -33,15 +35,15 @@ class Sfp::Module::WordpressDB
 	end
 
 	def uninstall(p={})
-		root_password = resolve(@model['database'] + '.root_password')
+		return false if @model['mysql'].nil?
 
+		root_password = resolve(@model['mysql'].to_s + '.root_password')
 		# uninstall database
 		mysql_cmd = "mysql -u root --password=#{root_password}"
 		sql1 = "DROP USER '#{@model['db_user']}'@'%';"
-		sql2 = "DROP DATABASE #{@model['db_name']};"
+		sql2 = "DROP DATABASE IF EXISTS #{@model['db_name']};"
 		sql3 = "REVOKE ALL PRIVILEGES ON *.* FROM '#{@model['db_user']}'@'%';"
 		sql4 = "FLUSH PRIVILEGES;"
-
 		system("echo \"#{sql1} #{sql2} #{sql3} #{sql4}\" | #{mysql_cmd}")
 
 		true
@@ -53,8 +55,8 @@ class Sfp::Module::WordpressWeb
 
 	def update_state
 		@state['installed'] = false
-		doc_root = resolve(@model['http'] + '.document_root')
-		if db_address.is_a?(String) and root_password.is_a?(String) and doc_root.is_a?(String)
+		doc_root = resolve(@model['http'].to_s + '.document_root')
+		if doc_root.is_a?(String)
 			path = "#{doc_root}/#{@model['path']}/wp-config.php".gsub /\/\//, '/'
 			@state['installed'] = true if File.exist?(path)
 		end
@@ -66,10 +68,12 @@ class Sfp::Module::WordpressWeb
 	end
 
 	def install(p={})
+		return false if @model['database'].nil?
+
 		system('apt-get update; apt-get install -y wget') if `which wget`.strip.length <= 0
 		return false if `which wget`.strip.length <= 0
 
-		doc_root = resolve(@model['http'] + '.document_root')
+		doc_root = resolve(@model['http'].to_s + '.document_root')
 
 		system("wget --output-document='/tmp/wp.tgz' #{@model['source_url']}")
 		return false if not File.exist?('/tmp/wp.tgz')
@@ -88,10 +92,12 @@ class Sfp::Module::WordpressWeb
 		system("cp -f #{wp_config_sample_path} #{wp_config_path}")
 
 		db = resolve(@model['database'])
+		db_address = resolve(@model['database'] + '.parent.sfpAddress')
+Sfp::Agent.logger.info @model['database'] + '.parent.sfpAddress'.to_s + ' :: ' + db_address.to_s
 		system("sed -i 's/.*DB_NAME.*/define(\"DB_NAME\",\"#{db['db_name']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_USER.*/define(\"DB_USER\",\"#{db['db_user']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_PASSWORD.*/define(\"DB_PASSWORD\",\"#{db['db_password']}\");/' #{wp_config_path}")
-		system("sed -i 's/.*DB_HOST.*/define(\"DB_HOST\",\"#{db['db_address']}\");/' #{wp_config_path}")
+		system("sed -i 's/.*DB_HOST.*/define(\"DB_HOST\",\"#{db_address}\");/' #{wp_config_path}")
 
 		system("cd #{home_path}; mv -f index.html index.html.bak")
 
@@ -99,7 +105,7 @@ class Sfp::Module::WordpressWeb
 	end
 
 	def uninstall(p={})
-		doc_root = resolve(@model['http'] + '.document_root')
+		doc_root = resolve(@model['http'].to_s + '.document_root')
 		home_path = "#{doc_root}/#{@model['path']}".gsub /\/\//, '/'
 
 		# delete all files

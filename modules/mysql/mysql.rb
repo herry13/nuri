@@ -44,7 +44,6 @@ class Sfp::Module::Mysql < Sfp::Module::Service
 				'service mysql stop',
 				'/bin/echo mysql > /etc/mysql/nuri.cnf',
 				'/bin/chmod 0400 /etc/mysql/nuri.cnf'
-			#exec_seq(commands)
 			return true
 		rescue Exception => e
 			Sfp::Agent.logger.error "#{e}\n#{e.backtrace.join("\n")}"
