@@ -21,7 +21,7 @@ schema WordpressDB {
 		condition {
 			this.installed = true
 		}
-		condition {
+		effect {
 			this.installed = false
 		}
 	}
