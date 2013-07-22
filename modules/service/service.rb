@@ -22,6 +22,7 @@ class Sfp::Module::Service < Sfp::Module::Package
 		return false if service.length <= 0
 		return true if Sfp::Module::Service.running?(service)
 		system("sudo service #{service} start")
+		sleep 1
 		return Sfp::Module::Service.running?(service)
 	end
 
@@ -30,6 +31,7 @@ class Sfp::Module::Service < Sfp::Module::Package
 		return false if service.length <= 0
 		return true if not Sfp::Module::Service.running?(service)
 		system("sudo service #{service} stop")
+		sleep 1
 		return !Sfp::Module::Service.running?(service)
 	end
 end
