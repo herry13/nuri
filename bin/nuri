@@ -2,6 +2,7 @@
 
 libdir = File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require "#{libdir}/nuri"
+require 'coderay'
 
 opts = Trollop::options do
 	version "Nuri 0.4.0 (c) 2013 Herry"
@@ -47,7 +48,7 @@ if opts[:state]
 	#Nuri::Console.print_state({:state => state}) if opts[:human]
 	state.accept(Sfp::Visitor::PrettyStateGenerator.new)
 	#puts JSON.pretty_generate(state) if opts[:pretty]
-	puts (opts[:pretty] or opts[:human] ? JSON.pretty_generate(state) : JSON.generate(state))
+	puts (opts[:pretty] or opts[:human] ? CodeRay.scan(JSON.pretty_generate(state), :json).terminal : JSON.generate(state))
 
 elsif opts[:plan]
 	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
