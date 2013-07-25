@@ -608,7 +608,22 @@ puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).insp
 		parent.delete(name) if value.is_a?(Sfp::Unknown)
 		true
 	end
+
+	def self.start
+		# TODO
+		fork {
+			while true do
+				sleep 5000
+			end
+		}
+	end
+
+	def self.stop
+		# TODO
+	end
 end
+
+### Helper classes/modules
 
 class Nuri::Master::GoalGenerator
 	attr_reader :results

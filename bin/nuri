@@ -20,6 +20,8 @@ EOS
 	opt :human, "Use human readable format."
 	opt :pretty, "Use pretty JSON format."
 	opt :silent, "Interactive mode."
+	opt :start, "Start master daemon."
+	opt :stop, "Stop master daemon."
 end
 
 def plan_to_human(plan)
@@ -94,6 +96,12 @@ elsif opts[:apply]
 		opts[:apply] = plan
 		puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
 	end
+
+elsif opts[:start]
+	Nuri::Master.start
+
+elsif opts[:stop]
+	Nuri::Master.stop
 
 else
 	Trollop::help
