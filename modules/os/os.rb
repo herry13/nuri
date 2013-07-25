@@ -6,6 +6,7 @@ class Sfp::Module::OS
 
 	def update_state
 		@state['running'] = true
+		@state['auto_upgrade'] = @model['auto_upgrade']
 
 		# get memory info
 		if `which free`.strip != ''
@@ -24,7 +25,15 @@ class Sfp::Module::OS
 		@state["cpus"] = (File.exist?('/proc/cpuinfo') ? `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i : 0)
 	end
 
-	def stop
+	def apply(p={})
+		self.upgrade if @model['auto_upgrade']
+	end
+
+	def upgrade(p={})
+		return !!system('apt-get update; apt-get upgrade -y')
+	end
+
+	def stop(p={})
 		return !!system('/sbin/shutdown -h now')
 	end
 end
