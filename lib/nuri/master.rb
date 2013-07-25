@@ -188,6 +188,7 @@ class Nuri::Master
 
 	protected
 	def get_dead_vm_state(name, cloud)
+		# TODO -- this should return the same structure as method "generate_not_exist_vm_state"
 =begin
 		{
 			'sfpAddress' => @model[name]['sfpAddress'],
@@ -400,7 +401,7 @@ class Nuri::Master
 
 		if vms2.length > vms1.length
 			# update the state of new VMs
-puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).inspect
+			puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).inspect
 			(vms2.keys - vms1.keys).each { |name|
 				push_modules(vms2[name])
 				template[name] = vms2[name]

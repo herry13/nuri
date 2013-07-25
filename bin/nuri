@@ -3,6 +3,7 @@
 libdir = File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require "#{libdir}/nuri"
 require 'coderay'
+require 'yaml'
 
 opts = Trollop::options do
 	version "Nuri 0.4.0 (c) 2013 Herry"
@@ -45,10 +46,12 @@ if opts[:state]
 	master = Nuri::Master.new
 	master.set_model_file(opts)
 	state = master.get_state(opts)
-	#Nuri::Console.print_state({:state => state}) if opts[:human]
 	state.accept(Sfp::Visitor::PrettyStateGenerator.new)
-	#puts JSON.pretty_generate(state) if opts[:pretty]
-	puts (opts[:pretty] or opts[:human] ? CodeRay.scan(JSON.pretty_generate(state), :json).terminal : JSON.generate(state))
+	if opts[:human]
+		puts CodeRay.scan(YAML.dump(state), :yaml).terminal
+	else
+		puts (opts[:pretty] ? JSON.pretty_generate(state) : JSON.generate(state))
+	end
 
 elsif opts[:plan]
 	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
@@ -59,8 +62,11 @@ elsif opts[:plan]
 	if plan['workflow'].nil?
 		puts "Plan: ".yellow + "\nno solution!".red
 	else
-		puts plan_to_human(plan) if opts[:human]
-		puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan)) if !opts[:human]
+		if opts[:human]
+			puts plan_to_human(plan)
+		else
+			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
+		end
 
 		if not opts[:silent] and not plan['workflow'].nil? and plan['workflow'].length > 0
 			print "Execute the plan [y/N]? "
@@ -93,6 +99,7 @@ elsif opts[:apply]
 		else
 			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
 		end
+
 		puts 'Executing the plan...'.yellow
 		opts[:apply] = plan
 		puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
