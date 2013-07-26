@@ -5,7 +5,6 @@ require "#{libdir}/nuri"
 
 require 'coderay'
 require 'yaml'
-require 'daemons'
 require 'logger'
 
 opts = Trollop::options do
@@ -109,34 +108,26 @@ elsif opts[:apply]
 	end
 
 elsif opts[:start]
-	Daemons.call do
-		logger = Logger.new('master.log', 5, 1024000)
-		logger.info 'Initializing master...'
+	logger = Logger.new('master.log')
+	begin
 		master = Nuri::Master.new
-		logger.info 'Set model file...'
 		master.set_model_file(opts)
-		sleep_time = 5
 		loop {
 			logger.info 'Generating plan [WAIT]'
 			plan = master.get_plan(opts)
 			logger.info 'Generating plan [OK]'
 			if plan['workflow'].nil?
-				logger.info "No solution!".red
+				logger.info "No solution"
 			else
 				logger.info plan_to_human(plan)
 			end
-			logger.info 'time to take a nap'
-			sleep sleep_time
+			sleep 5
 		}
+	rescue Exception => exp
+		logger.error "#{exp}\n#{exp.backtrace.join("\n")}"
 	end
 
 elsif opts[:stop]
-	pidfile = 'daemons.rb.pid'
-	if File.exist?(pidfile)
-		pid = File.read(pidfile).to_i
-		system("kill -9 #{pid}")
-		File.delete(pidfile)
-	end
 
 else
 	Trollop::help
