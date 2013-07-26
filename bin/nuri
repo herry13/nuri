@@ -2,8 +2,11 @@
 
 libdir = File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require "#{libdir}/nuri"
+
 require 'coderay'
 require 'yaml'
+require 'daemons'
+require 'logger'
 
 opts = Trollop::options do
 	version "Nuri 0.4.0 (c) 2013 Herry"
@@ -106,10 +109,34 @@ elsif opts[:apply]
 	end
 
 elsif opts[:start]
-	Nuri::Master.start
+	Daemons.call do
+		logger = Logger.new('master.log', 5, 1024000)
+		logger.info 'Initializing master...'
+		master = Nuri::Master.new
+		logger.info 'Set model file...'
+		master.set_model_file(opts)
+		sleep_time = 5
+		loop {
+			logger.info 'Generating plan [WAIT]'
+			plan = master.get_plan(opts)
+			logger.info 'Generating plan [OK]'
+			if plan['workflow'].nil?
+				logger.info "No solution!".red
+			else
+				logger.info plan_to_human(plan)
+			end
+			logger.info 'time to take a nap'
+			sleep sleep_time
+		}
+	end
 
 elsif opts[:stop]
-	Nuri::Master.stop
+	pidfile = 'daemons.rb.pid'
+	if File.exist?(pidfile)
+		pid = File.read(pidfile).to_i
+		system("kill -9 #{pid}")
+		File.delete(pidfile)
+	end
 
 else
 	Trollop::help
