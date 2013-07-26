@@ -131,16 +131,19 @@ class Nuri::Master
 				next if k =~ /\.sfpAddress/ or k =~ /\.sfpPort/ # skip "sfpAddress" and "sfpPort"
 				                                                # because these will be assigned dynamically
 				var = parser.variables[k]
+				next if var.nil? # the variable is not found
+
 				if v.is_a?(Hash)
 					val = parser.types[v['_value']][0] if v['_context'] == 'null'
 					raise Exception, "Not implemented yet." # this may arise on Set values
 				else
 					val = v
 				end
+
 				# add the value to variable's values
 				var << val  
 				var.uniq!
-
+	
 				# create new parameter, and then add to the operator
 				parameter = Sfp::Parameter.new(var, nil, val)
 				operator[var.name] = parameter
