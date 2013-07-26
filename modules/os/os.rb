@@ -6,7 +6,7 @@ class Sfp::Module::OS
 
 	def update_state
 		@state['running'] = true
-		@state['auto_upgrade'] = @model['auto_upgrade']
+		#@state['auto_upgrade'] = @model['auto_upgrade']
 
 		# get memory info
 		if `which free`.strip != ''

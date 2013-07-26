@@ -1,6 +1,6 @@
 schema OS {
 	running : Bool
-	auto_upgrade is true
+	//auto_upgrade : Bool
 
 	sub shutdown {
 		condition { }
