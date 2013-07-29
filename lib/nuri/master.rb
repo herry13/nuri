@@ -106,12 +106,13 @@ class Nuri::Master
 		# add global constraint (if exist)
 		task['global'] = @model['global'] if @model.has_key?('global')
 
-		# add sometime constraint (if exist)
-		#task['sometime'] = @model['sometime'] if @model.has_key?('sometime')
+		# add sometime constraint (if exist)
+		task['sometime'] = @model['sometime'] if @model.has_key?('sometime')
 
 		# remove old parent links, and then reconstruct SFP parent links
 		task.accept(ParentEliminator)
 
+		# debug
 		#puts JSON.pretty_generate(task)
 
 		# rebuild SFP data-structure
