@@ -11,7 +11,14 @@ schema Service extends Package {
 			this.service_name = name
 		}
 	}
-*/	
+*/
+	sub install {
+		effect {
+			this.installed = true
+			this.running = false
+		}
+	}
+	
 	sub uninstall {
 		condition {
 			this.running = false
