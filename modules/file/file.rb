@@ -9,16 +9,29 @@ module Sfp::Module
 			path = @model['path'].to_s
 			fullpath = ::File.expand_path(path)
 			@state['path'] = path
-			@state['created'] = ::File.exist?(fullpath)
-			@state['content'] = (@state['created'] ? ::File.read(fullpath) : '')
 
-			if @state['created']
+			if ::File.exist?(fullpath)
+				@state['exists'] = true
+				@state['content'] = ::File.read(fullpath)
 				stat = ::File.stat(fullpath)
 				@state['user'] = Etc.getpwuid(stat.uid).name if @model['user'] != ''
 				@state['group'] = Etc.getgrgid(stat.gid).name if @model['group'] != ''
 			else
+				@state['exists'] = false
+				@state.delete('user') if @state.has_key?('user')
+				@state.delete('group') if @state.has_key?('group')
+				@state.delete('content') if @state.has_key?('content')
+			end
+
+=begin
+			@state['exists'] = ::File.exist?(fullpath)
+			@state['content'] = (@state['exists'] ? ::File.read(fullpath) : '')
+
+			if @state['exists']
+			else
 				@state['user'] = @state['group'] = ''
 			end
+=end
 		end
 
 		def create(p={})
