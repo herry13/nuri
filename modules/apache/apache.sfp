@@ -34,16 +34,6 @@ schema Apache extends Service {
 		}
 	}
 
-	sub install {
-		condition {
-			//this.libaugeas.installed = true
-			//this.installed = false
-		}
-		effect {
-			this.installed = true
-		}
-	}
-
 	sub uninstall {
 		condition {
 			this.installed = true
