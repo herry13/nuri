@@ -5,7 +5,7 @@ schema File {
 	user : String
 	group : String
 
-	procedure create (content isref String) {
+	procedure create (content: String) {
 		condition { }
 		effect {
 			this.created is true
@@ -13,7 +13,7 @@ schema File {
 		}
 	}
 
-	procedure set_ownership(user isref String, group isref String) {
+	procedure set_ownership(user: String, group: String) {
 		condition { }
 		effect {
 			this.user = user

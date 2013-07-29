@@ -23,7 +23,7 @@ module Sfp::Module
 
 		def create(p={})
 			begin
-				::File.open(File.expand_path(@state['path']), 'w') { |f| f.write(p['content']) }
+				::File.open(::File.expand_path(@state['path']), 'w') { |f| f.write(p['content']) }
 				return true
 			rescue Exception => e
 				Sfp::Agent.logger.error "Error in creating file #{@state['path']} #{e}\n#{e.backtrace.join("\n")}"

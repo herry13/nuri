@@ -1,5 +1,4 @@
 include "../modules/node/node.sfp"
-//include "../modules/apache/apache.sfp"
 include "../modules/file/file.sfp"
 
 nena isa Node {
@@ -7,6 +6,6 @@ nena isa Node {
 
 	test isa File {
 		path = "/tmp/test"
-		created = false
+		created = true
 	}
 }
