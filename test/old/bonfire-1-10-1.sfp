@@ -26,7 +26,6 @@ vm1 isa VM {
 	}
 	in_cloud is master.bonfireINRIA
 }
-
 vm2 isa VM {
 	created = true
 	apache isa Apache {
@@ -35,23 +34,14 @@ vm2 isa VM {
 	in_cloud is master.bonfireINRIA
 }
 vm3 extends vm2
-
 vm4 extends vm2
-
 vm5 extends vm2
-
 vm6 extends vm2
-
 vm7 extends vm2
-
 vm8 extends vm2
-
 vm9 extends vm2
-
 vm11 extends vm2
-
 vm12 extends vm2
-
 vm10 isa VM {
 	created = true
 	mysql isa Mysql {
