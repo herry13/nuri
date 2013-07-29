@@ -6,3 +6,11 @@ a {
 		x = 2
 	}
 }
+
+global {
+	x = 1
+}
+
+global {
+	y = 2
+}
