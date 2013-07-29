@@ -28,7 +28,7 @@ hpvm7 isa Node {
 	}
 }
 
-global constraint {
+global {
 	if hpvm7.apache.running then hpvm6.mysql.running
 	//if hpvm6.mysql.running then hpvm7.apache.running
 }

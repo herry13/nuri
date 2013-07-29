@@ -59,7 +59,7 @@ vm10 isa VM {
 	in_cloud is master.bonfireEPCC
 }
 
-global constraint {
+global {
 	if vm1.apache.running = true then {
 		vm2.apache.running = true
 		vm3.apache.running = true

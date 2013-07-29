@@ -16,6 +16,9 @@ master isa Machine {
 	bonfireINRIA extends master.bonfireEPCC {
 		location is "fr-inria"
 	}
+	bonfireHPLABS extends master.bonfireEPCC {
+		location is "uk-hplabs"
+	}
 }
 
 vm1 isa VM {
@@ -29,33 +32,28 @@ vm1 isa VM {
 
 vm2 isa VM {
 	created = true
-	apache isa Apache {
-		running is true
-	}
-	in_cloud is master.bonfireINRIA
-}
-vm3 extends vm2
-
-vm4 extends vm2
-
-vm5 extends vm2
-
-vm6 extends vm2
-
-vm7 extends vm2
-
-vm8 extends vm2
-
-vm9 extends vm2
-
-vm10 isa VM {
-	created = true
 	mysql isa Mysql {
 		running is true
 	}
 	in_cloud is master.bonfireINRIA
 }
 
+vm3 isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+	}
+	in_cloud is master.bonfireINRIA
+}
+vm4 extends vm3
+vm5 extends vm3
+vm6 extends vm3
+vm7 extends vm3
+vm8 extends vm3
+vm9 extends vm3
+vm10 extends vm3
+
+/*
 global {
 	if vm1.apache.running = true then {
 		vm2.apache.running = true
@@ -77,3 +75,4 @@ global {
 	if vm8.apache.running = true then vm10.mysql.running = true
 	if vm9.apache.running = true then vm10.mysql.running = true
 }
+*/

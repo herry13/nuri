@@ -48,6 +48,10 @@ vm8 extends vm2
 
 vm9 extends vm2
 
+vm11 extends vm2
+
+vm12 extends vm2
+
 vm10 isa VM {
 	created = true
 	mysql isa Mysql {
@@ -66,6 +70,8 @@ global {
 		vm7.apache.running = true
 		vm8.apache.running = true
 		vm9.apache.running = true
+		vm11.apache.running = true
+		vm12.apache.running = true
 	}
 
 	if vm2.apache.running = true then vm10.mysql.running = true
@@ -76,4 +82,6 @@ global {
 	if vm7.apache.running = true then vm10.mysql.running = true
 	if vm8.apache.running = true then vm10.mysql.running = true
 	if vm9.apache.running = true then vm10.mysql.running = true
+	if vm11.apache.running = true then vm10.mysql.running = true
+	if vm12.apache.running = true then vm10.mysql.running = true
 }

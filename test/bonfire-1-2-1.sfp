@@ -48,7 +48,7 @@ vm7 isa VM {
 	in_cloud is master.bonfireINRIA
 }
 
-global constraint {
+global {
 	if vm1.apache.running = true then {
 		vm2.apache.running = true
 		vm3.apache.running = true

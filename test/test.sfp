@@ -1,0 +1,8 @@
+a {
+	b {
+		x = 1
+	}
+	c extends a.b {
+		x = 2
+	}
+}

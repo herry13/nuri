@@ -1,9 +1,10 @@
 include "../modules/node/node.sfp"
 include "../modules/bonfire/bonfire.sfp"
 include "../modules/file/file.sfp"
+include "../modules/vm/vm.sfp"
 
-hpvm6 isa Node {
-	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+master isa Node {
+	sfpAddress is "localhost"
 
 	bonfireEPCC isa Bonfire {
 		experiment is "autocloud"
@@ -12,7 +13,11 @@ hpvm6 isa Node {
 		wan_name is "BonFIRE WAN"
 	}
 
-	bonfireINRIA extends hpvm6.bonfireEPCC {
+	bonfireINRIA extends master.bonfireEPCC {
 		location is "fr-inria"
 	}
+}
+
+vmx isa VM {
+	created = true
 }
