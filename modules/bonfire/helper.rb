@@ -101,9 +101,11 @@ module Sfp::Module::BonfireHelper
 		begin
 			@session.logger.info "Installing agent to #{server['name']}:#{server['nic'][0]['ip']}"
 			server.ssh do |ssh|
-				ssh.exec! 'apt-get update; apt-get -y install sudo ruby ruby-dev rubygems libz-dev libaugeas-ruby make gcc libxml2-dev libxslt-dev libreadline-dev'
+				ssh.exec! 'apt-get update; apt-get -y install sudo ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 make gcc libxml2-dev libxslt-dev libreadline-dev'
+				ssh.exec! 'ln -sf /usr/bin/ruby1.9.1 /usr/bin/ruby'
+				ssh.exec! 'ln -sf /usr/bin/gem1.9.1 /usr/bin/gem'
 				ssh.exec! 'gem install sfp sfpagent fog restfully restfully-addons --no-ri --no-rdoc'
-				ssh.exec! 'ln -sf /var/lib/gems/1.8/bin/sfpagent /usr/local/bin/sfpagent'
+				ssh.exec! 'ln -sf /var/lib/gems/1.9.1/bin/sfpagent /usr/local/bin/sfpagent'
 				ssh.exec! 'sfpagent -t ; sfpagent -s'
 			end
 			return true
