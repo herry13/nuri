@@ -78,7 +78,7 @@ class Nuri::Master
 
 		# modify condition of procedures of each VM's component
 		# modification: add constraint "$.vm.created = true"
-		task['initial'].accept(VMProcedureModifier)
+		task['initial'].accept(VMProcedureModifier.new(task['initial']))
 
 		# construct goal state		
 		goalgen = GoalGenerator.new
@@ -106,9 +106,15 @@ class Nuri::Master
 		# add global constraint (if exist)
 		task['global'] = @model['global'] if @model.has_key?('global')
 
+		# add sometime constraint (if exist)
+		#task['sometime'] = @model['sometime'] if @model.has_key?('sometime')
+
 		# remove old parent links, and then reconstruct SFP parent links
 		task.accept(ParentEliminator)
-#puts JSON.pretty_generate(task)
+
+		#puts JSON.pretty_generate(task)
+
+		# rebuild SFP data-structure
 		task.accept(Sfp::Visitor::SfpGenerator.new(task))
 
 		planner = Sfp::Planner.new
@@ -589,14 +595,21 @@ class Nuri::Master
 		true
 	end
 
-	VMProcedureModifier = Object.new
-	def VMProcedureModifier.visit(name, value, parent)
-		return false if name[0,1] == '_'
-		if value.is_a?(Hash) and value['_context'] == 'procedure'
-			_, agent, _ = parent.ref.split('.', 3)
-			value['_condition']["$.#{agent}.created"] = Sfp::Helper::Constraint.equals(true)
+	class VMProcedureModifier
+		def initialize(root)
+			@root = root
 		end
-		true
+
+		def visit(name, value, parent)
+			return false if name[0,1] == '_'
+			if value.is_a?(Hash) and value['_context'] == 'procedure'
+				_, agent, _ = parent.ref.split('.', 3)
+				if not @root[agent]['_classes'].index(VMSchema).nil?
+					value['_condition']["$.#{agent}.created"] = Sfp::Helper::Constraint.equals(true)
+				end
+			end
+			true
+		end
 	end
 
 	ParentEliminator = ::Sfp::Visitor::ParentEliminator.new
