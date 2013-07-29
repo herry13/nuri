@@ -1,0 +1,20 @@
+include "../modules/node/node.sfp"
+include "../modules/bonfire/bonfire.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+
+	epcc isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+	inria extends proxy.epcc {
+		location is "fr-inria"
+	}
+}
+
+//include "bonfire-inria.sfp"
+include "test.sfp"
+
