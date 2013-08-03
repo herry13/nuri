@@ -16,6 +16,11 @@ vm2 isa VM {
 	apache isa Apache {
 		running is true
 	}
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vm2.apache
+		database is vm10.wp_db
+	}
 	in_cloud is proxy.epcc
 }
 /*vm3 extends vm2
@@ -31,6 +36,10 @@ vm10 isa VM {
 	created = true
 	mysql isa Mysql {
 		running is true
+	}
+	wp_db isa WordpressDB {
+		installed is true
+		mysql is vm10.mysql
 	}
 	in_cloud is proxy.epcc
 }

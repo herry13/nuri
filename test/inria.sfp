@@ -16,11 +16,11 @@ vm2x isa VM {
 	apache isa Apache {
 		running is true
 	}
-	/*wp_web isa WordpressWeb {
+	wp_web isa WordpressWeb {
 		installed is true
 		http is vm2x.apache
 		database is vm10x.wp_db
-	}*/
+	}
 	in_cloud is proxy.inria
 }
 /*vm3x extends vm2x
@@ -37,10 +37,10 @@ vm10x isa VM {
 	mysql isa Mysql {
 		running is true
 	}
-	/*wp_db isa WordpressDB {
+	wp_db isa WordpressDB {
 		installed is true
 		mysql is vm10x.mysql
-	}*/
+	}
 	in_cloud is proxy.inria
 }
 
