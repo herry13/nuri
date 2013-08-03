@@ -1,23 +1,29 @@
 include "../modules/vm/vm.sfp"
 include "../modules/apache/apache.sfp"
 include "../modules/mysql/mysql.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
 
 vm1x isa VM {
 	created = true
-	apache isa Apache {
+	/*apache isa Apache {
 		running is true
 		is_load_balancer is true
-	}
-	in_cloud is master.bonfireEPCC
+	}*/
+	in_cloud is proxy.inria
 }
 vm2x isa VM {
 	created = true
-	apache isa Apache {
+	/*apache isa Apache {
 		running is true
-	}
-	in_cloud is master.bonfireEPCC
+	}*/
+	/*wp_web isa WordpressWeb {
+		installed is true
+		http is vm2x.apache
+		database is vm10x.wp_db
+	}*/
+	in_cloud is proxy.inria
 }
-/*vm3x extends vm2x
+vm3x extends vm2x
 vm4x extends vm2x
 vm5x extends vm2x
 vm6x extends vm2x
@@ -25,18 +31,23 @@ vm7x extends vm2x
 vm8x extends vm2x
 vm9x extends vm2x
 vm11x extends vm2x
-vm12x extends vm2x*/
+vm12x extends vm2x
 vm10x isa VM {
 	created = true
-	mysql isa Mysql {
+	/*mysql isa Mysql {
 		running is true
 	}
-	in_cloud is master.bonfireEPCC
+	wp_db isa WordpressDB {
+		installed is true
+		mysql is vm10x.mysql
+	}*/
+	in_cloud is proxy.inria
 }
 
+
 global {
-	if vm1x.apache.running = true then {
-		vm2x.apache.running = true
+//	if vm1x.apache.running = true then {
+//		vm2x.apache.running = true
 		/*vm3x.apache.running = true
 		vm4x.apache.running = true
 		vm5x.apache.running = true
@@ -46,9 +57,9 @@ global {
 		vm9x.apache.running = true
 		vm11x.apache.running = true
 		vm12x.apache.running = true*/
-	}
+//	}
 
-	if vm2x.apache.running = true then vm10x.mysql.running = true
+//	if vm2x.apache.running = true then vm10x.mysql.running = true
 	/*if vm3x.apache.running = true then vm10x.mysql.running = true
 	if vm4x.apache.running = true then vm10x.mysql.running = true
 	if vm5x.apache.running = true then vm10x.mysql.running = true

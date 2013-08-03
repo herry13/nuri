@@ -1,0 +1,49 @@
+include "../modules/node/node.sfp"
+include "../modules/bonfire/bonfire.sfp"
+include "../modules/vm/vm.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
+
+master isa Node {
+	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+	epcc isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+}
+
+hpvm6 isa VM {
+	created = true
+/*
+	apache isa Apache {
+		running is true
+	}
+	wp_web isa WordpressWeb {
+		installed is true
+		http is hpvm6.apache
+		database is hpvm7.wp_db
+	}
+	mysql isa Mysql {
+		installed = false
+	}
+*/
+}
+
+/*hpvm8 extends hpvm6 {
+	created = true
+	wp_web extends hpvm6.wp_web {
+		http is hpvm8.apache
+	}
+}*/
+
+hpvm7 isa VM {
+	created = true
+/*	mysql isa Mysql {
+		running is true
+	}
+	wp_db isa WordpressDB {
+		installed is true
+		mysql is hpvm7.mysql
+	}*/
+}
