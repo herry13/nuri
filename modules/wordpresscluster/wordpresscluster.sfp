@@ -5,10 +5,10 @@ schema WordpressCluster
 
 schema WordpressDB extends WordpressCluster {
 	installed : Bool
-	mysql isref Mysql
-	db_name = "wordpress"
-	db_user = "wordpress"
-	db_password = "password"
+	final mysql isref Mysql
+	final db_name = "wordpress"
+	final db_user = "wordpress"
+	final db_password = "password"
 
 	sub install {
 		condition {
@@ -32,10 +32,10 @@ schema WordpressDB extends WordpressCluster {
 
 schema WordpressWeb extends WordpressCluster {
 	installed : Bool
-	http isref Apache
-	database isref WordpressDB
-	path = "/wp"
-	source_url = "http://wordpress.org/latest.tar.gz"
+	final http isref Apache
+	final database isref WordpressDB
+	final path = "/wp"
+	final source_url = "http://wordpress.org/latest.tar.gz"
 
 	sub install {
 		condition { 
