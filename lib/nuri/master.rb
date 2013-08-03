@@ -34,10 +34,7 @@ class Nuri::Master
 
 	def set_model(p={})
 		@model = (p.is_a?(Hash) and p[:model].is_a?(Hash) ? p[:model] : {})
-		begin
-			push_agents_list if @model.length > 0
-		rescue
-		end
+		push_agents_list if @model.length > 0
 
 		# find a list of cloud proxy
 		@model.accept(@cloudfinder.reset)
@@ -58,6 +55,8 @@ class Nuri::Master
 	def execute_plan(p={})
 		raise Exception, "Plan file is not exist!" if not File.exist?(p[:execute]) and
 			!p[:apply]
+
+		push_agents_list
 
 		plan = (p[:apply] ? p[:apply] : JSON[File.read(p[:execute])])
 		raise Exception, "Invalid plan!" if plan['workflow'].nil?
@@ -282,22 +281,27 @@ class Nuri::Master
 	end
 
 	def push_agents_list
-		agents = {}
-		# generate agents list
-		get_agents.each do |name, model|
-			address = model['sfpAddress'].to_s.strip
-			port = model['sfpPort'].to_s.strip.to_i
-			next if address == '' or port == 0
-			agents[name] = {:sfpAddress => address, :sfpPort => port}
+		begin
+			agents = {}
+			# generate agents list
+			get_agents.each do |name, model|
+				address = model['sfpAddress'].to_s.strip
+				port = model['sfpPort'].to_s.strip.to_i
+				next if address == '' or port == 0
+				agents[name] = {:sfpAddress => address, :sfpPort => port}
+			end
+			data = {'agents' => JSON.generate(agents)}
+	
+			# send the list to all agents
+			agents.each do |name, info|
+				code, _ = put_data(info[:sfpAddress], info[:sfpPort], '/agents', data)
+				raise Exception, "Push agents list to #{info[:sfpAddress]}:#{info[:sfpPort]} [Failed]" if code.to_i != 200
+			end
+			return true
+		rescue Exception => exp
+			$stderr.puts "#{exp}\n#{exp.backtrace.join("\n")}"
 		end
-		data = {'agents' => JSON.generate(agents)}
-
-		# send the list to all agents
-		agents.each do |name, info|
-			code, _ = put_data(info[:sfpAddress], info[:sfpPort], '/agents', data)
-			raise Exception, "Push agents list to #{info[:sfpAddress]}:#{info[:sfpPort]} [Failed]" if code.to_i != 200
-		end
-		true
+		false
 	end
 
 	def push_modules(agent_model)
@@ -435,10 +439,11 @@ class Nuri::Master
 				print "#{index}. #{action['name']} #{JSON.generate(action['parameters'])}... "
 				if execute_action(action, agents)
 					# if the action is "create_vm" or "delete_vm", then
-					# update the VMs' address
+					# update the VMs' address, and then push agents list
 					if action['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.(create_vm|delete_vm)/
 						_, agent_name, _ = action['name'].split('.', 3)
 						update_cloud_addresses(agent_name)
+						push_agents_list
 					end
 					puts "[OK]".green
 				else
