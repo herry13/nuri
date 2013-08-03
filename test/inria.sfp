@@ -5,17 +5,17 @@ include "../modules/wordpresscluster/wordpresscluster.sfp"
 
 vm1x isa VM {
 	created = true
-	/*apache isa Apache {
+	apache isa Apache {
 		running is true
 		is_load_balancer is true
-	}*/
+	}
 	in_cloud is proxy.inria
 }
 vm2x isa VM {
 	created = true
-	/*apache isa Apache {
+	apache isa Apache {
 		running is true
-	}*/
+	}
 	/*wp_web isa WordpressWeb {
 		installed is true
 		http is vm2x.apache
@@ -34,10 +34,10 @@ vm11x extends vm2x
 vm12x extends vm2x*/
 vm10x isa VM {
 	created = true
-	/*mysql isa Mysql {
+	mysql isa Mysql {
 		running is true
 	}
-	wp_db isa WordpressDB {
+	/*wp_db isa WordpressDB {
 		installed is true
 		mysql is vm10x.mysql
 	}*/
@@ -46,8 +46,8 @@ vm10x isa VM {
 
 
 global {
-//	if vm1x.apache.running = true then {
-//		vm2x.apache.running = true
+	if vm1x.apache.running = true then {
+		vm2x.apache.running = true
 		/*vm3x.apache.running = true
 		vm4x.apache.running = true
 		vm5x.apache.running = true
@@ -57,9 +57,9 @@ global {
 		vm9x.apache.running = true
 		vm11x.apache.running = true
 		vm12x.apache.running = true*/
-//	}
+	}
 
-//	if vm2x.apache.running = true then vm10x.mysql.running = true
+	if vm2x.apache.running = true then vm10x.mysql.running = true
 	/*if vm3x.apache.running = true then vm10x.mysql.running = true
 	if vm4x.apache.running = true then vm10x.mysql.running = true
 	if vm5x.apache.running = true then vm10x.mysql.running = true
