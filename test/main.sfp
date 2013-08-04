@@ -1,5 +1,6 @@
 include "../modules/node/node.sfp"
 include "../modules/bonfire/bonfire.sfp"
+include "../modules/client/client.sfp"
 
 proxy isa Node {
 	sfpAddress is "localhost"
@@ -12,6 +13,9 @@ proxy isa Node {
 	}
 	inria extends proxy.epcc {
 		location is "fr-inria"
+	}
+	client isa Client {
+		refer is vm1.apache
 	}
 }
 
