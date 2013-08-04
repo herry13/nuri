@@ -40,7 +40,7 @@ class Nuri::Master
 		@model.accept(@cloudfinder.reset)
 
 		# create a set of not-exist VMs' state
-		@map = generate_not_exist_vm_state
+		@map = generate_not_exist_vm_state(false)
 	end
 
 	def set_model_file(p={})
@@ -226,10 +226,11 @@ class Nuri::Master
 		SfpUnknown
 	end
 
-	def generate_not_exist_vm_state
+	def generate_not_exist_vm_state(with_final_attribute=true)
 		map = {}
 		get_vms.each do |name,model|
 			state = {name => get_not_exist_vm_state(model)}
+			state.accept(FinalAttributeRemover) if not with_final_attribute
 			state.accept(ParentGenerator)
 			flatten = Sfp::Helper::SfpFlatten.new
 			state.accept(flatten)
@@ -626,6 +627,14 @@ class Nuri::Master
 	ParentGenerator = Object.new
 	def ParentGenerator.visit(name, value, parent)
 		value['_parent'] = parent if value.is_a?(Hash)
+		true
+	end
+
+	FinalAttributeRemover = Object.new
+	def FinalAttributeRemove.visit(name, value, parent)
+		if value.is_a?(Hash) and value.has_key?('_finals')
+			value['_finals'].each { |attr| value.delete(attr) }
+		end
 		true
 	end
 
