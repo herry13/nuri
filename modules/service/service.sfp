@@ -13,6 +13,9 @@ schema Service extends Package {
 	}
 */
 	sub install {
+		condition {
+			this.installed != true
+		}
 		effect {
 			this.installed = true
 			this.running = false
