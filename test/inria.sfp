@@ -8,7 +8,7 @@ vm1x isa VM {
 	apache isa Apache {
 		running is true
 		is_load_balancer is true
-		lb_members is ( vm2x )
+		//lb_members is ( vm2x )
 	}
 	in_cloud is proxy.inria
 }
