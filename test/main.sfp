@@ -15,11 +15,16 @@ proxy isa Node {
 		location is "fr-inria"
 	}
 	client isa Client {
-		refer is vm1.apache
+		refer is vm1x.apache
 	}
 }
 
 include "inria.sfp"
 include "epcc.sfp"
+
+
+global {
+	proxy.client.refer.running = true
+}
 
 
