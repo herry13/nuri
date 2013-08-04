@@ -1,0 +1,11 @@
+include "../modules/apache/apache.sfp"
+
+schema Client {
+	refer isref Apache
+
+	sub redirect (s: Apache) {
+		effect {
+			this.refer = s
+		}
+	}
+}
