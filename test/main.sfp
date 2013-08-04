@@ -15,6 +15,7 @@ proxy isa Node {
 	}
 }
 
-include "inria.sfp"
-include "epcc.sfp"
+//include "inria.sfp"
+//include "epcc.sfp"
+include "test.sfp"
 

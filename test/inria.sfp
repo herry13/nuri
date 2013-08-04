@@ -44,6 +44,9 @@ vm10x isa VM {
 	in_cloud is proxy.inria
 }
 
+sometime {
+	vm2x.wp_web.installed = false
+}
 
 global {
 	if vm1x.apache.running = true then {
