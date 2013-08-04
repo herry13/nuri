@@ -38,8 +38,9 @@ schema WordpressWeb extends WordpressCluster {
 	final source_url = "http://wordpress.org/latest.tar.gz"
 
 	sub install {
-		condition { 
+		condition {
 			this.http.installed = true
+			this.http.running = false 
 			this.http.php_module = true
 			this.http.php_mysql_module = true
 			this.database.installed = true
