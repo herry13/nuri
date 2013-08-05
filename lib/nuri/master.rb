@@ -34,7 +34,7 @@ class Nuri::Master
 
 	def set_model(p={})
 		@model = (p.is_a?(Hash) and p[:model].is_a?(Hash) ? p[:model] : {})
-		#push_agents_list if @model.length > 0
+		push_agents_list if @model.length > 0
 
 		# find a list of cloud proxy
 		@model.accept(@cloudfinder.reset)
