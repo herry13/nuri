@@ -4,25 +4,18 @@ include "../node/node.sfp"
 schema Apache extends Service {
 	package_name = "apache2"
 	service_name = "apache2"
-	port : Int // = 80
-	document_root : String //= "/var/www"
+	port : Int
+	document_root : String
 	installed : Bool
 	running : Bool
-	php_module : Bool // = false
-	php_mysql_module : Bool // = false
-	server_name : String // = ""
+	php_module : Bool
+	php_mysql_module : Bool
+	server_name : String
 
 	// load balancer config
 	is_load_balancer : Bool
 	lb_members isset Node
 	lb_method : String  // byrequests, bytraffic, bybusyness
-
-	/** //-- bug: this is not working
-	libaugeas_ruby isa Package {
-		package_name = "libaugeas-ruby"
-		installed = true
-	}
-	**/
 
 	sub set_port(target isref Integer) {
 		condition {

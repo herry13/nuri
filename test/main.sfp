@@ -19,9 +19,10 @@ proxy isa Node {
 	}*/
 }
 
-include "inria2.sfp"
-include "epcc.sfp"
+include "inria2a.sfp"
+//include "epcc.sfp"
 
+//include "test.sfp"
 
 global {
 //	proxy.client.refer.running = true

@@ -5,18 +5,20 @@ schema WordpressCluster
 
 schema WordpressDB extends WordpressCluster {
 	installed : Bool
-	final mysql isref Mysql
+	mysql isref Mysql
 	final db_name = "wordpress"
 	final db_user = "wordpress"
 	final db_password = "password"
 
-	sub install {
+	sub install(mysql: Mysql) {
 		condition {
-			this.mysql.running = true
-			this.mysql.public = true
+			this.installed != true
+			mysql.running = true
+			mysql.public = true
 		}
 		effect {
 			this.installed = true
+			this.mysql = mysql
 		}
 	}
 	sub uninstall {
@@ -32,21 +34,24 @@ schema WordpressDB extends WordpressCluster {
 
 schema WordpressWeb extends WordpressCluster {
 	installed : Bool
-	final http isref Apache
-	final database isref WordpressDB
+	http isref Apache
+	database isref WordpressDB
 	final path = "/wp"
 	final source_url = "http://wordpress.org/latest.tar.gz"
 
-	sub install {
+	sub install (http: Apache, database: WordpressDB) {
 		condition {
-			this.http.installed = true
-			this.http.running = false 
-			this.http.php_module = true
-			this.http.php_mysql_module = true
-			this.database.installed = true
+			this.installed != true
+			http.installed = true
+			http.running = false 
+			http.php_module = true
+			http.php_mysql_module = true
+			database.installed = true
 		}
 		effect {
 			this.installed = true
+			this.http = http
+			this.database = database
 		}
 	}
 

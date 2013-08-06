@@ -3,7 +3,7 @@ include "../apache/apache.sfp"
 schema Client {
 	refer isref Apache
 
-	sub redirect (s: Apache) {
+	sub redirect (s isref Apache) {
 		effect {
 			this.refer = s
 		}
