@@ -6,17 +6,20 @@ schema WordpressCluster
 schema WordpressDB extends WordpressCluster {
 	installed : Bool
 	mysql isref Mysql
-	db_name = "wordpress"
-	db_user = "wordpress"
-	db_password = "password"
+	final db_name = "wordpress"
+	final db_user = "wordpress"
+	final db_password = "password"
 
-	sub install {
+	sub install (db isref Mysql) {
 		condition {
-			this.mysql.running = true
-			this.mysql.public = true
+			db.running = true
+			db.public = true
+			//this.mysql.running = true
+			//this.mysql.public = true
 		}
 		effect {
 			this.installed = true
+			this.mysql = db
 		}
 	}
 	sub uninstall {
