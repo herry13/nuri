@@ -23,7 +23,7 @@ EOS
 	opt :push_modules, "Automatically push an unavailable module to target agent.", :default => true
 	opt :human, "Use human readable format."
 	opt :pretty, "Use pretty JSON format."
-	opt :silent, "Interactive mode."
+	opt :no_interactive, "Set off interactive mode."
 	opt :start, "Start master daemon."
 	opt :stop, "Stop master daemon."
 end

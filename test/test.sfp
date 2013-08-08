@@ -1,0 +1,13 @@
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
+
+vm1x isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+		is_load_balancer is true
+	}
+	in_cloud is proxy.epcc
+}

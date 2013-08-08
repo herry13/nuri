@@ -34,13 +34,16 @@ class Nuri::Master
 
 	def set_model(p={})
 		@model = (p.is_a?(Hash) and p[:model].is_a?(Hash) ? p[:model] : {})
-		push_agents_list if @model.length > 0
+		begin
+			push_agents_list if @model.length > 0
+		rescue
+		end
 
 		# find a list of cloud proxy
 		@model.accept(@cloudfinder.reset)
 
 		# create a set of not-exist VMs' state
-		@map = generate_not_exist_vm_state(false)
+		@map = generate_not_exist_vm_state
 	end
 
 	def set_model_file(p={})
@@ -55,8 +58,6 @@ class Nuri::Master
 	def execute_plan(p={})
 		raise Exception, "Plan file is not exist!" if not File.exist?(p[:execute]) and
 			!p[:apply]
-
-		push_agents_list
 
 		plan = (p[:apply] ? p[:apply] : JSON[File.read(p[:execute])])
 		raise Exception, "Invalid plan!" if plan['workflow'].nil?
@@ -157,29 +158,62 @@ class Nuri::Master
 		end
 	end
 
-	def get_state(p={})
+	def get_node_state(name, model)
+		begin
+			if send_agent_model(name, model)
+				agent_state = get_agent_state(name, model)
+				raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
+				return agent_state[name]
+			end
+		rescue Exception => e
+			puts "[WARN] Cannot get the current state of #{name} : #{e}".red
+		end
+		SfpUnknown
+	end
+
+	def get_exist_node_state(name, model, template, options={})
+		push_modules(model) if options[:push_modules]
+		template = Sfp::Helper.deep_clone(template)
+		template[name] = model
+		state = get_node_state(name, template)
+		state
+	end
+
+	def get_agents_state(agent_model, template, options)
+		pool = {}
+		lock = Mutex.new
+		agent_model.each do |name,model|
+			Thread.new {
+				state = get_exist_node_state(name, model, template, options)
+				lock.synchronize { pool[name] = state }
+			}
+		end
+		until agent_model.length <= pool.length do
+			sleep 1
+		end
+		pool
+	end
+
+	def get_state(options={})
 		state = {}
 		template = get_schemata
 		vms = get_vms
 		agents = get_agents
-
-		# push agents list to each agent
-		push_agents_list
+		state_pool = {}  # pool for storing agent's state
 
 		# get state of non-VM nodes
-		(agents.keys - vms.keys).each do |name|
-			model = agents[name]
-			push_modules(model) if p[:push_modules]
-			template[name] = model
-			state[name] = get_node_state(name, template)
-			template.delete(name)
-		end
+		agent_model = {}
+		(agents.keys - vms.keys).each { |name,model| agent_model[name] = agents[name] }
+		get_agents_state(agent_model, template, options).each { |k,v| state[k] = v }
 
 		# assign VMs' address
 		exist_vms, not_exist_vms = assign_vm_address(state, vms)
 
-		# get state of VM nodes
-		exist_vms.each { |name,model| state[name] = get_exist_vm_state(name, model, template, p) }
+		# get state of existing VM nodes
+		#exist_vms.each { |name,model| state[name] = get_exist_node_state(name, model, template, options) }
+		get_agents_state(exist_vms, template, options).each { |k,v| state[k] = v }
+
+		# get state of non-existing VM nodes
 		not_exist_vms.each { |name,model| state[name] = get_not_exist_vm_state(model) }
 
 		@cloudfinder.clouds.each do |cloud|
@@ -213,24 +247,10 @@ class Nuri::Master
 		SfpUnknown
 	end
 
-	def get_node_state(name, model)
-		begin
-			if send_agent_model(name, model)
-				agent_state = get_agent_state(name, model)
-				raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
-				return agent_state[name]
-			end
-		rescue Exception => e
-			puts "[WARN] Cannot get the current state of #{name} : #{e}".red
-		end
-		SfpUnknown
-	end
-
-	def generate_not_exist_vm_state(with_final_attribute=true)
+	def generate_not_exist_vm_state
 		map = {}
 		get_vms.each do |name,model|
 			state = {name => get_not_exist_vm_state(model)}
-			state.accept(FinalAttributeRemover) if not with_final_attribute
 			state.accept(ParentGenerator)
 			flatten = Sfp::Helper::SfpFlatten.new
 			state.accept(flatten)
@@ -247,14 +267,6 @@ class Nuri::Master
 		s['state']['created'] = false
 		s['state']['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
 		s['state']
-	end
-
-	def get_exist_vm_state(name, model, template, p={})
-		push_modules(model) if p[:push_modules]
-		template[name] = model
-		state = get_node_state(name, template)
-		template.delete(name)
-		state
 	end
 
 	def assign_vm_address(state, vms)
@@ -285,27 +297,22 @@ class Nuri::Master
 	end
 
 	def push_agents_list
-		begin
-			agents = {}
-			# generate agents list
-			get_agents.each do |name, model|
-				address = model['sfpAddress'].to_s.strip
-				port = model['sfpPort'].to_s.strip.to_i
-				next if address == '' or port == 0
-				agents[name] = {:sfpAddress => address, :sfpPort => port}
-			end
-			data = {'agents' => JSON.generate(agents)}
-	
-			# send the list to all agents
-			agents.each do |name, info|
-				code, _ = put_data(info[:sfpAddress], info[:sfpPort], '/agents', data)
-				raise Exception, "Push agents list to #{info[:sfpAddress]}:#{info[:sfpPort]} [Failed]" if code.to_i != 200
-			end
-			return true
-		rescue Exception => exp
-			$stderr.puts "#{exp}\n#{exp.backtrace.join("\n")}"
+		agents = {}
+		# generate agents list
+		get_agents.each do |name, model|
+			address = model['sfpAddress'].to_s.strip
+			port = model['sfpPort'].to_s.strip.to_i
+			next if address == '' or port == 0
+			agents[name] = {:sfpAddress => address, :sfpPort => port}
 		end
-		false
+		data = {'agents' => JSON.generate(agents)}
+
+		# send the list to all agents
+		agents.each do |name, info|
+			code, _ = put_data(info[:sfpAddress], info[:sfpPort], '/agents', data)
+			raise Exception, "Push agents list to #{info[:sfpAddress]}:#{info[:sfpPort]} [Failed]" if code.to_i != 200
+		end
+		true
 	end
 
 	def push_modules(agent_model)
@@ -443,11 +450,10 @@ class Nuri::Master
 				print "#{index}. #{action['name']} #{JSON.generate(action['parameters'])}... "
 				if execute_action(action, agents)
 					# if the action is "create_vm" or "delete_vm", then
-					# update the VMs' address, and then push agents list
+					# update the VMs' address
 					if action['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.(create_vm|delete_vm)/
 						_, agent_name, _ = action['name'].split('.', 3)
 						update_cloud_addresses(agent_name)
-						push_agents_list
 					end
 					puts "[OK]".green
 				else
@@ -627,14 +633,6 @@ class Nuri::Master
 	ParentGenerator = Object.new
 	def ParentGenerator.visit(name, value, parent)
 		value['_parent'] = parent if value.is_a?(Hash)
-		true
-	end
-
-	FinalAttributeRemover = Object.new
-	def FinalAttributeRemover.visit(name, value, parent)
-		if value.is_a?(Hash) and value.has_key?('_finals')
-			value['_finals'].each { |attr| value.delete(attr) }
-		end
 		true
 	end
 

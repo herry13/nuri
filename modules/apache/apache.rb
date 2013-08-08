@@ -236,42 +236,14 @@ class Sfp::Module::Apache < Sfp::Module::Service
 		return !!system("sed -i -e 's/^\\s*ProxySet.*lbmethod=.*/ProxySet lbmethod=#{p['target']}/' #{LoadBalancerConfigFile}")
 	end
 
-	def set_members(params={})
-		members = ''
-		reverses = ''
-		params['members'].each do |ref|
-			path = ref.push('address')
-			address = self.get_state(path)
-			members += "\n\tBalancerMember http://#{address}"
-			reverses += "\n\tProxyPassReverse / http://#{address}"
-		end
-		output = ''
-		data = File.read(ConfigFile)
-		data.each_line do |line|
-			xline = line.strip
-			next if xline.length <= 0
-			head, _ = xline.split(' ', 2)
-			next if head == 'BalancerMember' or head == 'ProxyPassReverse'
-			output += "#{line} \n"
-			if head == 'ProxySet'
-				output += "#{members}\n"
-			elsif head == '</Location>'
-				output += "#{reverses}\n"
-			end
-		end
-		File.open(LoadBalancerConfigFile, 'w') { |f| f.write(output) }
-		sleep 1
-		true
-	end
-
 	def set_lb_members(p={})
 		agents = Sfp::Agent.get_agents
 		lbmembers = p['members'].map { |m| m.sub! /^\$\./, '' }
 		return false if (lbmembers - agents.keys).length > 0
 		members = reverses = ''
 		lbmembers.each do |m|
-			members += "\n\tBalancerMember http://#{agents[m]['address']}"
-			reverses += "\n\tProxyPassReverse / http://#{agents[m]['address']}"
+			members += "\n\tBalancerMember http://#{agents[m]['sfpAddress']}"
+			reverses += "\n\tProxyPassReverse / http://#{agents[m]['sfpAddress']}"
 		end
 		output = ''
 		File.read(LoadBalancerConfigFile).each_line do |line|

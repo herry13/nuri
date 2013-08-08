@@ -1,21 +1,28 @@
 include "../modules/vm/vm.sfp"
 include "../modules/apache/apache.sfp"
 include "../modules/mysql/mysql.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
 
 vm1x isa VM {
 	created = true
 	apache isa Apache {
 		running is true
 		is_load_balancer is true
+		//lb_members is ( vm2x )
 	}
-	in_cloud is master.bonfireEPCC
+	in_cloud is proxy.inria
 }
 vm2x isa VM {
 	created = true
 	apache isa Apache {
 		running is true
 	}
-	in_cloud is master.bonfireEPCC
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vm2x.apache
+		database is vm10x.wp_db
+	}
+	in_cloud is proxy.inria
 }
 /*vm3x extends vm2x
 vm4x extends vm2x
@@ -31,7 +38,11 @@ vm10x isa VM {
 	mysql isa Mysql {
 		running is true
 	}
-	in_cloud is master.bonfireEPCC
+	wp_db isa WordpressDB {
+		installed is true
+		mysql is vm10x.mysql
+	}
+	in_cloud is proxy.inria
 }
 
 global {
