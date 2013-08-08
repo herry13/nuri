@@ -5,9 +5,11 @@ include "../modules/wordpresscluster/wordpresscluster.sfp"
 
 vm1 isa VM {
 	created = false
+	apache isa Apache
 }
 vm2 isa VM {
 	created = false
+	apache isa Apache
 }
 /*vm3 extends vm2
 vm4 extends vm2
@@ -20,6 +22,7 @@ vm11 extends vm2
 vm12 extends vm2*/
 vm10 isa VM {
 	created = false
+	mysql isa Mysql
 }
 
 global {

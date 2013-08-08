@@ -23,6 +23,20 @@ vm2x isa VM {
 	}
 	in_cloud is proxy.epcc
 }
+vm3x extends vm2x {
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vm3x.apache
+		database is vm10x.wp_db
+	}
+}
+vm4x extends vm2x {
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vm4x.apache
+		database is vm10x.wp_db
+	}
+}
 vm10x isa VM {
 	created = true
 	mysql isa Mysql {
@@ -38,7 +52,11 @@ vm10x isa VM {
 global {
 	if vm1x.apache.running = true then {
 		vm2x.apache.running = true
+		vm3x.apache.running = true
+		vm4x.apache.running = true
 	}
 
 	if vm2x.apache.running = true then vm10x.mysql.running = true
+	if vm3x.apache.running = true then vm10x.mysql.running = true
+	if vm4x.apache.running = true then vm10x.mysql.running = true
 }

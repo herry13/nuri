@@ -14,18 +14,20 @@ proxy isa Node {
 	inria extends proxy.epcc {
 		location is "fr-inria"
 	}
-	/*client isa Client {
-		refer is vm1.apache
-	}*/
+	client isa Client {
+		refer is vm1x.apache
+	}
 }
 
-include "inria2a.sfp"
-//include "epcc.sfp"
+include "inria2e.sfp"
+//include "epcc2a.sfp"
 
 //include "test.sfp"
 
 global {
-//	proxy.client.refer.running = true
+	//proxy.client.refer in (vm1.apache, vm1x.apache)
+	//if proxy.client.refer = vm1.apache then vm1.apache.running = true
+	if proxy.client.refer = vm1x.apache then vm1x.apache.running = true
 }
 
 
