@@ -61,7 +61,7 @@ elsif opts[:plan]
 	master = Nuri::Master.new
 	master.set_model_file(opts)
 	plan = master.get_plan(opts)
-	if plan['workflow'].nil?
+	if !plan.is_a?(Hash) or plan['workflow'].nil?
 		puts "Plan: ".yellow + "\nno solution!".red
 	else
 		if opts[:human]
@@ -70,7 +70,7 @@ elsif opts[:plan]
 			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
 		end
 
-		if not opts[:silent] and not plan['workflow'].nil? and plan['workflow'].length > 0
+		if not opts[:no_interactive] and not plan['workflow'].nil? and plan['workflow'].length > 0
 			print "Execute the plan [y/N]? "
 			if STDIN.gets.chomp.upcase == 'Y'
 				puts 'Executing the plan:'.yellow
