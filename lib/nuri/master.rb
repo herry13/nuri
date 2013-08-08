@@ -69,7 +69,9 @@ class Nuri::Master
 
 	def get_plan(p={})
 		task = get_schemata
-		task['initial'] = to_state('initial', get_state(p))
+
+		print "Getting current state: "
+		puts Benchmark.measure { task['initial'] = to_state('initial', get_state(p)) }
 
 		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 		f1 = Sfp::Helper::SfpFlatten.new
@@ -117,8 +119,13 @@ class Nuri::Master
 		# rebuild SFP data-structure
 		task.accept(Sfp::Visitor::SfpGenerator.new(task))
 
-		planner = Sfp::Planner.new
-		planner.solve({:sfp => task, :sas_post_processor => self, :parallel => p[:parallel]})
+		plan = nil
+		planning_time = Benchmark.measure do
+			planner = Sfp::Planner.new
+			plan = planner.solve({:sfp => task, :sas_post_processor => self, :parallel => p[:parallel]})
+		end
+		puts "Planning: #{planning_time}"
+		plan
 	end
 
 	# post processing SAS after compilation
