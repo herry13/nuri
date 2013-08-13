@@ -249,8 +249,8 @@ class Nuri::Master
 
 	def get_not_exist_vm_state(model)
 		s = {'state' => Sfp::Helper.deep_clone(model)}
-		s.accept(ParentEliminator)
 		s.accept(VisitorNotExistNodeState)
+		s.accept(ParentEliminator)
 		s['state']['created'] = false
 		s['state']['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
 		s['state']
@@ -663,7 +663,7 @@ class Nuri::Master
 	end
 
 	def self.start
-		# TODO
+		# TODO
 		fork {
 			while true do
 				sleep 5000
@@ -672,11 +672,11 @@ class Nuri::Master
 	end
 
 	def self.stop
-		# TODO
+		# TODO
 	end
 end
 
-### Helper classes/modules
+### Helper classes/modules
 
 class Nuri::Master::GoalGenerator
 	attr_reader :results
