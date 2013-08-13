@@ -6,6 +6,7 @@ class Sfp::Module::Apache < Sfp::Module::Service
 	include Sfp::Resource
 
 	ConfigFile = '/etc/apache2/sites-available/default'
+	SitesEnabledDir = '/etc/apache2/sites-enabled'
 	LoadBalancerConfigFile = '/etc/apache2/sites-enabled/load_balancer'
 	InstallingLockFile = '/tmp/sfp_apache_installing.lock'
 	NotRunningLockFile = '/tmp/sfp_apache_not_running.lock'
@@ -43,7 +44,6 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 		# lb_members
 		members = []
-		#@state['lb_members_address'] = []
 		if @state['is_load_balancer']
 			data =`grep "BalancerMember" #{LoadBalancerConfigFile} 2>/dev/null`.chop
 			agents = Sfp::Agent.get_agents
@@ -52,12 +52,11 @@ class Sfp::Module::Apache < Sfp::Module::Service
 				next if member[1] == nil
 				_, address = member[1].split('http://', 2)
 				agents.each { |k,v|
-					if v['address'] == address
+					if v['sfpAddress'] == address
 						members << '$.' + k
 						break
 					end
 				}
-				#@state['lb_members_address'] << line.strip
 			end
 			members.sort!
 		end
@@ -202,6 +201,7 @@ class Sfp::Module::Apache < Sfp::Module::Service
 				'a2enmod proxy_balancer',
 				'a2enmod proxy_http',
 				'a2enmod status',
+				"rm -rf #{SitesEnabledDir}/*",
 				"cp -f #{template_file} #{LoadBalancerConfigFile}",
 				"sudo service #{@model['service_name']} stop"
 			return true
@@ -221,6 +221,7 @@ class Sfp::Module::Apache < Sfp::Module::Service
 				'a2dismod proxy',
 				'a2dismod status',
 				"rm -f #{LoadBalancerConfigFile}",
+				"ln -sf #{ConfigFile} #{SitesEnabledDir}/default",
 				"sudo service #{@model['service_name']} stop"
 			return true
 		rescue Exception => e
