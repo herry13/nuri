@@ -23,7 +23,8 @@ class Sfp::Module::WordpressDB
 		# install database
 		mysql_cmd = "mysql -u root --password=#{root_password}"
 		sql1 = "CREATE USER '#{@model['db_user']}'@'%' IDENTIFIED BY '#{@model['db_password']}';"
-		return false if not system("echo \"#{sql1}\" | #{mysql_cmd}")
+		#return false if not 
+		system("echo \"#{sql1}\" | #{mysql_cmd}")
 		sql2 = "DROP DATABASE IF EXISTS #{@model['db_name']}; CREATE DATABASE #{@model['db_name']};"
 		return false if not system("echo \"#{sql2}\" | #{mysql_cmd}")
 		sql3 = "GRANT ALL PRIVILEGES ON #{@model['db_name']}.* TO '#{@model['db_user']}'@'%';"
@@ -93,7 +94,6 @@ class Sfp::Module::WordpressWeb
 
 		db = resolve(@model['database'])
 		db_address = resolve(@model['database'] + '.parent.sfpAddress')
-Sfp::Agent.logger.info @model['database'] + '.parent.sfpAddress'.to_s + ' :: ' + db_address.to_s
 		system("sed -i 's/.*DB_NAME.*/define(\"DB_NAME\",\"#{db['db_name']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_USER.*/define(\"DB_USER\",\"#{db['db_user']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_PASSWORD.*/define(\"DB_PASSWORD\",\"#{db['db_password']}\");/' #{wp_config_path}")
