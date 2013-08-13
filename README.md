@@ -14,6 +14,28 @@ Requirements
 	- coderay (>= 1.0.9)
 
 
-SSH Tunnel
+To install
 ----------
-	ssh -f user@server.com -L 2000:server.com:25 -N
+
+	$ apt-get install make ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 libxml2-dev libxslt-dev
+	$ gem install sfplanner colorize coderay
+
+
+Usage
+-----
+Assume that the model of your system is in file "model.sfp".
+- to get the current state
+
+		$ ./bin/nuri -h -m model.sfp -s
+
+- to generate the plan
+
+		$ ./bin/nuri -h -m model.sfp -p
+
+  press 'Y' and enter to execute the plan (if the plan exists).
+
+- to execute any generated plan
+
+		$ ./bin/nuri -h -m model.sfp -a
+
+

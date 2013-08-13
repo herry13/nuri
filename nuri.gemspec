@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
 	s.name			= 'nuri'
 	s.version		= '0.4.0'
-	s.date			= '2013-07-09'
+	s.date			= '2013-08-13'
 	s.summary		= 'Nuri'
 	s.description	= 'Automated workflow configuration tool'
 	s.authors		= ['Herry']
@@ -18,7 +18,8 @@ Gem::Specification.new do |s|
 
 	s.add_dependency 'json', '~> 1.7.5'
 	s.add_dependency 'antlr3', '~> 1.8.12'
-	s.add_dependency 'sfp', '~> 0.3.0'
-	s.add_dependency 'sfplanner', '~> 0.0.1'
+	s.add_dependency 'sfp', '~> 0.3.8'
+	s.add_dependency 'sfplanner', '~> 0.1.1'
 	s.add_dependency 'colorize', '~> 0.5.8'
+	s.add_dependency 'coderay', '~> 1.0.9'
 end	
