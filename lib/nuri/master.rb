@@ -595,7 +595,18 @@ class Nuri::Master
 		return false if name[0,1] == '_'
 		if not value.is_a?(Hash)
 			if value.is_a?(String)
-				parent[name] = SfpUndefinedString
+				if value.isref
+					ref_value = parent.at?(value)
+					# TODO - need to handle a reference to a primitive value
+					if ref_value.is_a?(Hash) and ref_value.isobject
+						parent[name] = Sfp::Undefined.create(ref_value['_isa'])
+					else
+						puts "[WARN] Sfp::Undefined => #{parent.ref.push(name)}: #{value.class.name}"
+						parent[name] = SfpUndefined
+					end
+				else
+					parent[name] = SfpUndefinedString
+				end
 			elsif value.is_a?(Fixnum) or value.is_a?(Float)
 				parent[name] = SfpUndefinedNumber
 			elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
