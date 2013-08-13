@@ -1,0 +1,63 @@
+include "../modules/node/node.sfp"
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
+include "../modules/bonfire/bonfire.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+	epcc isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+}
+
+vmlb isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+		is_load_balancer is true
+		lb_members is (vmapp1)
+	}
+	in_cloud is proxy.epcc
+}
+vmapp1 isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+	}
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vmapp1.apache
+		database is vmdb.wp_db
+	}
+	in_cloud is proxy.epcc
+}
+vmdb isa VM {
+	created = true
+	mysql isa Mysql {
+		running is true
+	}
+	wp_db isa WordpressDB {
+		installed is true
+		mysql is vmdb.mysql
+	}
+	in_cloud is proxy.epcc
+}
+
+global {
+	if vmlb.apache.running = true then vmapp1.apache.running = true
+	if vmapp1.apache.running = true then vmdb.mysql.running = true
+}
+
+/*
+vmlb isa VM {
+	created is false
+}
+vmapp1 extends vmlb
+vmdb extends vmlb
+*/
+
