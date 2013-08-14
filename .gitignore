@@ -1,3 +1,5 @@
 *.swp
 *.pem
 *.DS_Store
+var
+etc
