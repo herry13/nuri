@@ -189,18 +189,8 @@ class Nuri::Master
 		exist_vms.each { |name,model| state[name] = get_exist_vm_state(name, model, template, p) }
 		not_exist_vms.each { |name,model| state[name] = get_not_exist_vm_state(model) }
 
-		@cloudfinder.clouds.each do |cloud|
-			# for each servers list of a cloud proxy, assign "in_cloud" attribute
-			# to associated VM
-			state.at?("#{cloud}.servers").each { |name, data|
-				next if not vms.has_key?(name)
-				if state[name].is_a?(Hash)
-					state[name]['in_cloud'] = cloud
-				elsif state[name].is_a?(Sfp::Unknown)
-					state[name] = get_dead_vm_state(name, cloud)
-				end
-			}
-		end
+		# update <vm>.in_cloud value
+		update_cloud_vm_relations(state, vms)
 
 		state
 	end
@@ -208,22 +198,13 @@ class Nuri::Master
 	protected
 	def get_dead_vm_state(name, cloud)
 		# TODO -- this should return the same structure as method "generate_not_exist_vm_state"
-=begin
-		{
-			'sfpAddress' => @model[name]['sfpAddress'],
-			'sfpPort' => @model[name]['sfpPort'],
-			'created' => !cloud.nil?,
-			'in_cloud' => cloud,
-			'os' => SfpUnknown
-		}
-=end
 		SfpUnknown
 	end
 
 	def get_node_state(name, model)
 		begin
-			if send_agent_model(name, model)
-				agent_state = get_agent_state(name, model)
+			if http_send_agent_model(name, model)
+				agent_state = http_get_agent_state(name, model)
 				raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
 				return agent_state[name]
 			end
@@ -264,26 +245,44 @@ class Nuri::Master
 		state
 	end
 
+	def update_cloud_vm_relations(state, vms)
+		@cloudfinder.clouds.each do |cloud|
+			# for each servers list of a cloud proxy, assign "in_cloud" attribute
+			# to associated VM
+			state.at?("#{cloud}.servers").each do |name,data|
+				next if not vms.has_key?(name)
+				if state[name].is_a?(Hash)
+					state[name]['in_cloud'] = cloud
+				elsif state[name].is_a?(Sfp::Unknown)
+					state[name] = get_dead_vm_state(name, cloud)
+				end
+			end
+		end
+	end
+
 	def assign_vm_address(state, vms)
 		# Reset sfpAddress, sfpPort, in_cloud of a VM if it's not found in
 		# previously assigned cloud
 		vms.each do |name,model|
 			next if !model['in_cloud'].is_a?(String) or !model['in_cloud'].isref
 			cloud, _ = @cloudfinder.clouds.select { |cloud| model['in_cloud'] == cloud }
-			if !cloud.nil? and !state.at?("#{cloud}.servers").has_key? name
+			if !cloud.nil? and !state.at?("#{cloud}.servers").has_key?(name)
 				vms[name]['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
 				vms[name]['sfpPort'] = {'_context'=>'any_value','_isa'=>'$.Number'}
 			end
 		end
 
 		@cloudfinder.clouds.each do |cloud|
+			proxy = state.at?(cloud)
+			next if not proxy.is_a?(Hash) and not proxy['servers'].is_a?(Hash)
 			# for each servers list of a cloud proxy, assign the available
 			# ip address
-			state.at?("#{cloud}.servers").each { |name, data|
-				next if not vms.has_key?(name)
-				vms[name]['sfpAddress'] = data['ip']
-				vms[name]['sfpPort'] = 1314
-			}
+			proxy['servers'].each do |name,data|
+				if vms.has_key?(name) and data['running']
+					vms[name]['sfpAddress'] = data['ip']
+					vms[name]['sfpPort'] = 1314
+				end
+			end
 		end
 
 		exist_vms = vms.select { |k,v| v['sfpAddress'].is_a?(String) and v['sfpAddress'] != '' }
@@ -291,11 +290,13 @@ class Nuri::Master
 		[exist_vms, not_exist_vms]
 	end
 
+
 	def push_agents_list
 		begin
 			agents = {}
 			# generate agents list
 			get_agents.each do |name, model|
+				next if not model['sfpAddress'].is_a?(String)
 				address = model['sfpAddress'].to_s.strip
 				port = model['sfpPort'].to_s.strip.to_i
 				next if address == '' or port == 0
@@ -332,7 +333,7 @@ class Nuri::Master
 			modules = JSON[body]
 			schemata.each { |m|
 				if m != 'object' and File.exist? "#{ModulesDir}/#{m}"
-					if not modules.has_key?(m) or modules[m] != get_module_hash(m).to_s
+					if not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s
 						print "Push module #{m} to #{name} ".yellow
 						puts (system("cd #{ModulesDir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>/dev/null") ?
 							"[OK]".green : "[Failed]".red)
@@ -346,7 +347,9 @@ class Nuri::Master
 		false
 	end
 
-	def get_module_hash(name)
+	# return the list of Hash value of all modules
+	#
+	def get_local_module_hash(name)
 		module_dir = "#{ModulesDir}/#{name}"
 		if File.directory? module_dir
 			if `which md5sum`.strip.length > 0
@@ -358,20 +361,24 @@ class Nuri::Master
 		nil
 	end
 
-	def send_agent_model(name, agent_model)
+	# send HTTP PUT request to push agent's model
+	#
+	def http_send_agent_model(name, agent_model)
 		address = agent_model[name]['sfpAddress'].to_s.strip
 		port = agent_model[name]['sfpPort'].to_s.strip
-		return false if address == '' or port == ''
-
-		agent_model = Sfp::Helper.deep_clone(agent_model)
-		agent_model.accept(ParentEliminator)
-
-		data = {'model' => JSON.generate(agent_model)}
-		code, _ = put_data(address, port, '/model', data)
-		code.to_i == 200
+		if address != '' and port != ''
+			agent_model = Sfp::Helper.deep_clone(agent_model)
+			agent_model.accept(ParentEliminator)
+			data = {'model' => JSON.generate(agent_model)}
+			code, _ = put_data(address, port, '/model', data)
+			return (code.to_i == 200)
+		end
+		false
 	end
 
-	def get_agent_state(name, agent_model)
+	# send HTTP GET requst to get agent's state
+	#
+	def http_get_agent_state(name, agent_model)
 		address = agent_model[name]['sfpAddress'].to_s.strip
 		port = agent_model[name]['sfpPort'].to_s.strip
 		if address != '' and port != ''
@@ -416,8 +423,7 @@ class Nuri::Master
 		vms1 = get_exist_vms
 
 		template = get_schemata
-		model = @model[name]
-		template[name] = model
+		template[name] = @model[name]
 		state = {name => get_node_state(name, template)}
 		assign_vm_address(state, get_vms)
 		template.delete(name)
@@ -441,6 +447,20 @@ class Nuri::Master
 			model['sfpAddress'] != '' }
 	end
 
+	def postprocess_create_or_delete_vm(action)
+		_, agent_name, _ = action['name'].split('.', 3)
+		update_cloud_addresses(agent_name)
+		if action['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.(delete_vm)/
+			vm_ref = action['parameters']['$.vm']
+			model = @model.at?(vm_ref)
+			if model.is_a?(Hash)
+				model['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
+				model['sfpPort'] = {'_context'=>'any_value','_isa'=>'$.Number'}
+			end
+		end
+		push_agents_list
+	end
+
 	def execute_sequential_plan(plan, p)
 		puts "Executing a sequential plan..."
 		agents = get_agents
@@ -451,11 +471,8 @@ class Nuri::Master
 				if execute_action(action, agents)
 					# if the action is "create_vm" or "delete_vm", then
 					# update the VMs' address, and then push agents list
-					if action['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.(create_vm|delete_vm)/
-						_, agent_name, _ = action['name'].split('.', 3)
-						update_cloud_addresses(agent_name)
-						push_agents_list
-					end
+					postprocess_create_or_delete_vm(action) if
+						action['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.(create_vm|delete_vm)/
 					puts "[OK]".green
 				else
 					puts "[Failed]".red
