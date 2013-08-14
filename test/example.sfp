@@ -15,6 +15,7 @@ proxy isa Node {
 	}
 }
 
+/*
 vmlb isa VM {
 	created = true
 	apache isa Apache {
@@ -52,12 +53,11 @@ global {
 	if vmlb.apache.running = true then vmapp1.apache.running = true
 	if vmapp1.apache.running = true then vmdb.mysql.running = true
 }
+*/
 
-/*
 vmlb isa VM {
 	created is false
 }
 vmapp1 extends vmlb
 vmdb extends vmlb
-*/
 
