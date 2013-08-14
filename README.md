@@ -17,8 +17,9 @@ Requirements
 To install
 ----------
 
-	$ apt-get install make ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 libxml2-dev libxslt-dev
+	$ apt-get install git make gcc ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 libxml2-dev libxslt-dev
 	$ gem install sfplanner colorize coderay
+	$ git clone https://github.com/herry13/nuri
 
 
 Usage
