@@ -1,8 +1,0 @@
-schema Service {
-	running is no
-	depend isref Service
-}
-
-schema WebService extends Service
-
-schema DBService extends Service

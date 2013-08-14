@@ -1,3 +1,0 @@
-author: Herry
-version: 1.0
-ruby-class: Nuri::Module::Tikidb

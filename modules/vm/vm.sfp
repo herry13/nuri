@@ -1,9 +1,0 @@
-include "modules/machine/machine.sfp"
-include "modules/cloud/cloud.sfp"
-
-schema VM extends Machine {
-	created is false
-	oncloud isref Cloud
-	flavor_id is ""
-	image_id is ""
-}

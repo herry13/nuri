@@ -1,5 +1,0 @@
-require 'nuri/lib.rb'
-require 'nuri/bsig-engine2.rb'
-require 'nuri/cloud-helper.rb'
-require 'nuri/client.rb'
-require 'nuri/master.rb'
