@@ -1,0 +1,18 @@
+include "../modules/node/node.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
+
+hpvm6 isa Node {
+	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+	apache isa Apache {
+		installed is false
+	}
+}
+hpvm8 extends hpvm6 {
+	sfpAddress is "hpvm8.diy.inf.ed.ac.uk"
+}
+hpvm7 isa Node {
+	sfpAddress is "hpvm7.diy.inf.ed.ac.uk"
+	mysql isa Mysql {
+		installed is false
+	}
+}

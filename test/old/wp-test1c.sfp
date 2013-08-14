@@ -1,0 +1,7 @@
+include "../modules/node/node.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
+
+hpvm6 isa Node {
+	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+	apache isa Apache
+}
