@@ -1,0 +1,16 @@
+//include "../modules/node/node.sfp"
+include "../modules/machine/machine.sfp"
+include "../modules/file/file.sfp"
+
+canim isa Machine { //Node {
+	sfpAddress = "localhost"
+	test isa File {
+		path = "/tmp/test"
+		exists = true
+		content = "hello world!"
+	}
+}
+
+sometime {
+	canim.test.exists = false
+}

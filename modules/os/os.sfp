@@ -1,0 +1,11 @@
+schema OS {
+	running : Bool
+	//auto_upgrade : Bool
+
+	sub shutdown {
+		condition { }
+		effect {
+			this.running = false
+		}
+	}
+}

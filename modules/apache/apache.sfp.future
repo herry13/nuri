@@ -1,0 +1,100 @@
+schema ServiceState
+uninstalled isa ServiceState { }
+installed isa ServiceState { }
+running isa ServiceState { }
+
+schema VHost {
+	serverName = ""
+	port = 80
+	documentRoot = ""
+	serverAdmin = ""
+}
+
+schema Apache {
+	state = uninstalled
+	version = "latest"
+	module_php = false
+	module_php_mysql = false
+
+	default isa VHost {
+		serverName = "*"
+		port = 80
+		document = "/var/www"
+		serverAdmin = "webmaster@localhost"
+	}
+
+	sub install {
+		condition {
+			this.state = uninstalled
+		}
+		effect {
+			this.state = installed
+		}
+	}
+
+	sub uninstall {
+		condition {
+			this.state = installed
+		}
+		effect {
+			this.state = uninstalled
+		}
+	}
+
+	sub start {
+		condition {
+			this.state = installed
+		}
+		effect {
+			this.state = running
+		}
+	}
+
+	sub stop {
+		condition {
+			this.state = running
+		}
+		effect {
+			this.state = uninstalled
+		}
+	}
+
+	sub install_module_php {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.module_php = true
+		}
+	}
+
+	sub uninstall_module_php {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.php_module = false
+		}
+	}
+
+	sub install_module_php_mysql {
+		condition {
+			this.module_php = true
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.module_php_mysql = true
+		}
+	}
+
+	sub uninstall_module_php_mysql {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.module_php_mysql = false
+		}
+	}
+}

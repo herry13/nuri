@@ -1,0 +1,45 @@
+include "../package/package.sfp"
+
+schema Service extends Package {
+	final service_name = ""
+	running : Bool
+
+	sub install {
+		condition {
+			this.installed != true
+		}
+		effect {
+			this.installed = true
+			this.running = false
+		}
+	}
+	
+	sub uninstall {
+		condition {
+			this.running = false
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+
+	sub start {
+		condition {
+			this.running != true
+			this.installed = true
+		}
+		effect {
+			this.running = true
+		}
+	}
+
+	sub stop {
+		condition {
+			this.running = true
+		}
+		effect {
+			this.running = false
+		}
+	}
+}

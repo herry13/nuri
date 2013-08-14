@@ -1,0 +1,18 @@
+include "../modules/node/node.sfp"
+include "../modules/apache/apache.sfp"
+
+hpvm6 isa Node {
+	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+
+	apache isa Apache {
+		installed = false
+		/*running = true
+		php_module = true
+		php_mysql_module = true
+
+		is_load_balancer = true
+		lb_method = "bytraffic"*/
+	}
+
+	
+}

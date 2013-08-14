@@ -1,0 +1,34 @@
+include "../modules/machine/machine.sfp"
+include "../modules/bonfire/bonfire.sfp"
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+
+master isa Machine {
+	sfpAddress is "localhost"
+
+	bonfireEPCC isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		wan_name is "BonFIRE WAN"
+	}
+}
+
+vm1 isa VM {
+	type is "small"
+	image is "BonFIRE Debian Squeeze 10G v5"
+	created = true
+	apache isa Apache {
+		running is true
+		is_load_balancer is true
+	}
+}
+vm2 extends vm1
+vm3 extends vm1
+vm4 extends vm1
+vm5 extends vm1
+vm6 extends vm1
+vm7 extends vm1
+vm8 extends vm1
+vm9 extends vm1
+vm10 extends vm1

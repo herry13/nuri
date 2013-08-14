@@ -1,0 +1,22 @@
+include "modules/machine/machine.sfp"
+include "modules/apache/apache.sfp"
+include "modules/mysql/mysql.sfp"
+include "modules/wordpress/wordpress.sfp"
+include "modules/file/file.sfp"
+
+test isa Machine {
+	sfpAddress = "hpvm7.diy.inf.ed.ac.uk"
+	//sfpAddress = "localhost"
+
+	apache isa Apache {
+		//installed = false
+	}
+	mysql isa Mysql
+
+	wp isa Wordpress {
+		path = "/wp"
+		installed = true
+		http = test.apache
+		database = test.mysql
+	}
+}

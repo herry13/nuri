@@ -1,0 +1,11 @@
+include "../modules/node/node.sfp"
+include "../modules/file/file.sfp"
+
+nena isa Node {
+	sfpAddress is "localhost"
+
+	test isa File {
+		path = "/tmp/test"
+		created = true
+	}
+}

@@ -1,0 +1,23 @@
+include "../modules/node/node.sfp"
+include "../modules/bonfire/bonfire.sfp"
+include "../modules/file/file.sfp"
+include "../modules/vm/vm.sfp"
+
+master isa Node {
+	sfpAddress is "localhost"
+
+	bonfireEPCC isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+
+	bonfireINRIA extends master.bonfireEPCC {
+		location is "fr-inria"
+	}
+}
+
+vmx isa VM {
+	created = true
+}

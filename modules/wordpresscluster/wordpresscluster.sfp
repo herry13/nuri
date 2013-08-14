@@ -1,0 +1,66 @@
+include "../apache/apache.sfp"
+include "../mysql/mysql.sfp"
+
+schema WordpressCluster
+
+schema WordpressDB extends WordpressCluster {
+	installed : Bool
+	mysql isref Mysql
+	final db_name = "wordpress"
+	final db_user = "wordpress"
+	final db_password = "password"
+
+	sub install(mysql: Mysql) {
+		condition {
+			this.installed != true
+			mysql.running = true
+			mysql.public = true
+		}
+		effect {
+			this.installed = true
+			this.mysql = mysql
+		}
+	}
+	sub uninstall {
+		condition {
+			this.mysql.running = true
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+}
+
+schema WordpressWeb extends WordpressCluster {
+	installed : Bool
+	http isref Apache
+	database isref WordpressDB
+	final path = "/wp"
+	final source_url = "http://wordpress.org/latest.tar.gz"
+
+	sub install (http: Apache, database: WordpressDB) {
+		condition {
+			this.installed != true
+			http.installed = true
+			http.running = false 
+			http.php_module = true
+			http.php_mysql_module = true
+			database.installed = true
+		}
+		effect {
+			this.installed = true
+			this.http = http
+			this.database = database
+		}
+	}
+
+	sub uninstall {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+}

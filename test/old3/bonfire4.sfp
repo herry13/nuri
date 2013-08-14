@@ -1,0 +1,78 @@
+include "../modules/machine/machine.sfp"
+include "../modules/bonfire/bonfire.sfp"
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+
+master isa Machine {
+	sfpAddress is "localhost"
+
+	bonfireEPCC isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+	bonfireINRIA extends master.bonfireEPCC {
+		location is "fr-inria"
+	}
+	bonfireHPLABS extends master.bonfireEPCC {
+		location is "uk-hplabs"
+	}
+}
+
+vm1 isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+		is_load_balancer is true
+	}
+	in_cloud is master.bonfireINRIA
+}
+
+vm2 isa VM {
+	created = true
+	mysql isa Mysql {
+		running is true
+	}
+	in_cloud is master.bonfireINRIA
+}
+
+vm3 isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+	}
+	in_cloud is master.bonfireINRIA
+}
+vm4 extends vm3
+vm5 extends vm3
+vm6 extends vm3
+vm7 extends vm3
+vm8 extends vm3
+vm9 extends vm3
+vm10 extends vm3
+
+/*
+global {
+	if vm1.apache.running = true then {
+		vm2.apache.running = true
+		vm3.apache.running = true
+		vm4.apache.running = true
+		vm5.apache.running = true
+		vm6.apache.running = true
+		vm7.apache.running = true
+		vm8.apache.running = true
+		vm9.apache.running = true
+	}
+
+	if vm2.apache.running = true then vm10.mysql.running = true
+	if vm3.apache.running = true then vm10.mysql.running = true
+	if vm4.apache.running = true then vm10.mysql.running = true
+	if vm5.apache.running = true then vm10.mysql.running = true
+	if vm6.apache.running = true then vm10.mysql.running = true
+	if vm7.apache.running = true then vm10.mysql.running = true
+	if vm8.apache.running = true then vm10.mysql.running = true
+	if vm9.apache.running = true then vm10.mysql.running = true
+}
+*/

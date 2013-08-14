@@ -1,0 +1,26 @@
+schema Package {
+	final package_name = ""
+	installed : Bool //= false
+	version : String
+
+	sub install {
+		effect {
+			this.installed = true
+		}
+	}
+
+	sub uninstall {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+/*
+	sub set_package_name (name isref String) {
+		effect {
+			this.package_name = name
+		}
+	}*/
+}

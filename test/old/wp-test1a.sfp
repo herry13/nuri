@@ -1,0 +1,38 @@
+include "modules/machine/machine.sfp"
+include "modules/wordpresscluster/wordpresscluster.sfp"
+
+hpvm6 isa Machine {
+	sfpAddress is "hpvm6.diy.inf.ed.ac.uk"
+	apache isa Apache {
+		running is true
+	}
+	wp_web isa WordpressWeb {
+		installed is true
+		http is hpvm6.apache
+		database is hpvm7.wp_db
+	}
+	mysql isa Mysql {
+		installed = false
+	}
+}
+
+hpvm8 extends hpvm6 {
+	sfpAddress is "hpvm8.diy.inf.ed.ac.uk"
+	wp_web extends hpvm6.wp_web {
+		http is hpvm8.apache
+	}
+}
+
+hpvm7 isa Machine {
+	sfpAddress is "hpvm7.diy.inf.ed.ac.uk"
+	mysql isa Mysql {
+		running is true
+	}
+	wp_db isa WordpressDB {
+		installed is true
+		mysql is hpvm7.mysql
+	}
+	apache isa Apache {
+		installed = false
+	}
+}

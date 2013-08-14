@@ -1,0 +1,18 @@
+#!/bin/bash
+
+COMMANDS="apt-get update;
+apt-get -y install sudo ruby ruby-dev rubygems libz-dev libaugeas-ruby make gcc libxml2-dev libxslt-dev libreadline-dev;
+gem install sfp sfpagent fog restfully restfully-addons --no-ri --no-rdoc;
+ln -sf /var/lib/gems/1.8/bin/sfpagent /usr/local/bin/sfpagent;
+sfpagent -t;
+sfpagent -s;
+"
+
+if [[ "$@" == "" ]]
+then
+	echo "Usage: install_agent <ssh-parameters>"
+else
+	echo $COMMANDS | ssh "$@"
+fi
+
+

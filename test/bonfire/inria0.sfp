@@ -1,0 +1,49 @@
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
+
+vm1x isa VM {
+	created = false
+}
+vm2x isa VM {
+	created = false
+}
+/*vm3x extends vm2x
+vm4x extends vm2x
+vm5x extends vm2x
+vm6x extends vm2x
+vm7x extends vm2x
+vm8x extends vm2x
+vm9x extends vm2x
+vm11x extends vm2x
+vm12x extends vm2x*/
+vm10x isa VM {
+	created = false
+}
+
+global {
+	if vm1x.apache.running = true then {
+		vm2x.apache.running = true
+		/*vm3x.apache.running = true
+		vm4x.apache.running = true
+		vm5x.apache.running = true
+		vm6x.apache.running = true
+		vm7x.apache.running = true
+		vm8x.apache.running = true
+		vm9x.apache.running = true
+		vm11x.apache.running = true
+		vm12x.apache.running = true*/
+	}
+
+	if vm2x.apache.running = true then vm10x.mysql.running = true
+	/*if vm3x.apache.running = true then vm10x.mysql.running = true
+	if vm4x.apache.running = true then vm10x.mysql.running = true
+	if vm5x.apache.running = true then vm10x.mysql.running = true
+	if vm6x.apache.running = true then vm10x.mysql.running = true
+	if vm7x.apache.running = true then vm10x.mysql.running = true
+	if vm8x.apache.running = true then vm10x.mysql.running = true
+	if vm9x.apache.running = true then vm10x.mysql.running = true
+	if vm11x.apache.running = true then vm10x.mysql.running = true
+	if vm12x.apache.running = true then vm10x.mysql.running = true*/
+}

@@ -1,0 +1,134 @@
+#!/usr/bin/env ruby
+
+libdir = File.expand_path(File.dirname(__FILE__)) + '/../lib'
+require "#{libdir}/nuri"
+
+require 'coderay'
+require 'yaml'
+require 'logger'
+
+opts = Trollop::options do
+	version "Nuri 0.4.0 (c) 2013 Herry"
+	banner <<-EOS
+Usage: nuri [options]
+where [options] are:
+EOS
+
+	opt :model_file, "Model of configuration file.", :default => ''
+	opt :state, "Print the current state of the system in JSON based on given model file."
+	opt :plan, "Print the plan that could bring the system to the desired state as defined in model file."
+	opt :parallel, "Generate a parallel plan.", :short => '-l'
+	opt :execute, "Execute a plan in given file. Note: model file should be specified.", :default => ''
+	opt :apply, "Generate and execute a plan that could bring the system to the desired state."
+	opt :push_modules, "Automatically push an unavailable module to target agent.", :default => true
+	opt :human, "Use human readable format."
+	opt :pretty, "Use pretty JSON format."
+	opt :no_interactive, "Set off interactive mode."
+	opt :start, "Start master daemon."
+	opt :stop, "Stop master daemon."
+end
+
+def plan_to_human(plan)
+	return 'No solution plan.'.red if plan['workflow'].nil?
+	return 'The system is at the goal state.'.green if plan['workflow'].length <= 0
+
+	p = 'Plan:'.yellow
+	actions = plan['workflow']
+	if plan['type'] == 'sequential'
+		actions.each_index { |i| p += "\n#{i+1}. #{actions[i]['name']} #{actions[i]['parameters']}" }
+	else
+		actions.each { |op| p += "\n#{op['id']}. #{op['name']} #{op['parameters']} (#{op['predecessors']}, #{op['successors']})" }
+	end
+	p
+end
+
+if opts[:state]
+	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
+
+	master = Nuri::Master.new
+	master.set_model_file(opts)
+	state = master.get_state(opts)
+	state.accept(Sfp::Visitor::PrettyStateGenerator.new)
+	if opts[:human]
+		puts CodeRay.scan(YAML.dump(state), :yaml).terminal
+	else
+		puts (opts[:pretty] ? JSON.pretty_generate(state) : JSON.generate(state))
+	end
+
+elsif opts[:plan]
+	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
+
+	master = Nuri::Master.new
+	master.set_model_file(opts)
+	plan = master.get_plan(opts)
+	if !plan.is_a?(Hash) or plan['workflow'].nil?
+		puts "Plan: ".yellow + "\nno solution!".red
+	else
+		if opts[:human]
+			puts plan_to_human(plan)
+		else
+			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
+		end
+
+		if not opts[:no_interactive] and not plan['workflow'].nil? and plan['workflow'].length > 0
+			print "Execute the plan [y/N]? "
+			if STDIN.gets.chomp.upcase == 'Y'
+				puts 'Executing the plan:'.yellow
+				opts[:apply] = plan
+				puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
+			end
+		end
+	end
+
+elsif opts[:execute].length > 0
+	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
+
+	master = Nuri::Master.new
+	master.set_model_file(opts)
+	puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
+
+elsif opts[:apply]
+	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
+
+	master = Nuri::Master.new
+	master.set_model_file(opts)
+	plan = master.get_plan(opts)
+	if plan['workflow'].nil?
+		puts "No solution!".red
+	else
+		if opts[:human]
+			puts plan_to_human(plan)
+		else
+			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
+		end
+
+		puts 'Executing the plan...'.yellow
+		opts[:apply] = plan
+		puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
+	end
+
+elsif opts[:start]
+	logger = Logger.new('master.log')
+	begin
+		master = Nuri::Master.new
+		master.set_model_file(opts)
+		loop {
+			logger.info 'Generating plan [WAIT]'
+			plan = master.get_plan(opts)
+			logger.info 'Generating plan [OK]'
+			if plan['workflow'].nil?
+				logger.info "No solution"
+			else
+				logger.info plan_to_human(plan)
+			end
+			sleep 5
+		}
+	rescue Exception => exp
+		logger.error "#{exp}\n#{exp.backtrace.join("\n")}"
+	end
+
+elsif opts[:stop]
+
+else
+	Trollop::help
+end

@@ -1,0 +1,5 @@
+include "../modules/node/node.sfp"
+
+hpvm7 isa Node {
+	sfpAddress = "hpvm7.diy.inf.ed.ac.uk"
+}

@@ -1,0 +1,43 @@
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
+
+vm1 isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+		is_load_balancer is true
+	}
+	in_cloud is proxy.epcc
+}
+vm2 isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+	}
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vm2.apache
+		database is vm10.wp_db
+	}
+	in_cloud is proxy.epcc
+}
+vm10 isa VM {
+	created = true
+	mysql isa Mysql {
+		running is true
+	}
+	wp_db isa WordpressDB {
+		installed is true
+		mysql is vm10.mysql
+	}
+	in_cloud is proxy.epcc
+}
+
+global {
+	if vm1.apache.running = true then {
+		vm2.apache.running = true
+	}
+	if vm2.apache.running = true then vm10.mysql.running = true
+}

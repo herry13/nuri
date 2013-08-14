@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [[ "$1" == "" ]] || [[ "$2" == "" ]]; then
+	echo "Usage: $ push_model <address> <model-file>"
+	exit 0
+fi
+
+MODEL_FILE="/tmp/model.json"
+
+sfp $2 > $MODEL_FILE
+
+curl -i -X PUT $1:1314/model -F model=@"$MODEL_FILE"
+
+if [[ -f "$MODEL_FILE" ]]; then
+	rm -f $MODEL_FILE
+fi

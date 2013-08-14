@@ -1,0 +1,25 @@
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+include "../modules/mysql/mysql.sfp"
+include "../modules/wordpresscluster/wordpresscluster.sfp"
+
+vm1 isa VM {
+	created = false
+	apache isa Apache
+}
+vm2 isa VM {
+	created = false
+	apache isa Apache
+}
+vm10 isa VM {
+	created = false
+	mysql isa Mysql
+}
+
+global {
+	if vm1.apache.running = true then {
+		vm2.apache.running = true
+	}
+
+	if vm2.apache.running = true then vm10.mysql.running = true
+}

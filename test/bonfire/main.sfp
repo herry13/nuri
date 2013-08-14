@@ -1,0 +1,33 @@
+include "../modules/node/node.sfp"
+include "../modules/bonfire/bonfire.sfp"
+include "../modules/client/client.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+
+	epcc isa Bonfire {
+		experiment is "autocloud"
+		location is "uk-epcc"
+		image_name is "BonFIRE Debian Squeeze 10G v5"
+		wan_name is "BonFIRE WAN"
+	}
+	inria extends proxy.epcc {
+		location is "fr-inria"
+	}
+	client isa Client {
+		refer is vm1x.apache
+	}
+}
+
+include "inria2e.sfp"
+//include "epcc2a.sfp"
+
+//include "test.sfp"
+
+global {
+	//proxy.client.refer in (vm1.apache, vm1x.apache)
+	//if proxy.client.refer = vm1.apache then vm1.apache.running = true
+	if proxy.client.refer = vm1x.apache then vm1x.apache.running = true
+}
+
+

@@ -1,0 +1,10 @@
+include "../node/node.sfp"
+include "../os/os.sfp"
+
+schema Machine extends Node {
+	created is true
+	is_virtual : Bool
+	hypervisor : String
+
+	os isa OS
+}
