@@ -20,7 +20,7 @@ EOS
 	opt :parallel, "Generate a parallel plan.", :short => '-l'
 	opt :execute, "Execute a plan in given file. Note: model file should be specified.", :default => ''
 	opt :apply, "Generate and execute a plan that could bring the system to the desired state."
-	opt :push_modules, "Automatically push an unavailable module to target agent.", :default => true
+	opt :push_modules, "Automatically push an unavailable module to target agent."
 	opt :human, "Use human readable format."
 	opt :pretty, "Use pretty JSON format."
 	opt :no_interactive, "Set off interactive mode."
