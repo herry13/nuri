@@ -247,9 +247,11 @@ class Nuri::Master
 
 	def update_cloud_vm_relations(state, vms)
 		@cloudfinder.clouds.each do |cloud|
-			# for each servers list of a cloud proxy, assign "in_cloud" attribute
+			proxy = state.at?(cloud)
+			next if not proxy.is_a?(Hash) or not proxy['vms'].is_a?(Hash)
+			# for each VMs list of a cloud proxy, assign "in_cloud" attribute
 			# to associated VM
-			state.at?("#{cloud}.servers").each do |name,data|
+			proxy['vms'].each do |name,data|
 				next if not vms.has_key?(name)
 				if state[name].is_a?(Hash)
 					state[name]['in_cloud'] = cloud
@@ -266,7 +268,7 @@ class Nuri::Master
 		vms.each do |name,model|
 			next if !model['in_cloud'].is_a?(String) or !model['in_cloud'].isref
 			cloud, _ = @cloudfinder.clouds.select { |cloud| model['in_cloud'] == cloud }
-			if !cloud.nil? and !state.at?("#{cloud}.servers").has_key?(name)
+			if !cloud.nil? and !state.at?("#{cloud}.vms").has_key?(name)
 				vms[name]['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
 				vms[name]['sfpPort'] = {'_context'=>'any_value','_isa'=>'$.Number'}
 			end
@@ -274,10 +276,10 @@ class Nuri::Master
 
 		@cloudfinder.clouds.each do |cloud|
 			proxy = state.at?(cloud)
-			next if not proxy.is_a?(Hash) and not proxy['servers'].is_a?(Hash)
-			# for each servers list of a cloud proxy, assign the available
+			next if not proxy.is_a?(Hash) or not proxy['vms'].is_a?(Hash)
+			# for each VMs list of a cloud proxy, assign the available
 			# ip address
-			proxy['servers'].each do |name,data|
+			proxy['vms'].each do |name,data|
 				if vms.has_key?(name) and data['running']
 					vms[name]['sfpAddress'] = data['ip']
 					vms[name]['sfpPort'] = 1314
@@ -615,10 +617,12 @@ class Nuri::Master
 				if value.isref
 					ref_value = parent.at?(value)
 					# TODO - need to handle a reference to a primitive value
-					if ref_value.is_a?(Hash) and ref_value.isobject
+					if ref_value.is_a?(Hash) and (ref_value.isobject or ref_value.isnull)
 						parent[name] = Sfp::Undefined.create(ref_value['_isa'])
+					elsif ref_value.is_a?(Sfp::Undefined) or ref_value.is_a?(Sfp::Unknown)
+						parent[name] = ref_value
 					else
-						puts "[WARN] Sfp::Undefined => #{parent.ref.push(name)}: #{value.class.name}"
+						puts "[WARN] Sfp::Undefined => #{parent.ref.push(name)}: #{ref_value.class.name}"
 						parent[name] = SfpUndefined
 					end
 				else

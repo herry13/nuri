@@ -6,5 +6,5 @@ schema Bonfire extends Cloud {
 	location : String
 	image_name : String
 	wan_name : String
-	servers { }
+	vms { }
 }

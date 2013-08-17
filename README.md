@@ -1,4 +1,4 @@
-Nuri2 Project
+Nuri Project
 =============
 - author: Herry (herry13@gmail.com)
 - last update: 13-07-2013

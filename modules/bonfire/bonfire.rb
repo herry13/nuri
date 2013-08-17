@@ -14,7 +14,7 @@ class Sfp::Module::Bonfire
 	def update_state
 		self.reset
 		@state['running'] = self.open_connection
-		@state['servers'] = self.get_servers(:experiment => @experiment)
+		@state['vms'] = self.get_vms(:experiment => @experiment)
 	end
 
 	def create_vm(p={})

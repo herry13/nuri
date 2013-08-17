@@ -137,17 +137,17 @@ module Sfp::Module::BonfireHelper
 		!running?(server)
 	end
 
-	def get_servers(p={})
-		servers = {}
+	def get_vms(p={})
+		vms = {}
 		p[:experiment].computes.each { |server|
 			if server.uri.to_s =~ /\/locations\/#{@model['location']}\/computes\//
-				servers[ server['name'] ] = {
+				vms[ server['name'] ] = {
 					'running' => running?(server),
 					'ip' => server['nic'][0]['ip'],
 					'uri' => server.uri,
 				}
 			end
 		} if p[:experiment]
-		servers
+		vms
 	end
 end
