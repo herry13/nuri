@@ -125,7 +125,6 @@ Nuri::Util.debug "#{operator.name} => #{operator.selected}"
 			status = self.achieve_local_goal({
 				:bsig_id => p[:bsig_id],
 				:goal => local,
-				:operators => p[:operators],
 				:min_priority_index => operator.priority_index + 1
 			})
 			sleep 1 if status == :on_going
