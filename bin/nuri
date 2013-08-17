@@ -50,7 +50,7 @@ if opts[:state]
 	state = master.get_state(opts)
 	state.accept(Sfp::Visitor::PrettyStateGenerator.new)
 	if opts[:human]
-		puts CodeRay.scan(YAML.dump(state), :yaml).terminal
+		puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
 	else
 		puts (opts[:pretty] ? JSON.pretty_generate(state) : JSON.generate(state))
 	end
