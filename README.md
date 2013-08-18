@@ -1,7 +1,24 @@
-Nuri Project
-=============
+Nuri
+====
 - author: Herry (herry13@gmail.com)
 - last update: 13-07-2013
+- license: BSD
+
+Nuri is an automated workflow configuration tool. It allows us to define the desired state of
+the managed system, and the tool will automatically generate and orchestrate the execution of the workflow
+that will:
+1. bring the system from current to the desired state,
+2. maintain any necessary constraints during the configuration changes.
+Unlike any other orchestration tool, this will eliminate the obligation for the user to define an explicit
+workflow to implement the configuration, which allows "unattended" reconfiguration.
+
+The desired state is specified in a declarative configuration language, called as SFP, where we could
+define a "loose" specification of the desired state as well as a set of global constraints
+(the constraints that must be satisfied during the changes).
+
+Each resource is managed by an instant of Nuri module, which consists of:
+1. a schema file in SFP language, that contains a set of attributes and declarative procedures;
+2. a implementation file in Ruby, that has contains a Ruby class with a set of methods (the implementation of SFP procedures).
 
 
 Requirements
