@@ -1,6 +1,6 @@
 schema Package {
 	final package_name = ""
-	installed : Bool //= false
+	installed : Bool
 	version : String
 
 	sub install {
@@ -17,10 +17,4 @@ schema Package {
 			this.installed = false
 		}
 	}
-/*
-	sub set_package_name (name isref String) {
-		effect {
-			this.package_name = name
-		}
-	}*/
 }

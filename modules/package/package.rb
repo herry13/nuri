@@ -23,8 +23,7 @@ class Sfp::Module::Package
 		nil
 	end
 
-	def install(p={})
-		package = @model['package_name'].to_s.strip
+	def self.install(package)
 		return false if package.length <= 0
 		return true if Sfp::Module::Package.installed?(package)
 		system("apt-get -y --purge autoremove")
@@ -33,13 +32,20 @@ class Sfp::Module::Package
 		!!system("apt-get -y install #{package}")
 	end
 
-	def uninstall(p={})
-		package = @model['package_name'].to_s.strip
+	def self.uninstall(package)
 		return false if package.length <= 0
 		return true if not Sfp::Module::Package.installed?(package)
 		system("apt-get -y --purge autoremove")
 		return (!!system("sudo apt-get -y --purge remove #{package}") and
 			!!system("sudo apt-get -y --purge autoremove") and
 			!!system("sudo apt-get -y --purge autoremove"))
+	end
+
+	def install(p={})
+		Sfp::Module::Package.install(@model['package_name'].to_s.strip)
+	end
+
+	def uninstall(p={})
+		Sfp::Module::Package.uninstall(@model['package_name'].to_s.strip)
 	end
 end
