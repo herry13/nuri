@@ -5,16 +5,16 @@ module Nuri::Net
 end
 
 module Nuri::Net::Helper
-	def http_request(uri, request, open_timeout=5, read_timeout=1800)
-		def use_proxy?(uri)
-			ENV['no_proxy'].to_s.split(',').each { |pattern|
-				pattern.chop! if pattern[-1] == '*'
-				return false if uri.host[0,pattern.length] == pattern
-			}
-			true
-		end
+	def use_http_proxy?(uri)
+		ENV['no_proxy'].to_s.split(',').each { |pattern|
+			pattern.chop! if pattern[-1] == '*'
+			return false if uri.host[0,pattern.length] == pattern
+		}
+		true
+	end
 
-		if ENV['http_proxy'].to_s.strip != '' and use_proxy?(uri)
+	def http_request(uri, request, open_timeout=5, read_timeout=1800)
+		if ENV['http_proxy'].to_s.strip != '' and use_http_proxy?(uri)
 			proxy = URI.parse(ENV['http_proxy'])
 			http = Net::HTTP::Proxy(proxy.host, proxy.port).new(uri.host, uri.port)
 		else
