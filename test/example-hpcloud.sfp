@@ -1,0 +1,18 @@
+include "../modules/node/node.sfp"
+include "../modules/hpcloud/hpcloud.sfp"
+include "../modules/vm/vm.sfp"
+include "../modules/apache/apache.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+	hpcloud isa HPCloud {
+		key_name is "herry_key"
+	}
+}
+
+vm1 isa VM {
+	created = true
+	apache isa Apache {
+		running is true
+	}
+}
