@@ -197,9 +197,9 @@ class Nuri::Master
 			#state[name] = get_node_state(name, !!p[:push_modules])
 		end
 		total = agents.keys.length - vms.keys.length
-		begin
-			sleep 1
-		end until state.length >= total
+
+		# wait until all threads have finish
+		wait? { (state.length >= total) }
 
 		# assign VMs' address
 		exist_vms, not_exist_vms = update_vms_address(state)
@@ -219,9 +219,8 @@ class Nuri::Master
 			state[name] = get_not_exist_vm_state(model)
 		}
 
-		begin
-			sleep 1
-		end until state.length >= agents.length
+		# wait until all threads have finish
+		wait? { (state.length >= agents.length) }
 
 		# update <vm>.in_cloud value
 		update_cloud_vm_relations(state, vms)
@@ -230,6 +229,12 @@ class Nuri::Master
 	end
 
 	protected
+	def wait?
+		until yield do
+			sleep 1
+		end
+	end
+
 	def get_dead_vm_state(name, cloud)
 		# TODO -- this should return the same structure as method "generate_not_exist_vm_state"
 		SfpUnknown
