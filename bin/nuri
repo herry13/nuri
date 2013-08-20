@@ -23,7 +23,7 @@ EOS
 	opt :push_modules, "Automatically push an unavailable module to target agent."
 	opt :human, "Use human readable format."
 	opt :pretty, "Use pretty JSON format."
-	opt :no_interactive, "Set off interactive mode."
+	opt :no_interactive, "Set off interactive mode.", :defaut => true
 	opt :start, "Start master daemon."
 	opt :stop, "Stop master daemon."
 end
@@ -32,12 +32,14 @@ def plan_to_human(plan)
 	return 'No solution plan.'.red if plan['workflow'].nil?
 	return 'The system is at the goal state.'.green if plan['workflow'].length <= 0
 
-	p = 'Plan:'.yellow
+	p = ''
 	actions = plan['workflow']
 	if plan['type'] == 'sequential'
+		p = 'Sequential Plan:'.yellow
 		actions.each_index { |i| p += "\n#{i+1}. #{actions[i]['name']} #{actions[i]['parameters']}" }
 	else
-		actions.each { |op| p += "\n#{op['id']}. #{op['name']} #{op['parameters']} (#{op['predecessors']}, #{op['successors']})" }
+		p = 'Partial-Order Plan:'.yellow
+		actions.each { |op| p += "\n#{op['id']+1}. #{op['name']} #{op['parameters']} (#{op['predecessors'].map{|i|i+1}}, #{op['successors'].map{|i|i+1}})" }
 	end
 	p
 end

@@ -1,6 +1,7 @@
 require 'uri'
 require 'net/http'
 require 'thread'
+require 'sfpagent'
 
 module Sfp::Helper::Constraint
 	def self.equals(value)
@@ -14,6 +15,7 @@ end
 
 class Nuri::Master
 	include Nuri::Net::Helper
+	include Nuri::Orchestrator
 
 	SfpUnknown = Sfp::Unknown.new
 	SfpUndefined = Sfp::Undefined.new
@@ -28,7 +30,10 @@ class Nuri::Master
 	attr_reader :model
 
 	def initialize(p={})
+		@mutex_vm_updater = Mutex.new
 		@cloudfinder = Sfp::Helper::CloudFinder.new
+		@local_agent = nil
+
 		set_model(p)
 	end
 
@@ -166,7 +171,6 @@ class Nuri::Master
 
 	def get_state(p={})
 		state = {}
-		template = get_schemata
 		vms = get_vms
 		agents = get_agents
 
@@ -175,18 +179,14 @@ class Nuri::Master
 
 		# get state of non-VM nodes
 		(agents.keys - vms.keys).each do |name|
-			model = agents[name]
-			push_modules(model) if p[:push_modules]
-			template[name] = model
-			state[name] = get_node_state(name, template)
-			template.delete(name)
+			state[name] = get_node_state(name, !!p[:push_modules])
 		end
 
 		# assign VMs' address
-		exist_vms, not_exist_vms = assign_vm_address(state, vms)
+		exist_vms, not_exist_vms = update_vms_address(state)
 
 		# get state of VM nodes
-		exist_vms.each { |name,model| state[name] = get_exist_vm_state(name, model, template, p) }
+		exist_vms.each { |name,model| state[name] = get_node_state(name, !!p[:push_modules]) }
 		not_exist_vms.each { |name,model| state[name] = get_not_exist_vm_state(model) }
 
 		# update <vm>.in_cloud value
@@ -198,19 +198,6 @@ class Nuri::Master
 	protected
 	def get_dead_vm_state(name, cloud)
 		# TODO -- this should return the same structure as method "generate_not_exist_vm_state"
-		SfpUnknown
-	end
-
-	def get_node_state(name, model)
-		begin
-			if http_send_agent_model(name, model)
-				agent_state = http_get_agent_state(name, model)
-				raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
-				return agent_state[name]
-			end
-		rescue Exception => e
-			puts "[WARN] Cannot get the current state of #{name} : #{e}".red
-		end
 		SfpUnknown
 	end
 
@@ -237,14 +224,6 @@ class Nuri::Master
 		s['state']
 	end
 
-	def get_exist_vm_state(name, model, template, p={})
-		push_modules(model) if p[:push_modules]
-		template[name] = model
-		state = get_node_state(name, template)
-		template.delete(name)
-		state
-	end
-
 	def update_cloud_vm_relations(state, vms)
 		@cloudfinder.clouds.each do |cloud|
 			proxy = state.at?(cloud)
@@ -262,36 +241,40 @@ class Nuri::Master
 		end
 	end
 
-	def assign_vm_address(state, vms)
-		# Reset sfpAddress, sfpPort, in_cloud of a VM if it's not found in
-		# previously assigned cloud
-		vms.each do |name,model|
-			next if !model['in_cloud'].is_a?(String) or !model['in_cloud'].isref
-			cloud, _ = @cloudfinder.clouds.select { |cloud| model['in_cloud'] == cloud }
-			if !cloud.nil? and !state.at?("#{cloud}.vms").has_key?(name)
-				vms[name]['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
-				vms[name]['sfpPort'] = {'_context'=>'any_value','_isa'=>'$.Number'}
-			end
-		end
+	def update_vms_address(state)
+		exist_vms = not_exist_vms = nil
+		@mutex_vm_updater.synchronize {
+			vms = get_vms
 
-		@cloudfinder.clouds.each do |cloud|
-			proxy = state.at?(cloud)
-			next if not proxy.is_a?(Hash) or not proxy['vms'].is_a?(Hash)
-			# for each VMs list of a cloud proxy, assign the available
-			# ip address
-			proxy['vms'].each do |name,data|
-				if vms.has_key?(name) and data['running']
-					vms[name]['sfpAddress'] = data['ip']
-					vms[name]['sfpPort'] = 1314
+			# Reset sfpAddress, sfpPort, in_cloud of a VM if it's not found in
+			# previously assigned cloud
+			vms.each do |name,model|
+				next if !model['in_cloud'].is_a?(String) or !model['in_cloud'].isref
+				cloud, _ = @cloudfinder.clouds.select { |cloud| model['in_cloud'] == cloud }
+				if !cloud.nil? and !state.at?("#{cloud}.vms").has_key?(name)
+					vms[name]['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
+					vms[name]['sfpPort'] = {'_context'=>'any_value','_isa'=>'$.Number'}
 				end
 			end
-		end
-
-		exist_vms = vms.select { |k,v| v['sfpAddress'].is_a?(String) and v['sfpAddress'] != '' }
-		not_exist_vms = vms.select { |k,v| !exist_vms.has_key?(k) }
+	
+			@cloudfinder.clouds.each do |cloud|
+				proxy = state.at?(cloud)
+				next if not proxy.is_a?(Hash) or not proxy['vms'].is_a?(Hash)
+				# for each VMs list of a cloud proxy, assign the available
+				# ip address
+				proxy['vms'].each do |name,data|
+					if vms.has_key?(name) and data['running']
+						vms[name]['sfpAddress'] = data['ip']
+						vms[name]['sfpPort'] = 1314
+					end
+				end
+			end
+	
+			exist_vms = vms.select { |k,v| v['sfpAddress'].is_a?(String) and v['sfpAddress'] != '' }
+			not_exist_vms = vms.select { |k,v| !exist_vms.has_key?(k) }
+		}
 		[exist_vms, not_exist_vms]
 	end
-
 
 	def push_agents_list
 		begin
@@ -308,20 +291,21 @@ class Nuri::Master
 	
 			# send the list to all agents
 			agents.each do |name, info|
-				code, _ = put_data(info[:sfpAddress], info[:sfpPort], '/agents', data)
+				code, _ = put_data(info[:sfpAddress], info[:sfpPort], '/agents', data, 5, 20)
 				raise Exception, "Push agents list to #{info[:sfpAddress]}:#{info[:sfpPort]} [Failed]" if code.to_i != 200
 			end
 			return true
 		rescue Exception => exp
-			$stderr.puts "#{exp}\n#{exp.backtrace.join("\n")}"
+			#$stderr.puts "#{exp}\n#{exp.backtrace.join("\n")}"
 		end
 		false
 	end
 
 	def push_modules(agent_model)
+		return false if !agent_model.is_a?(Hash) or !agent_model['sfpAddress'].is_a?(String)
 		address = agent_model['sfpAddress'].to_s.strip
 		port = agent_model['sfpPort'].to_s.strip
-		return if address == '' or port == ''
+		return false if address == '' or port == ''
 
 		name = agent_model['_self']
 		finder = Sfp::Helper::SchemaCollector.new
@@ -331,7 +315,8 @@ class Nuri::Master
 		begin
 			# get modules list
 			code, body = get_data(address, port, '/modules')
-			raise Exception, "Unable to get modules list from #{address}:#{port}" if code.to_i != 200
+			raise Exception, "Unable to get modules list from #{name}" if code.to_i != 200
+
 			modules = JSON[body]
 			schemata.each { |m|
 				if m != 'object' and File.exist? "#{ModulesDir}/#{m}"
@@ -363,15 +348,34 @@ class Nuri::Master
 		nil
 	end
 
+	def get_node_state(name, do_push_modules=false)
+		push_modules(@model[name]) if do_push_modules
+
+		model = get_schemata
+		model[name] = @model[name]
+
+		begin
+			if http_send_agent_model(name, model)
+				agent_state = http_get_agent_state(name, model)
+				raise Exception, "Cannot get the current state of #{name}" if agent_state.nil?
+				return agent_state[name]
+			end
+		rescue Exception => e
+			puts "[WARN] Cannot get the current state of #{name} : #{e}".red
+		end
+		SfpUnknown
+	end
+
 	# send HTTP PUT request to push agent's model
 	#
-	def http_send_agent_model(name, agent_model)
-		address = agent_model[name]['sfpAddress'].to_s.strip
-		port = agent_model[name]['sfpPort'].to_s.strip
+	def http_send_agent_model(name, model)
+		return false if !model[name].is_a?(Hash) or !model[name]['sfpAddress'].is_a?(String)
+		address = model[name]['sfpAddress'].to_s.strip
+		port = model[name]['sfpPort'].to_s.strip
 		if address != '' and port != ''
-			agent_model = Sfp::Helper.deep_clone(agent_model)
-			agent_model.accept(ParentEliminator)
-			data = {'model' => JSON.generate(agent_model)}
+			model = Sfp::Helper.deep_clone(model)
+			model.accept(ParentEliminator)
+			data = {'model' => JSON.generate(model)}
 			code, _ = put_data(address, port, '/model', data)
 			return (code.to_i == 200)
 		end
@@ -380,9 +384,10 @@ class Nuri::Master
 
 	# send HTTP GET requst to get agent's state
 	#
-	def http_get_agent_state(name, agent_model)
-		address = agent_model[name]['sfpAddress'].to_s.strip
-		port = agent_model[name]['sfpPort'].to_s.strip
+	def http_get_agent_state(name, model)
+		return nil if !model[name].is_a?(Hash) or !model[name]['sfpAddress'].is_a?(String)
+		address = model[name]['sfpAddress'].to_s.strip
+		port = model[name]['sfpPort'].to_s.strip
 		if address != '' and port != ''
 			code, body = get_data(address, port, '/sfpstate')
 			if code.to_i == 200 and body.length >= 2
@@ -417,191 +422,9 @@ class Nuri::Master
 		value
 	end
 
-	# Given agent's name that owns a cloud proxy
-	# - update its state
-	# - update the address of VMs
-	#
-	def update_cloud_addresses(name)
-		vms1 = get_exist_vms
-
-		template = get_schemata
-		template[name] = @model[name]
-		state = {name => get_node_state(name, template)}
-		assign_vm_address(state, get_vms)
-		template.delete(name)
-
-		vms2 = get_exist_vms
-
-		if vms2.length > vms1.length
-			# update the state of new VMs
-			puts "\nPush model and update state of new VMs: " + (vms2.keys - vms1.keys).inspect
-			(vms2.keys - vms1.keys).each { |name|
-				push_modules(vms2[name])
-				template[name] = vms2[name]
-				get_node_state(name, template)
-				template.delete(name)
-			}
-		end
-	end
-
 	def get_exist_vms
 		get_vms.select { |name,model| model['sfpAddress'].is_a?(String) and
 			model['sfpAddress'] != '' }
-	end
-
-	def postprocess_create_or_delete_vm(action)
-		_, agent_name, _ = action['name'].split('.', 3)
-		update_cloud_addresses(agent_name)
-		if action['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.(delete_vm)/
-			vm_ref = action['parameters']['$.vm']
-			model = @model.at?(vm_ref)
-			if model.is_a?(Hash)
-				model['sfpAddress'] = {'_context'=>'any_value','_isa'=>'$.String'}
-				model['sfpPort'] = {'_context'=>'any_value','_isa'=>'$.Number'}
-			end
-		end
-		push_agents_list
-	end
-
-	def execute_sequential_plan(plan, p)
-		puts "Executing a sequential plan..."
-		agents = get_agents
-		begin
-			index = 1
-			plan['workflow'].each do |action|
-				print "#{index}. #{action['name']} #{JSON.generate(action['parameters'])}... "
-				if execute_action(action, agents)
-					# if the action is "create_vm" or "delete_vm", then
-					# update the VMs' address, and then push agents list
-					postprocess_create_or_delete_vm(action) if
-						action['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.(create_vm|delete_vm)/
-					puts "[OK]".green
-				else
-					puts "[Failed]".red
-					return false
-				end
-				index += 1
-			end
-			return true
-		rescue Exception => e
-			puts "#{e}\n#{e.backtrace.join("\n")}".red
-		end
-		false
-	end
-
-	def execute_action(action, agents)
-		_, agent_name, _ = action['name'].split('.', 3)
-		address = agents[agent_name]['sfpAddress'].to_s
-		port = agents[agent_name]['sfpPort'].to_s
-		raise Exception, "Cannot find address:port of agent #{agent_name}" if
-			address.length <= 0 or port.length <= 0
-
-		return true if @mock		
-
-		data = {'action' => JSON.generate(action)}
-		code, _ = post_data(address, port, '/execute', data)
-		(code.to_i == 200)
-	end
-
-	def execute_parallel_plan(plan, options)
-		puts "Executing a parallel plan..."
-
-		@agents = get_agents
-		@retry = 2
-
-		@actions = plan['workflow']
-		@actions.sort! { |x,y| x['id'] <=> y['id'] }
-		@actions.each { |op|
-			op[:executed] = false
-			op[:executor] = nil
-			op[:string] = "#{op['id']}: #{op['name']} #{JSON.generate(op['parameters'])}"
-		}		
-
-		@threads = []
-		@actions_failed = []
-		@mutex = Mutex.new
-		@failed = false
-		@thread_id = 0
-
-		def next_thread_id
-			id = 0
-			@mutex.synchronize { @thread_id = id = @thread_id + 1 }
-			id
-		end
-
-		def assign_action_with_id(id)
-			thread_id = next_thread_id
-			action = @actions[id]
-			action[:executor] = thread_id
-			self.thread_execute_action(thread_id, action)
-		end
-
-		def thread_execute_action(tid, action)
-			t = Thread.new {
-				@mutex.synchronize { @threads << tid }
-
-				while not @failed and not action[:executed]
-					# execute the action
-					puts "Executing #{action[:string]} [WAIT]".yellow
-					num = @retry
-					begin
-						success = execute_action(action, @agents)
-						num -= 1
-					end while not success and num > 0
-
-					# check if execution failed
-					if success
-						puts "Executing #{action[:string]} [OK]".green
-						next_actions = []
-						@mutex.synchronize {
-							action[:executed] = true # set executed
-							# select next action to be executed from successor actions list
-							# select a successor action that has not been assigned to any thread yet
-							if action['successors'].length > 0
-								action['successors'].each { |id|
-									if @actions[id][:executor].nil?
-										# check if all predecessors actions have been executed
-										predecessors_ok = true
-										@actions[id]['predecessors'].each { |pid|
-											predecessors_ok = (predecessors_ok and @actions[pid][:executed])
-										}
-										# assign this action to be executed by this thread if all predecessors
-										# have been executed
-										next_actions << id if predecessors_ok
-									end
-								}
-							end
-							next_actions.each { |id| @actions[id][:executor] = tid }
-						}
-						if next_actions.length > 0				
-							# execute the first next actions to this thread
-							action = @actions[next_actions[0]]
-							if next_actions.length > 1
-								# execute other next actions to other threads
-								for i in 1..(next_actions.length-1)
-									assign_action_with_id(next_actions[i])
-								end
-							end
-						end
-
-					else
-						$stderr.puts "Executing #{action[:string]} [FAILED]".red
-						@mutex.synchronize {
-							@failed = true # set global flag to stop the execution
-							@actions_failed << action
-						}
-					end
-				end
-
-				@mutex.synchronize { @threads.delete(tid) }
-			}
-		end
-
-		plan['init'].each { |id| assign_action_with_id(id) }
-		begin
-			sleep 1
-		end while @threads.length > 0
-		(not @failed)
 	end
 
 
@@ -759,7 +582,7 @@ module Sfp::Helper
 			return v['_values'].inspect if v['_context'] == 'set'
 			return "<hash>"
 		elsif v.is_a?(String) and v =~ /^\$\./
-			return v #.sub(/^\$\./, '')
+			return v
 		end
 		v.inspect
 	end
@@ -796,17 +619,5 @@ class Sfp::Helper::CloudFinder
 			end
 		end
 		false
-	end
-end
-
-module Nuri::Console
-	def self.print_state(p={})
-		p[:state].accept(Sfp::Visitor::SfpGenerator.new(p[:state]))
-		f = Sfp::Helper::SfpFlatten.new
-		p[:state].accept(f)
-		f.results.each { |k,v|
-			value = (v.is_a?(String) ? v.sub(/^\$\./, '') : v)
-			puts "- #{k}: #{value}"
-		}
 	end
 end
