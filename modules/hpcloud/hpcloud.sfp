@@ -1,16 +1,12 @@
 include "../cloud/cloud.sfp"
 
 schema HPCloud extends Cloud {
-	description = "HPCloud US West Zone 1"
-	auth_uri = "https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
-	zone = "az-1.region-a.geo-1"
-
-	sub create_vm (vm isref Node) {
-		condition {
-			vm.created = false
-		}
-		effect {
-			vm.created = true
-		}
-	}
+	final description = "HPCloud US West Zone 1"
+	final auth_uri = "https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
+	final zone = "az-2.region-a.geo-1"
+	final flavor_id = "100"
+	final image_id = "67074"
+	final key_name = ""
+	final security_group = "default"
+	vms { }
 }
