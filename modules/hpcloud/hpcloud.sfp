@@ -1,7 +1,7 @@
 include "../cloud/cloud.sfp"
 
 schema HPCloud extends Cloud {
-	final description = "HPCloud US West Zone 1"
+	final description = "HPCloud US West Zone 2"
 	final auth_uri = "https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
 	final zone = "az-2.region-a.geo-1"
 	final flavor_id = "100"
