@@ -23,8 +23,6 @@ class Nuri::Master
 	CloudSchema = '$.Cloud'
 	VMSchema = '$.VM'
 
-	ModulesDir = File.expand_path(File.dirname(__FILE__)) + "/../../modules"
-
 	attr_accessor :mock
 	attr_reader :model
 
@@ -32,6 +30,17 @@ class Nuri::Master
 		@mutex_vm_updater = Mutex.new
 		@cloudfinder = Sfp::Helper::CloudFinder.new
 		@local_agent = nil
+
+		if ENV['SFP_HOME'].is_a?(String) and ENV['SFP_HOME'].strip.length > 0
+			@modules_dir = File.join(ENV['SFP_HOME'], 'modules')
+		elsif File.directory?(File.expand_path(File.dirname(__FILE__) + '/../../modules'))
+			@modules_dir = File.expand_path(File.dirname(__FILE__) + '/../../modules')
+		elsif File.directory?(File.expand_path('./modules'))
+			@modules_dir = File.expand_path('./modules')
+		else
+			@modules_dir = '/var/lib/nuri/modules'
+		end
+		fail "Invalid modules directory #{@modules_dir}!" if !File.directory?(@modules_dir}
 
 		set_model(p)
 	end
@@ -318,10 +327,10 @@ class Nuri::Master
 
 			modules = JSON[body]
 			schemata.each { |m|
-				if m != 'object' and File.exist? "#{ModulesDir}/#{m}"
+				if m != 'object' and File.exist? "#{@modules_dir}/#{m}"
 					if not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s
 						print "Push module #{m} to #{name} ".yellow
-						puts (system("cd #{ModulesDir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>/dev/null") ?
+						puts (system("cd #{@modules_dir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>/dev/null") ?
 							"[OK]".green : "[Failed]".red)
 					end
 				end
@@ -336,7 +345,7 @@ class Nuri::Master
 	# return the list of Hash value of all modules
 	#
 	def get_local_module_hash(name)
-		module_dir = "#{ModulesDir}/#{name}"
+		module_dir = "#{@modules_dir}/#{name}"
 		if File.directory? module_dir
 			if `which md5sum`.strip.length > 0
 				return `find #{module_dir} -type f -exec md5sum {} + | awk '{print $1}' | sort | md5sum | awk '{print $1}'`.strip
