@@ -1,3 +1,4 @@
+*.gem
 *.swp
 *.pem
 *.DS_Store

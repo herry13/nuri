@@ -15,9 +15,6 @@ Gem::Specification.new do |s|
 	s.homepage		= 'https://github.com/herry13/nuri'
 	s.rubyforge_project = 'nuri'
 
-	s.add_dependency 'json', '~> 1.7.5'
-	s.add_dependency 'antlr3', '~> 1.8.12'
-	s.add_dependency 'sfp', '~> 0.3.8'
 	s.add_dependency 'sfplanner', '~> 0.1.1'
 	s.add_dependency 'colorize', '~> 0.5.8'
 	s.add_dependency 'coderay', '~> 1.0.9'

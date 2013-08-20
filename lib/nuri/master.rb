@@ -185,17 +185,43 @@ class Nuri::Master
 		# push agents list to each agent
 		push_agents_list
 
+		mutex = Mutex.new
+
 		# get state of non-VM nodes
 		(agents.keys - vms.keys).each do |name|
-			state[name] = get_node_state(name, !!p[:push_modules])
+			Thread.new {
+				node_name = name
+				node_state = get_node_state(node_name, !!p[:push_modules])
+				mutex.synchronize { state[node_name] = node_state }
+			}
+			#state[name] = get_node_state(name, !!p[:push_modules])
 		end
+		total = agents.keys.length - vms.keys.length
+		begin
+			sleep 1
+		end until state.length >= total
 
 		# assign VMs' address
 		exist_vms, not_exist_vms = update_vms_address(state)
 
-		# get state of VM nodes
-		exist_vms.each { |name,model| state[name] = get_node_state(name, !!p[:push_modules]) }
-		not_exist_vms.each { |name,model| state[name] = get_not_exist_vm_state(model) }
+		# get state of existing VM nodes
+		exist_vms.each_key { |name|
+			Thread.new {
+				node_name = name
+				node_state = get_node_state(node_name, !!p[:push_modules])
+				mutex.synchronize { state[node_name] = node_state }
+			}
+			#state[name] = get_node_state(name, !!p[:push_modules])
+		}
+
+		# get state of non-existing VM nodes
+		not_exist_vms.each { |name,model|
+			state[name] = get_not_exist_vm_state(model)
+		}
+
+		begin
+			sleep 1
+		end until state.length >= agents.length
 
 		# update <vm>.in_cloud value
 		update_cloud_vm_relations(state, vms)
