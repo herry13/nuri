@@ -1,7 +1,6 @@
 require 'uri'
 require 'net/http'
 require 'thread'
-require 'sfpagent'
 
 module Sfp::Helper::Constraint
 	def self.equals(value)
