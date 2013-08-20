@@ -4,7 +4,7 @@ schema Service extends Package {
 	final service_name = ""
 	running : Bool
 
-	sub install {
+	synchronized sub install {
 		condition {
 			this.installed != true
 		}
@@ -14,7 +14,7 @@ schema Service extends Package {
 		}
 	}
 	
-	sub uninstall {
+	synchronized sub uninstall {
 		condition {
 			this.running = false
 			this.installed = true

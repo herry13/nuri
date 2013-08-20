@@ -1,5 +1,9 @@
+require 'thread'
+
 class Sfp::Module::Package
 	include Sfp::Resource
+
+	@@mutex = Mutex.new
 
 	def update_state
 		self.reset

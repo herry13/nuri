@@ -3,13 +3,13 @@ schema Package {
 	installed : Bool
 	version : String
 
-	sub install {
+	synchronized sub install {
 		effect {
 			this.installed = true
 		}
 	}
 
-	sub uninstall {
+	synchronized sub uninstall {
 		condition {
 			this.installed = true
 		}

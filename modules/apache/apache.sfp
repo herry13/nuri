@@ -27,7 +27,7 @@ schema Apache extends Service {
 		}
 	}
 
-	sub uninstall {
+	synchronized sub uninstall {
 		condition {
 			this.installed = true
 			this.running = false
@@ -59,7 +59,7 @@ schema Apache extends Service {
 		}
 	}
 
-	sub install_php_module {
+	synchronized sub install_php_module {
 		condition {
 			this.installed = true
 			this.running = false
@@ -69,7 +69,7 @@ schema Apache extends Service {
 		}
 	}
 
-	sub uninstall_php_module {
+	synchronized sub uninstall_php_module {
 		condition {
 			this.running = false
 		}
@@ -78,7 +78,7 @@ schema Apache extends Service {
 		}
 	}
 
-	sub install_php_mysql_module {
+	synchronized sub install_php_mysql_module {
 		condition {
 			this.php_module = true
 			this.installed = true
@@ -89,7 +89,7 @@ schema Apache extends Service {
 		}
 	}
 
-	sub uninstall_php_mysql_module {
+	synchronized sub uninstall_php_mysql_module {
 		condition {
 			this.running = false
 		}

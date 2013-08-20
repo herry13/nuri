@@ -19,6 +19,7 @@ schema Mysql extends Service {
 	sub set_public (pub isref Boolean) {
 		condition {
 			this.installed = true
+			this.running = false
 		}
 		effect {
 			this.public = pub
