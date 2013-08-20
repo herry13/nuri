@@ -6,7 +6,20 @@ end
 
 module Nuri::Net::Helper
 	def http_request(uri, request, open_timeout=5, read_timeout=1800)
-		http = Net::HTTP.new(uri.host, uri.port)
+		def use_proxy?(uri)
+			ENV['no_proxy'].to_s.split(',').each { |pattern|
+				pattern.chop! if pattern[-1] == '*'
+				return false if uri.host[0,pattern.length] == pattern
+			}
+			true
+		end
+
+		if ENV['http_proxy'].to_s.strip != '' and use_proxy?(uri)
+			proxy = URI.parse(ENV['http_proxy'])
+			http = Net::HTTP::Proxy(proxy.host, proxy.port).new(uri.host, uri.port)
+		else
+			http = Net::HTTP.new(uri.host, uri.port)
+		end
 		http.open_timeout = open_timeout
 		http.read_timeout = read_timeout
 		http.start

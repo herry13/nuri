@@ -344,7 +344,7 @@ class Nuri::Master
 			}
 			return true
 		rescue Exception => e
-			puts "[WARN] Cannot push module to #{name}".red
+			puts "[WARN] Cannot push module to #{name} - #{e}".red
 		end
 		false
 	end
