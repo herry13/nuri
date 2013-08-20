@@ -40,7 +40,7 @@ class Nuri::Master
 		else
 			@modules_dir = '/var/lib/nuri/modules'
 		end
-		fail "Invalid modules directory #{@modules_dir}!" if !File.directory?(@modules_dir}
+		fail "Invalid modules directory #{@modules_dir}!" if !File.directory?(@modules_dir)
 
 		set_model(p)
 	end
