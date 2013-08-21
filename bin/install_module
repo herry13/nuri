@@ -5,11 +5,11 @@ then
 	echo "Usage: install_module <address> [port] <module-name>"
 elif [[ "$3" == "" ]]
 then
-	tar cvzf $2.tgz $2
+	tar cvzhf $2.tgz $2
 	curl -i -X PUT $1:1314/modules/$2 -F module=@$2.tgz
 	rm $2.tgz
 else
-	tar cvzf $3.tgz $3
+	tar cvzhf $3.tgz $3
 	curl -i -X PUT $1:$2/modules/$3 -F module=@$3.tgz
 	rm $3.tgz
 fi
