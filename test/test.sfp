@@ -1,0 +1,7 @@
+include "../modules/apache/apache.sfp"
+include "../modules/node/node.sfp"
+
+local isa Node {
+	sfpAddress is "localhost"
+	apache isa Apache
+}
