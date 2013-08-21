@@ -31,6 +31,8 @@ class Nuri::Master
 		end
 		fail "Invalid modules directory #{@modules_dir}!" if !File.directory?(@modules_dir)
 
+		@sas_post_processor = SASPostProcessor
+
 		set_model(p)
 	end
 
@@ -51,34 +53,6 @@ class Nuri::Master
 		# create a set of not-exist VMs' state
 		@map = generate_not_exist_vm_state(false)
 		SASPostProcessor.set_map(@map)
-	end
-
-	def execute_plan(p={})
-		if p[:bsig]
-			choreograph_plan(p)
-		elsif p[:plan]
-			orchestrate_plan(p)
-		else
-			fail "Invalid parameter! (either :bsig or :plan must be set)"
-		end
-	end
-
-	def get_bsig(p={})
-		# set parameters value to be given to the planner
-		p[:sfp] = create_plan_task(p)
-		p[:sas_post_processor] = SASPostProcessor
-		p[:parallel] = true
-
-		bsig = plan = nil
-		choreographing_time = Benchmark.measure do
-			planner = Sfp::Planner.new
-			plan = planner.solve(p)
-			bsig = planner.to_bsig(p)
-		end
-		puts "Choreographing: #{choreographing_time}"
-puts JSON.pretty_generate(plan)
-
-		bsig
 	end
 
 	def get_plan(p={})
@@ -113,7 +87,6 @@ puts JSON.pretty_generate(plan)
 				node_state = get_node_state(node_name, !!p[:push_modules])
 				mutex.synchronize { state[node_name] = node_state }
 			}
-			#state[name] = get_node_state(name, !!p[:push_modules])
 		end
 		total = agents.keys.length - vms.keys.length
 
@@ -130,7 +103,6 @@ puts JSON.pretty_generate(plan)
 				node_state = get_node_state(node_name, !!p[:push_modules])
 				mutex.synchronize { state[node_name] = node_state }
 			}
-			#state[name] = get_node_state(name, !!p[:push_modules])
 		}
 
 		# get state of non-existing VM nodes

@@ -3,9 +3,9 @@ require 'thread'
 module Nuri::Orchestrator
 	include Nuri::Net::Helper
 
-	def orchestrate_plan(p={})
-		raise Exception, "Plan file is not exist!" if not File.exist?(p[:execute]) and
-			!p[:plan]
+	def execute_plan(p={})
+		raise Exception, "Plan file is not exist!" if not File.exist?(p[:execute]) and !p[:plan]
+		raise Exception, "Plan is not exist (parameter :plan must be given)!" if !p[:plan]
 
 		push_agents_list
 
