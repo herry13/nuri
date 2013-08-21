@@ -4,11 +4,10 @@ libdir = File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require "#{libdir}/nuri"
 
 require 'coderay'
-require 'yaml'
 require 'logger'
 
 opts = Trollop::options do
-	version "Nuri 0.4.0 (c) 2013 Herry"
+	version "Nuri 0.4.0 (c) 2013"
 	banner <<-EOS
 Usage: nuri [options]
 where [options] are:
@@ -18,6 +17,7 @@ EOS
 	opt :state, "Print the current state of the system in JSON based on given model file."
 	opt :plan, "Print the plan that could bring the system to the desired state as defined in model file."
 	opt :parallel, "Generate a parallel plan.", :short => '-l'
+	opt :bsig, "Activate distributed execution with Behavioural Signature model"
 	opt :execute, "Execute a plan in given file. Note: model file should be specified.", :default => ''
 	opt :apply, "Generate and execute a plan that could bring the system to the desired state."
 	opt :push_modules, "Automatically push an unavailable module to target agent."
@@ -48,7 +48,7 @@ if opts[:state]
 	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
 
 	master = Nuri::Master.new
-	master.set_model_file(opts)
+	master.set_model(opts)
 	state = master.get_state(opts)
 	state.accept(Sfp::Visitor::PrettyStateGenerator.new)
 	if opts[:human]
@@ -61,7 +61,7 @@ elsif opts[:plan]
 	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
 
 	master = Nuri::Master.new
-	master.set_model_file(opts)
+	master.set_model(opts)
 	plan = master.get_plan(opts)
 	if !plan.is_a?(Hash) or plan['workflow'].nil?
 		puts "Plan: ".yellow + "\nno solution!".red
@@ -76,7 +76,7 @@ elsif opts[:plan]
 			print "Execute the plan [y/N]? "
 			if STDIN.gets.chomp.upcase == 'Y'
 				puts 'Executing the plan:'.yellow
-				opts[:apply] = plan
+				opts[:plan] = plan
 				puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
 			end
 		end
@@ -86,14 +86,14 @@ elsif opts[:execute].length > 0
 	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
 
 	master = Nuri::Master.new
-	master.set_model_file(opts)
+	master.set_model(opts)
 	puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
 
 elsif opts[:apply]
 	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
 
 	master = Nuri::Master.new
-	master.set_model_file(opts)
+	master.set_model(opts)
 	plan = master.get_plan(opts)
 	if plan['workflow'].nil?
 		puts "No solution!".red
@@ -105,15 +105,42 @@ elsif opts[:apply]
 		end
 
 		puts 'Executing the plan...'.yellow
-		opts[:apply] = plan
+		opts[:plan] = plan
 		puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
+	end
+
+elsif opts[:bsig]
+	fail "Model file is not specified! Use \"-h\" option for more details." if opts[:model_file].length <= 0
+	opts[:parallel] = true
+
+	master = Nuri::Master.new
+	master.set_model(opts)
+	bsig = master.get_bsig(opts)
+
+	if !bsig.is_a?(Hash)
+		puts "\nNo solution!".red
+	else
+		if opts[:human]
+			puts CodeRay.encode(JSON.pretty_generate(bsig), :json, :terminal)
+		else
+			puts (opts[:pretty] ? JSON.pretty_generate(bsig) : JSON.generate(bsig))
+		end
+
+		if not opts[:no_interactive] and bsig['operators'].is_a?(Array) and bsig['operators'].length > 0
+			print "Deploy the model [y/N]? "
+			if STDIN.gets.chomp.upcase == 'Y'
+				puts 'Deploying the plan:'.yellow
+				opts[:bsig] = bsig
+				puts (master.execute_plan(opts) ? "Deployment success!".green : "Deployment failed!".red)
+			end
+		end
 	end
 
 elsif opts[:start]
 	logger = Logger.new('master.log')
 	begin
 		master = Nuri::Master.new
-		master.set_model_file(opts)
+		master.set_model(opts)
 		loop {
 			logger.info 'Generating plan [WAIT]'
 			plan = master.get_plan(opts)

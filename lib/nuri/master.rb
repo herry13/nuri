@@ -1,20 +1,9 @@
-require 'uri'
-require 'net/http'
 require 'thread'
-
-module Sfp::Helper::Constraint
-	def self.equals(value)
-		{ '_context' => 'constraint', '_type' => 'equals', '_value' => value }
-	end
-
-	def self.and(name)
-		{ '_context' => 'constraint', '_type' => 'and', '_self' => name }
-	end
-end
 
 class Nuri::Master
 	include Nuri::Net::Helper
 	include Nuri::Orchestrator
+	include Nuri::Choreographer
 
 	SfpUnknown = Sfp::Unknown.new
 	SfpUndefined = Sfp::Undefined.new
@@ -23,7 +12,6 @@ class Nuri::Master
 	CloudSchema = '$.Cloud'
 	VMSchema = '$.VM'
 
-	attr_accessor :mock
 	attr_reader :model
 
 	def initialize(p={})
@@ -31,6 +19,7 @@ class Nuri::Master
 		@cloudfinder = Sfp::Helper::CloudFinder.new
 		@local_agent = nil
 
+		# set modules directory
 		if ENV['SFP_HOME'].is_a?(String) and ENV['SFP_HOME'].strip.length > 0
 			@modules_dir = File.join(ENV['SFP_HOME'], 'modules')
 		elsif File.directory?(File.expand_path(File.dirname(__FILE__) + '/../../modules'))
@@ -46,6 +35,13 @@ class Nuri::Master
 	end
 
 	def set_model(p={})
+		if p[:model_file]
+			home_dir = File.expand_path File.dirname(p[:model_file])
+			@parser = Sfp::Parser.new({:home_dir => home_dir})
+			@parser.parse File.read(p[:model_file])
+			p[:model] = @parser.root
+		end
+
 		@model = (p.is_a?(Hash) and p[:model].is_a?(Hash) ? p[:model] : {})
 		push_agents_list if @model.length > 0
 
@@ -54,127 +50,50 @@ class Nuri::Master
 
 		# create a set of not-exist VMs' state
 		@map = generate_not_exist_vm_state(false)
-	end
-
-	def set_model_file(p={})
-		if p[:model_file]
-			home_dir = File.expand_path File.dirname(p[:model_file])
-			@parser = Sfp::Parser.new({:home_dir => home_dir})
-			@parser.parse File.read(p[:model_file])
-			set_model(:model => @parser.root)
-		end
+		SASPostProcessor.set_map(@map)
 	end
 
 	def execute_plan(p={})
-		raise Exception, "Plan file is not exist!" if not File.exist?(p[:execute]) and
-			!p[:apply]
-
-		push_agents_list
-
-		plan = (p[:apply] ? p[:apply] : JSON[File.read(p[:execute])])
-		raise Exception, "Invalid plan!" if plan['workflow'].nil?
-		if plan['type'] == 'sequential'
-			execute_sequential_plan(plan, p)
+		if p[:bsig]
+			choreograph_plan(p)
+		elsif p[:plan]
+			orchestrate_plan(p)
 		else
-			execute_parallel_plan(plan, p)
+			fail "Invalid parameter! (either :bsig or :plan must be set)"
 		end
 	end
 
+	def get_bsig(p={})
+		# set parameters value to be given to the planner
+		p[:sfp] = create_plan_task(p)
+		p[:sas_post_processor] = SASPostProcessor
+		p[:parallel] = true
+
+		bsig = plan = nil
+		choreographing_time = Benchmark.measure do
+			planner = Sfp::Planner.new
+			plan = planner.solve(p)
+			bsig = planner.to_bsig(p)
+		end
+		puts "Choreographing: #{choreographing_time}"
+puts JSON.pretty_generate(plan)
+
+		bsig
+	end
+
 	def get_plan(p={})
-		task = get_schemata
-
-		print "Getting current state: "
-		puts Benchmark.measure { task['initial'] = to_state('initial', get_state(p)) }
-
-		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
-		f1 = Sfp::Helper::SfpFlatten.new
-		task['initial'].accept(f1)
-
-		# modify condition of procedures of each VM's component
-		# modification: add constraint "$.vm.created = true"
-		task['initial'].accept(VMProcedureModifier.new(task['initial']))
-
-		# construct goal state		
-		goalgen = GoalGenerator.new
-		get_agents.accept(goalgen)
-		task['goal'] = goalgen.results
-
-		# find dead-node, remove from the task, print WARNING to the console
-		dead_nodes = task['initial'].select { |k,v| v.is_a?(Sfp::Unknown) }
-		dead_nodes.each_key { |name|
-			task['initial'].delete(name)
-			task['goal'].keep_if { |k,v| !(k =~ /(\$\.#{name}\.|\$\.#{name}$)/) }
-			puts "[WARN] Removing node #{name} from the task.".red
-		}
-
-		# print the status of goal state
-		puts "Goal state:".yellow
-		goalgen.results.each { |k,v|
-			next if k[0,1] == '_'
-			print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
-			print " #{Sfp::Helper.sfp_to_s(f1.results[k])}".red if f1.results.has_key?(k) and
-				f1.results[k] != v['_value']
-			puts ""
-		}
-
-		# add global constraint (if exist)
-		task['global'] = @model['global'] if @model.has_key?('global')
-
-		# add sometime constraint (if exist)
-		task['sometime'] = @model['sometime'] if @model.has_key?('sometime')
-
-		# remove old parent links, and then reconstruct SFP parent links
-		task.accept(ParentEliminator)
-
-		# debug
-		#puts JSON.pretty_generate(task)
-
-		# rebuild SFP data-structure
-		task.accept(Sfp::Visitor::SfpGenerator.new(task))
+		# set parameters value to be given to the planner
+		p[:sfp] = create_plan_task(p)
+		p[:sas_post_processor] = SASPostProcessor
 
 		plan = nil
 		planning_time = Benchmark.measure do
 			planner = Sfp::Planner.new
-			plan = planner.solve({:sfp => task, :sas_post_processor => self, :parallel => p[:parallel]})
+			plan = planner.solve(p)
 		end
 		puts "Planning: #{planning_time}"
+
 		plan
-	end
-
-	# post processing SAS after compilation
-	# goal: to add additional effects whenever a VM is deleted
-	def sas_post_processor(parser)
-		return if parser.operators.nil?
-		parser.operators.each do |name, operator|
-			# skip if it's not "delete_vm"
-			next if !(name =~ /\.delete_vm$/) or !operator.params.has_key?('$.vm')
-			vm = operator.params['$.vm'].sub(/^\$\./, '')
-			next if !@map.has_key?(vm)
-
-			# for each not-exist state VM, add an effect
-			@map[vm].each { |k,v|
-				next if operator.has_key?(k) # skip if variable is exist (avoid overwrite)
-				next if k =~ /\.sfpAddress/ or k =~ /\.sfpPort/ # skip "sfpAddress" and "sfpPort"
-				                                                # because these will be assigned dynamically
-				var = parser.variables[k]
-				next if var.nil? # the variable is not found
-
-				if v.is_a?(Hash)
-					val = parser.types[v['_value']][0] if v['_context'] == 'null'
-					raise Exception, "Not implemented yet." # this may arise on Set values
-				else
-					val = v
-				end
-
-				# add the value to variable's values
-				var << val  
-				var.uniq!
-	
-				# create new parameter, and then add to the operator
-				parameter = Sfp::Parameter.new(var, nil, val)
-				operator[var.name] = parameter
-			}
-		end
 	end
 
 	def get_state(p={})
@@ -229,6 +148,61 @@ class Nuri::Master
 	end
 
 	protected
+	def create_plan_task(p={})
+		task = get_schemata
+
+		print "Getting current state: "
+		puts Benchmark.measure { task['initial'] = to_state('initial', get_state(p)) }
+
+		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
+		f1 = Sfp::Helper::SfpFlatten.new
+		task['initial'].accept(f1)
+
+		# modify condition of procedures of each VM's component
+		# modification: add constraint "$.vm.created = true"
+		task['initial'].accept(VMProcedureModifier.new(task['initial']))
+
+		# construct goal state		
+		goalgen = GoalGenerator.new
+		get_agents.accept(goalgen)
+		task['goal'] = goalgen.results
+
+		# find dead-node, remove from the task, print WARNING to the console
+		dead_nodes = task['initial'].select { |k,v| v.is_a?(Sfp::Unknown) }
+		dead_nodes.each_key { |name|
+			task['initial'].delete(name)
+			task['goal'].keep_if { |k,v| !(k =~ /(\$\.#{name}\.|\$\.#{name}$)/) }
+			puts "[WARN] Removing node #{name} from the task.".red
+		}
+
+		# print the status of goal state
+		puts "Goal state:".yellow
+		goalgen.results.each { |k,v|
+			next if k[0,1] == '_'
+			print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
+			print " #{Sfp::Helper.sfp_to_s(f1.results[k])}".red if f1.results.has_key?(k) and
+				f1.results[k] != v['_value']
+			puts ""
+		}
+
+		# add global constraint (if exist)
+		task['global'] = @model['global'] if @model.has_key?('global')
+
+		# add sometime constraint (if exist)
+		task['sometime'] = @model['sometime'] if @model.has_key?('sometime')
+
+		# remove old parent links, and then reconstruct SFP parent links
+		task.accept(ParentEliminator)
+
+		# debug
+		#puts JSON.pretty_generate(task)
+
+		# rebuild SFP data-structure
+		task.accept(Sfp::Visitor::SfpGenerator.new(task))
+
+		task
+	end
+
 	def wait?
 		until yield do
 			sleep 1
@@ -543,6 +517,47 @@ class Nuri::Master
 	def SfpUnknownRemover.visit(name, value, parent)
 		parent.delete(name) if value.is_a?(Sfp::Unknown)
 		true
+	end
+
+	SASPostProcessor = Object.new
+	# set a map of VM-name => VM-model
+	def SASPostProcessor.set_map(map)
+		@map = map
+	end
+	# post processing SAS after compilation
+	# goal: to add additional effects whenever a VM is deleted
+	def SASPostProcessor.sas_post_processor(parser)
+		return if parser.operators.nil?
+		parser.operators.each do |name, operator|
+			# skip if it's not "delete_vm"
+			next if !(name =~ /\.delete_vm$/) or !operator.params.has_key?('$.vm')
+			vm = operator.params['$.vm'].sub(/^\$\./, '')
+			next if !@map.has_key?(vm)
+
+			# for each not-exist state VM, add an effect
+			@map[vm].each { |k,v|
+				next if operator.has_key?(k) # skip if variable is exist (avoid overwrite)
+				next if k =~ /\.sfpAddress/ or k =~ /\.sfpPort/ # skip "sfpAddress" and "sfpPort"
+				                                                # because these will be assigned dynamically
+				var = parser.variables[k]
+				next if var.nil? # the variable is not found
+
+				if v.is_a?(Hash)
+					val = parser.types[v['_value']][0] if v['_context'] == 'null'
+					raise Exception, "Not implemented yet." # this may arise on Set values
+				else
+					val = v
+				end
+
+				# add the value to variable's values
+				var << val  
+				var.uniq!
+	
+				# create new parameter, and then add to the operator
+				parameter = Sfp::Parameter.new(var, nil, val)
+				operator[var.name] = parameter
+			}
+		end
 	end
 
 	def self.start

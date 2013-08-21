@@ -1,17 +1,15 @@
-require 'uri'
-require 'net/http'
 require 'thread'
 
 module Nuri::Orchestrator
 	include Nuri::Net::Helper
 
-	def execute_plan(p={})
+	def orchestrate_plan(p={})
 		raise Exception, "Plan file is not exist!" if not File.exist?(p[:execute]) and
-			!p[:apply]
+			!p[:plan]
 
 		push_agents_list
 
-		plan = (p[:apply] ? p[:apply] : JSON[File.read(p[:execute])])
+		plan = (p[:plan] ? p[:plan] : JSON[File.read(p[:execute])])
 		raise Exception, "Invalid plan!" if plan['workflow'].nil?
 		if plan['type'] == 'sequential'
 			execute_sequential_plan(plan, p)
