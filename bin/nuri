@@ -1,13 +1,15 @@
 #!/usr/bin/env ruby
 
-libdir = File.expand_path(File.dirname(__FILE__)) + '/../lib'
-require "#{libdir}/nuri"
+dir = File.expand_path(File.dirname(__FILE__)) + '/../lib'
+require "#{dir}/nuri"
 
 require 'coderay'
 require 'logger'
 
+version = File.read(File.dirname(__FILE__) + '/../VERSION').sub(/\n/, '')
+
 opts = Trollop::options do
-	version "Nuri 0.4.0 (c) 2013"
+	version "Nuri #{version} (c) 2013"
 	banner <<-EOS
 Usage: nuri [options]
 where [options] are:

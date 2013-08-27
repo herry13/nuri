@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
 	s.name			= 'nuri'
-	s.version		= '0.4.0'
+	s.version		= File.read(File.dirname(__FILE__) + '/VERSION').sub(/\n/, '')
 	s.date			= '2013-08-13'
 	s.summary		= 'Nuri'
 	s.description	= 'Automated workflow configuration tool'

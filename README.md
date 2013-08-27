@@ -1,7 +1,7 @@
 Nuri
 ====
 - author: Herry [herry13@gmail.com]
-- last update: 13-07-2013
+- [version](https://github.com/herry13/nuri/blob/master/VERSION)
 - license: BSD
 
 Nuri is an automated workflow configuration tool. It allows us to define the desired state of
