@@ -35,10 +35,11 @@ class Sfp::Module::Mysql < Sfp::Module::Service
 
 	def install(params={})
 		begin
+			system('timeout 20s dpkg --configure -a')
+			system('apt-get -y --purge autoremove')
+			system('apt-get -y update')
 			exec_seq 'echo mysql-server mysql-server/root_password select mysql | debconf-set-selections',
 				'echo mysql-server mysql-server/root_password_again select mysql | debconf-set-selections',
-				'apt-get -y --purge autoremove',
-				'apt-get -y update',
 				"apt-get -y install #{@model['package_name']}",
 				'echo "\n[mysqld]\nmax_connect_errors = 10000" >> /etc/mysql/my.cnf',
 				'service mysql stop',
@@ -53,13 +54,23 @@ class Sfp::Module::Mysql < Sfp::Module::Service
 	
 	def uninstall(params={})
 		system('/bin/rm -f /etc/mysql/nuri.cnf') if File.exist?('/etc/mysql/nuri.cnf')
-		result = self.class.superclass.instance_method(:uninstall).bind(self).call
-		if result == false
-			system('apt-get remove -y mysql*; apt-get autoremove -y; apt-get autoremove -y')
-		end
-		system('/bin/rm -rf /etc/mysql') if File.exist?('/etc/mysql')
-		return result
-		false
+		system('timeout 20s dpkg --configure -a')
+		exec_seq 'apt-get remove --purge -y mysql-server*',
+			'apt-get autoremove --purge -y',
+			'apt-get autoremove --purge -y'
+
+		#if Sfp::Module::Package.uninstall('mysql-server*')
+		#result = self.class.superclass.instance_method(:uninstall).bind(self).call
+		#if result == false
+		#	system('apt-get remove -y mysql*; apt-get autoremove -y; apt-get autoremove -y')
+		#end
+			system('/bin/rm -rf /etc/mysql') if File.exist?('/etc/mysql')
+			true
+		#else
+		#	false
+		#end
+		#return result
+		#false
 	end
 	
 	def set_port(params={})

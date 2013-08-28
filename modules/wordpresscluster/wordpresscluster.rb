@@ -57,8 +57,11 @@ class Sfp::Module::WordpressWeb
 	def update_state
 		@state['installed'] = false
 		doc_root = resolve(@model['http'].to_s + '.document_root')
+Sfp::Agent.logger.info "wp doc root: #{doc_root}"
 		if doc_root.is_a?(String)
-			path = "#{doc_root}/#{@model['path']}/wp-config.php".gsub /\/\//, '/'
+			#path = "#{doc_root}/#{@model['path']}/wp-config.php".gsub /\/\//, '/'
+			path = "#{doc_root}/#{@model['path']}".gsub(/\/\//, '/')
+Sfp::Agent.logger.info "wp path: #{path}"
 			@state['installed'] = true if File.exist?(path)
 		end
 
@@ -81,7 +84,7 @@ class Sfp::Module::WordpressWeb
 		system("cd /tmp; tar xvzf wp.tgz")
 
 		home_path = "#{doc_root}/#{@model['path']}"
-		home_path.gsub! /\/\//, '/'
+		home_path.gsub!(/\/\//, '/')
 		wp_config_path = "#{home_path}/wp-config.php"
 		wp_config_sample_path = "#{home_path}/wp-config-sample.php"
 
@@ -106,7 +109,7 @@ class Sfp::Module::WordpressWeb
 
 	def uninstall(p={})
 		doc_root = resolve(@model['http'].to_s + '.document_root')
-		home_path = "#{doc_root}/#{@model['path']}".gsub /\/\//, '/'
+		home_path = "#{doc_root}/#{@model['path']}".gsub(/\/\//, '/')
 
 		# delete all files
 		if @model['path'] != '/'

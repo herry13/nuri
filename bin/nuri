@@ -15,20 +15,20 @@ Usage: nuri [options]
 where [options] are:
 EOS
 
-	opt :model_file, "Model of configuration file.", :default => ''
-	opt :state, "Print the current state of the system in JSON based on given model file."
-	opt :plan, "Print the plan that could bring the system to the desired state as defined in model file."
+	opt :model_file, "Model of configuration file.", :default => '', :short => '-m'
+	opt :state, "Print the current state of the system in JSON based on given model file.", :short => '-s'
+	opt :plan, "Print the plan that could bring the system to the desired state as defined in model file.", :short => '-p'
 	opt :parallel, "Generate a parallel plan.", :short => '-l'
-	opt :bsig_deploy, "Generate and deploy Behavioural Signature model"
-	opt :bsig_purge, "Purge Behavioural Signature model"
-	opt :execute, "Execute a plan in given file. Note: model file should be specified.", :default => ''
-	opt :apply, "Generate and execute a plan that could bring the system to the desired state."
-	opt :push_modules, "Automatically push an unavailable module to target agent."
-	opt :human, "Use human readable format."
-	opt :pretty, "Use pretty JSON format."
-	opt :silent, "Set off interactive mode.", :defaut => true
-	opt :start, "Start master daemon.", :short => '-s'
-	opt :stop, "Stop master daemon.", :short => '-t'
+	opt :bsig_deploy, "Generate and deploy Behavioural Signature model", :short => '-b'
+	opt :bsig_purge, "Purge Behavioural Signature model", :short => '-g'
+	opt :execute, "Execute a plan in given file. Note: model file should be specified.", :default => '', :short => '-x'
+	opt :apply, "Generate and execute a plan that could bring the system to the desired state.", :short => '-a'
+	opt :push_modules, "Automatically push an unavailable module to target agent.", :short => '-u'
+	opt :human, "Use human readable format.", :short => '-h'
+	opt :pretty, "Use pretty JSON format.", :short => '-r'
+	opt :silent, "Set off interactive mode.", :defaut => true, :short => '-n'
+	#opt :start, "Start master daemon.", :short => '-s'
+	#opt :stop, "Stop master daemon.", :short => '-t'
 end
 
 def plan_to_human(plan)
@@ -82,7 +82,7 @@ elsif opts[:plan]
 			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
 		end
 
-		if not opts[:no_interactive] and not plan['workflow'].nil? and plan['workflow'].length > 0
+		if not opts[:silent] and plan['workflow'].is_a?(Array) and plan['workflow'].length > 0
 			print "Execute the plan [y/N]? "
 			if STDIN.gets.chomp.upcase == 'Y'
 				puts 'Executing the plan:'.yellow
@@ -105,7 +105,7 @@ elsif opts[:apply]
 	master = Nuri::Master.new
 	master.set_model(opts)
 	plan = master.get_plan(opts)
-	if plan['workflow'].nil?
+	if not plan.is_a?(Hash)
 		puts "No solution!".red
 	else
 		if opts[:human]
@@ -114,9 +114,11 @@ elsif opts[:apply]
 			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
 		end
 
-		puts 'Executing the plan...'.yellow
-		opts[:plan] = plan
-		puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
+		if plan['workflow'].is_a?(Array) and plan['workflow'].length > 0
+			puts 'Executing the plan...'.yellow
+			opts[:plan] = plan
+			puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
+		end
 	end
 
 elsif opts[:bsig_deploy]
@@ -127,22 +129,31 @@ elsif opts[:bsig_deploy]
 	master.set_model(opts)
 	bsig = master.get_bsig(opts)
 
-	if !bsig.is_a?(Hash)
+	if not bsig.is_a?(Hash)
 		puts "\nNo solution!".red
-	else
-		if opts[:human]
-			puts CodeRay.encode(JSON.pretty_generate(bsig), :json, :terminal)
-		else
-			puts (opts[:pretty] ? JSON.pretty_generate(bsig) : JSON.generate(bsig))
-		end
+	elsif bsig.length > 0
+		empty_local_bsig = bsig.select { |name,local_bsig| local_bsig['operators'].length <= 0 }
 
-		if not opts[:no_interactive] and bsig.is_a?(Hash) and bsig.length > 0
-			print "Deploy the BSig model [y/N]? "
-			if STDIN.gets.chomp.upcase == 'Y'
-				puts 'Deploying the BSig model:'.yellow
-				opts[:bsig] = bsig
-				puts (master.deploy_bsig(opts) ? "Deployment success!".green : "Deployment failed!".red)
+		if empty_local_bsig.length == bsig.length
+			puts "The goal state has been achieved!".green
+
+		else
+			# print the BSig model
+			if opts[:human]
+				puts CodeRay.encode(JSON.pretty_generate(bsig), :json, :terminal)
+			else
+				puts (opts[:pretty] ? JSON.pretty_generate(bsig) : JSON.generate(bsig))
 			end
+
+			if not opts[:silent]
+				print "Deploy the BSig model [y/N]? "
+				if STDIN.gets.chomp.upcase == 'Y'
+					puts 'Deploying the BSig model:'.yellow
+					opts[:bsig] = bsig
+					puts (master.deploy_bsig(opts) ? "Deployment success!".green : "Deployment failed!".red)
+				end
+			end
+
 		end
 	end
 
@@ -158,11 +169,13 @@ elsif opts[:bsig_purge]
 		puts "Purging Behavioural Signature model [Failed]".red
 	end
 
+=begin
 elsif opts[:start]
 	puts "Not implemented yet!".red
 
 elsif opts[:stop]
 	puts "Not implemented yet!".red
+=end
 
 else
 	Trollop::help

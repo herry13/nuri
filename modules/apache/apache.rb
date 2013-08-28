@@ -74,8 +74,9 @@ class Sfp::Module::Apache < Sfp::Module::Service
 	def install(p={})
 		begin
 			File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
-			return (self.class.superclass.instance_method(:install).bind(self).call and
-				self.stop)
+			#return (self.class.superclass.instance_method(:install).bind(self).call and
+			#	self.stop)
+			return (Sfp::Module::Package.install(@model['package_name']) and self.stop)
 		rescue Exception => e
 			Sfp::Agent.logger.error "#{e}\n#{e.backtrace.join("\n")}"
 		ensure
@@ -86,7 +87,8 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def uninstall(p={})
 		begin
-			if self.class.superclass.instance_method(:uninstall).bind(self).call
+			#if self.class.superclass.instance_method(:uninstall).bind(self).call
+			if Sfp::Module::Package.uninstall(@model['package_name'])
 				system('/bin/rm -rf /etc/apache2') if File.directory?('/etc/apache2')
 				return true
 			end
@@ -140,9 +142,10 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def install_php_mysql_module(p={})
 		begin
-			self.init2 if @php_mysql_package.nil?
+			#self.init2 if @php_mysql_package.nil?
 			File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-			return self.stop if @php_mysql_package.install
+			return self.stop if Sfp::Module::Package.install('libapache2-mod-php5')
+			#return self.stop if @php_mysql_package.install
 		rescue Exception => e
 			Sfp::Agent.logger.error e.to_s + "\n" + e.backtrace.join("\n")
 		ensure
@@ -153,9 +156,10 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def uninstall_php_mysql_module(p={})
 		begin
-			self.init2 if @php_mysql_package.nil?
+			#self.init2 if @php_mysql_package.nil?
 			File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-			return self.stop if @php_mysql_package.uninstall
+			return self.stop if Sfp::Module::Package.uninstall('libapache2-mod-php5')
+			#return self.stop if @php_mysql_package.uninstall
 		rescue Exception => e
 			Sfp::Agent.logger.error e.to_s + "\n" + e.backtrace.join("\n")
 		ensure
@@ -166,9 +170,10 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def install_php_module(p={})
 		begin
-			self.init2 if @php_package.nil?
+			#self.init2 if @php_package.nil?
 			File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-			return self.stop if @php_package.install
+			return self.stop if Sfp::Module::Package.install('php5-mysql')
+			#return self.stop if @php_package.install
 		rescue Exception => e
 			Sfp::Agent.logger.error e.to_s + "\n" + e.backtrace.join("\n")
 		ensure
@@ -179,9 +184,10 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def uninstall_php_module(p={})
 		begin
-			self.init2 if @php_package.nil?
+			#self.init2 if @php_package.nil?
 			File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-			return self.stop if @php_package.uninstall
+			return self.stop if Sfp::Module::Package.uninstall('php5-mysql')
+			#return self.stop if @php_package.uninstall
 		rescue Exception => e
 			Sfp::Agent.logger.error e.to_s + "\n" + e.backtrace.join("\n")
 		ensure
@@ -258,6 +264,7 @@ class Sfp::Module::Apache < Sfp::Module::Service
 		true
 	end
 
+=begin
 	protected
 	def init2
 		@php_package = Sfp::Module::Package.new
@@ -266,4 +273,6 @@ class Sfp::Module::Apache < Sfp::Module::Service
 		@php_mysql_package = Sfp::Module::Package.new
 		@php_mysql_package.init({'package_name' => 'php5-mysql'}, {'package_name' => 'php5-mysql'})
 	end
+=end
+
 end

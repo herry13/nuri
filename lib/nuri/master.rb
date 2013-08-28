@@ -123,8 +123,9 @@ class Nuri::Master
 	def create_plan_task(p={})
 		task = get_schemata
 
-		print "Getting current state: "
-		puts Benchmark.measure { task['initial'] = to_state('initial', get_state(p)) }
+		puts "Getting current state [WAIT]".yellow
+		b = Benchmark.measure { task['initial'] = to_state('initial', get_state(p)) }
+		puts "Getting current state [OK] : #{b}".green
 
 		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 		f1 = Sfp::Helper::SfpFlatten.new
@@ -306,9 +307,11 @@ class Nuri::Master
 			schemata.each { |m|
 				if m != 'object' and File.exist? "#{@modules_dir}/#{m}"
 					if not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s
-						print "Push module #{m} to #{name} ".yellow
-						puts (system("cd #{@modules_dir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>/dev/null") ?
-							"[OK]".green : "[Failed]".red)
+						if system("cd #{@modules_dir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>/dev/null")
+							puts "Push module #{m} to #{name} [OK]".green
+						else
+							puts "Push module #{m} to #{name} [Failed]".red
+						end
 					end
 				end
 			}

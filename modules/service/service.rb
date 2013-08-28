@@ -5,9 +5,11 @@ class Sfp::Module::Service < Sfp::Module::Package
 
 	def update_state
 		self.reset
-		@state['installed'] = Sfp::Module::Package.installed?(@model['package_name'])
-		@state['version'] = Sfp::Module::Package.version?(@model['package_name']).to_s
-		@state['running'] = Sfp::Module::Service.running?(@model['service_name'])
+		if @model.is_a?(Hash)
+			@state['installed'] = Sfp::Module::Package.installed?(@model['package_name'])
+			@state['version'] = Sfp::Module::Package.version?(@model['package_name']).to_s
+			@state['running'] = Sfp::Module::Service.running?(@model['service_name'])
+		end
 	end
 
 	def self.running?(service)

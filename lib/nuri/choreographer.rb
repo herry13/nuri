@@ -87,7 +87,7 @@ module Nuri::Choreographer
 			if code == '200'
 				puts "Purging BSig model: #{name}@#{address}:#{port} [OK]".green
 			else
-				$stderr.puts "Purging BSig model: #{agent_ref}@#{address}:#{port} [Failed]".red
+				$stderr.puts "Purging BSig model: #{name}@#{address}:#{port} [Failed]".red
 				success = false
 			end
 		end
