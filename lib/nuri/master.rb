@@ -307,7 +307,7 @@ class Nuri::Master
 			schemata.each { |m|
 				if m != 'object' and File.exist? "#{@modules_dir}/#{m}"
 					if not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s
-						if system("cd #{@modules_dir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>/dev/null")
+						if system("cd #{@modules_dir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>>/tmp/install_module.error")
 							puts "Push module #{m} to #{name} [OK]".green
 						else
 							puts "Push module #{m} to #{name} [Failed]".red
