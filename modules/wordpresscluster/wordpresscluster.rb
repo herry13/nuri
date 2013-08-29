@@ -8,7 +8,7 @@ class Sfp::Module::WordpressDB
 			config = JSON[File.read(ConfigFile)]
 			root_password = resolve(config['mysql'] + '.root_password')
 			data = `echo "show databases;" | mysql -u root --password=#{root_password} mysql`.strip.split("\n")
-			@state['installed'] = !!data.index(@model['db_name'])
+			@state['installed'] = !!data.index(config['db_name'])
 			@state['mysql'] = (@state['installed'] ? config['mysql'] : @model['mysql'])
 			@state['db_name'] = config['db_name']
 			@state['db_user'] = config['db_user']
@@ -20,20 +20,6 @@ class Sfp::Module::WordpressDB
 			@state['db_user'] = @model['db_user']
 			@state['db_password'] = @model['db_password']
 		end
-=begin
-		@state['installed'] = false
-
-		root_password = (@model['mysql'].nil? ? nil : resolve(@model['mysql'] + '.root_password'))
-		if root_password.is_a?(String)
-			data = `echo "show databases;" | mysql -u root --password=#{root_password} mysql`.strip.split("\n")
-			@state['installed'] = true if data.index(@model['db_name'])
-		end
-
-		@state['mysql'] = @model['mysql']
-		@state['db_name'] = @model['db_name']
-		@state['db_user'] = @model['db_user']
-		@state['db_password'] = @model['db_password']
-=end
 	end
 
 	def install(p={})
@@ -44,7 +30,6 @@ class Sfp::Module::WordpressDB
 		# install database
 		mysql_cmd = "mysql -u root --password=#{root_password}"
 		sql1 = "CREATE USER '#{@model['db_user']}'@'%' IDENTIFIED BY '#{@model['db_password']}';"
-		#return false if not 
 		system("echo \"#{sql1}\" | #{mysql_cmd}")
 		sql2 = "DROP DATABASE IF EXISTS #{@model['db_name']}; CREATE DATABASE #{@model['db_name']};"
 		return false if not system("echo \"#{sql2}\" | #{mysql_cmd}")
@@ -104,15 +89,11 @@ class Sfp::Module::WordpressWeb
 			@state['database'] = nil
 			@state['path'] = @model['path']
 		end
-
-		#@state['http'] = @model['http']
-		#@state['database'] = @model['database']
-		#@state['path'] = @model['path']
 		@state['source_url'] = @model['source_url']
 	end
 
 	def install(p={})
-		return false if p['database'].nil? or p['http'].nil? # @model['database'].nil?
+		return false if p['database'].nil? or p['http'].nil? 
 
 		system('apt-get update; apt-get install -y wget') if `which wget`.strip.length <= 0
 		return false if `which wget`.strip.length <= 0
@@ -132,8 +113,8 @@ class Sfp::Module::WordpressWeb
 
 		system("cp -f #{wp_config_sample_path} #{wp_config_path}")
 
-		db = resolve(p['database']) # @model['database'])
-		db_address = resolve(p['database'] + '.parent.sfpAddress') #  @model['database'] + '.parent.sfpAddress')
+		db = resolve(p['database'])
+		db_address = resolve(p['database'] + '.parent.sfpAddress')
 		system("sed -i 's/.*DB_NAME.*/define(\"DB_NAME\",\"#{db['db_name']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_USER.*/define(\"DB_USER\",\"#{db['db_user']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_PASSWORD.*/define(\"DB_PASSWORD\",\"#{db['db_password']}\");/' #{wp_config_path}")
