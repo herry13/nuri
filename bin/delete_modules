@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ "$1" == "" ]]
+then
+	echo "Usage: delete_modules <address> [port]"
+elif [[ "$2" == "" ]]
+then
+	curl -i -X PUT $1:1314/modules
+else
+	curl -i -X PUT $1:$2/modules
+fi
