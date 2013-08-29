@@ -81,7 +81,8 @@ module Nuri::Choreographer
 		self.get_agents.each do |name,model|
 			address = model['sfpAddress']
 			port = model['sfpPort']
-			fail "Invalid agent's address: #{name}" if !address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
+			next if !address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
+			#fail "Invalid agent's address: #{name}" if !address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
 			
 			code, _ = put_data(address, port, '/bsig', {})
 			if code == '200'
