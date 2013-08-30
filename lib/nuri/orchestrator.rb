@@ -101,6 +101,12 @@ module Nuri::Orchestrator
 			op[:string] = "#{op['id'] + 1}: #{op['name']} #{JSON.generate(op['parameters'])}"
 		}		
 
+		@out = Logger.new(STDOUT)
+		@out.formatter = proc do |severity, datetime, progname, msg|
+			dt = datetime.split(' ')
+			"[#{dt[0]} #{dt[1]}] #{severity} #{msg}\n"
+		end
+
 		@threads = []
 		@actions_failed = []
 		@mutex = Mutex.new
@@ -127,13 +133,13 @@ module Nuri::Orchestrator
 
 				while not @failed and not action[:executed]
 					# Try to execute the action
-					puts "Executing #{action[:string]} - thread ##{tid} [WAIT]".yellow
+					@out.info "Executing #{action[:string]} - thread ##{tid} [WAIT]".yellow
 					success = false
 					1.upto(@retries) do |i|
 						begin
 							success = execute_action(action)
 						rescue Exception => exp
-							$stderr.puts "Executing(#{i}) #{action[:string]} - thread ##{tid} [FAILED]\n#{exp}\n#{exp.backtrace.join("\n")}"
+							@out.error "Executing(#{i}) #{action[:string]} - thread ##{tid} [FAILED]\n#{exp}\n#{exp.backtrace.join("\n")}"
 						end
 						break if success
 					end
@@ -141,7 +147,7 @@ module Nuri::Orchestrator
 					# Check if execution failed
 					if success
 						# Execution was success
-						puts "Executing #{action[:string]} - thread ##{tid} [OK]".green
+						@out.info "Executing #{action[:string]} - thread ##{tid} [OK]".green
 						next_actions = []
 						@mutex.synchronize {
 							action[:executed] = true # set executed
@@ -176,7 +182,7 @@ module Nuri::Orchestrator
 
 					else
 						# Execution was failed
-						$stderr.puts "Executing #{action[:string]} - thread ##{tid} [FAILED]".red
+						@out.error "Executing #{action[:string]} - thread ##{tid} [FAILED]".red
 						@mutex.synchronize {
 							@failed = true # set global flag to stop the execution
 							@actions_failed << action
