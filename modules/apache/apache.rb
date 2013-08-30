@@ -142,10 +142,8 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def install_php_mysql_module(p={})
 		begin
-			#self.init2 if @php_mysql_package.nil?
 			File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-			return self.stop if Sfp::Module::Package.install('libapache2-mod-php5')
-			#return self.stop if @php_mysql_package.install
+			return self.stop if Sfp::Module::Package.install('php5-mysql')
 		rescue Exception => e
 			Sfp::Agent.logger.error e.to_s + "\n" + e.backtrace.join("\n")
 		ensure
@@ -156,10 +154,8 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def uninstall_php_mysql_module(p={})
 		begin
-			#self.init2 if @php_mysql_package.nil?
 			File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-			return self.stop if Sfp::Module::Package.uninstall('libapache2-mod-php5')
-			#return self.stop if @php_mysql_package.uninstall
+			return self.stop if Sfp::Module::Package.uninstall('php5-mysql')
 		rescue Exception => e
 			Sfp::Agent.logger.error e.to_s + "\n" + e.backtrace.join("\n")
 		ensure
@@ -170,10 +166,8 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def install_php_module(p={})
 		begin
-			#self.init2 if @php_package.nil?
 			File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-			return self.stop if Sfp::Module::Package.install('php5-mysql')
-			#return self.stop if @php_package.install
+			return self.stop if Sfp::Module::Package.install('libapache2-mod-php5')
 		rescue Exception => e
 			Sfp::Agent.logger.error e.to_s + "\n" + e.backtrace.join("\n")
 		ensure
@@ -184,10 +178,8 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def uninstall_php_module(p={})
 		begin
-			#self.init2 if @php_package.nil?
 			File.open(NotRunningLockFile, 'w') { |f| f.write(' ') }
-			return self.stop if Sfp::Module::Package.uninstall('php5-mysql')
-			#return self.stop if @php_package.uninstall
+			return self.stop if Sfp::Module::Package.uninstall('libapache2-mod-php5')
 		rescue Exception => e
 			Sfp::Agent.logger.error e.to_s + "\n" + e.backtrace.join("\n")
 		ensure
