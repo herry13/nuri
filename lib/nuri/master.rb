@@ -65,7 +65,7 @@ class Nuri::Master
 			planner = Sfp::Planner.new
 			plan = planner.solve(p)
 		end
-		puts "Planning: #{planning_time}"
+		puts "Planning time (s): #{planning_time}"
 
 		plan
 	end
@@ -182,9 +182,13 @@ class Nuri::Master
 		end
 	end
 
-	def get_dead_vm_state(name, cloud)
-		# TODO -- this should return the same structure as method "generate_not_exist_vm_state"
-		SfpUnknown
+	def get_dead_vm_state(model, cloud)
+		s = {'state' => Sfp::Helper.deep_clone(model)}
+		s.accept(VisitorDeadAgentNodeState)
+		s.accept(ParentEliminator)
+		s['state']['created'] = true
+		s['state']['in_cloud'] = cloud
+		s['state']
 	end
 
 	def generate_not_exist_vm_state(with_final_attribute=true)
@@ -221,7 +225,7 @@ class Nuri::Master
 				if state[name].is_a?(Hash)
 					state[name]['in_cloud'] = cloud
 				elsif state[name].is_a?(Sfp::Unknown)
-					state[name] = get_dead_vm_state(name, cloud)
+					state[name] = get_dead_vm_state(vms[name], cloud)
 				end
 			end
 		end
@@ -449,6 +453,19 @@ class Nuri::Master
 			end
 		elsif value['_context'] == 'null' or value['_context'] == 'any_value'
 			parent[name] = Sfp::Undefined.create(value['_isa'])
+		elsif value['_context'] != 'object'
+			parent.delete(name)
+		end
+		true
+	end
+
+	VisitorDeadAgentNodeState = Object.new
+	def VisitorDeadAgentNodeState.visit(name, value, parent)
+		return false if name[0,1] == '_'
+		if not value.is_a?(Hash)
+			parent[name] = SfpUnknown
+		elsif value['_context'] == 'null' or value['_context'] == 'any_value'
+			parent[name] = Sfp::Unknown
 		elsif value['_context'] != 'object'
 			parent.delete(name)
 		end

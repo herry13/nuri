@@ -9,13 +9,19 @@ module Nuri::Orchestrator
 
 		push_agents_list
 
-		plan = (p[:plan] ? p[:plan] : JSON[File.read(p[:execute])])
-		raise Exception, "Invalid plan!" if plan['workflow'].nil?
-		if plan['type'] == 'sequential'
-			execute_sequential_plan(plan, p)
-		else
-			execute_parallel_plan(plan, p)
-		end
+		success = false
+		benchmark = Benchmark.measure {
+			plan = (p[:plan] ? p[:plan] : JSON[File.read(p[:execute])])
+			raise Exception, "Invalid plan!" if plan['workflow'].nil?
+			if plan.is_a?(Hash) and plan['type'] == 'sequential'
+				success = execute_sequential_plan(plan, p)
+			elsif plan.is_a?(Hash) and plan['type'] == 'parallel'
+				success = execute_parallel_plan(plan, p)
+			end
+		}
+		puts "Execution time (s): #{benchmark}"
+
+		success
 	end
 
 	protected
