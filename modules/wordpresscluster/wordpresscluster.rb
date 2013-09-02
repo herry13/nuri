@@ -54,37 +54,40 @@ end
 class Sfp::Module::WordpressWeb
 	include Sfp::Resource
 
+	ConfigFile = '/tmp/sfp.module.wordpressweb.config'
+
 	def update_state
 		@state['installed'] = false
-		doc_root = resolve(@model['http'].to_s + '.document_root')
-Sfp::Agent.logger.info "wp doc root: #{doc_root}"
-		if doc_root.is_a?(String)
-			#path = "#{doc_root}/#{@model['path']}/wp-config.php".gsub /\/\//, '/'
-			path = "#{doc_root}/#{@model['path']}".gsub(/\/\//, '/')
-Sfp::Agent.logger.info "wp path: #{path}"
-			@state['installed'] = true if File.exist?(path)
+		@state['installed'] = File.exist?(@model['path'])
+
+		if File.exist?(ConfigFile)
+			config = JSON[File.read(ConfigFile)]
+			@state['http'] = config['http']
+			@state['database'] = config['database']
+			@state['path'] = config['path']
+		else
+			@state['http'] = nil
+			@state['database'] = nil
+			@state['path'] = @model['path']
 		end
 
-		@state['http'] = @model['http']
-		@state['database'] = @model['database']
-		@state['path'] = @model['path']
+		#@state['http'] = @model['http']
+		#@state['database'] = @model['database']
+		#@state['path'] = @model['path']
 		@state['source_url'] = @model['source_url']
 	end
 
 	def install(p={})
-		return false if @model['database'].nil?
+		return false if p['database'].nil? or p['http'].nil? # @model['database'].nil?
 
 		system('apt-get update; apt-get install -y wget') if `which wget`.strip.length <= 0
 		return false if `which wget`.strip.length <= 0
-
-		doc_root = resolve(@model['http'].to_s + '.document_root')
 
 		system("wget --output-document='/tmp/wp.tgz' #{@model['source_url']}")
 		return false if not File.exist?('/tmp/wp.tgz')
 		system("cd /tmp; tar xvzf wp.tgz")
 
-		home_path = "#{doc_root}/#{@model['path']}"
-		home_path.gsub!(/\/\//, '/')
+		home_path = @model['path']
 		wp_config_path = "#{home_path}/wp-config.php"
 		wp_config_sample_path = "#{home_path}/wp-config-sample.php"
 
@@ -95,8 +98,8 @@ Sfp::Agent.logger.info "wp path: #{path}"
 
 		system("cp -f #{wp_config_sample_path} #{wp_config_path}")
 
-		db = resolve(@model['database'])
-		db_address = resolve(@model['database'] + '.parent.sfpAddress')
+		db = resolve(p['database']) # @model['database'])
+		db_address = resolve(p['database'] + '.parent.sfpAddress') #  @model['database'] + '.parent.sfpAddress')
 		system("sed -i 's/.*DB_NAME.*/define(\"DB_NAME\",\"#{db['db_name']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_USER.*/define(\"DB_USER\",\"#{db['db_user']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_PASSWORD.*/define(\"DB_PASSWORD\",\"#{db['db_password']}\");/' #{wp_config_path}")
@@ -104,19 +107,26 @@ Sfp::Agent.logger.info "wp path: #{path}"
 
 		system("cd #{home_path}; mv -f index.html index.html.bak")
 
+		File.open(ConfigFile, 'w') { |f|
+			config = { 'http' => p['http'], 'database' => p['database'], 'path' => @model['path'] }
+			f.write(JSON.generate(config))
+			f.flush
+		}
+
 		true
 	end
 
 	def uninstall(p={})
-		doc_root = resolve(@model['http'].to_s + '.document_root')
-		home_path = "#{doc_root}/#{@model['path']}".gsub(/\/\//, '/')
+		home_path = @model['path']
 
-		# delete all files
+		# delete all files
 		if @model['path'] != '/'
 			system("rm -rf #{home_path}")
 		else
 			system("cd #{home_path}; mv -f index.html.bak /tmp; rm -rf *; mv -f /tmp/index.html.bak index.html")
 		end
+
+		File.delete(ConfigFile) if File.exist?(ConfigFile)
 
 		true
 	end

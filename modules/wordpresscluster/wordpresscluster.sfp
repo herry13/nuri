@@ -36,7 +36,7 @@ schema WordpressWeb extends WordpressCluster {
 	installed : Bool
 	http isref Apache
 	database isref WordpressDB
-	final path = "/wp"
+	final path = "/var/www/wp"
 	final source_url = "http://wordpress.org/latest.tar.gz"
 
 	sub install (http: Apache, database: WordpressDB) {
@@ -57,6 +57,7 @@ schema WordpressWeb extends WordpressCluster {
 
 	sub uninstall {
 		condition {
+			//this.http.running = false
 			this.installed = true
 		}
 		effect {
