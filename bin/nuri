@@ -39,10 +39,10 @@ def plan_to_human(plan)
 	actions = plan['workflow']
 	if plan['type'] == 'sequential'
 		p = 'Sequential Plan:'.yellow
-		actions.each_index { |i| p += "\n#{i+1}. #{actions[i]['name']} #{actions[i]['parameters']}" }
+		actions.each_index { |i| p += "\n#{i+1}. #{actions[i]['name']} #{JSON.generate(actions[i]['parameters'])}" }
 	else
 		p = 'Partial-Order Plan:'.yellow
-		actions.each { |op| p += "\n#{op['id']+1}. #{op['name']} #{op['parameters']} (#{op['predecessors'].map{|i|i+1}}, #{op['successors'].map{|i|i+1}})" }
+		actions.each { |op| p += "\n#{op['id']+1}. #{op['name']} #{JSON.generate(op['parameters'])} (#{op['predecessors'].map{|i|i+1}}, #{op['successors'].map{|i|i+1}})" }
 	end
 	p
 end
