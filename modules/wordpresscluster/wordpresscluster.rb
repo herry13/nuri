@@ -1,8 +1,28 @@
 class Sfp::Module::WordpressDB
 	include Sfp::Resource
 
+	ConfigFile = '/tmp/sfp.module.wordpressdb.config'
+
 	def update_state
+		if File.exist?(ConfigFile)
+			config = JSON[File.read(ConfigFile)]
+			root_password = resolve(config['mysql'] + '.root_password')
+			data = `echo "show databases;" | mysql -u root --password=#{root_password} mysql`.strip.split("\n")
+			@state['installed'] = !!data.index(@model['db_name'])
+			@state['mysql'] = (@state['installed'] ? config['mysql'] : @model['mysql'])
+			@state['db_name'] = config['db_name']
+			@state['db_user'] = config['db_user']
+			@state['db_password'] = config['db_password']
+		else
+			@state['installed'] = false
+			@state['mysql'] = @model['mysql']
+			@state['db_name'] = @model['db_name']
+			@state['db_user'] = @model['db_user']
+			@state['db_password'] = @model['db_password']
+		end
+=begin
 		@state['installed'] = false
+
 		root_password = (@model['mysql'].nil? ? nil : resolve(@model['mysql'] + '.root_password'))
 		if root_password.is_a?(String)
 			data = `echo "show databases;" | mysql -u root --password=#{root_password} mysql`.strip.split("\n")
@@ -13,6 +33,7 @@ class Sfp::Module::WordpressDB
 		@state['db_name'] = @model['db_name']
 		@state['db_user'] = @model['db_user']
 		@state['db_password'] = @model['db_password']
+=end
 	end
 
 	def install(p={})
@@ -32,20 +53,33 @@ class Sfp::Module::WordpressDB
 		sql4 = "FLUSH PRIVILEGES;"
 		return false if not system("echo \"#{sql4}\" | #{mysql_cmd}")
 
+		config = { 'mysql' => @model['mysql'],
+		           'db_name' => @model['db_name'],
+		           'db_user' => @model['db_user'],
+		           'db_password' => @model['db_password'] }
+		File.open(ConfigFile, 'w') { |f|
+			f.write(JSON.generate(config))
+			f.flush
+		}
+
 		true
 	end
 
 	def uninstall(p={})
-		return false if @model['mysql'].nil?
+		return false if not File.exist?(ConfigFile)
 
-		root_password = resolve(@model['mysql'].to_s + '.root_password')
+		config = JSON[File.read(ConfigFile)]
+
+		root_password = resolve(config['mysql'] + '.root_password')
 		# uninstall database
 		mysql_cmd = "mysql -u root --password=#{root_password}"
-		sql1 = "DROP USER '#{@model['db_user']}'@'%';"
-		sql2 = "DROP DATABASE IF EXISTS #{@model['db_name']};"
-		sql3 = "REVOKE ALL PRIVILEGES ON *.* FROM '#{@model['db_user']}'@'%';"
+		sql1 = "DROP USER '#{config['db_user']}'@'%';"
+		sql2 = "DROP DATABASE IF EXISTS #{config['db_name']};"
+		sql3 = "REVOKE ALL PRIVILEGES ON *.* FROM '#{config['db_user']}'@'%';"
 		sql4 = "FLUSH PRIVILEGES;"
 		system("echo \"#{sql1} #{sql2} #{sql3} #{sql4}\" | #{mysql_cmd}")
+
+		File.delete(ConfigFile) if File.exist?(ConfigFile)
 
 		true
 	end

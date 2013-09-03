@@ -21,9 +21,10 @@ schema WordpressDB extends WordpressCluster {
 			this.mysql = mysql
 		}
 	}
-	sub uninstall {
+	sub uninstall (mysql: Mysql) {
 		condition {
-			this.mysql.running = true
+			this.mysql = mysql
+			mysql.running = true
 			this.installed = true
 		}
 		effect {
@@ -55,13 +56,19 @@ schema WordpressWeb extends WordpressCluster {
 		}
 	}
 
-	sub uninstall {
+	sub uninstall (http: Apache, database: WordpressDB) {
 		condition {
-			//this.http.running = false
 			this.installed = true
+			this.http = http
+			http.running = false
+			http.installed = true
+			this.database = database
+			database.installed = true
 		}
 		effect {
 			this.installed = false
+			this.http = null
+			this.database = null
 		}
 	}
 }
