@@ -101,12 +101,6 @@ module Nuri::Orchestrator
 			op[:string] = "#{op['id'] + 1}: #{op['name']} #{JSON.generate(op['parameters'])}"
 		}		
 
-		@out = Logger.new(STDOUT)
-		@out.formatter = proc do |severity, datetime, progname, msg|
-			dt = datetime.split(' ')
-			"[#{dt[0]} #{dt[1]}] #{severity} #{msg}\n"
-		end
-
 		@threads = []
 		@actions_failed = []
 		@mutex = Mutex.new
@@ -133,13 +127,13 @@ module Nuri::Orchestrator
 
 				while not @failed and not action[:executed]
 					# Try to execute the action
-					@out.info "Executing #{action[:string]} - thread ##{tid} [WAIT]".yellow
+					puts "Executing #{action[:string]} - thread ##{tid} [WAIT]".yellow
 					success = false
 					1.upto(@retries) do |i|
 						begin
 							success = execute_action(action)
 						rescue Exception => exp
-							@out.error "Executing(#{i}) #{action[:string]} - thread ##{tid} [FAILED]\n#{exp}\n#{exp.backtrace.join("\n")}"
+							puts "Executing(#{i}) #{action[:string]} - thread ##{tid} [FAILED]\n#{exp}\n#{exp.backtrace.join("\n")}"
 						end
 						break if success
 					end
@@ -147,16 +141,16 @@ module Nuri::Orchestrator
 					# Check if execution failed
 					if success
 						# Execution was success
-						@out.info "Executing #{action[:string]} - thread ##{tid} [OK]".green
+						puts "Executing #{action[:string]} - thread ##{tid} [OK]".green
 						next_actions = []
 						@mutex.synchronize {
 							action[:executed] = true # set executed
-							# select next action to be executed from successor actions list
+							# select next action to be executed from successor actions list
 							# select a successor action that has not been assigned to any thread yet
 							if action['successors'].length > 0
 								action['successors'].each { |id|
 									if @actions[id][:executor].nil?
-										# check if all predecessors actions have been executed
+										# check if all predecessors actions have been executed
 										predecessors_ok = true
 										@actions[id]['predecessors'].each { |pid|
 											predecessors_ok = (predecessors_ok and @actions[pid][:executed])
@@ -173,7 +167,7 @@ module Nuri::Orchestrator
 							# execute the first next actions to this thread
 							action = @actions[next_actions[0]]
 							if next_actions.length > 1
-								# execute other next actions to other threads
+								# execute other next actions to other threads
 								for i in 1..(next_actions.length-1)
 									assign_action_with_id(next_actions[i])
 								end
@@ -182,9 +176,9 @@ module Nuri::Orchestrator
 
 					else
 						# Execution was failed
-						@out.error "Executing #{action[:string]} - thread ##{tid} [FAILED]".red
+						puts "Executing #{action[:string]} - thread ##{tid} [FAILED]".red
 						@mutex.synchronize {
-							@failed = true # set global flag to stop the execution
+							@failed = true # set global flag to stop the execution
 							@actions_failed << action
 						}
 					end
