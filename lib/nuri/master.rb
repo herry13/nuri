@@ -4,6 +4,7 @@ class Nuri::Master
 	include Nuri::Net::Helper
 	include Nuri::Orchestrator
 	include Nuri::Choreographer
+	include Nuri::Server
 
 	SfpUnknown = Sfp::Unknown.new
 	SfpUndefined = Sfp::Undefined.new
@@ -20,14 +21,16 @@ class Nuri::Master
 		@local_agent = nil
 
 		# set modules directory
-		if ENV['SFP_HOME'].is_a?(String) and ENV['SFP_HOME'].strip.length > 0
-			@modules_dir = File.join(ENV['SFP_HOME'], 'modules')
+		if p[:modules_dir] and File.directory?(p[:modules_dir])
+			@modules_dir = File.expand_path(p[:modules_dir])
+		elsif ENV['NURI_HOME'].is_a?(String) and ENV['NURI_HOME'].strip.length > 0
+			@modules_dir = File.join(ENV['NURI_HOME'], 'modules')
 		elsif File.directory?(File.expand_path(File.dirname(__FILE__) + '/../../modules'))
 			@modules_dir = File.expand_path(File.dirname(__FILE__) + '/../../modules')
 		elsif File.directory?(File.expand_path('./modules'))
 			@modules_dir = File.expand_path('./modules')
 		else
-			@modules_dir = '/var/lib/nuri/modules'
+			@modules_dir = '/var/nuri/modules'
 		end
 		fail "Invalid modules directory #{@modules_dir}!" if !File.directory?(@modules_dir)
 
