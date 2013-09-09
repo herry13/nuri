@@ -2,8 +2,8 @@ include "../machine/machine.sfp"
 include "../cloud/cloud.sfp"
 
 schema VM extends Machine {
-	sfpAddress : String
-	sfpPort : Int
+	final sfpAddress is "" // : String
+	final sfpPort is "1314" // : Int
 	created : Bool
 	in_cloud isref Cloud
 }
