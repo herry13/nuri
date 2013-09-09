@@ -286,7 +286,6 @@ class Nuri::Master
 			end
 			return true
 		rescue Exception => exp
-			#$stderr.puts "#{exp}\n#{exp.backtrace.join("\n")}"
 		end
 		false
 	end
@@ -308,21 +307,26 @@ class Nuri::Master
 			raise Exception, "Unable to get modules list from #{name}" if code.to_i != 200
 
 			modules = JSON[body]
+			list = ''
 			schemata.each { |m|
-				if m != 'object' and File.exist? "#{@modules_dir}/#{m}"
-					if not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s
-						if system("cd #{@modules_dir}; ./install_module #{address} #{port} #{m} 1>/dev/null 2>>/tmp/install_module.error")
-							puts "Push module #{m} to #{name} [OK]".green
-						else
-							puts "Push module #{m} to #{name} [Failed]".red
-						end
-					end
-				end
+				list += "#{m} " if m != 'object' and File.exist?("#{@modules_dir}/#{m}") and
+				                   (not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s)
 			}
+
+			return true if list == ''
+
+			if system("cd #{@modules_dir}; ./install_module #{address} #{port} #{list} 1>/dev/null 2>/tmp/install_module.error")
+				puts "Push modules #{list}to #{name} [OK]".green
+			else
+				puts "Push modules #{list}to #{name} [Failed]".red
+			end
+
 			return true
+
 		rescue Exception => e
 			puts "[WARN] Cannot push module to #{name} - #{e}".red
 		end
+
 		false
 	end
 
@@ -463,9 +467,31 @@ class Nuri::Master
 	def VisitorDeadAgentNodeState.visit(name, value, parent)
 		return false if name[0,1] == '_'
 		if not value.is_a?(Hash)
-			parent[name] = SfpUnknown
+			if value.is_a?(String)
+				if value.isref
+					ref_value = parent.at?(value)
+					# TODO - need to handle a reference to a primitive value
+					if ref_value.is_a?(Hash) and (ref_value.isobject or ref_value.isnull)
+						parent[name] = Sfp::Unknown.create(ref_value['_isa'])
+					elsif ref_value.is_a?(Sfp::Unknown) or ref_value.is_a?(Sfp::Unknown)
+						parent[name] = ref_value
+					else
+						puts "[WARN] Sfp::Unknown => #{parent.ref.push(name)}: #{ref_value.class.name}"
+						parent[name] = SfpUnknown
+					end
+				else
+					parent[name] = Sfp::Unknown.create('$.String')
+				end
+			elsif value.is_a?(Fixnum) or value.is_a?(Float)
+				parent[name] = Sfp::Unknown.create('$.Number')
+			elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
+				parent[name] = Sfp::Unknown.create('$.Boolean')
+			else
+				puts "[WARN] Sfp::Unknown => " + parent.ref.push(name) + ": " + value.class.name
+				parent[name] = SfpUnknown
+			end
 		elsif value['_context'] == 'null' or value['_context'] == 'any_value'
-			parent[name] = Sfp::Unknown
+			parent[name] = Sfp::Unknown.create(value['_isa'])
 		elsif value['_context'] != 'object'
 			parent.delete(name)
 		end

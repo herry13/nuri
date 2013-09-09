@@ -1,15 +1,28 @@
 #!/bin/bash
 
-if [[ "$1" == "" ]] || [[ "$2" == "" ]]
-then
-	echo "Usage: install_module <address> [port] <module-name>"
-elif [[ "$3" == "" ]]
-then
-	tar cvzhf $2.tgz $2
-	curl -i -X PUT $1:1314/modules/$2 -F module=@$2.tgz
-	rm $2.tgz
-else
-	tar cvzhf $3.tgz $3
-	curl -i -X PUT $1:$2/modules/$3 -F module=@$3.tgz
-	rm $3.tgz
+if [[ "$1" == "" ]] || [[ "$2" == "" ]]; then
+	echo "Usage: install_module <address> [port] <module-name> ..."
+	exit 1
 fi
+
+address=$1
+shift
+
+if [[ "$1" == "" ]]; then
+	port=1314
+else
+	port=$1
+	shift
+fi
+
+cmd="curl -i -X PUT $address:$port/modules"
+for module in "$@" ; do
+	tar cvzhf /tmp/$module.tgz $module 1>/dev/null
+	cmd="$cmd -F $module=@/tmp/$module.tgz"
+done
+
+$cmd
+
+for module in "$@"; do
+	rm -f /tmp/$module.tgz
+done
