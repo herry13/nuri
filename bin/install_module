@@ -1,28 +1,63 @@
 #!/bin/bash
 
+DefaultPort=1314
+
+# verify the arguments
 if [[ "$1" == "" ]] || [[ "$2" == "" ]]; then
 	echo "Usage: install_module <address> [port] <module-name> ..."
 	exit 1
 fi
 
+# set the agent's address
 address=$1
 shift
 
-if [[ "$1" == "" ]]; then
-	port=1314
-else
+# set the agent's port number
+re='^[0-9]+$'
+if [[ $1 =~ $re ]]; then
 	port=$1
 	shift
+else
+	port=$DefaultPort
 fi
 
-cmd="curl -i -X PUT $address:$port/modules"
+# set a template command for sending the modules
+cmd="curl -s -i -X PUT $address:$port/modules"
+
+# for every module in the arguments:
+# - archive the module's files to a temporary file
+# - update the sending command by adding the module
+# if the module is not exist then the program will
+# set missing_module flag and then break from the loop
+missing_module=0
 for module in "$@" ; do
-	tar cvzhf /tmp/$module.tgz $module 1>/dev/null
-	cmd="$cmd -F $module=@/tmp/$module.tgz"
+	if [[ -d "$module" ]]; then
+		tar cvzhf /tmp/$module.tgz $module 1>/dev/null
+		cmd="$cmd -F $module=@/tmp/$module.tgz"
+	else
+		echo "Module $module is not exist!"
+		missing_module=`expr $missing_module + 1`
+	fi
 done
 
-$cmd
+if [[ $missing_module == 0 ]]; then
+	# execute the sending command there is no missing module
+	result=`$cmd`
+	re='.*HTTP/1\.1 200 OK.*'
+	if ! [[ $result =~ $re ]]; then
+		missing_module=`expr $missing_module + 1`
+	fi
+fi
 
+# delete temporary archive files
 for module in "$@"; do
 	rm -f /tmp/$module.tgz
 done
+
+if [[ $missing_module == 0 ]]; then
+	echo "status: ok"
+else
+	echo "status: failed"
+fi
+
+exit $missing_module
