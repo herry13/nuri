@@ -14,7 +14,7 @@ class Sfp::Module::Bonfire
 	def update_state
 		self.reset
 		@state['running'] = self.open_connection
-		@state['vms'] = self.get_vms(:experiment => @experiment)
+		@state['vms'] = self.get_vms
 	end
 
 	def create_vm(p={})
@@ -25,9 +25,6 @@ class Sfp::Module::Bonfire
 			name.sub!(/^\$\./, '')
 			server = self.create_server({
 				:name => name,
-				:session => @session,
-				:experiment => @experiment,
-				:location => @location,
 				:image => @model['image_name'],
 				:wan => @model['wan_name'],
 			})
@@ -51,9 +48,7 @@ class Sfp::Module::Bonfire
 		begin
 			name.sub!(/^\$\./, '')
 			return self.delete_server({
-				:name => name,
-				:session => @session,
-				:experiment => @experiment,
+				:name => name
 			})
 		rescue Exception => e
 			Sfp::Agent.logger.error "Delete VM [Failed] #{e}\n#{e.backtrace.join("\n")}"
