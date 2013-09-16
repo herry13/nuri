@@ -208,8 +208,8 @@ module Nuri::Server
 	end
 end
 
-nuri = Object.new
-nuri.extend(Nuri::Server)
-nuri.init
+#nuri = Object.new
+#nuri.extend(Nuri::Server)
+#nuri.init
 #nuri.start
-nuri.stop
+#nuri.stop

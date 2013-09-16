@@ -293,10 +293,13 @@ class Nuri::Master
 		false
 	end
 
-	def push_modules(agent_model)
-		return false if !agent_model.is_a?(Hash) or !agent_model['sfpAddress'].is_a?(String)
-		address = agent_model['sfpAddress'].to_s.strip
-		port = agent_model['sfpPort'].to_s.strip
+	def push_modules(agent_model, address=nil, port=nil)
+		if address.nil? or port.nil?
+			return false if !agent_model.is_a?(Hash) or !agent_model['sfpAddress'].is_a?(String)
+			address = agent_model['sfpAddress'].to_s.strip
+			port = agent_model['sfpPort'].to_s.strip
+		end
+
 		return false if address == '' or port == ''
 
 		name = agent_model['_self']
