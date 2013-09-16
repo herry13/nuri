@@ -9,9 +9,6 @@ module Nuri::Choreographer
 			bsig['operators'].each { |op|
 				op['condition'].keys.each { |var| op['condition'].delete(var) if op['condition'][var].is_a?(Sfp::Undefined) }
 				op['effect'].keys.each { |var| op['effect'].delete(var) if op['effect'][var].is_a?(Sfp::Undefined) }
-
-				#op['condition'].keys.each { |var| op['condition'].delete(var) if var =~ /^\$\.[a-zA-Z0-9]+\.in_cloud$/ }
-				#op['condition'].keys.each { |var| op['effect'].delete(var) if var =~ /^\$\.[a-zA-Z0-9]+\.in_cloud$/ }
 			}
 			bsig['goal'].keys.each { |var|
 				if bsig['goal'][var].is_a?(Sfp::Undefined)
@@ -56,18 +53,25 @@ module Nuri::Choreographer
 
 		return false if not push_cache_model(p)
 
+		return false if not clear_agents_list
+
+		push_agents_list
+
 		success = true
 		p[:bsig].each do |name,bsig|
 			address = @model.at?("$.#{name}.sfpAddress")
 			port = @model.at?("$.#{name}.sfpPort")
-			#fail "Invalid agent's address: #{name}"
 			if !address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
 				puts "Agent #{name} is not exist!".yellow
 				next
 			end
 
 			data = {'bsig' => JSON.generate(bsig)}
-			code, _ = put_data(address, port, '/bsig', data)
+			code = nil
+			begin
+				code, _ = put_data(address, port, '/bsig', data)
+			rescue
+			end
 			if code == '200'
 				puts "Deploying BSig model to #{name}@#{address}:#{port} [OK]".green
 			else
@@ -96,7 +100,11 @@ module Nuri::Choreographer
 					push_modules(@model[target_name], address, port)
 
 					data = {'model' => JSON.generate(data)}
-					code, _ = put_data(address, port, "/model/cache/#{target_name}", data)
+					code = nil
+					begin
+						code, _ = put_data(address, port, "/model/cache/#{target_name}", data)
+					rescue
+					end
 					if code == '200'
 						puts "Sending model of #{name} to #{address}:#{port} [OK]".green
 					else
@@ -123,17 +131,21 @@ module Nuri::Choreographer
 			address = model['sfpAddress']
 			port = model['sfpPort']
 			next if !address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
-			#fail "Invalid agent's address: #{name}" if !address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
-			
-			code, _ = put_data(address, port, '/bsig', {})
-			if code == '200'
+
+			code = nil
+			begin			
+				code1, _ = delete_data(address, port, '/bsig')
+				code2, _ = delete_data(address, port, '/agents')
+			rescue
+			end
+			if code1 == '200' and code2 == '200'
 				puts "Purging BSig model: #{name}@#{address}:#{port} [OK]".green
 			else
 				$stderr.puts "Purging BSig model: #{name}@#{address}:#{port} [Failed]".red
 				success = false
 			end
 		end
-		success
 		
+		success		
 	end
 end

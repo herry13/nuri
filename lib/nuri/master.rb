@@ -269,6 +269,24 @@ class Nuri::Master
 		[exist_vms, not_exist_vms]
 	end
 
+	def clear_agents_list
+		get_agents.each do |name,model|
+			begin
+				next if not model['sfpAddress'].is_a?(String)
+				address = model['sfpAddress'].to_s.strip
+				port = model['sfpPort'].to_i
+				next if address == '' or port <= 0
+	
+				code, _ = delete_data(address, port, '/agents')
+				fail "Bad response: #{code}" if code != '200'
+			rescue Exception => exp
+				$stderr.puts "Cannot delete agents data on #{name} - #{model['sfpAddress']}:#{model['sfpPort']} - #{exp}\n#{exp.backtrace.join("\n")}"
+				return false
+			end
+		end
+		true
+	end
+
 	def push_agents_list
 		begin
 			agents = {}
@@ -277,15 +295,15 @@ class Nuri::Master
 				next if not model['sfpAddress'].is_a?(String)
 				address = model['sfpAddress'].to_s.strip
 				port = model['sfpPort'].to_s.strip.to_i
-				next if address == '' or port == 0
+				next if address == '' or port <= 0
 				agents[name] = {:sfpAddress => address, :sfpPort => port}
 			end
 			data = {'agents' => JSON.generate(agents)}
-	
+
 			# send the list to all agents
-			agents.each do |name, info|
-				code, _ = put_data(info[:sfpAddress], info[:sfpPort], '/agents', data, 5, 20)
-				raise Exception, "Push agents list to #{info[:sfpAddress]}:#{info[:sfpPort]} [Failed]" if code.to_i != 200
+			agents.each do |name, agent|
+				code, _ = put_data(agent[:sfpAddress], agent[:sfpPort], '/agents', data, 5, 20)
+				raise Exception, "Push agents list to #{agent[:sfpAddress]}:#{agent[:sfpPort]} [Failed]" if code.to_i != 200
 			end
 			return true
 		rescue Exception => exp

@@ -74,8 +74,6 @@ class Sfp::Module::Apache < Sfp::Module::Service
 	def install(p={})
 		begin
 			File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
-			#return (self.class.superclass.instance_method(:install).bind(self).call and
-			#	self.stop)
 			return (Sfp::Module::Package.install(@model['package_name']) and self.stop)
 		rescue Exception => e
 			Sfp::Agent.logger.error "#{e}\n#{e.backtrace.join("\n")}"
@@ -87,7 +85,6 @@ class Sfp::Module::Apache < Sfp::Module::Service
 
 	def uninstall(p={})
 		begin
-			#if self.class.superclass.instance_method(:uninstall).bind(self).call
 			if Sfp::Module::Package.uninstall(@model['package_name'])
 				system('/bin/rm -rf /etc/apache2') if File.directory?('/etc/apache2')
 				return true
@@ -188,9 +185,8 @@ class Sfp::Module::Apache < Sfp::Module::Service
 		false
 	end
 
-	###
 	# Load Balancer methods
-	###
+	#
 	def enable_load_balancer(p={})
 		begin
 			File.open(InstallingLockFile, 'w') { |f| f.write(' ') }
@@ -255,16 +251,4 @@ class Sfp::Module::Apache < Sfp::Module::Service
 		File.open(LoadBalancerConfigFile, 'w') { |f| f.write(output); f.flush }
 		true
 	end
-
-=begin
-	protected
-	def init2
-		@php_package = Sfp::Module::Package.new
-		@php_package.init({'package_name' => 'libapache2-mod-php5'}, {'package_name' => 'libapache2-mod-php5'})
-
-		@php_mysql_package = Sfp::Module::Package.new
-		@php_mysql_package.init({'package_name' => 'php5-mysql'}, {'package_name' => 'php5-mysql'})
-	end
-=end
-
 end

@@ -4,8 +4,8 @@ class Sfp::Module::WordpressDB
 	ConfigFile = '/tmp/sfp.module.wordpressdb.config'
 
 	def update_state
-		if File.exist?(ConfigFile)
-			config = JSON[File.read(ConfigFile)]
+		if ::File.exist?(ConfigFile)
+			config = JSON[::File.read(ConfigFile)]
 			root_password = resolve(config['mysql'] + '.root_password')
 			data = `echo "show databases;" | mysql -u root --password=#{root_password} mysql`.strip.split("\n")
 			@state['installed'] = !!data.index(config['db_name'])
@@ -42,7 +42,7 @@ class Sfp::Module::WordpressDB
 		           'db_name' => @model['db_name'],
 		           'db_user' => @model['db_user'],
 		           'db_password' => @model['db_password'] }
-		File.open(ConfigFile, 'w') { |f|
+		::File.open(ConfigFile, 'w') { |f|
 			f.write(JSON.generate(config))
 			f.flush
 		}
@@ -51,9 +51,9 @@ class Sfp::Module::WordpressDB
 	end
 
 	def uninstall(p={})
-		return false if not File.exist?(ConfigFile)
+		return false if not ::File.exist?(ConfigFile)
 
-		config = JSON[File.read(ConfigFile)]
+		config = JSON[::File.read(ConfigFile)]
 
 		root_password = resolve(config['mysql'] + '.root_password')
 		# uninstall database
@@ -64,7 +64,7 @@ class Sfp::Module::WordpressDB
 		sql4 = "FLUSH PRIVILEGES;"
 		system("echo \"#{sql1} #{sql2} #{sql3} #{sql4}\" | #{mysql_cmd}")
 
-		File.delete(ConfigFile) if File.exist?(ConfigFile)
+		::File.delete(ConfigFile) if ::File.exist?(ConfigFile)
 
 		true
 	end
@@ -77,10 +77,10 @@ class Sfp::Module::WordpressWeb
 
 	def update_state
 		@state['installed'] = false
-		@state['installed'] = File.exist?(@model['path'])
+		@state['installed'] = ::File.exist?(@model['path'])
 
-		if File.exist?(ConfigFile)
-			config = JSON[File.read(ConfigFile)]
+		if ::File.exist?(ConfigFile)
+			config = JSON[::File.read(ConfigFile)]
 			@state['http'] = config['http']
 			@state['database'] = config['database']
 			@state['path'] = config['path']
@@ -95,26 +95,28 @@ class Sfp::Module::WordpressWeb
 	def install(p={})
 		return false if p['database'].nil? or p['http'].nil? 
 
+		db_address = resolve(p['database'] + '.parent.sfpAddress')
+		return false if db_address.to_s.strip == ''
+		db = resolve(p['database'])
+
 		system('apt-get update; apt-get install -y wget') if `which wget`.strip.length <= 0
 		return false if `which wget`.strip.length <= 0
 
 		system("wget --output-document='/tmp/wp.tgz' #{@model['source_url']}")
-		return false if not File.exist?('/tmp/wp.tgz')
+		return false if not ::File.exist?('/tmp/wp.tgz')
 		system("cd /tmp; tar xvzf wp.tgz")
 
 		home_path = @model['path']
 		wp_config_path = "#{home_path}/wp-config.php"
 		wp_config_sample_path = "#{home_path}/wp-config-sample.php"
 
-		File.delete(home_path) if File.file?(home_path)
-		Dir.mkdir(home_path, 0755) if not File.directory?(home_path)
+		system("rm -rf #{home_path}") if ::File.file?(home_path)
+		Dir.mkdir(home_path, 0755) if not ::File.directory?(home_path)
 		system("cd /tmp; mv -f wordpress/* #{home_path}/; mv -f wordpress/.* #{home_path}/;rmdir wordpress;rm -f wp.tgz")
-		return false if not File.exist?(wp_config_sample_path)
+		return false if not ::File.exist?(wp_config_sample_path)
 
 		system("cp -f #{wp_config_sample_path} #{wp_config_path}")
 
-		db = resolve(p['database'])
-		db_address = resolve(p['database'] + '.parent.sfpAddress')
 		system("sed -i 's/.*DB_NAME.*/define(\"DB_NAME\",\"#{db['db_name']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_USER.*/define(\"DB_USER\",\"#{db['db_user']}\");/' #{wp_config_path}")
 		system("sed -i 's/.*DB_PASSWORD.*/define(\"DB_PASSWORD\",\"#{db['db_password']}\");/' #{wp_config_path}")
@@ -122,7 +124,7 @@ class Sfp::Module::WordpressWeb
 
 		system("cd #{home_path}; mv -f index.html index.html.bak")
 
-		File.open(ConfigFile, 'w') { |f|
+		::File.open(ConfigFile, 'w') { |f|
 			config = { 'http' => p['http'], 'database' => p['database'], 'path' => @model['path'] }
 			f.write(JSON.generate(config))
 			f.flush
@@ -141,7 +143,7 @@ class Sfp::Module::WordpressWeb
 			system("cd #{home_path}; mv -f index.html.bak /tmp; rm -rf *; mv -f /tmp/index.html.bak index.html")
 		end
 
-		File.delete(ConfigFile) if File.exist?(ConfigFile)
+		::File.delete(ConfigFile) if ::File.exist?(ConfigFile)
 
 		true
 	end
