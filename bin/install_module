@@ -24,6 +24,10 @@ fi
 # set a template command for sending the modules
 cmd="curl -s -i -X PUT $address:$port/modules"
 
+# setup directory for temporary files
+dir="/tmp/"$(date +%s%N)"$RANDOM"
+mkdir -p $dir
+
 # for every module in the arguments:
 # - archive the module's files to a temporary file
 # - update the sending command by adding the module
@@ -32,8 +36,8 @@ cmd="curl -s -i -X PUT $address:$port/modules"
 missing_module=0
 for module in "$@" ; do
 	if [[ -d "$module" ]]; then
-		tar cvzhf /tmp/$module.tgz $module 1>/dev/null
-		cmd="$cmd -F $module=@/tmp/$module.tgz"
+		tar cvzhf $dir/$module.tgz $module 1>/dev/null
+		cmd="$cmd -F $module=@$dir/$module.tgz"
 	else
 		echo "Module $module is not exist!"
 		missing_module=`expr $missing_module + 1`
@@ -49,10 +53,8 @@ if [[ $missing_module == 0 ]]; then
 	fi
 fi
 
-# delete temporary archive files
-for module in "$@"; do
-	rm -f /tmp/$module.tgz
-done
+# delete directory that holds temporary files
+rm -rf $dir
 
 if [[ $missing_module == 0 ]]; then
 	echo "status: ok"
