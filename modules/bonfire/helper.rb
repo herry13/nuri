@@ -39,33 +39,30 @@ module Sfp::Module::BonfireHelper
 		open_connection
 
 		name = p[:name]
-		session = p[:session]
-		experiment = p[:experiment]
-		location = p[:location]
 		image_name = p[:image]
 		wan_name = p[:wan]
 
-		session.logger.info "Launching #{name} in #{location['name']}..."
-		server = experiment.computes.find { |vm|
+		@session.logger.info "Launching #{name} in #{@location['name']}..."
+		server = @experiment.computes.find { |vm|
 			vm['name'] == name
-		} || experiment.computes.submit(
+		} || @experiment.computes.submit(
 			:name => name,
 			:instance_type => "small",
 			:disk => [{
-				:storage => location.storages.find { |s|
+				:storage => @location.storages.find { |s|
 					s['name'] == image_name
 				},
 				:type => "OS"
 			}],
 			:nic => [
-				{:network => location.networks.find { |n| n['name'] == wan_name }}
+				{:network => @location.networks.find { |n| n['name'] == wan_name }}
 			],
-			:location => location
+			:location => @location
 		)
 		server_ip = server['nic'][0]['ip']
-		session.logger.info "#{name} IP=#{server_ip}"
+		@session.logger.info "#{name} IP=#{server_ip}"
 	
-		experiment.update(:status => "running")
+		@experiment.update(:status => "running")
 
 		tries = 30 # 10 minutes
 		until [server].all? { |vm|
@@ -74,14 +71,14 @@ module Sfp::Module::BonfireHelper
 			fail "#{name} has failed" if [server].any? { |vm|
 				vm['state'] == "FAILED"
 			}
-			session.logger.info "#{name} is not ready. Waiting..."
+			@session.logger.info "#{name} is not ready. Waiting..."
 			sleep 20
 			tries -= 1
 		end
 		fail "Cannot create #{name}: too long waiting!" if !running?(server)
 
 		server.ssh do |ssh|
-			session.logger.info "Setting hostname..."
+			@session.logger.info "Setting hostname..."
 			output = ssh.exec! "hostname"
 			if output.chop != name
 				ssh.exec! "/bin/echo #{name} > /etc/hostname"
@@ -91,8 +88,8 @@ module Sfp::Module::BonfireHelper
 			end
 		end
 
-		session.logger.info "VMs are now READY!"
-		session.logger.info "*** #{server['name']} IP: #{server['nic'][0]['ip']}"
+		@session.logger.info "VMs are now READY!"
+		@session.logger.info "*** #{server['name']} IP: #{server['nic'][0]['ip']}"
 
 		server
 	end
@@ -118,19 +115,17 @@ module Sfp::Module::BonfireHelper
 	def delete_server(p={})
 		open_connection
 		name = p[:name]
-		session = p[:session]
-		experiment = p[:experiment]
 
-		server = experiment.computes.find { |vm|
+		server = @experiment.computes.find { |vm|
 			vm['name'] == name
 		} || (return true)
-		session.logger.info "Deleting #{name} ..."
+		@session.logger.info "Deleting #{name} ..."
 		server.delete
 		tries = 30
 		until [server].all? { |vm|
 			tries > 0 && !running?(vm)
 		} do
-			session.logger.info "#{name} is not deleted. Waiting..."
+			@session.logger.info "#{name} is not deleted. Waiting..."
 			sleep 10
 			tries -= 1
 		end
@@ -138,8 +133,10 @@ module Sfp::Module::BonfireHelper
 	end
 
 	def get_vms(p={})
+		open_connection
+
 		vms = {}
-		p[:experiment].computes.each { |server|
+		@experiment.computes.each { |server|
 			if server.uri.to_s =~ /\/locations\/#{@model['location']}\/computes\//
 				vms[ server['name'] ] = {
 					'running' => running?(server),
@@ -147,7 +144,7 @@ module Sfp::Module::BonfireHelper
 					'uri' => server.uri,
 				}
 			end
-		} if p[:experiment]
+		} if @experiment
 		vms
 	end
 end
