@@ -15,27 +15,49 @@ proxy isa Node {
 	}
 }
 
-/*
 vmlb isa VM {
 	created = true
 	apache isa Apache {
 		running is true
 		is_load_balancer is true
-		lb_members is (vmapp1)
+		lb_members is (vmapp1,vmapp2,vmapp3,vmapp4,vmapp5)
 	}
 	in_cloud is proxy.epcc
 }
-vmapp1 isa VM {
-	created = true
-	apache isa Apache {
-		running is true
-	}
+vmapp1 extends vmlb {
 	wp_web isa WordpressWeb {
 		installed is true
 		http is vmapp1.apache
 		database is vmdb.wp_db
 	}
-	in_cloud is proxy.epcc
+}
+vmapp2 extends vmlb {
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vmapp2.apache
+		database is vmdb.wp_db
+	}
+}
+vmapp3 extends vmlb {
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vmapp3.apache
+		database is vmdb.wp_db
+	}
+}
+vmapp4 extends vmlb {
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vmapp4.apache
+		database is vmdb.wp_db
+	}
+}
+vmapp5 extends vmlb {
+	wp_web isa WordpressWeb {
+		installed is true
+		http is vmapp5.apache
+		database is vmdb.wp_db
+	}
 }
 vmdb isa VM {
 	created = true
@@ -50,14 +72,24 @@ vmdb isa VM {
 }
 
 global {
-	if vmlb.apache.running = true then vmapp1.apache.running = true
+	if vmlb.apache.running = true then {
+		vmapp1.apache.running = true
+		vmapp2.apache.running = true
+		vmapp3.apache.running = true
+		vmapp4.apache.running = true
+		vmapp5.apache.running = true
+	}
 	if vmapp1.apache.running = true then vmdb.mysql.running = true
+	if vmapp2.apache.running = true then vmdb.mysql.running = true
+	if vmapp3.apache.running = true then vmdb.mysql.running = true
+	if vmapp4.apache.running = true then vmdb.mysql.running = true
+	if vmapp5.apache.running = true then vmdb.mysql.running = true
 }
-*/
 
+/*
 vmlb isa VM {
 	created is false
 }
 vmapp1 extends vmlb
 vmdb extends vmlb
-
+*/
