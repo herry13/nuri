@@ -232,13 +232,14 @@ class Sfp::Module::Apache < Sfp::Module::Service
 	end
 
 	def set_lb_members(p={})
-		agents = Sfp::Agent.get_agents
 		lbmembers = p['members'].map { |m| m.sub! /^\$\./, '' }
-		return false if (lbmembers - agents.keys).length > 0
 		members = reverses = ''
 		lbmembers.each do |m|
-			members += "\n\tBalancerMember http://#{agents[m]['sfpAddress']}"
-			reverses += "\n\tProxyPassReverse / http://#{agents[m]['sfpAddress']}"
+			address = resolve("$.#{m}.sfpAddress")
+Sfp::Agent.logger.info "lb_member => #{m}:#{address}"
+			return false if not address.is_a?(String) or address.strip == ''
+			members += "\n\tBalancerMember http://#{address}" #agents[m]['sfpAddress']}"
+			reverses += "\n\tProxyPassReverse / http://#{address}" #agents[m]['sfpAddress']}"
 		end
 		output = ''
 		File.read(LoadBalancerConfigFile).each_line do |line|
