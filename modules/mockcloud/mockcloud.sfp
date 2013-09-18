@@ -1,0 +1,6 @@
+include "../cloud/cloud.sfp"
+
+schema MockCloud extends Cloud {
+	running is true
+	final description is "Mock cloud for testing"
+}

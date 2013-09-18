@@ -1,10 +1,9 @@
 include "../cloud/cloud.sfp"
 
 schema Bonfire extends Cloud {
-	gateway is "ssh.bonfire.grid5000.fr"
-	experiment : String
-	location : String
-	image_name : String
-	wan_name : String
-	vms { }
+	final gateway is "ssh.bonfire.grid5000.fr"
+	final experiment is ""
+	final location is "uk-epcc"
+	final image_name is "BonFIRE Debian Squeeze 10G v5"
+	final wan_name is "BonFIRE WAN"
 }

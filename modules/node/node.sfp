@@ -2,6 +2,6 @@ include "../os/os.sfp"
 include "../cloud/cloud.sfp"
 
 schema Node {
-	sfpAddress is ""
-	sfpPort is 1314
+	final sfpAddress is ""
+	final sfpPort is 1314
 }

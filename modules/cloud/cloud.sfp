@@ -1,6 +1,7 @@
 schema Cloud {
 	running : Bool
-	description is ""
+	final description is ""
+	vms { }
 
 	sub create_vm (vm isref VM) {
 		condition {

@@ -8,5 +8,4 @@ schema HPCloud extends Cloud {
 	final image_id = "67074"
 	final key_name = ""
 	final security_group = "default"
-	vms { }
 }
