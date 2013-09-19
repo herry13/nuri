@@ -3,7 +3,6 @@ require 'restfully'
 require 'restfully/addons/bonfire'
 
 module Sfp::Module::BonfireHelper
-	protected
 	def open_connection
 		return true if not @session.nil?
 
