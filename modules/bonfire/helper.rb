@@ -63,15 +63,16 @@ module Sfp::Module::BonfireHelper
 	
 		@experiment.update(:status => "running")
 
-		tries = 30 # 10 minutes
+		@session.logger.info "#{name} is not ready. Waiting..."
+		wait_time = 3600 # 1-hour
+		tries = wait_time # 30 # 10 minutes
 		until [server].all? { |vm|
 			tries <= 0 || (running?(vm) && vm.ssh.accessible?)
 		} do
 			fail "#{name} has failed" if [server].any? { |vm|
 				vm['state'] == "FAILED"
 			}
-			@session.logger.info "#{name} is not ready. Waiting..."
-			sleep 20
+			sleep 1 #20
 			tries -= 1
 		end
 		fail "Cannot create #{name}: too long waiting!" if !running?(server)
@@ -87,8 +88,7 @@ module Sfp::Module::BonfireHelper
 			end
 		end
 
-		@session.logger.info "VMs are now READY!"
-		@session.logger.info "*** #{server['name']} IP: #{server['nic'][0]['ip']}"
+		@session.logger.info "VM:#{server['name']} is READY! IP: #{server['nic'][0]['ip']}"
 
 		server
 	end
