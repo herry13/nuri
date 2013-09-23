@@ -56,6 +56,5 @@ class Sfp::Module::Bonfire
 		false
 	end
 
-	protected
 	include Sfp::Module::BonfireHelper
 end

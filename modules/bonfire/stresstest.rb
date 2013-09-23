@@ -118,7 +118,7 @@ end
 
 if $0 == __FILE__
 	if ARGV[0] == 'daemon'
-		sites = ['uk-epcc', 'uk-hplabs']
+		sites = ['fr-inria'] #, 'uk-epcc'] #, 'uk-hplabs']
 		experiment = 'autocloud'
 		total_vms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 		repeat = 10
