@@ -57,6 +57,10 @@ proxy isa Node {
 end
 
 if $0 == __FILE__
-	number_apps = (ARGV.length > 0 ? ARGV[0].to_i : 3)
-	puts generate(number_apps)
+	if ARGV[0] == 'help'
+		puts "Usage: generator.rb [total-app-layer]"
+	else
+		number_apps = (ARGV.length > 0 ? ARGV[0].to_i : 3)
+		puts generate(number_apps)
+	end
 end
