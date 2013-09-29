@@ -25,6 +25,27 @@ module Nuri::Orchestrator
 	end
 
 	protected
+	def send_action_data(action, address, port)
+		action['parameters'].each do |name,value|
+			next if !value.is_a?(String) or !value.isref or value.split('.').length > 2
+			_, target_name = value.split('.', 2)
+			data = {'model' => Sfp::Helper.deep_clone(@model[target_name])}
+			data.accept(Sfp::Visitor::ParentEliminator.new)
+			data = {'model' => JSON.generate(data)}
+			code = nil
+			begin
+				code, _ = put_data(address, port, "/model/cache/#{target_name}", data)
+			rescue
+			end
+			if code != '200'
+				$stderr.puts "Sending action data of #{value} to #{address}:#{port} [Failed]".red
+				return false
+			end
+		end
+
+		true
+	end
+
 	def execute_action(action)
 		_, agent_name, _ = action['name'].split('.', 3)
 		agents = get_agents
@@ -37,7 +58,7 @@ module Nuri::Orchestrator
 		raise Exception, "Cannot find address:port of agent #{agent_name}" if
 			address.length <= 0 or port.length <= 0
 
-		return true if @mock		
+		send_action_data(action, address, port)
 
 		data = {'action' => JSON.generate(action)}
 		code, _ = post_data(address, port, '/execute', data)
