@@ -8,6 +8,9 @@ class Sfp::Module::MockCloud
 	end
 
 	def create_vm(p={})
+		Sfp::Agent.logger.info p.inspect
+		model = resolve_model(p['vm'])
+		Sfp::Agent.logger.info "cpu=#{model['cpu']} memory=#{model['memory']}"
 		false
 	end
 
