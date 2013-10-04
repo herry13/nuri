@@ -1,182 +1,331 @@
 #!/usr/bin/env ruby
 
-dir = File.expand_path(File.dirname(__FILE__)) + '/../lib'
-require "#{dir}/nuri"
+dir = File.expand_path('../../', __FILE__)
+require "#{dir}/lib/nuri"
+require "coderay"
 
-require 'coderay'
-require 'logger'
+version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
+#Nuri #{version} (c) 2013
 
-version = File.read(File.dirname(__FILE__) + '/../VERSION').sub(/\n/, '')
+banner = <<-EOS
+Usage: nuri [command]
+where [command] is:
+  state     get the current state
+  plan      generate the plan
+  bsig      deployment with distributed mechanism
+  agent     manage Nuri agent
 
-opts = Trollop::options do
-	version "Nuri #{version} (c) 2013"
-	banner <<-EOS
-Usage: nuri [options]
-where [options] are:
 EOS
 
-	opt :model_file, "Model of configuration file.", :default => '', :short => '-m'
-	opt :state, "Print the current state of the system in JSON based on given model file.", :short => '-s'
-	opt :plan, "Print the plan that could bring the system to the desired state as defined in model file.", :short => '-p'
-	opt :parallel, "Generate a parallel plan.", :short => '-l'
-	opt :bsig_deploy, "Generate and deploy Behavioural Signature model", :short => '-b'
-	opt :bsig_purge, "Purge Behavioural Signature model", :short => '-g'
-	opt :execute, "Execute a plan in given file. Note: model file should be specified.", :default => '', :short => '-x'
-	opt :apply, "Generate and execute a plan that could bring the system to the desired state.", :short => '-a'
-	opt :push_modules, "Automatically push an unavailable module to target agent.", :short => '-u'
-	opt :human, "Use human readable format.", :short => '-h'
-	opt :pretty, "Use pretty JSON format.", :short => '-r'
-	opt :silent, "Set off interactive mode.", :defaut => true, :short => '-n'
-	#opt :start, "Start master daemon.", :short => '-s'
-	#opt :stop, "Stop master daemon.", :short => '-t'
-end
-
-def plan_to_human(plan)
-	return 'No solution plan.'.red if plan['workflow'].nil?
-	return 'The system is at the goal state.'.green if plan['workflow'].length <= 0
-
-	p = ''
-	actions = plan['workflow']
-	if plan['type'] == 'sequential'
-		p = 'Sequential Plan:'.yellow
-		actions.each_index { |i| p += "\n#{i+1}. #{actions[i]['name']} #{JSON.generate(actions[i]['parameters'])}" }
-	else
-		p = 'Partial-Order Plan:'.yellow
-		actions.each { |op| p += "\n#{op['id']+1}. #{op['name']} #{JSON.generate(op['parameters'])} (#{op['predecessors'].map{|i|i+1}}, #{op['successors'].map{|i|i+1}})" }
-	end
-	p
-end
-
-def verify_model(opts)
-	if opts[:model_file].length <= 0
-		puts "Model file is not specified! Use \"-h\" option for more details.".red
-		exit(false)
+def process_args(args, parser)
+	Trollop::with_standard_exception_handling parser do
+		parser.parse args
 	end
 end
 
-if opts[:state]
-	verify_model(opts)
+def check_help(args)
+	help = args.count { |x| x == '-h' or x == '--help' }
+	[(help > 0), args.select { |x| x != '-h' and x != '--help' }]
+end
 
-	master = Nuri::Master.new
-	master.set_model(opts)
-	state = master.get_state(opts)
-	state.accept(Sfp::Visitor::PrettyStateGenerator.new)
-	if opts[:human]
-		puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
+def do_state(args=ARGV, cmd="nuri ")
+	parser = Trollop::Parser.new do
+		banner <<-EOS
+Usage: #{cmd}state [options]
+where [options] are:
+EOS
+	opt :model_file, 'Model file of the desired state.', :default => 'main.sfp', :short => '-m'
+	opt :plain, 'Print output in plain JSON.'
+end
+	help, args = check_help(args)
+	opts = process_args args, parser
+
+	if help
+		parser.educate(STDOUT)
+	elsif File.exist?(opts[:model_file])
+		master = Nuri::Master.new
+		master.set_model opts
+		state = master.get_state opts
+		state.accept(Sfp::Visitor::PrettyStateGenerator.new)
+		puts (opts[:plain] ? JSON.generate(state) : CodeRay.encode(JSON.pretty_generate(state), :json, :terminal))
 	else
-		puts (opts[:pretty] ? JSON.pretty_generate(state) : JSON.generate(state))
+		puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
 	end
+end
 
-elsif opts[:plan]
-	verify_model(opts)
+def do_plan(args=ARGV, cmd="nuri ")
+	parser = Trollop::Parser.new do
+		banner <<-EOS
+Usage: #{cmd}plan [options]
+where [options] are:
+EOS
+	opt :model_file, 'Model file of the desired state.', :default => 'main.sfp', :short => '-m'
+	opt :parallel, 'Generate a parallel plan.', :short => '-l'
+	opt :plain, 'Print output in plain JSON.'
+	opt :no_interactive, 'Disable interactive input.'
+end
+	help, args = check_help(args)
+	opts = process_args args, parser
 
-	master = Nuri::Master.new
-	master.set_model(opts)
-	plan = master.get_plan(opts)
-	if !plan.is_a?(Hash) or plan['workflow'].nil?
-		puts "Plan: ".yellow + "\nno solution!".red
-	else
-		if opts[:human]
-			puts plan_to_human(plan)
-		else
-			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
-		end
-
-		if not opts[:silent] and plan['workflow'].is_a?(Array) and plan['workflow'].length > 0
-			print "Execute the plan [y/N]? "
-			if STDIN.gets.chomp.upcase == 'Y'
-				puts 'Executing the plan:'.yellow
-				opts[:plan] = plan
-				puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
-			end
-		end
-	end
-
-elsif opts[:execute].length > 0
-	verify_model(opts)
-
-	master = Nuri::Master.new
-	master.set_model(opts)
-	puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
-
-elsif opts[:apply]
-	verify_model(opts)
-
-	master = Nuri::Master.new
-	master.set_model(opts)
-	plan = master.get_plan(opts)
-	if not plan.is_a?(Hash)
-		puts "No solution!".red
-	else
-		if opts[:human]
-			puts plan_to_human(plan)
-		else
-			puts (opts[:pretty] ? JSON.pretty_generate(plan) : JSON.generate(plan))
-		end
-
-		if plan['workflow'].is_a?(Array) and plan['workflow'].length > 0
-			puts 'Executing the plan...'.yellow
-			opts[:plan] = plan
-			puts (master.execute_plan(opts) ? "Execution success!".green : "Execution failed!".red)
-		end
-	end
-
-elsif opts[:bsig_deploy]
-	verify_model(opts)
-	opts[:parallel] = true
-
-	master = Nuri::Master.new
-	master.set_model(opts)
-	bsig = master.get_bsig(opts)
-
-	if not bsig.is_a?(Hash)
-		puts "\nNo solution!".red
-	elsif bsig.length > 0
-		empty_local_bsig = bsig.select { |name,local_bsig| local_bsig['operators'].length <= 0 }
-
-		if empty_local_bsig.length == bsig.length
-			puts "The goal state has been achieved!".green
-
-		else
-			# print the BSig model
-			if opts[:human]
-				puts CodeRay.encode(JSON.pretty_generate(bsig), :json, :terminal)
-			else
-				puts (opts[:pretty] ? JSON.pretty_generate(bsig) : JSON.generate(bsig))
-			end
-
-			if not opts[:silent]
-				print "Deploy the BSig model [y/N]? "
-				if STDIN.gets.chomp.upcase == 'Y'
-					puts 'Deploying the BSig model:'.yellow
-					opts[:bsig] = bsig
-					puts (master.deploy_bsig(opts) ? "Deployment success!".green : "Deployment failed!".red)
+	if help
+		parser.educate(STDOUT)
+	elsif File.exist?(opts[:model_file])
+		opts[:plan] = true
+		master = Nuri::Master.new
+		master.set_model(opts)
+		plan = master.get_plan(opts)
+		if plan.is_a?(Hash) and !plan['workflow'].nil?
+			if plan['workflow'].length > 0
+				if opts[:plain]
+					puts JSON.generate(plan)
+				else
+					actions = plan['workflow']
+					if plan['type'] == 'sequential'
+						p = 'Sequential Plan:'.yellow
+						actions.each_index { |i| p += "\n#{i+1}. #{actions[i]['name']} #{JSON.generate(actions[i]['parameters'])}" }
+						puts p
+					else
+						p = 'Partial-Order Plan:'.yellow
+						actions.each { |op| p += "\n#{op['id']+1}. #{op['name']} #{JSON.generate(op['parameters'])} (#{op['predecessors'].map{|i|i+1}}, #{op['successors'].map{|i|i+1}})" }
+						puts p
+					end
 				end
-			end
 
+				if not opts[:no_interactive] and plan['workflow'].length > 0
+					print "Execute the plan [y/N]? "
+					if STDIN.gets.chomp.upcase == 'Y'
+						puts 'Executing the plan: '.yellow
+						opts[:plan] = plan
+						if master.execute_plan(opts)
+							puts "Execution success!".green
+						else
+							puts "Execution failed!".red
+						end
+					end
+				end
+			else
+				puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.'.green)
+			end
+		else
+			puts (opts[:plain] ? "No solution!" : "No solution!".red)
+		end
+	else
+		puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+	end
+end
+
+def do_bsig(args=ARGV, cmd="nuri ")
+	parser = Trollop::Parser.new do
+		banner <<-EOS
+Usage: #{cmd}bsig [options]
+where [options] are:
+EOS
+	opt :model_file, 'Model file of the desired state.', :default => 'main.sfp', :short => '-m'
+	opt :purge, 'Purge the existing BSig model.', :short => '-g'
+	opt :deploy, 'Generate and then deploy the BSig model.'
+	opt :plain, 'Print output in plain JSON.'
+	opt :no_interactive, 'Disable interactive input.'
+end
+	help, args = check_help(args)
+	opts = process_args args, parser
+
+	if help
+		parser.educate(STDOUT)
+	elsif File.exist?(opts[:model_file])
+		opts[:bsig_deploy] = true
+		opts[:parallel] = true
+		master = Nuri::Master.new
+		master.set_model(opts)
+
+		if opts[:purge]
+			if master.purge_bsig(opts)
+				puts "Purging Behavioural Signature model [OK]".green
+			else
+				puts "Purging Behavioural Signature model [Failed]".red
+			end
+		else
+			bsig = master.get_bsig(opts)
+			if bsig.is_a?(Hash) and bsig.length > 0
+				empty_local_bsig = bsig.select { |name,local_bsig| local_bsig['operators'].length <= 0 }
+				if empty_local_bsig.length != bsig.length
+					if opts[:plain]
+						puts JSON.generate(bsig)
+					else
+						puts CodeRay.encode(JSON.pretty_generate(bsig), :json, :terminal)
+					end
+	
+					if not opts[:no_interactive] and not opts[:deploy]
+						print "Deploy the BSig model [y/N]? "
+						opts[:deploy] = true if STDIN.gets.chomp.upcase == 'Y'
+					end
+
+					if opts[:deploy]
+						puts 'Deploying the BSig model: '.yellow
+						opts[:bsig] = bsig
+						if master.deploy_bsig(opts)
+							puts "Deployment success!".green
+						else
+							puts "Deployment failed!".red
+						end
+					end
+				else
+					puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.'.green)
+				end
+			else
+				puts (opts[:plain] ? "No solution!" : "No solution!".red)
+			end
+		end
+	else
+		puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+	end
+end
+
+def do_agent(args=ARGV, cmd="nuri ")
+	parser = Trollop::Parser.new do
+		banner <<-EOS
+Usage: #{cmd}agent <subcommand> [options]
+where <subcommand> are:
+ install:   Install an agent on target node.
+   start:   Start the agent (use SSH for remote agent).
+    stop:   Stop the agent (use SSH for remote agent).
+  status:   Get agent's status.
+  update:   Update agent's files.
+   state:   Get agent's current state.
+   model:   Get agent's current model.
+    bsig:   Get agent's current Behavioural Signature model.
+  module:   Get agent's modules list.
+  
+where [options] are:
+EOS
+	opt :address, "Agent's address.", :default => 'localhost'
+	opt :ssh_user, "Agent's SSH username.", :short => '-u'
+	opt :ssh_port, "Agent's SSH port.", :short => '-p'
+end
+	help, args = check_help(args)
+	subcommand = (args.length > 0 ? args.shift : '')
+	opts = process_args args, parser
+	ssh_opt = ''
+	if opts[:address] != 'localhost'
+		ssh_opt = "ssh "
+		ssh_opt += (opts[:ssh_user] ? "#{opts[:ssh_user]}@#{opts[:address]}" : opts[:address])
+		ssh_opt += (opts[:ssh_port] ? "-p #{opts[:ssh_port]}" : '')
+	end
+
+	if help
+		parser.educate(STDOUT)
+	elsif `which sfpagent`.strip.length > 0
+		case subcommand
+		when 'install'
+			system("#{ssh_opt} gem install sfpagent --no-ri --no-rdoc")
+		when 'start'
+			system("#{ssh_opt} sfpagent -s")
+		when 'stop'
+			system("#{ssh_opt} sfpagent -t")
+		when 'status'
+			system("#{ssh_opt} sfpagent -a")
+		when 'update'
+			system("#{ssh_opt} gem update sfpagent --no-ri --no-rdoc")
+		when 'state'
+			state = JSON[Net::HTTP.get("#{opts[:address]}", "/state", 1314)]['state']
+			state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
+			state.accept(Sfp::Visitor::PrettyStateGenerator.new)
+			puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
+		when 'model'
+			model = JSON[Net::HTTP.get("#{opts[:address]}", "/model", 1314)]
+			model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
+			model.accept(Sfp::Visitor::PrettyStateGenerator.new)
+			puts CodeRay.encode(JSON.pretty_generate(model), :json, :terminal)
+		when 'bsig'
+			json = Net::HTTP.get("#{opts[:address]}", "/bsig", 1314)
+			puts CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) if json.length >= 2
+		when 'module'
+			json = Net::HTTP.get("#{opts[:address]}", "/modules", 1314)
+			puts CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) if json.length >= 2
+		when 'help'
+			parser.educate(STDOUT)
+		else
+			puts 'Unrecognized command!'
+		end
+	else
+		puts 'sfpagent gem is not installed!'.red
+	end
+end
+
+def do_edit(args)
+	file = args[0].to_s
+	if file == '-h' or file == '--help'
+		puts <<-EOS
+Usage: edit <filepath>
+EOS
+	elsif File.exist?(file)
+		system("vi #{file}")
+	else
+		puts 'Target file is not specified!'
+	end
+end
+
+def do_console
+	banner = <<-EOS
+Usage: <command> [options]
+when <command> is:
+  state     get the current state
+  plan      generate the plan
+  bsig      deployment with distributed mechanism
+  agent     manage Nuri agent
+  edit      edit a file
+  help      print this help
+  exit      exit the console
+
+EOS
+
+	loop do
+		print 'nuri> '
+		begin
+			input = STDIN.gets
+			raise Exception if input.nil?
+		rescue Exception
+			puts ''
+			break
+		end
+		input = input.chomp.strip
+		command, args = input.split(' ', 2)
+		args = args.to_s.split(' ')
+		case command
+		when 'state'
+			do_state args, ''
+		when 'plan'
+			do_plan args, ''
+		when 'bsig'
+			do_bsig args, ''
+		when 'agent'
+			do_agent args, ''
+		when 'edit'
+			do_edit args
+		when 'help'
+			puts banner
+		when 'exit', 'quit', 'q'
+			break
 		end
 	end
+	puts "Bye!\n"
+end
 
-elsif opts[:bsig_purge]
-	verify_model(opts)
-
-	puts "Purging Behavioural Signature model...".yellow
-	master = Nuri::Master.new
-	master.set_model(opts)
-	if master.purge_bsig(opts)
-		puts "Purging Behavioural Signature model [OK]".green
+if ARGV.length > 0
+	success = false
+	case ARGV.shift
+	when 'state'
+		do_state
+	when 'plan'
+		do_plan
+	when 'bsig'
+		do_bsig
+	when 'agent'
+		do_agent
+	when 'console'
+		do_console
 	else
-		puts "Purging Behavioural Signature model [Failed]".red
+		puts banner
 	end
-
-=begin
-elsif opts[:start]
-	puts "Not implemented yet!".red
-
-elsif opts[:stop]
-	puts "Not implemented yet!".red
-=end
-
 else
-	Trollop::help
+	puts banner
 end

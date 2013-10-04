@@ -3,6 +3,7 @@ require 'rubygems'
 require 'json'
 require 'sfplanner'
 require 'colorize'
+require 'logger'
 
 # define main module
 module Nuri
