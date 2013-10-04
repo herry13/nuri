@@ -184,16 +184,17 @@ def do_agent(args=ARGV, cmd="nuri ")
 	parser = Trollop::Parser.new do
 		banner <<-EOS
 Usage: #{cmd}agent <subcommand> [options]
-where <subcommand> are:
- install:   Install an agent on target node.
-   start:   Start the agent (use SSH for remote agent).
-    stop:   Stop the agent (use SSH for remote agent).
-  status:   Get agent's status.
-  update:   Update agent's files.
-   state:   Get agent's current state.
-   model:   Get agent's current model.
-    bsig:   Get agent's current Behavioural Signature model.
-  module:   Get agent's modules list.
+where <subcommand> is:
+ install:   install agent on target node
+ upgrade:   upgrade agent
+   start:   start the agent (use SSH for remote agent)
+    stop:   stop the agent (use SSH for remote agent)
+  status:   get agent's status
+   state:   get agent's current state
+   model:   get agent's current model
+    bsig:   get agent's current Behavioural Signature model
+  module:   get agent's modules list
+     log:   get last 100 lines of logs
   
 where [options] are:
 EOS
@@ -216,15 +217,15 @@ end
 	elsif `which sfpagent`.strip.length > 0
 		case subcommand
 		when 'install'
-			system("#{ssh_opt} gem install sfpagent --no-ri --no-rdoc")
+			system("#{ssh_opt} sudo gem install sfpagent --no-ri --no-rdoc")
 		when 'start'
 			system("#{ssh_opt} sfpagent -s")
 		when 'stop'
 			system("#{ssh_opt} sfpagent -t")
 		when 'status'
 			system("#{ssh_opt} sfpagent -a")
-		when 'update'
-			system("#{ssh_opt} gem update sfpagent --no-ri --no-rdoc")
+		when 'upgrade'
+			system("#{ssh_opt} sudo gem update sfpagent --no-ri --no-rdoc")
 		when 'state'
 			state = JSON[Net::HTTP.get("#{opts[:address]}", "/state", 1314)]['state']
 			state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
@@ -241,6 +242,8 @@ end
 		when 'module'
 			json = Net::HTTP.get("#{opts[:address]}", "/modules", 1314)
 			puts CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) if json.length >= 2
+		when 'log'
+			puts Net::HTTP.get "#{opts[:address]}", "/log", 1314
 		when 'help'
 			parser.educate(STDOUT)
 		else
