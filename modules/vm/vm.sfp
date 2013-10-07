@@ -4,7 +4,7 @@ include "../cloud/cloud.sfp"
 schema VM extends Machine {
 	created : Bool
 	in_cloud isref Cloud
-	final cpu = 1
+	final cpus = 1
 	final memory = 512
 	final network { }
 	final disk { }
