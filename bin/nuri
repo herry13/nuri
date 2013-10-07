@@ -4,18 +4,8 @@ dir = File.expand_path('../../', __FILE__)
 require "#{dir}/lib/nuri"
 require "coderay"
 
-version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
-#Nuri #{version} (c) 2013
-
-banner = <<-EOS
-Usage: nuri [command]
-where [command] is:
-  state     get the current state
-  plan      generate the plan
-  bsig      deployment with distributed mechanism
-  agent     manage Nuri agent
-
-EOS
+Version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
+About = "Nuri #{Version} (c) 2013"
 
 def process_args(args, parser)
 	Trollop::with_standard_exception_handling parser do
@@ -281,37 +271,61 @@ when <command> is:
 
 EOS
 
+	puts About
 	loop do
-		print 'nuri> '
 		begin
-			input = STDIN.gets
-			raise Exception if input.nil?
-		rescue Exception
-			puts ''
-			break
-		end
-		input = input.chomp.strip
-		command, args = input.split(' ', 2)
-		args = args.to_s.split(' ')
-		case command
-		when 'state'
-			do_state args, ''
-		when 'plan'
-			do_plan args, ''
-		when 'bsig'
-			do_bsig args, ''
-		when 'agent'
-			do_agent args, ''
-		when 'edit'
-			do_edit args
-		when 'help'
-			puts banner
-		when 'exit', 'quit', 'q'
-			break
+			print 'nuri> '
+			begin
+				input = STDIN.gets
+				raise Exception if input.nil?
+			rescue Exception
+				puts ''
+				break
+			end
+			input = input.chomp.strip
+			if input[0] == '!'
+				system(input[1..input.length])
+			else
+				command, args = input.split(' ', 2)
+				break if command == 'exit' or command == 'quit' or command == 'q'
+				args = args.to_s.split(' ')
+				command = args[0] and args = ['-h'] if command == 'help' and args.length > 0
+				case command
+				when 'state'
+					do_state args, ''
+				when 'plan'
+					do_plan args, ''
+				when 'bsig'
+					do_bsig args, ''
+				when 'agent'
+					do_agent args, ''
+				when 'edit'
+					do_edit args
+				when 'help'
+					puts banner
+				when 'version', '-v'
+					puts About
+				else
+					$stderr.puts 'Unrecognized command! Type "help" to print available commands.'
+				end
+			end
+		rescue Exception => e
+			puts "#{e}\n#{e.backtrace.join("\n")}"
 		end
 	end
 	puts "Bye!\n"
 end
+
+banner = <<-EOS
+Usage: nuri [command]
+where [command] is:
+  state     get the current state
+  plan      generate the plan
+  bsig      deployment with distributed mechanism
+  agent     manage Nuri agent
+  console   enter console
+
+EOS
 
 if ARGV.length > 0
 	success = false
