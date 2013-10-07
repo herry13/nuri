@@ -26,6 +26,7 @@ where [options] are:
 EOS
 	opt :model_file, 'Model file of the desired state.', :default => 'main.sfp', :short => '-m'
 	opt :plain, 'Print output in plain JSON.'
+	opt :no_push_module, 'disable automatic push module'
 end
 	help, args = check_help(args)
 	opts = process_args args, parser
@@ -33,6 +34,7 @@ end
 	if help
 		parser.educate(STDOUT)
 	elsif File.exist?(opts[:model_file])
+		opts[:push_modules] = true if !opts[:no_push_module]
 		master = Nuri::Master.new
 		master.set_model opts
 		state = master.get_state opts
@@ -49,10 +51,12 @@ def do_plan(args=ARGV, cmd="nuri ")
 Usage: #{cmd}plan [options]
 where [options] are:
 EOS
-	opt :model_file, 'Model file of the desired state.', :default => 'main.sfp', :short => '-m'
-	opt :parallel, 'Generate a parallel plan.', :short => '-l'
-	opt :plain, 'Print output in plain JSON.'
-	opt :no_interactive, 'Disable interactive input.'
+	opt :model_file, 'model file of the desired state', :default => 'main.sfp', :short => '-m'
+	opt :parallel, 'generate a parallel plan', :short => '-l'
+	opt :apply, 'execute any generated plan', :short => '-a'
+	opt :plain, 'print output in plain JSON'
+	opt :no_interactive, 'disable interactive input'
+	opt :no_push_module, 'disable automatic push module'
 end
 	help, args = check_help(args)
 	opts = process_args args, parser
@@ -61,6 +65,7 @@ end
 		parser.educate(STDOUT)
 	elsif File.exist?(opts[:model_file])
 		opts[:plan] = true
+		opts[:push_modules] = true if !opts[:no_push_module]
 		master = Nuri::Master.new
 		master.set_model(opts)
 		plan = master.get_plan(opts)
@@ -245,7 +250,7 @@ end
 end
 
 def do_edit(args)
-	file = args[0].to_s
+	file = (args[0].nil? ? 'main.sfp' : args[0].to_s)
 	if file == '-h' or file == '--help'
 		puts <<-EOS
 Usage: edit <filepath>
