@@ -428,7 +428,14 @@ class Nuri::Master
 	end
 
 	def get_agents
-		@model.select { |k,v| !(k[0,1] == '_' or not v.is_a?(Hash) or
+		#@model.select { |k,v| !(k[0,1] == '_' or not v.is_a?(Hash) or
+		#	v['_context'] != 'object' or v['_classes'].index(AgentSchema).nil?)
+		#}
+		Nuri::Master.agents(@model)
+	end
+
+	def self.agents(sfp)
+		sfp.select { |k,v| !(k[0] == '_' or not v.is_a?(Hash) or
 			v['_context'] != 'object' or v['_classes'].index(AgentSchema).nil?)
 		}
 	end
