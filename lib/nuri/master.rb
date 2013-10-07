@@ -140,7 +140,9 @@ class Nuri::Master
 
 		# construct goal state		
 		goalgen = GoalGenerator.new
-		get_agents.accept(goalgen)
+		goal = Sfp::Helper.deep_clone(get_agents)
+		goal.accept(FinalAttributeRemover)
+		goal.accept(goalgen)
 		task['goal'] = goalgen.results
 
 		# find dead-node, remove from the task, print WARNING to the console
