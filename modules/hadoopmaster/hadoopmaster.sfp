@@ -1,0 +1,53 @@
+include "../modules/hadoopclient/hadoopclient.sfp"
+
+schema HadoopMaster {
+	installed : Bool
+	running : Bool
+	slaves isset HadoopClient
+	final version = "1.1.0"
+	final home_dir = "/hadoop"
+	final user = "hadoop"
+	final password = "$1$JtZIJa3N$9efrteyy8KhG8NFTJIMj0/"
+	final source_url = "http://master.herry.ext9.sup.hpl.hp.com/hadoop/"
+	final java_home = "/usr/local/java/jre1.6.0_34"
+	final scratch_dir = "/extra/data"
+
+	sub install {
+		condition {
+			this.installed != true
+		}
+		effect {
+			this.installed = true
+			this.running = false
+		}
+	}
+	
+	sub uninstall {
+		condition {
+			this.running = false
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+
+	sub start {
+		condition {
+			this.running != true
+			this.installed = true
+		}
+		effect {
+			this.running = true
+		}
+	}
+
+	sub stop {
+		condition {
+			this.running = true
+		}
+		effect {
+			this.running = false
+		}
+	}
+}

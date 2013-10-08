@@ -1,0 +1,17 @@
+schema HadoopClient {
+	installed : Bool
+	running : Bool
+	final version = "1.1.10"
+	final home_dir = "/hadoop"
+	final username = "hadoop"
+	final password = "$1$JtZIJa3N$9efrteyy8KhG8NFTJIMj0/"
+	final source_url = "http://master.herry.ext9.sup.hpl.hp.com/"
+	final java_home = "/usr/local/java/jre1.6.0_34"
+
+	sub install {
+		condition { }
+		effect {
+			this.installed = true
+		}
+	}
+}
