@@ -86,16 +86,18 @@ end
 					end
 				end
 
-				if not opts[:no_interactive] and plan['workflow'].length > 0
+				if not opts[:apply] and not opts[:no_interactive] and plan['workflow'].length > 0
 					print "Execute the plan [y/N]? "
-					if STDIN.gets.chomp.upcase == 'Y'
-						puts 'Executing the plan: '.yellow
-						opts[:plan] = plan
-						if master.execute_plan(opts)
-							puts "Execution success!".green
-						else
-							puts "Execution failed!".red
-						end
+					opts[:apply] = true if STDIN.gets.chomp.upcase == 'Y'
+				end
+
+				if opts[:apply]
+					puts 'Executing the plan: '.yellow
+					opts[:plan] = plan
+					if master.execute_plan(opts)
+						puts "Execution success!".green
+					else
+						puts "Execution failed!".red
 					end
 				end
 			else
