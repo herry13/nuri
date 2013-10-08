@@ -172,9 +172,6 @@ class Nuri::Master
 		# remove old parent links, and then reconstruct SFP parent links
 		task.accept(ParentEliminator)
 
-		# debug
-		#puts JSON.pretty_generate(task)
-
 		# rebuild SFP data-structure
 		task.accept(Sfp::Visitor::SfpGenerator.new(task))
 
