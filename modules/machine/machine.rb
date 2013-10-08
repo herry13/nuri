@@ -68,9 +68,11 @@ class Sfp::Module::Machine
 		end
 
 		disk = generate_state
+
 		if @model['disk'].is_a?(Hash)
 			names = @model['disk'].keys.sort { |x,y| x <=> y }
 			device = "/dev/vdb"
+			# format unformatted disks, mount unmount disks
 			names.each { |name|
 				next if name[0] == '_' or disk.has_key?(name)
 				spec = @model['disk'][name]
@@ -78,18 +80,16 @@ class Sfp::Module::Machine
 				if not (status =~ /ERROR/)
 					target = spec['mount'].to_s.strip
 					# format the disk if not yet formatted
-					system("mkfs.ext4 #{device}") if not (status =~ /.+ filesystem data/)
+					system "mkfs.ext4 #{device}" if not (status =~ /.+ filesystem data/)
 					# create target directory if not exist
-					system("mkdir -p #{target}") if !File.exist?(target)
-					# mount the disk
-					if target.length > 0 and system("mount #{device} #{target}")
-						Sfp::Agent.logger.info "mount #{device} to #{target}  [OK]"
-					else
-						Sfp::Agent.logger.info "mount #{device} to #{target}  [Failed]"
-					end
+					system "mkdir -p #{target}" if !File.exist? target
+					# add fstab record
+					system "sed -i '/^#{device}/d' /etc/fstab"
+					system "echo '#{device}   #{target}  ext4   defaults  0 0' >> /etc/fstab"
 				end
 				device = device.next
 			}
+			system 'mount -a'
 		end
 
 		generate_state
