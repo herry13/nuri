@@ -248,7 +248,7 @@ EOS
 					state = JSON[state]['state']
 					state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
 					state.accept(Sfp2JSON)
-					state.accept(PrettyStateGenerator.new)
+					state.accept(PrettyStateGenerator)
 					puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
 				else
 					puts state
@@ -259,7 +259,7 @@ EOS
 					model = JSON[model]
 					model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
 					model.accept(Sfp2JSON)
-					model.accept(PrettyStateGenerator.new)
+					model.accept(PrettyStateGenerator)
 					puts CodeRay.encode(JSON.pretty_generate(model), :json, :terminal)
 				else
 					puts model
