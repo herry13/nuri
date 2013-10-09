@@ -229,7 +229,7 @@ EOS
 			when 'state'
 				state = Net::HTTP.get("#{opts[:address]}", "/state", 1314)
 				if state =~ /{.*}/
-					state = JSON[state]
+					state = JSON[state]['state']
 					state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
 					state.accept(Sfp::Visitor::PrettyStateGenerator.new)
 					puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
@@ -237,16 +237,21 @@ EOS
 					puts state
 				end
 			when 'model'
-				model = JSON[Net::HTTP.get("#{opts[:address]}", "/model", 1314)]
-				model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
-				model.accept(Sfp::Visitor::PrettyStateGenerator.new)
-				puts CodeRay.encode(JSON.pretty_generate(model), :json, :terminal)
+				model = Net::HTTP.get("#{opts[:address]}", "/model", 1314)
+				if model =~ /{.*}/
+					model = JSON[model]
+					model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
+					model.accept(Sfp::Visitor::PrettyStateGenerator.new)
+					puts CodeRay.encode(JSON.pretty_generate(model), :json, :terminal)
+				else
+					puts model
+				end
 			when 'bsig'
 				json = Net::HTTP.get("#{opts[:address]}", "/bsig", 1314)
-				puts CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) if json.length >= 2
+				puts (json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
 			when 'module'
 				json = Net::HTTP.get("#{opts[:address]}", "/modules", 1314)
-				puts CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) if json.length >= 2
+				puts (json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
 			when 'log'
 				puts Net::HTTP.get "#{opts[:address]}", "/log", 1314
 			when 'list'
