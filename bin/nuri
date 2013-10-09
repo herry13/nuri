@@ -227,10 +227,15 @@ EOS
 			when 'upgrade'
 				system("#{ssh_opt} sudo gem update sfpagent --no-ri --no-rdoc")
 			when 'state'
-				state = JSON[Net::HTTP.get("#{opts[:address]}", "/state", 1314)]['state']
-				state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
-				state.accept(Sfp::Visitor::PrettyStateGenerator.new)
-				puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
+				state = Net::HTTP.get("#{opts[:address]}", "/state", 1314)
+				if state =~ /{.*}/
+					state = JSON[state]
+					state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
+					state.accept(Sfp::Visitor::PrettyStateGenerator.new)
+					puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
+				else
+					puts state
+				end
 			when 'model'
 				model = JSON[Net::HTTP.get("#{opts[:address]}", "/model", 1314)]
 				model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
