@@ -1,5 +1,12 @@
 include "../modules/hadoopclient/hadoopclient.sfp"
 
+/**
+ * Module for managing Hadoop master node
+ *
+ * - password can be generated using command:
+ *      echo "mypassword" | makepasswd --clearfrom=- --crypt-md5 |awk '{ print $2 }'
+ *
+ */
 schema HadoopMaster {
 	installed : Bool
 	running : Bool
