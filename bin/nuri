@@ -25,8 +25,8 @@ class Sfp::Console
 Usage: #{cmd}state [options]
 where [options] are:
 EOS
-			opt :model_file, 'Model file of the desired state.', :default => 'main.sfp', :short => '-m'
-			opt :plain, 'Print output in plain JSON.'
+			opt :model_file, 'file contains a model of desired state', :default => 'main.sfp', :short => '-m'
+			opt :plain, 'print output in plain JSON'
 			opt :no_push_module, 'disable automatic push module'
 		end
 		help, args = check_help(args)
@@ -52,9 +52,9 @@ EOS
 Usage: #{cmd}plan [options]
 where [options] are:
 EOS
-			opt :model_file, 'model file of the desired state', :default => 'main.sfp', :short => '-m'
+			opt :model_file, 'file contains a model of desired state', :default => 'main.sfp', :short => '-m'
 			opt :parallel, 'generate a parallel plan', :short => '-l'
-			opt :apply, 'execute any generated plan', :short => '-a'
+			opt :apply, 'generate and execute a plan', :short => '-a'
 			opt :plain, 'print output in plain JSON'
 			opt :no_interactive, 'disable interactive input'
 			opt :no_push_module, 'disable automatic push module'
@@ -118,11 +118,11 @@ EOS
 Usage: #{cmd}bsig [options]
 where [options] are:
 EOS
-			opt :model_file, 'Model file of the desired state.', :default => 'main.sfp', :short => '-m'
-			opt :purge, 'Purge the existing BSig model.', :short => '-g'
-			opt :deploy, 'Generate and then deploy the BSig model.'
-			opt :plain, 'Print output in plain JSON.'
-			opt :no_interactive, 'Disable interactive input.'
+			opt :model_file, 'file contains a model of desired state', :default => 'main.sfp', :short => '-m'
+			opt :purge, 'purge existing BSig model', :short => '-g'
+			opt :deploy, 'generate and then deploy a BSig model'
+			opt :plain, 'print output in plain JSON'
+			opt :no_interactive, 'disable interactive input'
 		end
 		help, args = check_help(args)
 		opts = process_args args, parser
@@ -183,7 +183,7 @@ EOS
 			banner <<-EOS
 Usage: #{cmd}agent <subcommand> [node] [options]
 where <subcommand> is:
- install     install agent
+ install     install agent (use SSH for remote node)
  upgrade     upgrade agent (use SSH for remote node)
    start     start the agent (use SSH for remote node)
     stop     stop the agent (use SSH for remote node)
@@ -193,7 +193,7 @@ where <subcommand> is:
     bsig     get current Behavioural Signature model
   module     get modules list
      log     get last 100 lines of logs
-    list     list of agents
+    list     list of available agents from model file
   
 where [options] are:
 EOS
@@ -286,13 +286,13 @@ EOS
 		banner = <<-EOS
 Usage: <command> [options]
 when <command> is:
-  state     get the current state
-   plan     generate the plan
+  state     get current state
+   plan     generate a plan
    bsig     deployment with distributed mechanism
   agent     manage Nuri agent
-   edit     edit a file
+   edit     edit file
    help     print this help
-   exit     exit the console
+   exit     exit this console
 
 EOS
 
@@ -326,6 +326,10 @@ EOS
 						do_agent args, ''
 					when 'edit'
 						do_edit args
+					when 'cd'
+						Dir.chdir(args[0].to_s)
+					when 'pwd'
+						puts Dir.pwd
 					when 'help'
 						puts banner
 					when 'version', '-v'
