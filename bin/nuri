@@ -178,6 +178,22 @@ EOS
 		end
 	end
 
+	Sfp2JSON = Object.new
+	def Sfp2JSON.accept(name, value, parent)
+		if value.is_a?(Hash)
+			if value['_context'] == 'null'
+				parent[name] = nil
+			elsif value['_context'] == 'any'
+				parent.delete(name)
+			elsif value['_context'] == 'set'
+				parent[name] = value['_values']
+			end
+		end
+		true
+	end
+
+	PrettyStateGenerator = Sfp::Visitor::PrettyStateGenerator.new
+
 	def do_agent(args=ARGV, cmd="nuri ")
 		parser = Trollop::Parser.new do
 			banner <<-EOS
@@ -231,7 +247,8 @@ EOS
 				if state =~ /{.*}/
 					state = JSON[state]['state']
 					state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
-					state.accept(Sfp::Visitor::PrettyStateGenerator.new)
+					state.accept(Sfp2JSON)
+					state.accept(PrettyStateGenerator.new)
 					puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
 				else
 					puts state
@@ -241,7 +258,8 @@ EOS
 				if model =~ /{.*}/
 					model = JSON[model]
 					model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
-					model.accept(Sfp::Visitor::PrettyStateGenerator.new)
+					model.accept(Sfp2JSON)
+					model.accept(PrettyStateGenerator.new)
 					puts CodeRay.encode(JSON.pretty_generate(model), :json, :terminal)
 				else
 					puts model
