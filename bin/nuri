@@ -179,7 +179,7 @@ EOS
 	end
 
 	Sfp2JSON = Object.new
-	def Sfp2JSON.accept(name, value, parent)
+	def Sfp2JSON.visit(name, value, parent)
 		if value.is_a?(Hash)
 			if value['_context'] == 'null'
 				parent[name] = nil
