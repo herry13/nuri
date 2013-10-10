@@ -12,7 +12,7 @@ class Nuri::Service < WEBrick::HTTPServlet::AbstractServlet
 	Dir.mkdir(HOME) if !File.exist?(HOME)
 
 	WebDir = File.expand_path('.', File.dirname(__FILE__))
-	WebFiles = ['index.html', 'index.js', 'index.css', 'jquery.js']
+	WebFiles = ['index.html', 'index.js', 'index.css', 'jquery.js', 'd3.js']
 
 	PIDFile = '/tmp/nuri_service.pid'
 	Log = Logger.new(HOME + "/nuri.log")
