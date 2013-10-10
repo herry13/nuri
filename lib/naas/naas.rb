@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'json'
 require 'logger'
 require 'webrick'
 
@@ -9,14 +10,9 @@ end
 class Nuri::Service < WEBrick::HTTPServlet::AbstractServlet
 	HOME = File.expand_path('~/.nuri')
 	Dir.mkdir(HOME) if !File.exist?(HOME)
-	WebDir = HOME + "/web"
-	Dir.mkdir(WebDir) if !File.exist?(WebDir)
 
-	WebFiles = {
-		:index_html => File.expand_path('./index.html', File.dirname(__FILE__)),
-		:index_js => File.expand_path('./index.js', File.dirname(__FILE__)),
-		:index_css => File.expand_path('./index.css', File.dirname(__FILE__)),
-	}
+	WebDir = File.expand_path('.', File.dirname(__FILE__))
+	WebFiles = ['index.html', 'index.js', 'index.css', 'jquery.js']
 
 	PIDFile = '/tmp/nuri_service.pid'
 	Log = Logger.new(HOME + "/nuri.log")
@@ -87,6 +83,7 @@ class Nuri::Service < WEBrick::HTTPServlet::AbstractServlet
 
 	def initialize(server)
 		@server = server
+		@cache = {}
 	end
 
 	def do_GET(request, response)
@@ -100,10 +97,28 @@ class Nuri::Service < WEBrick::HTTPServlet::AbstractServlet
 			when '/'
 				status = 200
 				content_type = 'text/html'
-				@index_html = File.read(WebFiles[:index_html]) if !defined?(@index_html)
-				body = @index_html
-			when '/index.js'
-			when '/index.css'
+				@cache[WebFiles[0]] = File.read(WebDir + '/' + WebFiles[0]) if !@cache.has_key?(WebFiles[0])
+				body = @cache[WebFiles[0]]
+			when '/modules/'
+				status, content_type, body = get_modules
+			when /^\/.+/
+				req = request.path[1, request.path.length-1]
+				WebFiles.each do |file|
+					if file == req
+						status = 200
+						case File.extname(file)
+						when '.css'
+							content_type = 'text/css'
+						when '.js'
+							content_type = 'application/javascript'
+						else
+							content_type = 'text/plain'
+						end
+						@cache[file] = File.read(WebDir + '/' + file) if !@cache.has_key?(file)
+						body = @cache[file]
+						break
+					end
+				end
 			end
 		end
 
@@ -115,6 +130,12 @@ class Nuri::Service < WEBrick::HTTPServlet::AbstractServlet
 	def trusted?(request)
 		# TODO
 		true
+	end
+
+	def get_modules
+		module_dir = WebDir + '/../../modules'
+		modules = Dir.entries(module_dir).select { |entry| File.directory?(File.expand_path(module_dir + '/' + entry)) and !(entry == '.' or entry == '..') }
+		[200, 'application/json', JSON.generate({'modules' => modules})]
 	end
 end
 
