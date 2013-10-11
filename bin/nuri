@@ -7,6 +7,8 @@ require "coderay"
 Version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
 About = "Nuri #{Version} (c) 2013"
 
+HTTP = Object.new.extend(Nuri::Net::Helper)
+
 class Sfp::Console
 	def process_args(args, parser)
 		Trollop::with_standard_exception_handling parser do
@@ -203,10 +205,11 @@ where <subcommand> is:
  upgrade     upgrade agent (use SSH for remote node)
    start     start the agent (use SSH for remote node)
     stop     stop the agent (use SSH for remote node)
-  status     get status
+  status     get status (use SSH for remote node)
    state     get current state
    model     get current model
     bsig     get current Behavioural Signature model
+    exec     execute given action
   module     get modules list
      log     get last 100 lines of logs
     list     list of available agents from model file
@@ -215,8 +218,8 @@ where [options] are:
 EOS
 			opt :address, "address", :default => 'localhost'
 			opt :port, "port", :default => 1314
-			opt :ssh_user, "SSH username", :short => '-u'
-			opt :ssh_port, "SSH port", :short => '-p'
+			opt :ssh_user, "SSH username", :short => '-u', :default => 'root'
+			opt :ssh_port, "SSH port", :short => '-p', :default => '22'
 		end
 		help, args = check_help(args)
 		subcommand = (args.length > 0 ? args.shift : '')
@@ -225,7 +228,7 @@ EOS
 		if opts[:address] != 'localhost'
 			ssh_opt = "ssh "
 			ssh_opt += (opts[:ssh_user] ? "#{opts[:ssh_user]}@#{opts[:address]}" : opts[:address])
-			ssh_opt += (opts[:ssh_port] ? "-p #{opts[:ssh_port]}" : '')
+			ssh_opt += (opts[:ssh_port] ? " -p #{opts[:ssh_port]}" : '')
 		end
 	
 		if help
@@ -243,33 +246,46 @@ EOS
 			when 'upgrade'
 				system("#{ssh_opt} sudo gem update sfpagent --no-ri --no-rdoc")
 			when 'state'
-				state = Net::HTTP.get("#{opts[:address]}", "/state", 1314)
-				if state =~ /{.*}/
+				code, state = HTTP.get_data(opts[:address], 1314, "/state")
+				if code == '200' and state =~ /{.*}/
 					state = JSON[state]['state']
 					state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
-					#state.accept(Sfp2JSON)
-					#state.accept(PrettyStateGenerator)
 					puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
 				else
 					puts state
 				end
 			when 'model'
-				model = Net::HTTP.get("#{opts[:address]}", "/model", 1314)
-				if model =~ /{.*}/
+				code, model = HTTP.get_data(opts[:address], 1314, "/model")
+				if code == '200' and model =~ /{.*}/
 					model = JSON[model]
 					model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
-					#model.accept(Sfp2JSON)
-					#model.accept(PrettyStateGenerator)
 					puts CodeRay.encode(JSON.pretty_generate(model), :json, :terminal)
 				else
 					puts model
 				end
 			when 'bsig'
-				json = Net::HTTP.get("#{opts[:address]}", "/bsig", 1314)
-				puts (json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
+				code, json = HTTP.get_data(opts[:address], 1314, "/bsig")
+				puts (code == '200' and json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
 			when 'module'
-				json = Net::HTTP.get("#{opts[:address]}", "/modules", 1314)
-				puts (json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
+				code, json = HTTP.get_data(opts[:address], 1314, "/bsig")
+				puts (code == '200' and json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
+			when 'exec', 'execute'
+				if args.length > 0
+					name = args.shift
+					name = '$.' + name if !name.isref
+					parameters = {}
+					args.each do |arg|
+						if arg =~ /=/
+							arg = arg.split('=', 2)
+							parameters[arg[0]] = arg[1]
+						end
+					end
+					data = { 'action' => JSON.generate({ 'name' => name, 'parameters' => parameters }) }
+					code, _ = HTTP.post_data(opts[:address], 1314, "/execute", data)
+					puts (code == '200' ? "Executing #{name} [OK]".green : "Executing #{name} [Failed]".red)
+				else
+					puts 'Invalid parameters (usage: agent exec <action-path> [action-arguments]).'
+				end
 			when 'log'
 				puts Net::HTTP.get "#{opts[:address]}", "/log", 1314
 			when 'list'
