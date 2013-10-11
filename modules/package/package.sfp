@@ -2,6 +2,9 @@ schema Package {
 	final package_name = ""
 	installed : Bool
 	version : String
+	final type = "apt"
+	final source = ""
+	final destination = ""
 
 	synchronized sub install {
 		effect {
