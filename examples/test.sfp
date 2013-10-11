@@ -1,0 +1,16 @@
+include "../modules/node/node.sfp"
+include "../modules/package/package.sfp"
+
+local isa Node {
+	sfpAddress is "localhost"
+	
+	wget isa Package {
+		package_name = "wget"
+	}
+
+/*	hadoop isa Package {
+		type = "tgz"
+		source = "http://apache.mirrors.timporter.net/hadoop/common/stable/hadoop-1.2.1.tar.gz"
+		destination = "/tmp/hadoop-binaries"
+	}*/
+}
