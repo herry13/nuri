@@ -1,108 +1,171 @@
+require 'ostruct'
+
 class Sfp::Module::HadoopMaster
 	include Sfp::Resource
 
+	Services = ['namenode', 'secondarynamenode', 'datanode', 'jobtracker', 'tasktracker']
+
 	def update_state
+		@model.accept(Sfp2Ruby)
 		self.reset
+
 		@state['installed'] = installed?
 		@state['running'] = running?
+		@state['pids'] = pids
+
+		# try to restart any stopped daemon
+		start if @state['running']
 	end
 
 	def install(p={})
+		model = OpenStruct.new(@model)
+
 		# add group hadoop
-		if `grep '^#{@model['user']}' /etc/group`.length <= 0
-			Sfp::Agent.logger.info "adding group #{@model['user']}"
-			system "echo '#{@model['user']}:x:8000:' >> /etc/group"
+		if `grep '^#{model.user}' /etc/group`.length <= 0
+			log.info "adding group #{model.user}"
+			system "echo '#{model.user}:x:8000:' >> /etc/group"
 		else
-			Sfp::Agent.logger.info "group #{@model['user']} is already exist"
+			log.info "group #{model.user} is already exist"
 		end
 
 		# add user hadoop
-		if `grep '^#{@model['user']}' /etc/passwd`.length <= 0
-			Sfp::Agent.logger.info "adding user #{@model['user']}"
-			system "echo '#{@model['user']}:x:8000:8000::#{@model['home_dir']}:/bin/bash' >> /etc/passwd &&
-			        echo '#{@model['user']}:#{@model['password']}:15958:0:99999:7:::' >> /etc/shadow"
+		if `grep '^#{model.user}' /etc/passwd`.length <= 0
+			log.info "adding user #{model.user}"
+			system "echo '#{model.user}:x:8000:8000::#{model.home_dir}:/bin/bash' >> /etc/passwd &&
+			        echo '#{model.user}:#{model.password}:15958:0:99999:7:::' >> /etc/shadow"
 		else
-			Sfp::Agent.logger.info "user #{@model['user']} is already exist"
+			log.info "user #{model.user} is already exist"
 		end
 
 		# create home_dir
-		Sfp::Agent.logger.info "create hadoop home directory: #{@model['home_dir']}"
-		system "mkdir -p #{@model['home_dir']}" if !::File.exist? @model['home_dir']
-		system "chown -R hadoop:hadoop #{@model['home_dir']}"
+		log.info "create hadoop home directory: #{model.home_dir}"
+		system "mkdir -p #{model.home_dir}" if !::File.exist? model.home_dir
+		system "chown -R #{model.user}:#{model.user} #{model.home_dir}"
+
+		system 'apt-get install -y axel'
+		downloader = 'axel -q -o' # 'wget -O'
 
 		# download and extract hadoop binaries
-		Sfp::Agent.logger.info "download and install hadoop binaries"
-		tmp_file = "hadoop.tar.gz"
-		system "cd #{@model['home_dir']} &&
-              wget -O #{tmp_file} #{model['source_url']}/hadoop-#{@model['version']}.tar.gz &&
-              tar xvzf #{tmp_file} && rm -f #{tmp_file} &&
-              mv hadoop-#{@model['version']}/* . && rm -rf hadoop-#{@model['version']}"
-
-		# download other files
-		Sfp::Agent.logger.info "download and install additional files"
-		['hadoop-env.sh', 'core-site.xml', 'mapred-site.xml', 'hdfs-site.xml'].each do |file|
-			system "wget -O #{@model['home_dir']}/conf/#{file} #{@model['source_url']}/#{file}"
-		end
-		system "wget -O #{@model['home_dir']}/bin/masterScript.sh #{@model['source_url']}/masterScript.sh &&
-              chmod +x #{@model['home_dir']}/bin/masterScript.sh"
-		system "chown -R hadoop:hadoop #{@model['home_dir']}"
+		log.info "download and install hadoop binaries"
+		file = model.source.split('/').last.to_s
+		basename = (::File.extname(file) == '.gz' ? ::File.basename(file, '.tar.gz') : ::File.basename(file, ::File.extname(file)))
+		system "cd #{model.home_dir} &&
+		        #{downloader} #{file} #{model.source} &&
+		        tar xvzf #{file} && rm -f #{file} &&
+		        bash -c 'cd #{model.home_dir}/#{basename} && shopt -s dotglob && mv * .. && cd .. && rm -rf #{basename}'"
 
 		map = {
-			'user' => @model['user'],
-			'hostname' => 'localhost', #resolve('$.parent.sfpAddress'),
-			'java_home' => @model['java_home']
+			'user' => model.user,
+			'master' => `hostname`.strip,
+			'java_home' => model.java_home,
+			'tmp_dir' => model.scratch_dir,
+			'replication' => model.replication,
 		}
-		Sfp::Agent.logger.info "render template configuration files: core-site.xml, hadoop-env.sh, mapred-site.xml"
 		renderer = Sfp::TemplateEngine.new(map)
-		['core-site.xml', 'hadoop-env.sh', 'mapred-site.xml'].each do |file|
-			renderer.render_file("#{@model['home_dir']}/conf/#{file}")
+
+		# copy and process template configuration files
+		log.info "copy and process template configuration files: core-site.xml, hadoop-env.sh, mapred-site.xml"
+		dir = File.expand_path(File.dirname(__FILE__))
+		['hadoop-env.sh', 'core-site.xml', 'mapred-site.xml', 'hdfs-site.xml'].each do |file|
+			system "cp -f #{dir}/#{file} #{model.home_dir}/conf/"
+			renderer.render_file("#{model.home_dir}/conf/#{file}")
 		end
+		system "chown -R #{model.user}:#{model.user} #{model.home_dir}"
+
+		# create HDFS directory
+		if !::File.exist?(model.scratch_dir) && !system("mkdir -p #{model.scratch_dir}")
+			log.info "create scratch directory for HDFS: #{model.scratch_dir}"
+			system "mkdir -p #{model.scratch_dir}"
+		end
+		system "chown -R #{model.user}:#{model.user} #{model.scratch_dir}"
 
 		# format namenode space
-		Sfp::Agent.logger.info "format namenode space"
-		system "su -c '#{@model['home_dir']}/bin/hadoop namenode -format' hadoop"
+		log.info "format namenode space"
+		system "su -c '#{model.home_dir}/bin/hadoop namenode -format' hadoop"
 
 		# export hadoop home to root
-		Sfp::Agent.logger.info "export hadoop home directory to root"
+		log.info "export hadoop home directory to root"
 		system "sed -i '/^export HADOOP_HOME/d' /root/.bashrc"
-		system "echo 'export HADOOP_HOME=#{@model['home_dir']}' >> /root/.bashrc"
+		system "echo 'export HADOOP_HOME=#{model.home_dir}' >> /root/.bashrc"
 
-		if !::File.exist?(@model['scratch_dir']) && !system("mkdir -p #{@model['scratch_dir']}")
-			Sfp::Agent.logger.info "create scratch directory: #{@model['scratch_dir']}"
-			system "mkdir #{@model['scratch_dir']} && chown -R #{@model['user']}:#{@model['user']} #{@model['scratch_dir']}"
-		else
-			Sfp::Agent.logger.info "cannot create scratch directory: #{@model['scratch_dir']}"
-		end
-
-		true
+		installed?
 	end
 
 	def uninstall(p={})
+		model = OpenStruct.new(@model)
 		# remove hadoop user and group, and then delete hadoop's home directory
 		system "sed -i '/^export HADOOP_HOME/d' /root/.bash_profile"
-		!!system("sed -i '/^#{@model['user']}/d' /etc/passwd &&
-                sed -i '/^#{@model['user']}/d' /etc/shadow &&
-                sed -i '/^#{@model['user']}/d' /etc/group &&
-                rm -rf #{@model['home_dir']} &&
-		          rm -rf /tmp/#{@model['user']} &&
-		          rm -rf #{@model['scratch_dir']}")
+		!!system("sed -i '/^#{model.user}/d' /etc/passwd &&
+                sed -i '/^#{model.user}/d' /etc/shadow &&
+                sed -i '/^#{model.user}/d' /etc/group &&
+                rm -rf #{model.home_dir} &&
+		          rm -rf /tmp/#{model.user}* &&
+		          rm -rf #{model.scratch_dir}")
 	end
 
 	def start(p={})
+		model = OpenStruct.new(@model)
+		pids = self.pids
+		Services.each { |name|
+			pid = pids[name]
+			if pid <= 0
+				cmd = "#{model.home_dir}/bin/hadoop-daemon.sh start #{name}"
+				log.info `su -c '#{cmd} && sleep 3' #{model.user}`
+			end
+		}
+		true
 	end
 
 	def stop(p={})
+		model = OpenStruct.new(@model)
+		pids = self.pids
+		Services.reverse.each { |name|
+			pid = pids[name]
+			if pid > 0
+				cmd = "#{model.home_dir}/bin/hadoop-daemon.sh stop #{name}"
+				log.info `su -c '#{cmd}' #{model.user}`
+			end
+		}
+		true
 	end
 
 	protected
 	def installed?
-		['conf/hadoop-env.sh', 'conf/core-site.xml', 'conf/mapred-site.xml', 'conf/hdfs-site.xml', 'bin/masterScript.sh'].each { |file|
+		['bin/hadoop', 'conf/hadoop-env.sh', 'conf/core-site.xml', 'conf/mapred-site.xml', 'conf/hdfs-site.xml'].each { |file|
 			return false if !::File.exist?("#{@model['home_dir']}/#{file}")
 		}
 		true
 	end
 
 	def running?
-		false
+		status = false
+		pids.each { |name,pid|
+			log.warn "#{name} is not running!" if pid <= 0
+			status = true if pid > 0
+		}
+		status
+	end
+
+	def pids
+		data = {}
+		Services.each { |name| data[name] = `ps axf | grep java | grep -v grep | grep Dproc_#{name}`.to_s.strip.split(' ', 2)[0].to_i }
+		data
+	end
+
+	Sfp2Ruby = Object.new
+	def Sfp2Ruby.visit(name, value, parent)
+		if name[0] == '_'
+			parent.delete(name)
+		elsif value.is_a?(Hash)
+			case value['_context']
+			when 'null'
+				parent[name] = nil
+			when 'any_value', 'constraint', 'procedure'
+				parent.delete(name)
+			when 'set'
+				parent[name] = value['_values']
+			end
+		end
+		true
 	end
 end
