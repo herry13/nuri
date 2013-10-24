@@ -340,10 +340,11 @@ when <command> is:
 
 EOS
 
+		username = `whoami`.strip
 		puts About
 		loop do
 			begin
-				print 'nuri> '.green
+				print "nuri@#{username}> ".green
 				begin
 					input = STDIN.gets
 					raise Exception if input.nil?
@@ -374,6 +375,8 @@ EOS
 						Dir.chdir(args[0].to_s)
 					when 'pwd'
 						puts Dir.pwd
+					when 'ls'
+						system "ls --color #{args.join(" ")}"
 					when 'help'
 						puts banner
 					when 'version', '-v'
