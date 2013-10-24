@@ -13,11 +13,12 @@ schema HadoopMaster {
 	final home_dir = "/hadoop"
 	final user = "hadoop"
 	final password = "$1$JtZIJa3N$9efrteyy8KhG8NFTJIMj0/"
-	final source = "http://master.herry.ext9.sup.hpl.hp.com/hadoop/hadoop-1.1.0.tar.gz"
-	//final source = "http://mirror.catn.com/pub/apache/hadoop/common/hadoop-1.2.1/hadoop-1.2.1.tar.gz"
+	final source = "http://www.mirrorservice.org/sites/ftp.apache.org/hadoop/common"
+	final version = "1.2.1"
 	final java_home = "/usr/local/java/jre1.6.0_34"
 	final scratch_dir = "/tmp/hadoop"
 	final replication = 2
+	final cluster_name = "hadoop-nuri"
 
 	sub install {
 		condition {
