@@ -50,7 +50,11 @@
 <property>
         <name>yarn.resourcemanager.scheduler.class</name>
         <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
-</property> 
+</property>
+<property>
+        <name>yarn.web-proxy.address</name>
+        <value><%= master %>:54315</value>
+</property>
 <property>
         <name>yarn.scheduler.minimum-allocation-mb</name>
         <value>256</value>

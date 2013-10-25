@@ -18,7 +18,7 @@ schema HadoopMaster {
 	final java_home = "/usr/local/java/jre1.6.0_34"
 	final scratch_dir = "/tmp/hadoop"
 	final replication = 2
-	final cluster_name = "hadoop-nuri"
+	final cluster_name = "hadoopnuri"
 
 	sub install {
 		condition {

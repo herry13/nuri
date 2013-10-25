@@ -75,7 +75,7 @@ class Sfp::Module::HadoopClient
 	
 			# copy and process template configuration files
 			log.info "copy and process template configuration files: core-site.xml, hadoop-env.sh, mapred-site.xml"
-			dir = File.expand_path(File.dirname(__FILE__)) + '/config-1.x'
+			dir = File.expand_path(File.dirname(__FILE__)) + '/hadoop1'
 			['hadoop-env.sh', 'core-site.xml', 'mapred-site.xml', 'hdfs-site.xml'].each do |file|
 				system "cp -f #{dir}/#{file} #{model.home_dir}/conf/"
 				renderer.render_file("#{model.home_dir}/conf/#{file}")
@@ -141,7 +141,7 @@ class Sfp::Module::HadoopClient
 
 		def pids
 			data = {}
-			Sfp::Module::HadoopClient::Services.each { |name|
+			Sfp::Module::HadoopClient::Hadoop1::Services.each { |name|
 				data[name] = `ps axf | grep java | grep -v grep | grep hadoop | grep Dproc_#{name}`.to_s.strip.split(' ', 2)[0].to_i
 			}
 			data
@@ -224,7 +224,7 @@ class Sfp::Module::HadoopClient
 			renderer = Sfp::TemplateEngine.new(map)
 	
 			log.info "copy and process template configuration files: {hadoop,yarn}-env.sh, {core,hdfs,yarn,mapred}-site.xml"
-			dir = File.expand_path(File.dirname(__FILE__)) + '/config-2.x'
+			dir = File.expand_path(File.dirname(__FILE__)) + '/hadoop2'
 			['hadoop-env.sh', 'yarn-env.sh', 'core-site.xml', 'hdfs-site.xml', 'yarn-site.xml', 'mapred-site.xml'].each do |file|
 				system "cp -f #{dir}/#{file} #{config_dir}"
 				renderer.render_file("#{config_dir}/#{file}")
@@ -301,7 +301,7 @@ class Sfp::Module::HadoopClient
 
 		def pids
 			data = {}
-			Sfp::Module::HadoopMaster::Hadoop2::Services.each { |name|
+			Sfp::Module::HadoopClient::Hadoop2::Services.each { |name|
 				data[name] = `ps axf | grep java | grep -v grep | grep hadoop | grep Dproc_#{name}`.to_s.strip.split(' ', 2)[0].to_i
 			}
 			data

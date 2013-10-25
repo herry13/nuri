@@ -78,7 +78,7 @@ class Sfp::Module::HadoopMaster
 	
 			# copy and process template configuration files
 			log.info "copy and process template configuration files: core-site.xml, hadoop-env.sh, mapred-site.xml"
-			dir = File.expand_path(File.dirname(__FILE__)) + '/config-1.x'
+			dir = File.expand_path(File.dirname(__FILE__)) + '/hadoop1'
 			['hadoop-env.sh', 'core-site.xml', 'mapred-site.xml', 'hdfs-site.xml'].each do |file|
 				system "cp -f #{dir}/#{file} #{config_dir}"
 				renderer.render_file("#{config_dir}/#{file}")
@@ -168,7 +168,7 @@ class Sfp::Module::HadoopMaster
 	end
 
 	module Hadoop2
-		Services = ['namenode', 'resourcemanager', 'historyserver']
+		Services = ['namenode', 'resourcemanager', 'historyserver', 'proxyserver']
 
 		def version
 			2
@@ -243,7 +243,7 @@ class Sfp::Module::HadoopMaster
 			renderer = Sfp::TemplateEngine.new(map)
 	
 			log.info "copy and process template configuration files: {hadoop,yarn}-env.sh, {core,hdfs,yarn,mapred}-site.xml"
-			dir = File.expand_path(File.dirname(__FILE__)) + '/config-2.x'
+			dir = File.expand_path(File.dirname(__FILE__)) + '/hadoop2'
 			['hadoop-env.sh', 'yarn-env.sh', 'core-site.xml', 'hdfs-site.xml', 'yarn-site.xml', 'mapred-site.xml'].each do |file|
 				system "cp -f #{dir}/#{file} #{config_dir}"
 				renderer.render_file("#{config_dir}/#{file}")
@@ -256,7 +256,8 @@ class Sfp::Module::HadoopMaster
 	
 			# format namenode
 			log.info "format namenode space"
-			system "su -c '#{model.home_dir}/bin/hdfs namenode -format #{model.cluster_name}"
+			cmd = "#{model.home_dir}/bin/hdfs namenode -format #{model.cluster_name}"
+			log.info `su -c '#{cmd}' #{model.user}`
 	
 			return false if not installed?
 	
@@ -283,6 +284,7 @@ class Sfp::Module::HadoopMaster
 		def start(p={})
 			model = OpenStruct.new(@model)
 			pids = self.pids
+
 			if pids['namenode'] <= 0
 				cmd = "#{model.home_dir}/sbin/hadoop-daemon.sh --config #{model.home_dir}/etc/hadoop --script hdfs start namenode"
 				log.info `su -c '#{cmd}' #{model.user}`
@@ -293,7 +295,20 @@ class Sfp::Module::HadoopMaster
 				log.info `su -c '#{cmd}' #{model.user}`
 			end
 
+			if pids['proxyserver'] <= 0
+				cmd = "#{model.home_dir}/sbin/yarn-daemon.sh --config #{model.home_dir}/etc/hadoop start proxyserver"
+				log.info `su -c '#{cmd}' #{model.user}`
+			end
+
+			sleep 1
 			if pids['historyserver'] <= 0
+				cmd = "#{model.home_dir}/sbin/mr-jobhistory-daemon.sh --config #{model.home_dir}/etc/hadoop start historyserver"
+				log.info `su -c '#{cmd}' #{model.user}`
+			end
+
+			pids = self.pids
+			if pids['historyserver'] <= 0
+				sleep 6
 				cmd = "#{model.home_dir}/sbin/mr-jobhistory-daemon.sh --config #{model.home_dir}/etc/hadoop start historyserver"
 				log.info `su -c '#{cmd}' #{model.user}`
 			end
@@ -304,8 +319,14 @@ class Sfp::Module::HadoopMaster
 		def stop(p={})
 			model = OpenStruct.new(@model)
 			pids = self.pids
-			if pids['namenode'] > 0
-				cmd = "#{model.home_dir}/sbin/hadoop-daemon.sh --config #{model.home_dir}/etc/hadoop --script hdfs stop namenode"
+
+			if pids['historyserver'] > 0
+				cmd = "#{model.home_dir}/sbin/mr-jobhistory-daemon.sh --config #{model.home_dir}/etc/hadoop stop historyserver"
+				log.info `su -c '#{cmd}' #{model.user}`
+			end
+
+			if pids['proxyserver'] > 0
+				cmd = "#{model.home_dir}/sbin/yarn-daemon.sh --config #{model.home_dir}/etc/hadoop stop proxyserver"
 				log.info `su -c '#{cmd}' #{model.user}`
 			end
 
@@ -314,8 +335,8 @@ class Sfp::Module::HadoopMaster
 				log.info `su -c '#{cmd}' #{model.user}`
 			end
 
-			if pids['historyserver'] > 0
-				cmd = "#{model.home_dir}/sbin/mr-jobhistory-daemon.sh --config #{model.home_dir}/etc/hadoop stop historyserver"
+			if pids['namenode'] > 0
+				cmd = "#{model.home_dir}/sbin/hadoop-daemon.sh --config #{model.home_dir}/etc/hadoop --script hdfs stop namenode"
 				log.info `su -c '#{cmd}' #{model.user}`
 			end
 
