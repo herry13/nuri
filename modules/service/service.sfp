@@ -1,8 +1,9 @@
-include "../package/package.sfp"
+include "../aptpackage/aptpackage.sfp"
 
-schema Service extends Package {
-	final service_name = ""
+schema Service extends AptPackage {
 	running : Bool
+
+	final service_name = ""
 
 	synchronized sub install {
 		condition {

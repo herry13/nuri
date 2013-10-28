@@ -1,0 +1,5 @@
+include "../package/package.sfp"
+
+schema AptPackage extends Package {
+	final source = "default"
+}

@@ -1,4 +1,4 @@
-include "../modules/hadoopclient/hadoopclient.sfp"
+include "../service/service.sfp"
 
 /**
  * Module for managing Hadoop master node
@@ -7,7 +7,7 @@ include "../modules/hadoopclient/hadoopclient.sfp"
  *     $ echo "mypassword" | makepasswd --clearfrom=- --crypt-md5 |awk '{ print $2 }'
  *
  */
-schema HadoopMaster {
+schema HadoopMaster extends Service {
 	installed : Bool
 	running : Bool
 	final home_dir = "/hadoop"
@@ -59,91 +59,3 @@ schema HadoopMaster {
 		}
 	}
 }
-
-/*
-schema HadoopService {
-	installed : Bool
-	running : Bool
-
-	sub install {
-		condition {
-			this.installed != true
-		}
-		effect {
-			this.installed = true
-			this.running = false
-		}
-	}
-	
-	sub uninstall {
-		condition {
-			this.running = false
-			this.installed = true
-		}
-		effect {
-			this.installed = false
-		}
-	}
-
-	sub start {
-		condition {
-			this.running != true
-			this.installed = true
-		}
-		effect {
-			this.running = true
-		}
-	}
-
-	sub stop {
-		condition {
-			this.running = true
-		}
-		effect {
-			this.running = false
-		}
-	}
-}
-
-schema HadoopNameNode extends TemplateService
-schema HadoopDataNode extends TemplateService
-schema HadoopJobTracker extends TemplateService
-schema HadoopTaskTracker extends TemplateService
-
-schema HadoopMaster {
-	installed : Bool
-	running : Bool
-	slaves isset HadoopClient
-	final version = "1.1.0"
-	final home_dir = "/hadoop"
-	final user = "hadoop"
-	final password = "$1$JtZIJa3N$9efrteyy8KhG8NFTJIMj0/"
-	final java_home = "/usr/local/java/jre1.6.0_34"
-	final scratch_dir = "/tmp/hadoop"
-
-	hadoop isa Package {
-		package_name = "hadoop"
-		installed = parent.installed
-		version = parent.version
-		type = "tgz"
-		source = "http://www.mirrorservice.org/sites/ftp.apache.org/hadoop/common/hadoop-" + version + "/hadoop-" + version + ".tar.gz"
-		destination = parent.home_dir
-	}
-	namenode isa HadoopNameNode {
-		installed = parent.installed
-		running = parent.running
-	}
-	datanode isa HadoopDataNode {
-		installed = parent.installed
-		running = parent.running
-	}
-	jobtracker isa HadoopJobTracker {
-		installed = parent.installed
-		running = parent.running
-	}
-	tasktracker isa HadoopTaskTracker {
-		installed = parent.installed
-		running = parent.running
-	}
-}
-*/

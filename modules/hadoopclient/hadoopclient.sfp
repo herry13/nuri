@@ -1,3 +1,5 @@
+include "../hadoopmaster/hadoopmaster.sfp"
+
 schema HadoopClient {
 	installed : Bool
 	running : Bool
