@@ -18,7 +18,7 @@ class Sfp::Module::TarPackage
 
 	def install(p={})
 		src = url
-		dest = target
+		dest = home
 		return false if dest.length <= 0
 
 		# create destination directory if not exist
@@ -32,7 +32,10 @@ class Sfp::Module::TarPackage
 
 		file = src.split('/').last.to_s
 		# if downloaded file is not exist, then return false
-		return false if !::File.exist?("#{@model['destination']}/#{file}")
+		if !::File.exist?("#{dest}/#{file}")
+			log.error "Failed to download file from #{url}"
+			return false
+		end
 
 		# extract tar file, and then delete it
 		system "cd #{dest} && tar xvzf #{file}"
@@ -47,7 +50,7 @@ class Sfp::Module::TarPackage
 	end
 
 	def uninstall(p={})
-		!!system("rm -rf #{@model['destination']}") if File.exist?(@model['destination'])
+		!!system("rm -rf #{home}") if File.exist?(home)
 		true
 	end
 
@@ -59,14 +62,14 @@ class Sfp::Module::TarPackage
 
 	protected
 	def installed?
-		::File.exist?("#{@model['destination']}/#{Signature}")
+		::File.exist?("#{home}/#{Signature}")
 	end
 
 	def version?
 		if @model['version'].length > 0
 			@model['version']
 		else
-			file_version = @model['destination'].to_s + "/VERSION"
+			file_version = home + "/VERSION"
 			(::File.exist?(file_version) ? File.read(file_version).strip : '')
 		end
 	end
@@ -83,7 +86,7 @@ class Sfp::Module::TarPackage
 		end
 	end
 
-	def target
-		@model['destination'].to_s.strip
+	def home
+		@model['home'].to_s.strip
 	end
 end

@@ -1,5 +1,5 @@
 include "../package/package.sfp"
 
 schema TarPackage extends Package {
-	final destination = ""
+	final home = ""
 }
