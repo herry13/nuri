@@ -104,10 +104,10 @@ EOS
 						end
 					end
 				elsif plan['workflow'].length == 0
-					puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.'.green)
+					puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.').green
 				end
 			else
-				puts (opts[:plain] ? "No solution!" : "No solution!".red)
+				puts (opts[:plain] ? "No solution!".yellow : "No solution!".red)
 			end
 		else
 			puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
@@ -169,10 +169,10 @@ EOS
 							end
 						end
 					else
-						puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.'.green)
+						puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.').green
 					end
 				else
-					puts (opts[:plain] ? "No solution!" : "No solution!".red)
+					puts (opts[:plain] ? "No solution!".yellow : "No solution!".red)
 				end
 			end
 		else
@@ -201,18 +201,19 @@ EOS
 			banner <<-EOS
 Usage: #{cmd}agent <subcommand> [node] [options]
 where <subcommand> is:
- install     install agent (use SSH for remote node)
- upgrade     upgrade agent (use SSH for remote node)
-   start     start the agent (use SSH for remote node)
-    stop     stop the agent (use SSH for remote node)
-  status     get status (use SSH for remote node)
-   state     get current state
-   model     get current model
-    bsig     get current Behavioural Signature model
-    exec     execute given action
-  module     get modules list
-     log     get last 100 lines of logs
-    list     list of available agents from model file
+       install     install agent (use SSH for remote node)
+       upgrade     upgrade agent (use SSH for remote node)
+         start     start the agent (use SSH for remote node)
+          stop     stop the agent (use SSH for remote node)
+        status     get status (use SSH for remote node)
+         state     get current state
+         model     get current model
+          bsig     get current Behavioural Signature model
+ exec <action>     execute given action description
+                    <action> = <path> [param1=value1 param2=value2 ...]
+        module     get modules list
+           log     get last 100 lines of logs
+          list     list of available agents from model file
   
 where [options] are:
 EOS
@@ -293,10 +294,10 @@ EOS
 			when 'help'
 				parser.educate(STDOUT)
 			else
-				puts 'Unrecognized command!'
+				$stderr.puts 'Unrecognized command! Type "help" to print available commands.'.red
 			end
 		else
-			puts 'sfpagent gem is not installed!'.red
+			$stderr.puts 'sfpagent gem is not installed!'.red
 		end
 	end
 
@@ -382,7 +383,7 @@ EOS
 					when 'version', '-v'
 						puts About
 					else
-						$stderr.puts 'Unrecognized command! Type "help" to print available commands.'
+						$stderr.puts 'Unrecognized command! Type "help" to print available commands.'.red
 					end
 				end
 			rescue Exception => e
