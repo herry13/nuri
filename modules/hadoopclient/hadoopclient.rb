@@ -71,7 +71,7 @@ class Sfp::Module::HadoopClient
 				'java_home' => model.java_home,
 				'replication' => resolve(model.master + '.replication')
 			}
-			renderer = Sfp::TemplateEngine.new(map)
+			renderer = Sfp::Template.new(map)
 	
 			# copy and process template configuration files
 			log.info "copy and process template configuration files: core-site.xml, hadoop-env.sh, mapred-site.xml"
@@ -221,7 +221,7 @@ class Sfp::Module::HadoopClient
 				'yarn_local_dir' => model.scratch_dir + "/yarn_local_dir",
 				'yarn_log_dir' => model.scratch_dir + "/yarn_log_dir"
 			}
-			renderer = Sfp::TemplateEngine.new(map)
+			renderer = Sfp::Template.new(map)
 	
 			log.info "copy and process template configuration files: {hadoop,yarn}-env.sh, {core,hdfs,yarn,mapred}-site.xml"
 			dir = File.expand_path(File.dirname(__FILE__)) + '/hadoop2'
