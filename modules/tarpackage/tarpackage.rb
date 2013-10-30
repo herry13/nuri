@@ -4,10 +4,11 @@ class Sfp::Module::TarPackage
 	Signature = '.tarpackage.log'
 
 	def update_state
-		self.reset
-
 		@state['installed'] = installed?
 		@state['version'] = version?
+		@state['source'] = @model['source']
+		@state['package_name'] = @model['package_name']
+		@state['home'] = (@state['installed'] ? @model['home'] : '')
 	end
 
 	##############################
