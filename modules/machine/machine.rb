@@ -3,7 +3,7 @@ class Sfp::Module::Machine
 	include Sfp::Resource
 
 	def update_state
-		self.reset
+		to_model
 
 		@state['sfpAddress'] = @model['sfpAddress']
 		@state['sfpPort'] = @model['sfpPort']

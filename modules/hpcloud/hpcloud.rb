@@ -12,7 +12,7 @@ class Sfp::Module::HPCloud
 	end
 
 	def update_state
-		self.reset
+		to_model
 		begin
 			@state['vms'] = get_vms
 			@state['running'] = true

@@ -2,7 +2,7 @@ class Sfp::Module::AptPackage
 	include Sfp::Resource
 
 	def update_state
-		self.reset
+		to_model
 
 		@state['installed'] = installed?
 		@state['version'] = version?

@@ -396,7 +396,7 @@ class Sfp::Module::HadoopMaster
 	end
 
 	def update_state
-		self.reset
+		to_model
 
 		if @model['version'] =~ /^1\..+$/ and version != 1
 			self.extend(Hadoop1)

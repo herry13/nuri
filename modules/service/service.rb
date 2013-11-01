@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__)) + "/../aptpackage/aptpackage.rb
 
 class Sfp::Module::Service < Sfp::Module::AptPackage
 	def update_state
-		self.reset
+		to_model
 		if @model.is_a?(Hash)
 			@state['installed'] = installed?
 			@state['version'] = version?

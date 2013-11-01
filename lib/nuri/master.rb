@@ -332,7 +332,7 @@ class Nuri::Master
 			modules = JSON[body]
 			list = ''
 			schemata.each { |m|
-				list += "#{m} " if m != 'object' and File.exist?("#{@modules_dir}/#{m}") and
+				list += "#{m} " if File.exist?("#{@modules_dir}/#{m}") and #m != 'object' and
 				                   (not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s)
 			}
 

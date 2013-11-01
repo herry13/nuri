@@ -13,7 +13,7 @@ class Sfp::Module::Apache
 
 	# get state of this module
 	def update_state
-		self.reset
+		to_model
 
 		# php module
 		@state['php_module'] = Nuri::Helper::Package.installed?('libapache2-mod-php5')

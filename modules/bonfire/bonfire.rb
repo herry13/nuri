@@ -12,7 +12,7 @@ class Sfp::Module::Bonfire
 	end
 
 	def update_state
-		self.reset
+		to_model
 		@state['running'] = self.open_connection
 		@state['vms'] = self.get_vms
 	end
