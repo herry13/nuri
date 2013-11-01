@@ -9,6 +9,11 @@ About = "Nuri #{Version} (c) 2013"
 
 HTTP = Object.new.extend(Nuri::Net::Helper)
 
+def console(*args)
+	print Time.now.strftime('%Y-%m-%d %H:%M:%S '.yellow)
+	$stdout.puts(args)
+end
+
 class Sfp::Console
 	def process_args(args, parser)
 		Trollop::with_standard_exception_handling parser do
@@ -354,7 +359,8 @@ EOS
 					break
 				end
 				input = input.chomp.strip
-				if input[0] == '!'
+				if input.length <= 0
+				elsif input[0] == '!'
 					system(input[1..input.length])
 				else
 					command, args = input.split(' ', 2)
