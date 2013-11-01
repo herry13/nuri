@@ -1,23 +1,94 @@
+body {
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-size: 1em;
+	margin: 0px;
+	padding: 0px;
+	color: #333;
+}
+a:link {
+	color: #333;
+	text-decoration: none;
+}
+a:visited {
+	color: #333;
+}
+a:active {
+	color: #333;
+}
+a:hover {
+	color: #333;
+	text-decoration: underline;
+}
+p {
+	margin: 0px;
+	padding: 0px;
+}
+#top {
+	text-align: center;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin: 0px;
+}
+#title {
+	text-align: center;
+	font-size: 2em;
+	font-weight: bold;
+}
+.banner {
+	text-align: center;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	background-color: #CCC;
+	margin: 0px;
+}
+.banneritem {
+	display: inline-block;
+	vertical-align: top;
+}
+.banneritem div {
+	margin-top: 10px;
+	margin-bottom: auto;
+	height: auto;
+}
+.banner h2 {
+	font-weight: bold;
+	margin: 0px;
+	padding: 0px;
+	color: #555;
+	font-size: 1.5em;
+}
+.banneritem img {
+	width: 300px;
+}
+.bannersep {
+	display: inline-block;
+	width: 50px;
+}
+.code {
+	text-align: left;
+	font-family: monospace, terminal, courier;
+	font-size: 1em;
+}
+.codevalue {
+	color: #c00;
+}
+.codekeyword {
+	color: #00c;
+}
+.content {
+	background-color: #FFF;
+}
+.content ul li {
+	text-align: left;
+}
+
+/*
 body, table {
 	color: #0000A8;
 	font-family: verdana, sans-serif;
 	font-size: 12px;
 	text-align: left;
 	line-height: 140%;
-}
-a:link {
-	color: #0000A8;
-	text-decoration: underline;
-}
-a:visited {
-	color: #0000A8;
-}
-a:active {
-	color: #0000A8;
-}
-a:hover {
-	color: #0000A8;
-	text-decoration: none;
 }
 
 h2 {
@@ -147,5 +218,4 @@ a.button {
 #view-on-github {
 	margin-right: 0;
 }
-
-
+*/

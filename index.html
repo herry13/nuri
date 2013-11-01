@@ -1,16 +1,67 @@
 <html>
 	<head>
-		<title>Nuri: The Automated Workflow Configuration Tool</title>
+		<title>Nuri: automated workflow configuration tool</title>
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
-	<div id="main">
+		<div id="top">
+			<span id="title">Nuri</span> &nbsp;Just define your desired state and let Nuri achieves it for you.
+		</div>
+		<div class="banner">
+			<div class="banneritem">
+				<h2>Modelling (User)</h2>
+					<div class="code">
+						<span class="codekeyword">include</span> <span class="codevalue">"vm/vm.sfp"</span><br/>
+						<span class="codekeyword">include</span> <span class="codevalue">"hpcloud/hpcloud.sfp"</span><br/>
+						<span class="codekeyword">include</span> <span class="codevalue">"hadoop2/hadoop2.sfp"</span><br/>
 
-		<div>
+						hpcloud <span class="codekeyword">isa</span> HPCloud { <br/>
+							&nbsp; key_name is <span class="codevalue">"nurikey"</span> <br/>
+						} </br>
+						master <span class="codekeyword">isa</span> VM { </br>
+							&nbsp; hadoop <span class="codekeyword">isa</span> Hadoop2Master {</br>
+							&nbsp; &nbsp; 	slaves = <span class="codevalue">(slave1.hadoop,<br/>
+							&nbsp; &nbsp; &nbsp; slave2.hadoop)</span></br>
+							&nbsp; } </br>
+						} </br>
+						slave1 <span class="codekeyword">isa</span> VM { </br>
+							&nbsp; hadoop <span class="codekeyword">isa</span> Hadoop2Slave</br>
+						} </br>
+						slave2 <span class="codekeyword">extends</span> slave1
+					</div>
+			</div>
+			<div class="bannersep">&nbsp;</div>
+			<div class="banneritem">
+				<h2>Planning (Nuri)</h2>
+				<div><a href="workflow.png"><img src="workflow.png"></a></div>
+			</div>
+			<div class="bannersep">&nbsp;</div>
+			<div class="banneritem">
+				<h2>Deployment (Nuri)</h2>
+				<div><a href="deployment.png"><img src="deployment.png"></a></div>
+			</div>
+		</div>
+		<div class="banner content">
+			<h2>Features</h2>
+			<div class="banneritem">
+			<ul>
+			<li><!--&#10004;-->Automated composition of workflow</li>
+			<li>Achieve a desired state, and also preserve global constraints</li>
+			<li>A declarative configuration language: objects and procedures</li>
+			<li>Orchestrate or choreograph configuration changes</li>
+			<li>Enable unattended, autonomic, and distributed reconfiguration and auto-recovery			</li>
+			</ul>
+			</div>
+		</div>
+<!--
+		<div id="top">
 			<a href="https://github.com/herry13/nuri/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
 			<a href="https://github.com/herry13/nuri/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
 			<a href="https://github.com/herry13/nuri" id="view-on-github" class="button"><span>View on Github</span></a>
 		</div>
+
+	<div id="main">
+
 		<br/>
 
 		<div class="title">Nuri <span id="keywords">The Automated Workflow Configuration Tool</span></div>
@@ -55,5 +106,6 @@ Some tools allow you to define such workflow manually. However, even in a small 
 		</div>
 
 	</div>
+-->
 	</body>
 </html>
