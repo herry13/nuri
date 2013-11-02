@@ -2,9 +2,6 @@ require 'yaml'
 require 'logger'
 require 'webrick'
 
-module Nuri
-end
-
 module Nuri::Server
 	VarDir = (Process.euid == 0 ? '/var/nuri' : File.expand_path('~/.nuri'))
 	Dir.mkdir(VarDir, 0700) if not File.exist?(VarDir)

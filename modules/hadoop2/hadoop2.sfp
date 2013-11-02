@@ -1,0 +1,5 @@
+schema Hadoop2Master {
+}
+
+schema Hadoop2Slave {
+}

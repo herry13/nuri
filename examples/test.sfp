@@ -1,5 +1,6 @@
-include "../modules/node/node.sfp"
-include "../modules/package/package.sfp"
+include "test.inc"
+include "node/node.sfp"
+include "package/package.sfp"
 
 local isa Node {
 	sfpAddress is "localhost"

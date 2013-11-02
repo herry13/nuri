@@ -4,7 +4,7 @@ class Nuri::Master
 	include Nuri::Net::Helper
 	include Nuri::Orchestrator
 	include Nuri::Choreographer
-	include Nuri::Server
+	#include Nuri::Server
 
 	SfpUnknown = Sfp::Unknown.new
 	SfpUndefined = Sfp::Undefined.new
@@ -332,7 +332,7 @@ class Nuri::Master
 			modules = JSON[body]
 			list = ''
 			schemata.each { |m|
-				list += "#{m} " if File.exist?("#{@modules_dir}/#{m}") and #m != 'object' and
+				list += "#{m} " if File.exist?("#{@modules_dir}/#{m}") and
 				                   (not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s)
 			}
 

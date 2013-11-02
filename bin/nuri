@@ -2,12 +2,13 @@
 
 dir = File.expand_path('../../', __FILE__)
 require "#{dir}/lib/nuri"
-require "coderay"
 
 Version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
 About = "Nuri #{Version} (c) 2013"
 
 HTTP = Object.new.extend(Nuri::Net::Helper)
+
+Nuri.init
 
 def console(*args)
 	print Time.now.strftime('%Y-%m-%d %H:%M:%S '.yellow)
@@ -32,7 +33,7 @@ class Sfp::Console
 Usage: #{cmd}state [options]
 where [options] are:
 EOS
-			opt :model_file, 'file contains a model of desired state', :default => 'main.sfp', :short => '-m'
+			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :plain, 'print output in plain JSON'
 			opt :no_push_module, 'disable automatic push module'
 		end
@@ -59,7 +60,7 @@ EOS
 Usage: #{cmd}plan [options]
 where [options] are:
 EOS
-			opt :model_file, 'file contains a model of desired state', :default => 'main.sfp', :short => '-m'
+			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :parallel, 'generate a parallel plan', :short => '-l'
 			opt :apply, 'generate and execute a plan', :short => '-a'
 			opt :plain, 'print output in plain JSON'
@@ -125,7 +126,7 @@ EOS
 Usage: #{cmd}bsig [options]
 where [options] are:
 EOS
-			opt :model_file, 'file contains a model of desired state', :default => 'main.sfp', :short => '-m'
+			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :purge, 'purge existing BSig model', :short => '-g'
 			opt :deploy, 'generate and then deploy a BSig model'
 			opt :plain, 'print output in plain JSON'
@@ -307,20 +308,20 @@ EOS
 	end
 
 	def do_edit(args)
-		file = (args[0].nil? ? 'main.sfp' : args[0].to_s)
+		file = (args[0].nil? ? Nuri.main : args[0].to_s)
 		if file == '-h' or file == '--help'
 			puts <<-EOS
 Usage: edit <filepath>
 EOS
 		elsif File.exist?(file)
-			system("vi #{file}")
+			system "#{Nuri.config['editor']} #{file}"
 		else
 			puts 'Target file is not specified!'
 		end
 	end
 
 	def get_agents(args={})
-		model_file = (args[:model_file] ? args[:model_file].to_s : 'main.sfp')
+		model_file = (args[:model_file] ? args[:model_file].to_s : Nuri.main)
 		models = (File.exist?(model_file) ? Nuri::Master.agents(Sfp::Parser.parse_file(model_file)) : {})
 		agents = {}
 		models.each do |name,model|
@@ -424,6 +425,8 @@ EOS
 				do_agent
 			when 'console'
 				do_console
+			when 'edit'
+				do_edit(ARGV)
 			else
 				puts banner
 			end
