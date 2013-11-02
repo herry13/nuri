@@ -4,108 +4,186 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
-		<div id="top">
-			<span id="title">Nuri</span> &nbsp;Just define your desired state and let Nuri achieves it for you.
-		</div>
+		<a href="https://github.com/herry13/nuri"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
 		<div class="banner">
-			<div class="banneritem">
-				<h2>Modelling (User)</h2>
-					<div class="code">
-						<span class="codekeyword">include</span> <span class="codevalue">"vm/vm.sfp"</span><br/>
-						<span class="codekeyword">include</span> <span class="codevalue">"hpcloud/hpcloud.sfp"</span><br/>
-						<span class="codekeyword">include</span> <span class="codevalue">"hadoop2/hadoop2.sfp"</span><br/>
+			<h1>Nuri</h1> &nbsp; intelligent configuration management tool
+			<p class="slogan">"Just define your desired state and let Nuri achieves it for you."</p>
+		</div>
 
-						hpcloud <span class="codekeyword">isa</span> HPCloud { <br/>
-							&nbsp; key_name is <span class="codevalue">"nurikey"</span> <br/>
+		<div class="banner gray">
+			<div class="fixed">
+				<h2>&#10003; Object-oriented declarative configuration language.</h2><br/>
+				<h2>&#10003; Automated composition of workflow.</h2><br/>
+				<h2>&#10003; Orchestrating or choreographing configuration changes.</h2><br/>
+				<h2>&#10003; Unattended, autonomic, and self-healing.</h2><br/>
+			</div>
+		</div>
+
+		<div class="banner">
+			<div class="fixed">
+				<h2>To install</h2>
+				<br/><br/>
+				<div class="code">
+					$ <div class="codevalue">sudo gem install nuri</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="banner gray">
+			<div class="fixed">
+				<h2>Start local Nuri agent as cloud proxy</h2>
+				<br/><br/>
+				<div class="code">
+					$ <div class="codevalue">nuri console</div><br/>
+					<div class="console">nuri@user></div> <div class="codevalue">agent start</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="banner">
+			<div class="fixed">
+				<h2>Model your desired state</h2>
+				<br/>
+				<br/>
+				<div class="code">
+					<div class="console">nuri@user></div> <div class="codevalue">edit</div>
+				</div>
+				<br/>
+				<br/>
+				<div>
+					<h3>System Diagram</h3>
+					<br/>
+					<img src="system.png"/>
+				</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>
+					<h3>Model</h3>
+					<br/>
+					<div class="code box">
+						<div class="codekeyword">include</div> <div class="codevalue">"vm/vm.sfp"</div><br/>
+						<div class="codekeyword">include</div> <div class="codevalue">"hpcloud/hpcloud.sfp"</div><br/>
+						<div class="codekeyword">include</div> <div class="codevalue">"hadoop2/hadoop2.sfp"</div><br/>
+						proxy <div class="codekeyword">isa</div> Node {<br/>
+							&nbsp; sfpAddress is <div class="codevalue">"localhost"</div><br/>
+							&nbsp; hpcloud <div class="codekeyword">isa</div> HPCloud { <br/>
+							&nbsp; &nbsp; key_name is <div class="codevalue">"nurikey"</div> <br/>
+							&nbsp; } <br/>
 						} </br>
-						master <span class="codekeyword">isa</span> VM { </br>
-							&nbsp; hadoop <span class="codekeyword">isa</span> Hadoop2Master {</br>
-							&nbsp; &nbsp; 	slaves = <span class="codevalue">(slave1.hadoop,<br/>
-							&nbsp; &nbsp; &nbsp; slave2.hadoop)</span></br>
+						master <div class="codekeyword">isa</div> VM { <br/>
+							&nbsp; in_cloud is hpcloud <br/>
+							&nbsp; hadoop <div class="codekeyword">isa</div> Hadoop2Master {<br/>
+							&nbsp; &nbsp; 	slaves = <div class="codevalue">(slave1.hadoop,</div><br/>
+							&nbsp; &nbsp; &nbsp; <div class="codevalue">slave2.hadoop)</div></br>
 							&nbsp; } </br>
 						} </br>
-						slave1 <span class="codekeyword">isa</span> VM { </br>
-							&nbsp; hadoop <span class="codekeyword">isa</span> Hadoop2Slave</br>
+						slave1 <div class="codekeyword">isa</div> VM { </br>
+							&nbsp; in_cloud is hpcloud </br>
+							&nbsp; hadoop <div class="codekeyword">isa</div> Hadoop2Slave</br>
 						} </br>
-						slave2 <span class="codekeyword">extends</span> slave1
+						slave2 <div class="codekeyword">extends</div> slave1
 					</div>
-			</div>
-			<div class="bannersep">&nbsp;</div>
-			<div class="banneritem">
-				<h2>Planning (Nuri)</h2>
-				<div><a href="workflow.png"><img src="workflow.png"></a></div>
-			</div>
-			<div class="bannersep">&nbsp;</div>
-			<div class="banneritem">
-				<h2>Deployment (Nuri)</h2>
-				<div><a href="deployment.png"><img src="deployment.png"></a></div>
+				</div>
 			</div>
 		</div>
-		<div class="banner content">
-			<h2>Features</h2>
-			<div class="banneritem">
-			<ul>
-			<li><!--&#10004;-->Automated composition of workflow</li>
-			<li>Achieve a desired state, and also preserve global constraints</li>
-			<li>A declarative configuration language: objects and procedures</li>
-			<li>Orchestrate or choreograph configuration changes</li>
-			<li>Enable unattended, autonomic, and distributed reconfiguration and auto-recovery			</li>
-			</ul>
+
+		<div class="banner gray">
+			<div class="fixed">
+				<h2>Tell Nuri to automatically generate the workflow for dry test</h2>
+				<br/><br/>
+				<div class="code">
+					<div class="console">nuri@user></div> <div class="codevalue">plan</div>
+				</div>
+				<br/><br/>
+				<img src="workflow.png">
 			</div>
 		</div>
-<!--
-		<div id="top">
-			<a href="https://github.com/herry13/nuri/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-			<a href="https://github.com/herry13/nuri/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-			<a href="https://github.com/herry13/nuri" id="view-on-github" class="button"><span>View on Github</span></a>
+
+		<div class="banner">
+			<div class="fixed">
+				<h2>Deploy your configuration by...</h2>
+				<br/><br/>
+				<div>
+					<h3>orchestration (centralised)</h3>
+					<br/>
+					<div class="code">
+						<div class="console">nuri@user></div> <div class="codevalue">plan -a</div>
+					</div>
+					<br/><br/>
+					<img src="orchestration.png">
+				</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>
+					<h3>or choreographing (distributed)</h3>
+					<br/>
+					<div class="code">
+						<div class="console">nuri@user></div> <div class="codevalue">bsig -a</div>
+					</div>
+					<br/><br/>
+					<img src="choreographing.png">
+				</div>
+			</div>
 		</div>
 
-	<div id="main">
-
-		<br/>
-
-		<div class="title">Nuri <span id="keywords">The Automated Workflow Configuration Tool</span></div>
-
- 		<div id="buzzword">"Define your desired state and let Nuri achieves it for you"</div>
-
-		<div id="architecture"><img src="architecture.png" border="0" width="600px" /></div>
-
-		<div id="description"><h2>Why use Nuri</h2>
-During the process of a configuration change, the order of the actions must be carefully chosen to maintain certain global constraints throughout the entire transition. Nuri is a configuration tool which can automatically generate and execute a workflow to move from one (declarative) configuration state to another while respecting any such constraints.<br/>
-Some tools allow you to define such workflow manually. However, even in a small system, a very large number of workflows can be required to cater for every eventuality. And choosing an appropriate workflow to suit a particular desired state is not always obvious - indeed such manual workflows are conceptually similar to the imperative scripts which are no longer popular because of their unreliability.</div>
-
-		<div id="resources">
-			<h2>Key Features</h2>
-			<ul>
-				<li>Automated composition of workflow</li>
-				<li>Enable unattended, autonomic, and distributed reconfiguration and auto-recovery</li>
-				<li>Achieve a desired state, and also preserve global constraints</li>
-				<li>A declarative configuration language: objects and procedures</li>
-				<li>Orchestrate or choreograph workflows</li>
-			</ul>
-			<h2>Demo Videos</h2>
-			<ul>
-				<li><a href="http://youtu.be/wMGchBSOJoA">Managing TikiWiki CMS with Nuri</a></li>
-				<li><a href="http://youtu.be/6DH6FReTPTI">Installing Nuri client</a></li>
-			</ul>
-			<h2>Presentation Video</h2>
-			<ul>
-				<li><a href="http://youtu.be/otjfUsDGctQ">LISA 2011 Conference</a></li>
-			</ul>
+		<div class="banner gray">
+			<div class="fixed">
+				<h2>Resources</h2>
+				<br/><br/>
+				<div>
+					<h3>Videos</h3>
+					<p><a href="http://youtu.be/otjfUsDGctQ">LISA 2013 Presentation</a></p>
+				</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>
+					<h3>Related projects</h3>
+					<p>
+						<a href="https://github.com/herry13/nuri">Nuri</a> -
+						<a href="https://github.com/herry13/sfp-ruby">Sfp-Ruby</a> -
+						<a href="https://github.com/herry13/sfpagent">SfpAgent</a> -
+						<a href="https://github.com/herry13/sfplanner">Sfplanner</a>
+					</p>
+				</div>
+				<br/>
+				<br/>
+				<div>
+					<h3>Publications</h3>
+					<br/>
+					<div>
+						<p class="listleft inline">
+							<a href="Planning Configuration Relocation on the BonFIRE Infrastructure">Planning Configuration Relocation on the BonFIRE Infrastructure</a><br/>
+							<a href="http://scholar.google.co.uk/scholar?q=Choreographing+Configuration+Changes&btnG=&hl=en&as_sdt=0%2C5">Choreographing Configuration Changes</a><br/>
+							<a href="http://scholar.google.co.uk/scholar?q=Planning+with+Global+Constraints+for+Computing+Infrastructure+Reconfiguration&btnG=&hl=en&as_sdt=0%2C5">Planning with Global Constraints for Computing Infrastructure Reconfiguration</a><br/>
+							<a href="http://scholar.google.co.uk/scholar?hl=en&q=Automated+Planning+for+Configuration+Changes&btnG=&as_sdt=1%2C5&as_sdtp=">Automated Planning for Configuration Changes</a>
+						</p>
+					</div>
+					<div>
+						<p class="list inline">
+							CloudCom 2013 UNICO Workshop (to appear)<br/>
+							CNSM 2013<br/>
+							AAAI 2012 CP4PS Workshop<br/>
+							LISA 2011
+						</p>
+					</div>
+				</div>
+			</div>
 		</div>
 
-		<div id="contact">
-			<h2>Contact</h2>
-			Herry &ndash; herry13 [at] gmail.com
+		<div class="banner">
+			<div class="fixed">
+				Contact: <a href="http://homepages.inf.ed.ac.uk/s0978621">Herry</a> - herry13[at]gmail.com -
+				<a href="https://raw.github.com/herry13/nuri/master/LICENSE">BSD License</a> -
+				Powered by <a href="https://www.ruby-lang.org">Ruby</a>
+			</div>
+			<br/><br/>
+			<br/><br/>
 		</div>
-
-		<div id="footer">
-			<a href="https://github.com/herry13/nuri/blob/master/LICENSE">BSD License</a> |
-			Powered by <a href="http://www.ruby-lang.org">Ruby</a> |
-			&copy; 2013
-		</div>
-
-	</div>
--->
 	</body>
 </html>
