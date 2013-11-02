@@ -4,6 +4,8 @@ body {
 	margin: 0px;
 	padding: 0px;
 	color: #333;
+	min-width: 900px;
+	border: 0px;
 }
 a:link {
 	color: #333;
@@ -39,14 +41,16 @@ p.listleft {
 	text-align: center;
 	padding-top: 20px;
 	padding-bottom: 20px;
+	padding-left: 0px;
+	padding-right: 0px;
+	border: 0px;
 	margin: 0px;
+	width: 100%;
+	white-space: nowrap;
 }
 .banner div {
 	display: inline-block;
 	vertical-align: top;
-}
-.fixed {
-	width: 1000px;
 }
 .gray {
 	background-color: #DDD;
