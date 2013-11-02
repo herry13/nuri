@@ -73,14 +73,14 @@
 							&nbsp; } <br/>
 						} </br>
 						master <div class="codekeyword">isa</div> VM { <br/>
-							&nbsp; in_cloud is hpcloud <br/>
+							&nbsp; in_cloud is proxy.hpcloud <br/>
 							&nbsp; hadoop <div class="codekeyword">isa</div> Hadoop2Master {<br/>
 							&nbsp; &nbsp; 	slaves = <div class="codevalue">(slave1.hadoop,</div><br/>
 							&nbsp; &nbsp; &nbsp; <div class="codevalue">slave2.hadoop)</div></br>
 							&nbsp; } </br>
 						} </br>
 						slave1 <div class="codekeyword">isa</div> VM { </br>
-							&nbsp; in_cloud is hpcloud </br>
+							&nbsp; in_cloud is proxy.hpcloud </br>
 							&nbsp; hadoop <div class="codekeyword">isa</div> Hadoop2Slave</br>
 						} </br>
 						slave2 <div class="codekeyword">extends</div> slave1
