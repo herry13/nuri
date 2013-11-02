@@ -1,0 +1,22 @@
+include "vm/vm.sfp"
+include "hpcloud/hpcloud.sfp"
+include "hadoop2/hadoop2.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+	hpcloud isa HPCloud {
+		key_name is "nurikey"
+	}
+}
+
+master isa VM {
+	in_cloud is proxy.hpcloud
+	hadoop isa Hadoop2Master {
+		slaves = (slave1.hadoop, slave2.hadoop)
+	}
+}
+slave1 isa VM {
+	in_cloud is proxy.hpcloud
+	hadoop isa Hadoop2Slave
+}
+slave2 extends slave1
