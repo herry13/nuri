@@ -213,13 +213,14 @@ class Sfp::Module::HPCloud
 		vms
 	end
 
-	def install_agent(vm, name, ssh_key_file=nil)
+	def install_agent(vm, name, ssh_key_file=nil, ssh_user="ubuntu")
 		log.info "Installing agent in VM #{name} [WAIT]"
 
 		result = vm.ssh(['sudo apt-get update',
 		                 'sudo apt-get -y install sudo ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 make gcc libxml2-dev libxslt-dev libreadline-dev',
 		                 'sudo gem install sfp sfpagent fog --no-ri --no-rdoc && sudo sfpagent -s'])
 		vm.ssh('sudo /usr/local/bin/sfpagent -s')
+		system "ssh -i #{ssh_key_file} #{ssh_user}@#{vm.public_ip_address} sudo sfpagent -s"
 
 		if !result
 			log.error "Installing agent in VM #{name} [Failed]"
