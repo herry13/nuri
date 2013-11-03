@@ -1,4 +1,3 @@
-
 class Sfp::Module::Machine
 	include Sfp::Resource
 
@@ -30,7 +29,14 @@ class Sfp::Module::Machine
 		@state['disk'] = get_disk_state
 	end
 
+	##############################
+	#
+	# Helper methods
+	#
+	##############################
+
 	protected
+
 	# generate the disks' state, try to automatically mount the disk to target directory
 	#
 	def get_disk_state

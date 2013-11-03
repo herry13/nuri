@@ -4,8 +4,19 @@ schema HPCloud extends Cloud {
 	final description = "HPCloud US West Zone 2"
 	final auth_uri = "https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
 	final zone = "az-2.region-a.geo-1"
-	final flavor_id = "100"
-	final image_id = "67074"
-	final key_name = ""
-	final security_group = "default"
+
+	// default SSH username
+	final vm_username = "ubuntu"
+
+	// small instance
+	final vm_flavor = "100"
+
+	// Ubuntu 12.04 image
+	final vm_image = "67074"
+
+	// key pair which will be used to SSH to VM
+	final vm_ssh_key_name = "default"
+
+	// security group of the VM
+	final vm_security_group = "default"
 }

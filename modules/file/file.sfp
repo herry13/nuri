@@ -1,30 +1,9 @@
 schema File {
-	path is ""
-	exists : Bool
-	content : String
-	user : String
-	group : String
+	exists is true
 
-	procedure create (content: String) {
-		condition { }
-		effect {
-			this.exists is true
-			this.content is content
-		}
-	}
-
-	procedure set_ownership(user: String, group: String) {
-		condition { }
-		effect {
-			this.user = user
-			this.group = group
-		}
-	}
-
-	procedure remove {
-		condition { }
-		effect {
-			this.exists is false
-		}
-	}
+	final path is ""
+	final content : String
+	final user : String
+	final group : String
+	final permission : String
 }
