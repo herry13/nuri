@@ -16,6 +16,9 @@ def console(*args)
 end
 
 class Sfp::Console
+	PrettyStateGenerator = Sfp::Visitor::PrettyStateGenerator.new
+	ParentEliminator = Sfp::Visitor::ParentEliminator.new
+
 	def process_args(args, parser)
 		Trollop::with_standard_exception_handling parser do
 			parser.parse args
@@ -34,7 +37,8 @@ Usage: #{cmd}state [options]
 where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
-			opt :plain, 'print output in plain JSON'
+			opt :json, 'print output in JSON'
+			opt :plain, 'print output in plain text'
 			opt :no_push_module, 'disable automatic push module'
 		end
 		help, args = check_help(args)
@@ -42,15 +46,22 @@ EOS
 
 		if help
 			parser.educate(STDOUT)
+
 		elsif File.exist?(opts[:model_file])
 			opts[:push_modules] = true if !opts[:no_push_module]
 			master = Nuri::Master.new
 			master.set_model opts
 			state = master.get_state opts
-			state.accept(Sfp::Visitor::PrettyStateGenerator.new)
-			puts (opts[:plain] ? JSON.generate(state) : CodeRay.encode(JSON.pretty_generate(state), :json, :terminal))
+			state.accept(PrettyStateGenerator)
+
+			if opts[:json]
+				puts (opts[:plain] ? JSON.generate(state) : CodeRay.encode(JSON.pretty_generate(state), :json, :terminal))
+			else
+				puts (opts[:plain] ? YAML.dump(state) : CodeRay.encode(YAML.dump(state), :yaml, :terminal))
+			end
 		else
-			puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+
 		end
 	end
 
@@ -113,10 +124,10 @@ EOS
 					puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.').green
 				end
 			else
-				puts (opts[:plain] ? "No solution!".yellow : "No solution!".red)
+				$stderr.puts (opts[:plain] ? "No solution!".yellow : "No solution!".red)
 			end
 		else
-			puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
 		end
 	end
 
@@ -178,29 +189,13 @@ EOS
 						puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.').green
 					end
 				else
-					puts (opts[:plain] ? "No solution!".yellow : "No solution!".red)
+					$stderr.puts (opts[:plain] ? "No solution!".yellow : "No solution!".red)
 				end
 			end
 		else
-			puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
 		end
 	end
-
-	Sfp2JSON = Object.new
-	def Sfp2JSON.visit(name, value, parent)
-		if value.is_a?(Hash)
-			if value['_context'] == 'null'
-				parent[name] = nil
-			elsif value['_context'] == 'any'
-				parent.delete(name)
-			elsif value['_context'] == 'set'
-				parent[name] = value['_values']
-			end
-		end
-		true
-	end
-
-	PrettyStateGenerator = Sfp::Visitor::PrettyStateGenerator.new
 
 	def do_agent(args=ARGV, cmd="nuri ")
 		parser = Trollop::Parser.new do
@@ -210,6 +205,7 @@ where <subcommand> is:
        install     install agent (use SSH for remote node)
        upgrade     upgrade agent (use SSH for remote node)
          start     start the agent (use SSH for remote node)
+       restart     restart the agent (use SSH for remode node)
           stop     stop the agent (use SSH for remote node)
         status     get status (use SSH for remote node)
          state     get current state
@@ -244,14 +240,23 @@ EOS
 			case subcommand
 			when 'install'
 				system("#{ssh_opt} sudo gem install sfpagent --no-ri --no-rdoc")
+
 			when 'start'
-				system("#{ssh_opt} sfpagent -s")
+				system "#{ssh_opt} sfpagent -s && sleep 5"
+				system "#{ssh_opt} sfpagent -a"
+
+			when 'restart'
+				system "#{ssh_opt} sfpagent -r"
+
 			when 'stop'
 				system("#{ssh_opt} sfpagent -t")
+
 			when 'status'
 				system("#{ssh_opt} sfpagent -a")
+
 			when 'upgrade'
 				system("#{ssh_opt} sudo gem update sfpagent --no-ri --no-rdoc")
+
 			when 'state'
 				code, state = HTTP.get_data(opts[:address], 1314, "/state")
 				if code == '200' and state =~ /{.*}/
@@ -261,6 +266,7 @@ EOS
 				else
 					puts state
 				end
+
 			when 'model'
 				code, model = HTTP.get_data(opts[:address], 1314, "/model")
 				if code == '200' and model =~ /{.*}/
@@ -270,12 +276,15 @@ EOS
 				else
 					puts model
 				end
+
 			when 'bsig'
 				code, json = HTTP.get_data(opts[:address], 1314, "/bsig")
 				puts (code == '200' and json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
+
 			when 'module'
 				code, json = HTTP.get_data(opts[:address], 1314, "/bsig")
 				puts (code == '200' and json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
+
 			when 'exec', 'execute'
 				if args.length > 0
 					name = args.shift
@@ -291,32 +300,39 @@ EOS
 					code, _ = HTTP.post_data(opts[:address], 1314, "/execute", data)
 					puts (code == '200' ? "Executing #{name} [OK]".green : "Executing #{name} [Failed]".red)
 				else
-					puts 'Invalid parameters (usage: agent exec <action-path> [action-arguments]).'
+					$stderr.puts 'Invalid parameters (usage: agent exec <action-path> [action-arguments]).'
 				end
+
 			when 'log'
 				puts Net::HTTP.get "#{opts[:address]}", "/log", 1314
+
 			when 'list'
 				get_agents.each { |name,model| puts "#{name} address=#{model['sfpAddress']} port=#{model['sfpPort']}" }
+
 			when 'help'
 				parser.educate(STDOUT)
+
 			else
-				$stderr.puts 'Unrecognized command! Type "help" to print available commands.'.red
+				$stderr.puts 'Unrecognized command! Use \"-h\" to print available commands.'.red
 			end
 		else
 			$stderr.puts 'sfpagent gem is not installed!'.red
 		end
 	end
 
-	def do_edit(args)
+	def do_edit(args=ARGV)
 		file = (args[0].nil? ? Nuri.main : args[0].to_s)
 		if file == '-h' or file == '--help'
 			puts <<-EOS
 Usage: edit <filepath>
 EOS
+
 		elsif File.exist?(file)
 			system "#{Nuri.config['editor']} #{file}"
+
 		else
-			puts 'Target file is not specified!'
+			$stderr.puts 'Target file is not specified!'
+
 		end
 	end
 
@@ -379,6 +395,8 @@ EOS
 						do_agent args, ''
 					when 'edit'
 						do_edit args
+					when 'model'
+						do_model args
 					when 'cd'
 						Dir.chdir(args[0].to_s)
 					when 'pwd'
@@ -390,20 +408,58 @@ EOS
 					when 'version', '-v'
 						puts About
 					else
-						$stderr.puts 'Unrecognized command! Type "help" to print available commands.'.red
+						$stderr.puts 'Unrecognized command! Use \"-h\" option to print available commands.'.red
 					end
 				end
 			rescue Exception => e
-				puts "#{e}\n#{e.backtrace.join("\n")}"
+				$stderr.puts "#{e}\n#{e.backtrace.join("\n")}"
 			end
 		end
 		puts "Bye!\n"
+	end
+
+	def do_model(args=ARGV, cmd='nuri')
+		parser = Trollop::Parser.new do
+			banner <<-EOS
+Usage: #{cmd}state [options]
+where [options] are:
+EOS
+			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
+			opt :json, 'print output in JSON'
+			opt :plain, 'print output in plain format'
+		end
+		help, args = check_help(args)
+		opts = process_args args, parser
+
+		if help
+			parser.educate(STDOUT)
+
+		elsif File.exist?(opts[:model_file])
+			@parser = Sfp::Parser.new({:home_dir => File.dirname(opts[:model_file])})
+			@parser.parse File.read(opts[:model_file])
+			model = @parser.root
+			model.accept(ParentEliminator)
+			model.select! { |k,v| k[0,1] != '_' and (not v.is_a?(Hash) or v['_context'] == 'object') }
+			model.accept(PrettyStateGenerator)
+
+			if opts[:json]
+				puts (opts[:plain] ? JSON.generate(model) : CodeRay.encode(JSON.pretty_generate(model), :json, :terminal))
+			else
+				puts (opts[:plain] ? YAML.dump(model) : CodeRay.encode(YAML.dump(model), :yaml, :terminal))
+			end
+
+		else
+			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+
+		end
+	
 	end
 
 	def run
 		banner = <<-EOS
 Usage: nuri [command]
 where [command] is:
+    model     get compilation result of the model
     state     get the current state
      plan     generate the plan
      bsig     deployment with distributed mechanism
@@ -426,7 +482,9 @@ EOS
 			when 'console'
 				do_console
 			when 'edit'
-				do_edit(ARGV)
+				do_edit
+			when 'model'
+				do_model
 			else
 				puts banner
 			end
