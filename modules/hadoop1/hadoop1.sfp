@@ -1,24 +1,25 @@
 include "../service/service.sfp"
 
 /**
- * Module for managing Hadoop master node
+ * Module for managing Hadoop version 1
  *
  * - password can be generated using command:
  *     $ echo "mypassword" | makepasswd --clearfrom=- --crypt-md5 |awk '{ print $2 }'
  *
  */
-schema HadoopMaster extends Service {
-	installed : Bool
-	running : Bool
-	final home_dir = "/hadoop"
+schema Hadoop1 {
+	installed = true
+	running = true
+
+	final home = "/opt/hadoop"
 	final user = "hadoop"
-	final password = "$1$JtZIJa3N$9efrteyy8KhG8NFTJIMj0/"
+	final group = "hadoop"
+	final password = "!"
 	final source = "http://www.mirrorservice.org/sites/ftp.apache.org/hadoop/common"
 	final version = "1.2.1"
-	final java_home = "/usr/local/java/jre1.6.0_34"
-	final scratch_dir = "/tmp/hadoop"
+	final java_home = "" //"/usr/local/java/jre1.6.0_34"
+	final data_dir = "/tmp/hadoop"
 	final replication = 2
-	final cluster_name = "hadoopnuri"
 
 	sub install {
 		condition {
@@ -56,6 +57,37 @@ schema HadoopMaster extends Service {
 		}
 		effect {
 			this.running = false
+		}
+	}
+}
+
+schema Hadoop1Master extends Hadoop1 { }
+
+
+schema Hadoop1Slave extends Hadoop1 {
+	master isref Hadoop1Master
+
+	sub install (master : Hadoop1Master) {
+		condition {
+			this.installed != true
+			master.parent.created = true
+		}
+		effect {
+			this.installed = true
+			this.running = false
+			this.master = master
+		}
+	}
+
+	sub start (master : Hadoop1Master) {
+		condition {
+			this.running != true
+			this.installed = true
+			this.master = master
+			master.running = true
+		}
+		effect {
+			this.running = true
 		}
 	}
 }
