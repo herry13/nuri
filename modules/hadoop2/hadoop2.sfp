@@ -6,15 +6,26 @@ schema Hadoop2 extends TarPackage {
 	configured = true
 	
 	final package_name = "hadoop"
-	final version = "2.0.0"
+	final version = "2.2.0"
 	final source = "http://www.mirrorservice.org/sites/ftp.apache.org/hadoop/common"
 	final home = "/opt/hadoop"
 
 	final user = "hadoop"
 	final group = "hadoop"
 	final password = "!"
-	final java_home = "/usr/local/java/jre1.6.0_34"  // TODO -- re-check in Ubuntu
+	final java_home = ""
 	final data_dir = "/tmp/hadoop"
+
+	sub install {
+		condition {
+			this.installed != true
+		}
+		effect {
+			this.installed = true
+			this.running = false
+			this.configured = false
+		}
+	}
 
 	sub uninstall {
 		condition {
@@ -23,6 +34,7 @@ schema Hadoop2 extends TarPackage {
 		}
 		effect {
 			this.installed = false
+			this.configured = true
 		}
 	}
 
@@ -30,6 +42,7 @@ schema Hadoop2 extends TarPackage {
 		condition {
 			this.running != true
 			this.installed = true
+			this.configured = true
 		}
 		effect {
 			this.running = true
@@ -48,9 +61,10 @@ schema Hadoop2 extends TarPackage {
 	sub configure {
 		condition {
 			this.running = false
+			this.configured = false
 		}
 		effect {
-			this.running = true
+			this.configured = true
 		}
 	}
 
@@ -58,23 +72,12 @@ schema Hadoop2 extends TarPackage {
 
 schema Hadoop2Master extends Hadoop2 {
 	final cluster_name = "hadoopnuri"
-
-	sub install {
-		condition {
-			this.installed != true
-		}
-		effect {
-			this.installed = true
-			this.running = false
-			this.configured = true
-		}
-	}
 }
 
 schema Hadoop2Slave extends Hadoop2 {
-	master isref HadoopMaster
+	master isref Hadoop2Master
 
-	sub install (master : HadoopMaster) {
+	sub install (master : Hadoop2Master) {
 		condition {
 			this.installed != true
 			master.parent.created = true
@@ -82,7 +85,30 @@ schema Hadoop2Slave extends Hadoop2 {
 		effect {
 			this.installed = true
 			this.running = false
+			this.configured = false
 			this.master = master
+		}
+	}
+
+	sub start (master : Hadoop2Master) {
+		condition {
+			this.running != true
+			this.installed = true
+			this.configured = true
+			this.master = master
+			master.running = true
+		}
+		effect {
+			this.running = true
+		}
+	}
+
+	sub stop {
+		condition {
+			this.running = true
+		}
+		effect {
+			this.running = false
 		}
 	}
 }
