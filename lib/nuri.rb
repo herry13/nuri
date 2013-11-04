@@ -18,15 +18,18 @@ module Nuri
 	end
 
 	def self.init
+		### create home directory
 		Dir.mkdir(home) if not File.exist?(home)
+
+		### create main configuration file
 		File.open(main, 'w') { |f| f.write('') } if not File.exist?(main)
+
+		### create default configuration if it's not exist
 		File.open(config_file, 'w') { |f| f.write(YAML.dump(default_config)) } if not File.exist?(config_file)
-		srcdir = File.dirname(__FILE__) + '/../modules'
-		Dir.foreach(srcdir) { |file|
-			next if file == '..' or file == '.' or file[0].to_s == '.' or
-			        File.exist?("#{home}/#{file}")
-			system "ln -sf #{srcdir}/#{file} #{home}/#{file}"
-		}
+
+		### create link to built-in modules directory
+		modules_dir = "#{home}/modules"
+		system "ln -sf #{File.expand_path(File.dirname(__FILE__) + '/../modules')} #{modules_dir}" if not File.exist?(modules_dir)
 	end
 
 	def self.main
@@ -39,7 +42,7 @@ module Nuri
 	end
 
 	def self.config_file
-		home + '/config.yaml'
+		home + '/config.yml'
 	end
 
 	def self.default_config
