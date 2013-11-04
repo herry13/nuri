@@ -12,6 +12,8 @@ Gem::Specification.new do |s|
 
 	s.require_paths = ['lib']
 
+	s.license       = 'BSD'
+
 	s.homepage              = 'https://github.com/herry13/nuri'
 	s.rubyforge_project     = 'nuri'
 
