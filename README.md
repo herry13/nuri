@@ -1,8 +1,9 @@
 Nuri
 ====
 - author: Herry [herry13@gmail.com]
-- [version](https://github.com/herry13/nuri/blob/master/VERSION)
 - license: BSD
+
+[![Gem Version](https://badge.fury.io/rb/nuri.png)](https://badge.fury.io/rb/nuri)
 
 Nuri is an automated workflow configuration tool. It allows us to define the desired state of
 the managed system, and the tool will automatically generate and orchestrate the execution of the workflow

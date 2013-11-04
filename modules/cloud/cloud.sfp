@@ -1,8 +1,6 @@
 schema Cloud {
 	running : Bool
 
-	final vms { }
-
 	sub create_vm (vm isref VM) {
 		condition {
 			this.running = true

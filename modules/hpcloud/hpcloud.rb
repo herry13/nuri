@@ -3,6 +3,7 @@ require 'thread'
 require 'json'
 require 'fog'
 require 'yaml'
+require 'net/ssh'
 
 ##############################
 #
@@ -206,9 +207,10 @@ class Sfp::Module::HPCloud
 		return {} if not running?
 		vms = {}
 		@conn.servers.each { |s|
-			vms[s.name] = {}
-			vms[s.name]['running'] = s.ready?
-			vms[s.name]['ip'] = s.public_ip_address
+			vms[s.name] = {
+				'running' => s.ready?,
+				'ip' => s.public_ip_address
+			}
 		}
 		vms
 	end
@@ -219,8 +221,13 @@ class Sfp::Module::HPCloud
 		result = vm.ssh(['sudo apt-get update',
 		                 'sudo apt-get -y install sudo ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 make gcc libxml2-dev libxslt-dev libreadline-dev',
 		                 'sudo gem install sfp sfpagent fog --no-ri --no-rdoc && sudo sfpagent -s'])
-		vm.ssh('sudo /usr/local/bin/sfpagent -s')
-		system "ssh -i #{ssh_key_file} #{ssh_user}@#{vm.public_ip_address} sudo sfpagent -s"
+
+		if result
+			Net::SSH.start(vm.public_ip_address, ssh_user, :keys => [ssh_key_file]) do |ssh|
+				log.info ssh.exec!('sudo sfpagent -s')
+				result = (ssh.exec!('sudo sfpagent -a') =~ /Agent is running/)
+			end
+		end
 
 		if !result
 			log.error "Installing agent in VM #{name} [Failed]"
