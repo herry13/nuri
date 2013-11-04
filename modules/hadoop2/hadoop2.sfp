@@ -12,7 +12,7 @@ schema Hadoop2 extends TarPackage {
 
 	final user = "hadoop"
 	final group = "hadoop"
-	final password = ""
+	final password = "!"
 	final java_home = "/usr/local/java/jre1.6.0_34"  // TODO -- re-check in Ubuntu
 	final data_dir = "/tmp/hadoop"
 
