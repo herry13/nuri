@@ -496,26 +496,4 @@ EOS
 	end
 end
 
-module Sfp::Helper
-	Sfp2Ruby = Object.new
-	def Sfp2Ruby.visit(name, value, parent)
-		if name[0] == '_' 
-			parent.delete(name)
-		elsif value.is_a?(Hash)
-			case value['_context']
-			when 'null'
-				parent[name] = nil 
-			#when 'any_value'
-			#	parent[name] = '$.Any:' + value['_type']
-			#when 'constraint', 'procedure'
-			when 'any_value', 'constraint', 'procedure'
-				parent.delete(name)
-			when 'set'
-				parent[name] = value['_values']
-			end 
-		end 
-		true
-	end 
-end
-
 Nuri::Console.new.run if $0 == __FILE__

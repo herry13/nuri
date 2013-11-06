@@ -157,9 +157,13 @@ class Nuri::Master
 		puts "Goal state:".yellow
 		goalgen.results.each { |k,v|
 			next if k[0,1] == '_'
-			print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
-			print " #{Sfp::Helper.sfp_to_s(f1.results[k])}".red if f1.results.has_key?(k) and
-				f1.results[k] != v['_value']
+			#print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
+			#print " #{Sfp::Helper.sfp_to_s(f1.results[k])}".red if f1.results.has_key?(k) and
+			#	f1.results[k] != v['_value']
+			print "  #{k}: " + Sfp::Helper::Sfp2Ruby.val(v['_value']).to_s.green
+			if f1.results.has_key?(k) and f1.results[k] != v['_value']
+				print " " + Sfp::Helper::Sfp2Ruby.val(f1.results[k]).to_s.red
+			end
 			puts ""
 		}
 

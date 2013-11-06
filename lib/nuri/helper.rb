@@ -1,6 +1,39 @@
 require 'uri'
 require 'net/http'
 
+module Sfp::Helper
+	Sfp2Ruby = Object.new
+	def Sfp2Ruby.visit(name, value, parent)
+		if name[0] == '_' or (value.is_a?(Hash) and (value['_context'] == 'constraint' or value['_context'] == 'procedure'))
+			parent.delete(name)
+		else
+			parent[name] = val(value)
+		end
+		true
+	end
+
+	def Sfp2Ruby.val(value)
+		if value.is_a?(Hash)
+			case value['_context']
+			when 'null'
+				nil 
+			when 'any_value'
+				'$.Any:' + value['_isa']
+			when 'set'
+				parent[name] = value['_values']
+			else
+				value
+			end
+		elsif value.is_a?(Sfp::Unknown)
+			'$.Unknown:' + value.type.to_s
+		elsif value.is_a?(Sfp::Undefined)
+			'$.Undefined:' + value.type.to_s
+		else
+			value
+		end 
+	end
+end
+
 module Nuri::Helper
 	def post_data(address, port, path, data, open_timeout=5, read_timeout=1800)
 		uri = create_uri(address, port, path)
