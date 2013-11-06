@@ -1,10 +1,7 @@
 require 'uri'
 require 'net/http'
 
-module Nuri::Net
-end
-
-module Nuri::Net::Helper
+module Nuri::Helper
 	def post_data(address, port, path, data, open_timeout=5, read_timeout=1800)
 		uri = create_uri(address, port, path)
 		req = Net::HTTP::Post.new(uri.path)

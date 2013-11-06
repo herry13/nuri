@@ -1,7 +1,7 @@
 require 'thread'
 
 module Nuri::Orchestrator
-	include Nuri::Net::Helper
+	include Nuri::Helper
 
 	def execute_plan(p={})
 		raise Exception, "Plan file is not exist!" if not File.exist?(p[:execute].to_s) and !p[:plan]

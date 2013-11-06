@@ -1,7 +1,7 @@
 require 'thread'
 
 class Nuri::Master
-	include Nuri::Net::Helper
+	include Nuri::Helper
 	include Nuri::Orchestrator
 	include Nuri::Choreographer
 	#include Nuri::Server

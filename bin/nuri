@@ -6,8 +6,6 @@ require "#{dir}/lib/nuri"
 Version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
 About = "Nuri #{Version} (c) 2013"
 
-HTTP = Object.new.extend(Nuri::Net::Helper)
-
 Nuri.init
 
 def console(*args)
@@ -15,8 +13,9 @@ def console(*args)
 	$stdout.puts(args)
 end
 
-class Sfp::Console
-	PrettyStateGenerator = Sfp::Visitor::PrettyStateGenerator.new
+class Nuri::Console
+	include Nuri::Helper
+
 	ParentEliminator = Sfp::Visitor::ParentEliminator.new
 
 	def process_args(args, parser)
@@ -259,7 +258,7 @@ EOS
 				system("#{ssh_opt} sudo gem update sfpagent --no-ri --no-rdoc")
 
 			when 'state'
-				code, state = HTTP.get_data(opts[:address], 1314, "/state")
+				code, state = get_data(opts[:address], 1314, "/state")
 				if code == '200' and state =~ /{.*}/
 					state = JSON[state]['state']
 					state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
@@ -269,7 +268,7 @@ EOS
 				end
 
 			when 'model'
-				code, model = HTTP.get_data(opts[:address], 1314, "/model")
+				code, model = get_data(opts[:address], 1314, "/model")
 				if code == '200' and model =~ /{.*}/
 					model = JSON[model]
 					model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
@@ -279,11 +278,11 @@ EOS
 				end
 
 			when 'bsig'
-				code, json = HTTP.get_data(opts[:address], 1314, "/bsig")
+				code, json = get_data(opts[:address], 1314, "/bsig")
 				puts (code == '200' and json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
 
 			when 'module'
-				code, json = HTTP.get_data(opts[:address], 1314, "/bsig")
+				code, json = get_data(opts[:address], 1314, "/bsig")
 				puts (code == '200' and json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
 
 			when 'exec', 'execute'
@@ -298,7 +297,7 @@ EOS
 						end
 					end
 					data = { 'action' => JSON.generate({ 'name' => name, 'parameters' => parameters }) }
-					code, _ = HTTP.post_data(opts[:address], 1314, "/execute", data)
+					code, _ = post_data(opts[:address], 1314, "/execute", data)
 					puts (code == '200' ? "Executing #{name} [OK]".green : "Executing #{name} [Failed]".red)
 				else
 					$stderr.puts 'Invalid parameters (usage: agent exec <action-path> [action-arguments]).'
@@ -506,6 +505,9 @@ module Sfp::Helper
 			case value['_context']
 			when 'null'
 				parent[name] = nil 
+			#when 'any_value'
+			#	parent[name] = '$.Any:' + value['_type']
+			#when 'constraint', 'procedure'
 			when 'any_value', 'constraint', 'procedure'
 				parent.delete(name)
 			when 'set'
@@ -516,4 +518,4 @@ module Sfp::Helper
 	end 
 end
 
-Sfp::Console.new.run if $0 == __FILE__
+Nuri::Console.new.run if $0 == __FILE__

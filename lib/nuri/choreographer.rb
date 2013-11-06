@@ -1,7 +1,7 @@
 require 'thread'
 
 module Nuri::Choreographer
-	include Nuri::Net::Helper
+	include Nuri::Helper
 
 	def get_bsig(p={})
 		def postprocess(bsig)
