@@ -4,7 +4,6 @@ class Nuri::Master
 	include Nuri::Helper
 	include Nuri::Orchestrator
 	include Nuri::Choreographer
-	#include Nuri::Server
 
 	SfpUnknown = Sfp::Unknown.new
 	SfpUndefined = Sfp::Undefined.new
@@ -157,9 +156,6 @@ class Nuri::Master
 		puts "Goal state:".yellow
 		goalgen.results.each { |k,v|
 			next if k[0,1] == '_'
-			#print "- #{k}: " + Sfp::Helper.sfp_to_s(v['_value']).green
-			#print " #{Sfp::Helper.sfp_to_s(f1.results[k])}".red if f1.results.has_key?(k) and
-			#	f1.results[k] != v['_value']
 			print "  #{k}: " + Sfp::Helper::Sfp2Ruby.val(v['_value']).to_s.green
 			if f1.results.has_key?(k) and f1.results[k] != v['_value']
 				print " " + Sfp::Helper::Sfp2Ruby.val(f1.results[k]).to_s.red
@@ -429,9 +425,6 @@ class Nuri::Master
 	end
 
 	def get_agents
-		#@model.select { |k,v| !(k[0,1] == '_' or not v.is_a?(Hash) or
-		#	v['_context'] != 'object' or v['_classes'].index(AgentSchema).nil?)
-		#}
 		Nuri::Master.agents(@model)
 	end
 
@@ -588,7 +581,7 @@ class Nuri::Master
 
 			# for each not-exist state VM, add an effect
 			@map[vm].each { |k,v|
-				next if operator.has_key?(k) # skip if variable is exist (avoid overwrite)
+				next if operator.has_key?(k)                    # skip if variable is exist (avoid overwrite)
 				next if k =~ /\.sfpAddress/ or k =~ /\.sfpPort/ # skip "sfpAddress" and "sfpPort"
 				                                                # because these will be assigned dynamically
 				var = parser.variables[k]
@@ -596,7 +589,7 @@ class Nuri::Master
 
 				if v.is_a?(Hash)
 					val = parser.types[v['_value']][0] if v['_context'] == 'null'
-					raise Exception, "Not implemented yet." # this may arise on Set values
+					raise Exception, "Not implemented yet."      # this may arise on Set values
 				else
 					val = v
 				end
@@ -610,19 +603,6 @@ class Nuri::Master
 				operator[var.name] = parameter
 			}
 		end
-	end
-
-	def self.start
-		# TODO
-		fork {
-			while true do
-				sleep 5000
-			end
-		}
-	end
-
-	def self.stop
-		# TODO
 	end
 end
 

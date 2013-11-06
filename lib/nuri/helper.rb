@@ -7,7 +7,7 @@ module Sfp::Helper
 		if name[0] == '_' or (value.is_a?(Hash) and (value['_context'] == 'constraint' or value['_context'] == 'procedure'))
 			parent.delete(name)
 		else
-			parent[name] = val(value)
+			parent[name] = Sfp::Helper::Sfp2Ruby.val(value)
 		end
 		true
 	end
