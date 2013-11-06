@@ -1,0 +1,41 @@
+include "modules/vm/vm.sfp"
+include "modules/hpcloud/hpcloud.sfp"
+include "modules/apache/apache.sfp"
+include "modules/mysql/mysql.sfp"
+include "modules/wordpress/wordpress.sfp"
+proxy isa Node {
+	sfpAddress is "localhost"
+	hpcloud isa HPCloud {
+		vm_ssh_key_name is "herrykey3"
+	}
+}
+lb isa VM {
+	apache isa Apache {
+		load_balancer is true
+		lb_members is (app1,app2,app3)
+	}
+}
+app1 isa VM {
+	apache isa Apache {
+		modules is ("php", "php-mysql")
+	}
+	wp isa WordpressWeb {
+		database is vmdb.wp
+	}
+}
+app2 extends app1
+app3 extends app1
+db isa VM {
+	mysql isa Mysql
+	wp isa WordpressDB
+}
+global {
+	if lb.apache.running is true then {
+		app1.apache.running is true
+		app2.apache.running is true
+		app3.apache.running is true
+	}
+	if app1.apache.running is true then db.mysql.running is true
+	if app2.apache.running is true then db.mysql.running is true
+	if app3.apache.running is true then db.mysql.running is true
+}

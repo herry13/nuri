@@ -1,9 +1,9 @@
-include "../modules/node/node.sfp"
-include "../modules/vm/vm.sfp"
-include "../modules/apache/apache.sfp"
-include "../modules/mysql/mysql.sfp"
-include "../modules/wordpresscluster/wordpresscluster.sfp"
-include "../modules/bonfire/bonfire.sfp"
+include "modules/node/node.sfp"
+include "modules/vm/vm.sfp"
+include "modules/apache/apache.sfp"
+include "modules/mysql/mysql.sfp"
+include "modules/wordpresscluster/wordpresscluster.sfp"
+include "modules/bonfire/bonfire.sfp"
 
 proxy isa Node {
 	sfpAddress is "localhost"
@@ -85,11 +85,3 @@ global {
 	if vmapp4.apache.running = true then vmdb.mysql.running = true
 	if vmapp5.apache.running = true then vmdb.mysql.running = true
 }
-
-/*
-vmlb isa VM {
-	created is false
-}
-vmapp1 extends vmlb
-vmdb extends vmlb
-*/

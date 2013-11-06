@@ -1,6 +1,6 @@
 include "modules/vm/vm.sfp"
 include "modules/hpcloud/hpcloud.sfp"
-include "modules/hadoop2/hadoop2.sfp"
+include "modules/hadoop1/hadoop1.sfp"
 proxy isa Node {
 	sfpAddress is "localhost"
 	hpcloud isa HPCloud {
@@ -9,11 +9,11 @@ proxy isa Node {
 }
 master isa VM {
 	in_cloud is proxy.hpcloud
-	hadoop isa Hadoop2Master
+	hadoop isa Hadoop1Master
 }
 slave1 isa VM {
 	in_cloud is proxy.hpcloud
-	hadoop isa Hadoop2Slave {
+	hadoop isa Hadoop1Slave {
 		master is master.hadoop
 	}
 }
