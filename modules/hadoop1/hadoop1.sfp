@@ -17,7 +17,7 @@ schema Hadoop1 {
 	final password = "!"
 	final source = "http://www.mirrorservice.org/sites/ftp.apache.org/hadoop/common"
 	final version = "1.2.1"
-	final java_home = "" //"/usr/local/java/jre1.6.0_34"
+	final java_home = ""
 	final data_dir = "/tmp/hadoop"
 	final replication = 2
 
@@ -27,14 +27,13 @@ schema Hadoop1 {
 		}
 		effect {
 			this.installed = true
-			this.running = false
 		}
 	}
 	
 	sub uninstall {
 		condition {
-			this.running = false
 			this.installed = true
+			this.running = false
 		}
 		effect {
 			this.installed = false
@@ -43,8 +42,8 @@ schema Hadoop1 {
 
 	sub start {
 		condition {
-			this.running != true
 			this.installed = true
+			this.running != true
 		}
 		effect {
 			this.running = true
@@ -53,6 +52,7 @@ schema Hadoop1 {
 
 	sub stop {
 		condition {
+			this.installed = true
 			this.running = true
 		}
 		effect {
@@ -74,7 +74,6 @@ schema Hadoop1Slave extends Hadoop1 {
 		}
 		effect {
 			this.installed = true
-			this.running = false
 			this.master = master
 		}
 	}
