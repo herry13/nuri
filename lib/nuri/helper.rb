@@ -20,7 +20,7 @@ module Sfp::Helper
 			when 'any_value'
 				'$.Any:' + value['_isa']
 			when 'set'
-				parent[name] = value['_values']
+				value['_values']
 			else
 				value
 			end
