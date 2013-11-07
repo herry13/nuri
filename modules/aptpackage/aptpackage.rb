@@ -1,3 +1,5 @@
+require 'thread'
+
 class Sfp::Module::AptPackage
 	include Sfp::Resource
 
@@ -28,6 +30,8 @@ class Sfp::Module::AptPackage
 	#
 	##############################
 
+	@@lock = Mutex.new
+
 	def self.installed?(package)
 		package = package.to_s.strip
 		return false if package.length <= 0
@@ -46,23 +50,27 @@ class Sfp::Module::AptPackage
 
 	def self.install(package)
 		return false if not package.is_a?(String) or package.length <= 0
-		return true if Sfp::Module::Package.installed?(package)
-		system("dpkg --configure -a")
-		system("apt-get -y --purge autoremove")
-		return true if system("apt-get -y install #{package}")
-		system("dpkg --configure -a")
-		system("apt-get -y update")
-		!!system("apt-get -y install #{package}")
+		return true if Sfp::Module::AptPackage.installed?(package)
+		@@lock.synchronize {
+			system("dpkg --configure -a")
+			system("apt-get -y --purge autoremove")
+			return true if system("apt-get -y install #{package}")
+			system("dpkg --configure -a")
+			system("apt-get -y update")
+			!!system("apt-get -y install #{package}")
+		}
 	end
 
 	def self.uninstall(package)
 		return false if not package.is_a?(String) or package.length <= 0
-		return true if not Sfp::Module::Package.installed?(package)
-		system("dpkg --configure -a")
-		system("apt-get -y --purge autoremove")
-		return (!!system("sudo apt-get -y --purge remove #{package}") and
-			!!system("sudo apt-get -y --purge autoremove") and
-			!!system("sudo apt-get -y --purge autoremove"))
+		return true if not Sfp::Module::AptPackage.installed?(package)
+		@@lock.synchronize {
+			system("dpkg --configure -a")
+			system("apt-get -y --purge autoremove")
+			return (!!system("sudo apt-get -y --purge remove #{package}") and
+				!!system("sudo apt-get -y --purge autoremove") and
+				!!system("sudo apt-get -y --purge autoremove"))
+		}
 	end
 
 	protected
@@ -72,7 +80,7 @@ class Sfp::Module::AptPackage
 
 	def version?
 		package = @model['package_name'].to_s.strip
-		return nil if package.length <= 0
+		return "" if package.length <= 0
 		installed = `apt-cache policy #{package} | grep Installed`.strip.split(' ', 2)[1].to_s.strip
 		return "" if installed.length <= 0
 		candidate = `apt-cache policy #{package} | grep Candidate`.strip.split(' ', 2)[1].to_s.strip

@@ -1,5 +1,5 @@
 schema Package {
-	installed : Bool
+	installed = true
 
 	final package_name = ""
 	final version : String

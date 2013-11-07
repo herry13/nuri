@@ -1,4 +1,5 @@
 include "../service/service.sfp"
+include "../aptpackage/aptpackage.sfp"
 
 /**
  * Module for managing Hadoop version 1
@@ -21,9 +22,14 @@ schema Hadoop1 {
 	final data_dir = "/tmp/hadoop"
 	final replication = 2
 
+	java isa AptPackage {
+		package_name = "default-jre"
+	}
+
 	sub install {
 		condition {
 			this.installed != true
+			this.java.installed = true
 		}
 		effect {
 			this.installed = true

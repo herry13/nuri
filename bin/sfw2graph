@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'json'
+
+module Sfp
+end
+
+require File.expand_path('../../lib/sfplanner/graph.rb', __FILE__)
+
+def main
+	if ARGV.length < 1
+		puts "Convert SFP plan to an image graph with Graphviz (dot).\n\nUsage: sfw2dot.rb <input-file> [output-file]\n\n"
+		exit
+	end
+	
+	fp = open(ARGV[0], "rb")
+	json = JSON.parse(fp.read)
+	fp.close
+	
+	dot = ""
+	case json["type"]
+	when 'partial-order', 'parallel'
+		dot = Sfp::Graph::partial2dot(json)
+	when 'sequential'
+		dot = Sfp::Graph::sequential2dot(json)
+	when 'stage'
+		dot = Sfp::Graph::stage2dot(json)
+	else
+		throw Exception, "Unrecognised type of workflow: #{json['type']}"
+	end
+	
+	outfile = "/tmp/#{ARGV[0]}.dot"
+	fp = open(outfile, "w");
+	fp.write(dot)
+	fp.close
+	
+	cmd = 'dot -Tpng -o';
+	if ARGV.length > 1
+		cmd += "#{ARGV[1]} #{outfile}"
+	else
+		cmd += ARGV[0].sub(/\.[a-zA-Z]*/,'') + ".png < #{outfile}"
+	end
+	system(cmd)
+	File.delete(outfile)
+end
+
+main if __FILE__ == $0

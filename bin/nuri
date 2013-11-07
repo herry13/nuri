@@ -76,6 +76,7 @@ EOS
 			opt :plain, 'print output in plain JSON'
 			opt :no_interactive, 'disable interactive input'
 			opt :no_push_module, 'disable automatic push module'
+			opt :image, 'image graph of the generated plan', :default => Dir.home + '/.nuri/plan.png'
 		end
 		help, args = check_help(args)
 		opts = process_args args, parser
@@ -90,6 +91,13 @@ EOS
 			plan = master.get_plan(opts)
 			if plan.is_a?(Hash) and !plan['workflow'].nil?
 				if plan['workflow'].length > 0
+					plan_file = Dir.home + '/.nuri/plan.json'
+					File.open(plan_file, 'w') { |f| f.write(JSON.generate(plan)) }
+
+					if opts[:image]
+						system "#{File.dirname(__FILE__)}/sfw2graph #{plan_file} #{opts[:image]}"
+					end
+
 					if opts[:plain]
 						puts JSON.generate(plan)
 					else
@@ -119,6 +127,7 @@ EOS
 							puts "Execution failed!".red
 						end
 					end
+
 				elsif plan['workflow'].length == 0
 					puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.').green
 				end

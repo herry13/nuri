@@ -25,11 +25,6 @@ class Sfp::Module::Hadoop1Master
 	def install(p={})
 		model = OpenStruct.new(@model)
 
-		if java_home.length <= 0
-			### install JRE
-			shell "apt-get install -y default-jre"
-		end
-
 		# add group hadoop
 		if `grep '^#{model.group}' /etc/group`.length <= 0
 			log.info "adding group #{model.group}"
@@ -56,6 +51,7 @@ class Sfp::Module::Hadoop1Master
 		shell "rm -f #{model.data_dir} && mkdir -p #{model.data_dir}" if !::File.directory?(model.data_dir)
 		shell "chown -R #{model.user}:#{model.user} #{model.data_dir} && rm -rf #{model.data_dir}/*"
 
+=begin
 		# download and extract hadoop binaries
 		shell 'apt-get install -y axel'
 		downloader = 'axel -q -o' # 'wget -O'
@@ -68,6 +64,18 @@ class Sfp::Module::Hadoop1Master
 		        #{downloader} #{file} #{source} &&
 		        tar xvzf #{file} && rm -f #{file} &&
 		        bash -c 'cd #{model.home}/#{basename} && shopt -s dotglob && mv * .. && cd .. && rm -rf #{basename}'"
+=end
+
+		# download and extract hadoop binaries
+		log.info "download and install hadoop binaries"
+		source = (model.source[-7,7] == '.tar.gz' or model.source[-4,4] == '.tgz' ? model.source : "#{model.source}/hadoop-#{model.version}/hadoop-#{model.version}.tar.gz")
+		file = source.split('/').last.to_s
+		basename = (::File.extname(file) == '.gz' ? ::File.basename(file, '.tar.gz') : ::File.basename(file, ::File.extname(file)))
+		download source, "#{model.home}/#{file}"
+		return false if not ::File.exist?(file)
+		shell "cd #{model.home} &&
+		       tar xvzf #{file} && rm -f #{file} &&
+		       bash -c 'cd #{model.home}/#{basename} && shopt -s dotglob && mv * .. && cd .. && rm -rf #{basename}'"
 
 		config_dir = "#{model.home}/conf"
 
@@ -223,11 +231,6 @@ class Sfp::Module::Hadoop1Slave
 	def install(p={})
 		model = OpenStruct.new(@model)
 
-		if java_home.length <= 0
-			### install JRE
-			shell "apt-get install -y default-jre"
-		end
-
 		# add group hadoop
 		if `grep '^#{model.group}' /etc/group`.length <= 0
 			log.info "adding group #{model.group}"
@@ -255,17 +258,23 @@ class Sfp::Module::Hadoop1Slave
 		shell "chown -R #{model.user}:#{model.user} #{model.data_dir} && rm -rf #{model.data_dir}/*"
 
 		# download and extract hadoop binaries
-		system 'apt-get install -y axel'
-		downloader = 'axel -q -o' # 'wget -O'
+		#system 'apt-get install -y axel'
+		#downloader = 'axel -q -o' # 'wget -O'
 		source = (model.source[-7,7] == '.tar.gz' or model.source[-4,4] == '.tgz' ? model.source : "#{model.source}/hadoop-#{model.version}/hadoop-#{model.version}.tar.gz")
 
 		log.info "download and install hadoop binaries"
 		file = source.split('/').last.to_s
 		basename = (::File.extname(file) == '.gz' ? ::File.basename(file, '.tar.gz') : ::File.basename(file, ::File.extname(file)))
-		shell  "cd #{model.home} &&
-		        #{downloader} #{file} #{source} &&
-		        tar xvzf #{file} && rm -f #{file} &&
-		        bash -c 'cd #{model.home}/#{basename} && shopt -s dotglob && mv * .. && cd .. && rm -rf #{basename}'"
+		download source, "#{model.home}/#{file}"
+		return false if not ::File.exist?(file)
+		shell "cd #{model.home} &&
+		       tar xvzf #{file} && rm -f #{file} &&
+		       bash -c 'cd #{model.home}/#{basename} && shopt -s dotglob && mv * .. && cd .. && rm -rf #{basename}'"
+
+		#shell  "cd #{model.home} &&
+		#        #{downloader} #{file} #{source} &&
+		#        tar xvzf #{file} && rm -f #{file} &&
+		#        bash -c 'cd #{model.home}/#{basename} && shopt -s dotglob && mv * .. && cd .. && rm -rf #{basename}'"
 
 		map = {
 			'user' => model.user,

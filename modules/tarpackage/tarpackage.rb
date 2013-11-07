@@ -1,3 +1,6 @@
+require 'uri'
+require 'net/http'
+
 class Sfp::Module::TarPackage
 	include Sfp::Resource
 
@@ -18,40 +21,42 @@ class Sfp::Module::TarPackage
 	##############################
 
 	def install(p={})
-		src = url
-		dest = home
-		return false if dest.length <= 0
+		return false if home.length <= 0
 
-		# create destination directory if not exist
-		system "mkdir -p #{dest}" if !::File.exist?(dest)
+		# create home directory if not exist
+		shell "mkdir -p #{home}" if !::File.exist?(home)
 
-		# install axel if it's not available
-		system "apt-get install axel" if `which axel`.strip.length <= 0
+		file = url.split('/').last.to_s
+		dest = "#{home}/#{file}"
+		download(url, dest)
 
-		# download the file
-		system "cd #{dest} && axel -q #{src}"
-
-		file = src.split('/').last.to_s
 		# if downloaded file is not exist, then return false
-		if !::File.exist?("#{dest}/#{file}")
+		if !::File.exist?(dest)
 			log.error "Failed to download file from #{url}"
 			return false
 		end
 
 		# extract tar file, and then delete it
-		system "cd #{dest} && tar xvzf #{file}"
-		system "rm -f #{dest}/#{file}"
+		shell "cd #{home} && tar xvzf #{file} && rm -f #{file}"
 
-		basename = (::File.extname(file) == '.gz' ? ::File.basename(file, '.tar.gz') : ::File.basename(file, ::File.extname(file)))
-		system "bash -c 'cd #{dest}/#{basename} && shopt -s dotglob && mv -f * .. && cd .. && rm -rf #{basename}'"
+		basename = case ::File.extname(file)
+		when '.gz'
+			::File.basename(file, '.tar.gz')
+		when '.tgz'
+			::File.basename(file, '.tgz')
+		else
+			file
+		end
 
-		File.open("#{dest}/#{Signature}", 'w') { |f| f.write(Time.now.to_s) }
+		shell "bash -c 'cd #{home}/#{basename} && shopt -s dotglob && mv -f * .. && cd .. && rm -rf #{basename}'"
+
+		File.open("#{home}/#{Signature}", 'w') { |f| f.write(Time.now.to_s) }
 
 		true
 	end
 
 	def uninstall(p={})
-		!!system("rm -rf #{home}") if File.exist?(home)
+		!!shell("rm -rf #{home}") if File.exist?(home)
 		true
 	end
 
@@ -62,6 +67,37 @@ class Sfp::Module::TarPackage
 	##############################
 
 	protected
+	def download(source, destination)
+		def use_http_proxy?(uri)
+			ENV['no_proxy'].to_s.split(',').each { |pattern|
+				pattern.chop! if pattern[-1] == '*'
+				return false if uri.hist[0, pattern.length] == pattern
+			}
+			true
+		end
+
+		file = nil
+		begin
+			uri = URI.parse(source)
+			http = nil
+			if use_http_proxy?(uri)
+				proxy = URI.parse(ENV['http_proxy'])
+				http = Net::HTTP::Proxy(proxy.host, proxy.port).new(uri.host, uri.port)
+			else
+				http = Net::HTTP.new(uri.host, uri.port)
+			end
+			http.request_get(uri.path) do |response|
+				file = ::File.open(destination, 'wb')
+				response.read_body do |segment|
+					file.write segment
+				end
+				file.flush
+			end
+		ensure
+			file.close if not file.nil?
+		end
+	end
+
 	def installed?
 		::File.exist?("#{home}/#{Signature}")
 	end
