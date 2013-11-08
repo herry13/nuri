@@ -67,11 +67,14 @@ schema Hadoop1 {
 	}
 }
 
-schema Hadoop1Master extends Hadoop1 { }
-
+schema Hadoop1Master extends Hadoop1 {
+	home = "/opt/hadoopmaster"
+}
 
 schema Hadoop1Slave extends Hadoop1 {
 	master isref Hadoop1Master
+
+	home = "/opt/hadoopslave"
 
 	sub install (master : Hadoop1Master) {
 		condition {
