@@ -82,6 +82,7 @@ schema Hadoop1Slave extends Hadoop1 {
 		condition {
 			this.installed != true
 			master.parent.created = true
+			this.java.installed = true
 		}
 		effect {
 			this.installed = true
