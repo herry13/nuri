@@ -139,7 +139,7 @@ module Sfp::Module::Hadoop2Common
 			'dfs_datanode_data_dir' => @model['data_dir'] + "/datanode_data",
 			'mapreduce_framework_name' => 'yarn',
 			'mapreduce_map_memory_mb' => 1536,
-			'mapreduce_map_java_opts' => '-Xmx1024M',
+			'mapreduce_map_java_opts' => '-Xmx2048M',
 			'mapreduce_reduce_memory_mb' => 3072,
 			'mapreduce_reduce_java_opts' => '-Xmx2560M',
 			'mapreduce_task_io_sort_mb' => 512,
@@ -150,7 +150,7 @@ module Sfp::Module::Hadoop2Common
 			'yarn_log_aggregation_enable' => false,
 			'yarn_resourcemanager_scheduler_class' => 'org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler',
 			'yarn_scheduler_minimum_allocation_mb' => 256,
-			'yarn_scheduler_maximum_allocation_mb' => 1024,
+			'yarn_scheduler_maximum_allocation_mb' => 2048,
 			'yarn_nodemanager_resource_memory_mb' => 512,
 			'yarn_nodemanager_vmem_pmem_ratio' => 2,
 			'yarn_nodemanager_log_retain_seconds' => 10800,
@@ -159,8 +159,14 @@ module Sfp::Module::Hadoop2Common
 			'yarn_log_aggregation_retain_check_interval_seconds' => -1,
 			'yarn_nodemanager_local_dirs' => @model['data_dir'] + "/yarn_local_dir",
 			'yarn_nodemanager_log_dirs' => @model['data_dir'] + "/yarn_log_dir",
+			'yarn_web_proxy_address' => local_address,
 			'io_file_buffer_size' => 131072,
 		}
+	end
+
+	def local_address
+		domain = `dnsdomainname`.to_s.strip
+		`hostname`.to_s.strip + (domain.length > 0 ? '.' + domain : '')
 	end
 
 	# TODO -- user "useradd" and "groupadd"
@@ -308,7 +314,7 @@ class Sfp::Module::Hadoop2Master < Sfp::Module::TarPackage
 
 	def map
 		map = common_map
-		map['master'] = `hostname`.to_s.strip
+		map['master'] = local_address
 		map
 	end
 
@@ -392,6 +398,7 @@ class Sfp::Module::Hadoop2Slave < Sfp::Module::TarPackage
 	def map
 		map = common_map
 		map['master'] = resolve(@model['master'] + '.parent.sfpAddress')
+		map['yarn_web_proxy_address'] = resolve(@model['master'] + '.parent.sfpAddress')
 		map
 	end
 

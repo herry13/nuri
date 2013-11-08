@@ -14,7 +14,7 @@ schema Hadoop2 extends TarPackage {
 	final group = "hadoop"
 	final password = "!"
 	final java_home = ""
-	final data_dir = "/tmp/hadoop"
+	final data_dir = "/opt/hadoop/data"
 
 	sub install {
 		condition {

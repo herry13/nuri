@@ -18,70 +18,43 @@
 
 <property>
         <name>yarn.acl.enable</name>
-        <value>false</value>
+        <value><%= yarn_acl_enable %></value>
 </property> 
 
 <property>
         <name>yarn.admin.acl</name>
-        <value>*</value>
+        <value><%= yarn_admin_acl %></value>
 </property> 
 
 <property>
         <name>yarn.log-aggregation-enable</name>
-        <value>false</value>
+        <value><%= yarn_log_aggregation_enable %></value>
 </property> 
 
 <property>
-        <name>yarn.resourcemanager.address</name>
-        <value><%= master %>:54311</value>
-</property> 
-<property>
-        <name>yarn.resourcemanager.scheduler.address</name>
-        <value><%= master %>:54312</value>
-</property> 
-<property>
-        <name>yarn.resourcemanager.admin.address</name>
-        <value><%= master %>:54313</value>
-</property> 
-<property>
-        <name>yarn.resourcemanager.webapp.address</name>
-        <value><%= master %>:54314</value>
-</property> 
+        <name>yarn.resourcemanager.hostname</name>
+        <value><%= master %></value>
+</property>
+
 <property>
         <name>yarn.resourcemanager.scheduler.class</name>
-        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+        <value><%= yarn_resourcemanager_scheduler_class %></value>
 </property>
 <property>
         <name>yarn.web-proxy.address</name>
-        <value><%= master %>:54315</value>
+        <value><%= yarn_web_proxy_address %>:54315</value>
 </property>
 <property>
-        <name>yarn.scheduler.minimum-allocation-mb</name>
-        <value>256</value>
-</property> 
-<property>
-        <name>yarn.scheduler.maximum-allocation-mb</name>
-        <value>1024</value>
-</property> 
-<property>
-        <name>yarn.nodemanager.resource.memory-mb</name>
-        <value>512</value>
-</property> 
-<property>
-        <name>yarn.nodemanager.vmem-pmem-ratio</name>
-        <value>2</value>
-</property> 
-<property>
         <name>yarn.nodemanager.local-dirs</name>
-        <value><%= yarn_local_dir %></value>
+        <value><%= yarn_nodemanager_local_dirs %></value>
 </property> 
 <property>
         <name>yarn.nodemanager.log-dirs</name>
-        <value><%= yarn_log_dir %></value>
+        <value><%= yarn_nodemanager_log_dirs %></value>
 </property> 
 <property>
         <name>yarn.nodemanager.log.retain-seconds</name>
-        <value>10800</value>
+        <value><%= yarn_nodemanager_log_retain_seconds %></value>
 </property> 
 <property>
         <name>yarn.nodemanager.remote-app-log-dir</name>
@@ -93,15 +66,7 @@
 </property> 
 <property>
         <name>yarn.nodemanager.aux-services</name>
-        <value>mapreduce_shuffle</value>
-</property> 
-<property>
-        <name>yarn.log-aggregation.retain-seconds</name>
-        <value>-1</value>
-</property> 
-<property>
-        <name>yarn.log-aggregation.retain-check-interval-seconds</name>
-        <value>-1</value>
+        <value><%= yarn_nodemanager_aux_services %></value>
 </property> 
 
 </configuration>
