@@ -43,20 +43,16 @@ class Sfp::Module::Hadoop1Common
 		# create home
 		log.info "create hadoop home directory: #{model.home}"
 		shell "mkdir -p #{model.home}" if !::File.exist?(model.home)
-		shell "chown -R #{model.user}:#{model.user} #{model.home} && rm -rf #{model.home}/*"
 		
-		# create data_dir
-		shell "rm -f #{model.data_dir} && mkdir -p #{model.data_dir}" if not ::File.directory?(model.data_dir)
-		shell "chown -R #{model.user}:#{model.user} #{model.data_dir} && rm -rf #{model.data_dir}/*"
-
 		# download and extract hadoop binaries
 		log.info "download and install hadoop binaries"
 		source = (model.source[-7,7] == '.tar.gz' or model.source[-4,4] == '.tgz' ? model.source : "#{model.source}/hadoop-#{model.version}/hadoop-#{model.version}.tar.gz")
 
 		file = source.split('/').last.to_s
 		basename = (::File.extname(file) == '.gz' ? ::File.basename(file, '.tar.gz') : ::File.basename(file, ::File.extname(file)))
-		download source, "#{model.home}/#{file}"
-		return false if not ::File.exist?(file)
+		destination = "#{model.home}/#{file}"
+		download source, destination
+		return false if not ::File.exist?(destination)
 		shell "cd #{model.home} &&
 		       tar xvzf #{file} && rm -f #{file} &&
 		       bash -c 'cd #{model.home}/#{basename} && shopt -s dotglob && mv * .. && cd .. && rm -rf #{basename}'"
@@ -74,6 +70,10 @@ class Sfp::Module::Hadoop1Common
 		log.info "export hadoop home directory to root"
 		shell "sed -i '/^export HADOOP_HOME/d' /root/.bashrc"
 		shell "echo 'export HADOOP_HOME=#{model.home}' >> /root/.bashrc"
+
+		# create data_dir
+		shell "rm -f #{model.data_dir} && mkdir -p #{model.data_dir}" if not ::File.directory?(model.data_dir)
+		shell "chown -R #{model.user}:#{model.user} #{model.data_dir} && rm -rf #{model.data_dir}/*"
 
 		installed?
 	end
@@ -173,15 +173,11 @@ class Sfp::Module::Hadoop1Master < Sfp::Module::Hadoop1Common
 	##############################
 
 	def install(p={})
-		new_data_dir = ::File.directory?(@model['data_dir'])
-
 		super
 
-		if new_data_dir
-			# format namenode space
-			log.info "format namenode space"
-			shell "su -c '#{@model['home']}/bin/hadoop namenode -format' hadoop"
-		end
+		# format namenode space
+		log.info "format namenode space"
+		shell "su -c '#{@model['home']}/bin/hadoop namenode -format' hadoop"
 
 		installed?
 	end
