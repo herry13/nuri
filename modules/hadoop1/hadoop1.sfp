@@ -19,7 +19,7 @@ schema Hadoop1 {
 	final source = "http://www.mirrorservice.org/sites/ftp.apache.org/hadoop/common"
 	final version = "1.2.1"
 	final java_home = ""
-	final data_dir = "/tmp/hadoop"
+	final data_dir = "/opt/hadoop/data"
 	final replication = 2
 
 	java isa AptPackage {
@@ -69,12 +69,14 @@ schema Hadoop1 {
 
 schema Hadoop1Master extends Hadoop1 {
 	home = "/opt/hadoopmaster"
+	data_dir = "/opt/hadoopmaster/data"
 }
 
 schema Hadoop1Slave extends Hadoop1 {
 	master isref Hadoop1Master
 
 	home = "/opt/hadoopslave"
+	data_dir = "/opt/hadoopslave/data"
 
 	sub install (master : Hadoop1Master) {
 		condition {

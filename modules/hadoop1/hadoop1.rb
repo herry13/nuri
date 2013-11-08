@@ -46,7 +46,7 @@ class Sfp::Module::Hadoop1Common
 		shell "chown -R #{model.user}:#{model.user} #{model.home} && rm -rf #{model.home}/*"
 		
 		# create data_dir
-		shell "rm -f #{model.data_dir} && mkdir -p #{model.data_dir}" if !::File.directory?(model.data_dir)
+		shell "rm -f #{model.data_dir} && mkdir -p #{model.data_dir}" if not ::File.directory?(model.data_dir)
 		shell "chown -R #{model.user}:#{model.user} #{model.data_dir} && rm -rf #{model.data_dir}/*"
 
 		# download and extract hadoop binaries
@@ -173,7 +173,7 @@ class Sfp::Module::Hadoop1Master < Sfp::Module::Hadoop1Common
 	##############################
 
 	def install(p={})
-		new_data_dir = ::File.exist?(@model['data_dir'])
+		new_data_dir = ::File.directory?(@model['data_dir'])
 
 		super
 
