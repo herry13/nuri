@@ -220,7 +220,7 @@ where <subcommand> is:
          model     get current model
           bsig     get current Behavioural Signature model
  exec <action>     execute given action description
-                    <action> = <path> [param1=value1 param2=value2 ...]
+                    <action> := <path> [param1=value1 param2=value2 ...]
         module     get modules list
            log     get last 100 lines of logs
           list     list of available agents from model file
@@ -232,6 +232,7 @@ EOS
 			opt :port, "port", :default => 1314
 			opt :ssh_user, "SSH username", :short => '-u', :default => 'root'
 			opt :ssh_port, "SSH port", :short => '-p', :default => '22'
+			opt :raw, "print a RAW output"
 		end
 		help, args = check_help(args)
 		subcommand = (args.length > 0 ? args.shift : '')
@@ -245,7 +246,7 @@ EOS
 	
 		if help
 			parser.educate(STDOUT)
-		elsif `which sfpagent`.strip.length > 0
+		elsif `which sfpagent`.strip.length > 0 or ssh_opt.length > 0
 			case subcommand
 			when 'install'
 				system("#{ssh_opt} sudo gem install sfpagent --no-ri --no-rdoc")
@@ -270,8 +271,11 @@ EOS
 				code, state = get_data(opts[:address], 1314, "/state")
 				if code == '200' and state =~ /{.*}/
 					state = JSON[state]['state']
-					state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
-					puts CodeRay.encode(JSON.pretty_generate(state), :json, :terminal)
+					if not opts[:raw]
+						state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
+						state.accept(Sfp::Helper::Sfp2Ruby)
+					end
+					puts CodeRay.encode(YAML.dump(state), :yaml, :terminal)
 				else
 					puts state
 				end
@@ -280,19 +284,36 @@ EOS
 				code, model = get_data(opts[:address], 1314, "/model")
 				if code == '200' and model =~ /{.*}/
 					model = JSON[model]
-					model.keys.each { |key| model.delete(key) if model[key]['_context'] != 'object' }
-					puts CodeRay.encode(JSON.pretty_generate(model), :json, :terminal)
+					if not opts[:raw]
+						model.select! { |k,v| k[0,1] != '_' and (not v.is_a?(Hash) or v['_context'] == 'object') }
+						model.accept(Sfp::Helper::Sfp2Ruby)
+					end
+					puts CodeRay.encode(YAML.dump(model), :yaml, :terminal)
+				elsif code == '404'
+					puts "The model of desired state is not exist!"
 				else
-					puts model
+					$stderr.puts "Error: #{code}"
 				end
 
 			when 'bsig'
 				code, json = get_data(opts[:address], 1314, "/bsig")
-				puts (code == '200' and json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
+				if code == '200' and json.length > 0
+					puts CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal)
+				elsif code == '404'
+					puts 'Behavioural Signature model is not exist!'
+				else
+					$stderr.puts "Error: #{code}"
+				end
 
 			when 'module'
-				code, json = get_data(opts[:address], 1314, "/bsig")
-				puts (code == '200' and json.length >= 2 ? CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal) : json)
+				code, json = get_data(opts[:address], 1314, "/modules")
+				if code == '200' and json.length >= 2
+					puts CodeRay.encode(YAML.dump(JSON[json]), :yaml, :terminal)
+				elsif code == '404'
+					puts 'No module is available!'
+				else
+					$stderr.puts "Error: #{code}"
+				end
 
 			when 'exec', 'execute'
 				if args.length > 0

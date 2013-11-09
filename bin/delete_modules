@@ -1,11 +1,35 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 
-if [[ "$1" == "" ]]
-then
-	echo "Usage: delete_modules <address> [port]"
-elif [[ "$2" == "" ]]
-then
-	curl -i -X PUT $1:1314/modules
-else
-	curl -i -X PUT $1:$2/modules
-fi
+require 'uri'
+require 'net/http'
+
+module Nuri
+	module Util
+		def self.delete_modules(address, port, protocol="http")
+			url = "#{protocol}://#{address}:#{port}/modules"
+			uri = URI.parse(url)
+			http = Net::HTTP.new(uri.host, uri.port)
+			request = Net::HTTP::Delete.new(uri.request_uri)
+			response = http.request(request)
+			(response.code == '200')
+		end
+	end
+end
+
+if $0 == __FILE__
+	DefaultPort = 1314
+
+	if ARGV.length < 1
+		puts "Usage: delete_modules <address> [port]"
+		exit(1)
+	end
+
+	address = ARGV.shift
+	port = (ARGV[0].nil? ? DefaultPort : ARGV[0].to_i)
+
+	if Nuri::Util.delete_modules(address, port)
+		puts '{"status":"ok"}'
+	else
+		puts '{"status":"failed"}'
+	end
+end

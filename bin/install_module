@@ -1,65 +1,54 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 
-DefaultPort=1314
+require 'json'
+require 'uri'
+require 'net/http'
+require File.dirname(__FILE__) + '/../lib/nuri/targz'
 
-# verify the arguments
-if [[ "$1" == "" ]] || [[ "$2" == "" ]]; then
-	echo "Usage: install_module <address> [port] <module-name> ..."
-	exit 1
-fi
+module Nuri
+	module Util
+		TarGzip = Object.new.extend(Util::Tar)
+	
+		def self.install_modules(address, port, modules, protocol="http")
+			data = {}
+			modules.each do |module_name|
+				raise Exception, "Module #{module_name} is not exist!" if not ::File.directory?(module_name)
+				data[module_name] = TarGzip.targzip(module_name, module_name).read
+			end
 
-# set the agent's address
-address=$1
-shift
+			url = "#{protocol}://#{address}:#{port}/modules"
+			uri = URI.parse(url)
+			http = Net::HTTP.new(uri.host, uri.port)
+			request = Net::HTTP::Put.new(uri.request_uri)
+			request.set_form_data(data)
+			response = http.request(request)
 
-# set the agent's port number
-re='^[0-9]+$'
-if [[ $1 =~ $re ]]; then
-	port=$1
-	shift
-else
-	port=$DefaultPort
-fi
+			(response.code == '200')
+		end
+	end
+end
 
-# set a template command for sending the modules
-cmd="curl -s -i -X PUT $address:$port/modules"
+if $0 == __FILE__
+	if ARGV.length < 2
+		puts "Usage: install_module <address> [port] <module-name> ..."
+		exit(1)
+	end
 
-# setup directory for temporary files
-dir="/tmp/"$(date +%s%N)"$RANDOM"
-mkdir -p $dir
+	DefaultPort = 1314
 
-# for every module in the arguments:
-# - archive the module's files to a temporary file
-# - update the sending command by adding the module
-# if the module is not exist then the program will
-# set missing_module flag and then break from the loop
-missing_module=0
-for module in "$@" ; do
-	if [[ -d "$module" ]]; then
-		tar cvzhf $dir/$module.tgz $module 1>/dev/null
-		cmd="$cmd -F $module=@$dir/$module.tgz"
-	else
-		echo "Module $module is not exist!"
-		missing_module=`expr $missing_module + 1`
-	fi
-done
+	address = ARGV.shift
+	port = (ARGV.length >= 2 ? ARGV.shift : DefaultPort)
+	modules = ARGV
+	missing = modules.select { |mod| not ::File.directory?(mod) }
+	modules = modules - missing
+	
+	success = Nuri::Util.install_modules(address, port, modules),
+	output = {
+		:status => success,
+		:installed_modules => modules,
+		:missing_modules => missing
+	}
+	puts JSON.generate(output)
 
-if [[ $missing_module == 0 ]]; then
-	# execute the sending command there is no missing module
-	result=`$cmd`
-	re='.*HTTP/1\.1 200 OK.*'
-	if ! [[ $result =~ $re ]]; then
-		missing_module=`expr $missing_module + 1`
-	fi
-fi
-
-# delete directory that holds temporary files
-rm -rf $dir
-
-if [[ $missing_module == 0 ]]; then
-	echo "status: ok"
-else
-	echo "status: failed"
-fi
-
-exit $missing_module
+	exit (success ? 0 : 1)
+end

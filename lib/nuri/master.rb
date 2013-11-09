@@ -338,10 +338,12 @@ class Nuri::Master
 
 			return true if list == ''
 
-			if system("cd #{@modules_dir}; ./install_module #{address} #{port} #{list} 1>/dev/null 2>/tmp/install_module.error")
-				puts "Push modules #{list}to #{name} [OK]".green
-			else
-				puts "Push modules #{list}to #{name} [Failed]".red
+			output = JSON.parse(`cd #{@modules_dir}; ./install_module #{address} #{port} #{list}`)
+			if output['installed_modules'].length > 0
+				puts ("Push modules: " + output['installed_modules'].join(" ") + " to agent #{name} [OK]").green
+			end
+			if output['missing_modules'].length > 0
+				puts ("Missing modules: " + output['missing_modules'].join(" ") + ".").red
 			end
 
 			return true
