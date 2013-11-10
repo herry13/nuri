@@ -18,7 +18,12 @@ module Sfp::Helper
 			when 'null'
 				nil 
 			when 'any_value'
-				'$.Any:' + value['_isa']
+				isa = value['_isa']
+				if isa.is_a?(String) and isa.isref
+					'$.Any' + '.' + isa[2, isa.length-2]
+				else
+					'$.Any'
+				end
 			when 'set'
 				value['_values']
 			else
