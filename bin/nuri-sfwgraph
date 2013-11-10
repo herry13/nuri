@@ -152,11 +152,11 @@ Usage: #{$0.split('/').last} <input-file> [output-file]\n\n"
 	dot = ""
 	case json["type"]
 	when 'partial-order', 'parallel'
-		dot = Sfp::Graph::partial2dot(json)
+		dot = Nuri::Graph::partial2dot(json)
 	when 'sequential'
-		dot = Sfp::Graph::sequential2dot(json)
+		dot = Nuri::Graph::sequential2dot(json)
 	when 'stage'
-		dot = Sfp::Graph::stage2dot(json)
+		dot = Nuri::Graph::stage2dot(json)
 	else
 		throw Exception, "Unrecognised type of workflow: #{json['type']}"
 	end
