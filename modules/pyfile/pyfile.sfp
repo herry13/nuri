@@ -1,0 +1,5 @@
+schema pyfile {
+	created : Bool
+	final path = ""
+	final content : String
+}
