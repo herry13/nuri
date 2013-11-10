@@ -12,6 +12,8 @@ class Nuri::Master
 	CloudSchema = '$.Cloud'
 	VMSchema = '$.VM'
 
+	InstallModule = File.dirname(__FILE__) + '/../../bin/nuri-install-module'
+
 	attr_reader :model
 
 	def initialize(p={})
@@ -310,6 +312,15 @@ class Nuri::Master
 		false
 	end
 
+	###############
+	#
+	# Push required modules to agent based on schemata available in agent's model
+	#
+	# @param agent_model    agent's model
+	# @param address        agent's address (IP or DNS address)
+	# @param port           agent's port
+	#
+	###############
 	def push_modules(agent_model, address=nil, port=nil)
 		if address.nil? or port.nil?
 			return false if !agent_model.is_a?(Hash) or !agent_model['sfpAddress'].is_a?(String)
@@ -330,15 +341,20 @@ class Nuri::Master
 			raise Exception, "Unable to get modules list from #{name}" if code.to_i != 200
 
 			modules = JSON[body]
-			list = ''
-			schemata.each { |m|
-				list += "#{m} " if File.exist?("#{@modules_dir}/#{m}") and
-				                   (not modules.has_key?(m) or modules[m] != get_local_module_hash(m).to_s)
-			}
+			tobe_installed_modules = []
+			schemata.each do |name|
+				module_dir = "#{@modules_dir}/#{name}"
+				if File.exist?(module_dir) and
+				   ( not modules.has_key?(name) or modules[name] != get_local_module_hash(name).to_s )
+					tobe_installed_modules << name
+				end
+			end
 
-			return true if list == ''
+			return true if tobe_installed_modules.length <= 0
 
-			output = JSON.parse(`cd #{@modules_dir}; ./install_module #{address} #{port} #{list}`)
+			### install new modules and replace old ones
+			list = tobe_installed_modules.join(" ")
+			output = JSON.parse(`cd #{@modules_dir}; #{InstallModule} #{address}:#{port} #{list}`)
 			if output['installed_modules'].length > 0
 				puts ("Push modules: " + output['installed_modules'].join(" ") + " to agent #{name} [OK]").green
 			end

@@ -3,10 +3,10 @@
 require 'rubygems'
 require 'json'
 
-module Sfp
+module Nuri
 end
 
-module Sfp::Graph
+module Nuri::Graph
 	ActionColor = 'white'
 	ActionLabelWithParameters = false
 
@@ -140,7 +140,8 @@ end
 
 def main
 	if ARGV.length < 1
-		puts "Convert SFP plan to an image graph with Graphviz (dot).\n\nUsage: sfw2dot.rb <input-file> [output-file]\n\n"
+		puts "Convert SFP plan to a PNG image graph using Graphviz library.
+Usage: #{$0.split('/').last} <input-file> [output-file]\n\n"
 		exit
 	end
 	

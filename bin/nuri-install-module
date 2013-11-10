@@ -30,19 +30,22 @@ end
 
 if $0 == __FILE__
 	if ARGV.length < 2
-		puts "Usage: install_module <address> [port] <module-name> ..."
+		puts "Usage: #{$0.split('/').last} <address>:[port] <module-name>+
+
+"
 		exit(1)
 	end
 
 	DefaultPort = 1314
 
-	address = ARGV.shift
-	port = (ARGV.length >= 2 ? ARGV.shift : DefaultPort)
+	address, port = ARGV.shift.split(':', 2)
+	port = port.to_s.to_i
+	port = DefaultPort unless port > 0
 	modules = ARGV
 	missing = modules.select { |mod| not ::File.directory?(mod) }
 	modules = modules - missing
 	
-	success = Nuri::Util.install_modules(address, port, modules),
+	success = Nuri::Util.install_modules(address, port, modules)
 	output = {
 		:status => success,
 		:installed_modules => modules,

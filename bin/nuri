@@ -8,11 +8,6 @@ About = "Nuri #{Version} (c) 2013"
 
 Nuri.init
 
-def console(*args)
-	print Time.now.strftime('%Y-%m-%d %H:%M:%S '.yellow)
-	$stdout.puts(args)
-end
-
 class Nuri::Console
 	include Nuri::Helper
 
@@ -95,7 +90,7 @@ EOS
 					File.open(plan_file, 'w') { |f| f.write(JSON.generate(plan)) }
 
 					if opts[:image]
-						system "#{File.dirname(__FILE__)}/sfw2graph #{plan_file} #{opts[:image]}"
+						system "#{File.dirname(__FILE__)}/nuri-sfwgraph #{plan_file} #{opts[:image]}"
 					end
 
 					if opts[:plain]
@@ -216,13 +211,15 @@ where <subcommand> is:
        restart     restart the agent (use SSH for remode node)
           stop     stop the agent (use SSH for remote node)
         status     get status (use SSH for remote node)
+         reset     delete all modules, model (desired state), bsig-model,
+                    and agents list
          state     get current state
          model     get current model
           bsig     get current Behavioural Signature model
  exec <action>     execute given action description
                     <action> := <path> [param1=value1 param2=value2 ...]
         module     get modules list
-           log     get last 100 lines of logs
+           log     get last 100 lines of agent's logs file
           list     list of available agents from model file
   
 where [options] are:
@@ -248,26 +245,26 @@ EOS
 			parser.educate(STDOUT)
 		elsif `which sfpagent`.strip.length > 0 or ssh_opt.length > 0
 			case subcommand
-			when 'install'
+			when 'i', 'install'
 				system("#{ssh_opt} sudo gem install sfpagent --no-ri --no-rdoc")
 
-			when 'start'
+			when 's', 'start'
 				system "#{ssh_opt} sfpagent -s && sleep 5"
 				system "#{ssh_opt} sfpagent -a"
 
-			when 'restart'
+			when 'r', 'restart'
 				system "#{ssh_opt} sfpagent -r"
 
-			when 'stop'
+			when 't', 'stop'
 				system("#{ssh_opt} sfpagent -t")
 
-			when 'status'
+			when 'a', 'status'
 				system("#{ssh_opt} sfpagent -a")
 
 			when 'upgrade'
 				system("#{ssh_opt} sudo gem update sfpagent --no-ri --no-rdoc")
 
-			when 'state'
+			when 'e', 'state'
 				code, state = get_data(opts[:address], 1314, "/state")
 				if code == '200' and state =~ /{.*}/
 					state = JSON[state]['state']
@@ -280,42 +277,42 @@ EOS
 					puts state
 				end
 
-			when 'model'
+			when 'm', 'model'
 				code, model = get_data(opts[:address], 1314, "/model")
-				if code == '200' and model =~ /{.*}/
+				if code == '200' and model =~ /{.+}/
 					model = JSON[model]
 					if not opts[:raw]
 						model.select! { |k,v| k[0,1] != '_' and (not v.is_a?(Hash) or v['_context'] == 'object') }
 						model.accept(Sfp::Helper::Sfp2Ruby)
 					end
 					puts CodeRay.encode(YAML.dump(model), :yaml, :terminal)
-				elsif code == '404'
-					puts "The model of desired state is not exist!"
+				elsif code == '404' or model == '{}'
+					puts "Model of desired state is not exist!"
 				else
 					$stderr.puts "Error: #{code}"
 				end
 
-			when 'bsig'
-				code, json = get_data(opts[:address], 1314, "/bsig")
-				if code == '200' and json.length > 0
+			when 'b', 'bsig'
+				code, bsig = get_data(opts[:address], 1314, "/bsig")
+				if code == '200' and bsig =~ /{.+}/
 					puts CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal)
-				elsif code == '404'
+				elsif code == '404' or bsig == '{}'
 					puts 'Behavioural Signature model is not exist!'
 				else
 					$stderr.puts "Error: #{code}"
 				end
 
-			when 'module'
-				code, json = get_data(opts[:address], 1314, "/modules")
-				if code == '200' and json.length >= 2
-					puts CodeRay.encode(YAML.dump(JSON[json]), :yaml, :terminal)
-				elsif code == '404'
+			when 'mod', 'module', 'modules'
+				code, modules = get_data(opts[:address], 1314, "/modules")
+				if code == '200' and modules =~ /{.+}/
+					puts CodeRay.encode(YAML.dump(JSON[modules]), :yaml, :terminal)
+				elsif code == '404' or modules == '{}'
 					puts 'No module is available!'
 				else
 					$stderr.puts "Error: #{code}"
 				end
 
-			when 'exec', 'execute'
+			when 'x', 'exec', 'execute'
 				if args.length > 0
 					name = args.shift
 					name = '$.' + name if !name.isref
@@ -333,17 +330,32 @@ EOS
 					$stderr.puts 'Invalid parameters (usage: agent exec <action-path> [action-arguments]).'
 				end
 
-			when 'log'
+			when 'g', 'log', 'logs'
 				puts Net::HTTP.get "#{opts[:address]}", "/log", 1314
 
-			when 'list'
+			when 'l', 'list'
 				get_agents(opts).each { |name,model| puts "#{name} address=#{model['sfpAddress']} port=#{model['sfpPort']}" }
 
-			when 'help'
+			when 'reset'
+				codes = []
+				codes[0], _ = delete_data(opts[:address], 1314, "/bsig")
+				codes[1], _ = delete_data(opts[:address], 1314, "/model/cache")
+				codes[2], _ = delete_data(opts[:address], 1314, "/model")
+				codes[3], _ = delete_data(opts[:address], 1314, "/modules")
+				codes[4], _ = delete_data(opts[:address], 1314, "/agents")
+
+				failed = codes.index { |x| x != '200' }
+				if not failed
+					puts "Reset agent [OK]".green
+				else
+					puts "Reset agent [Failed]".red
+				end
+
+			when 'h', 'help'
 				parser.educate(STDOUT)
 
 			else
-				$stderr.puts 'Unrecognized command! Use \"-h\" to print available commands.'.red
+				$stderr.puts 'Unrecognized command! Use -h to print available commands.'.red
 			end
 		else
 			$stderr.puts 'sfpagent gem is not installed!'.red
@@ -440,7 +452,7 @@ EOS
 					when 'version', '-v'
 						puts About
 					else
-						$stderr.puts 'Unrecognized command! Use \"-h\" option to print available commands.'.red
+						$stderr.puts 'Unrecognized command! Use -h option to print available commands.'.red
 					end
 				end
 			rescue Exception => e
@@ -503,19 +515,19 @@ EOS
 		if ARGV.length > 0
 			success = false
 			case ARGV.shift
-			when 'state'
+			when 's', 'state'
 				do_state
-			when 'plan'
+			when 'p', 'plan'
 				do_plan
-			when 'bsig'
+			when 'b', 'bsig'
 				do_bsig
-			when 'agent'
+			when 'a', 'agent'
 				do_agent
-			when 'console'
+			when 'c', 'console'
 				do_console
-			when 'edit'
+			when 'e', 'edit'
 				do_edit
-			when 'model'
+			when 'm', 'model'
 				do_model
 			else
 				puts banner

@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+require 'uri'
+require 'net/http'
+
+module Nuri
+	module Util
+		def self.delete_module(address, port, modules, protocol="http")
+			def self.send_request(url)
+				uri = URI.parse(url)
+				http = Net::HTTP.new(uri.host, uri.port)
+				request = Net::HTTP::Delete.new(uri.request_uri)
+				response = http.request(request)
+				(response.code == '200')
+			end
+			if modules.length <= 0
+				send_request("#{protocol}://#{address}:#{port}/modules")
+			else
+				modules.each do |mod|
+					return false if not send_request("#{protocol}://#{address}:#{port}/modules/#{mod}")
+				end
+				true
+			end
+		end
+	end
+end
+
+if $0 == __FILE__
+	DefaultPort = 1314
+
+	if ARGV.length < 1
+		puts "Usage: delete_modules <address>:[port] [module-name]*"
+		exit(1)
+	end
+
+	address, port = ARGV.shift.split(':', 2)
+	port = port.to_s.to_i
+	port = DefaultPort unless port > 0
+
+	if Nuri::Util.delete_module(address, port, ARGV)
+		puts '{"status":"ok"}'
+	else
+		puts '{"status":"failed"}'
+	end
+end
