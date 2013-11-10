@@ -2,4 +2,22 @@ schema pyfile {
 	created : Bool
 	final path = ""
 	final content : String
+
+	sub del {
+		condition {
+			this.created = true
+		}
+		effect {
+			this.created = false
+		}
+	}
+
+	sub create {
+		condition {
+			this.created != true
+		}
+		effect {
+			this.created = true
+		}
+	}
 }

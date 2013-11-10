@@ -7,7 +7,7 @@ class Sfp::Module::File
 
 	##############################
 	#
-	# update current state method
+	# method to update current state
 	#
 	##############################
 

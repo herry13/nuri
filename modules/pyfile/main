@@ -5,6 +5,8 @@ import json
 import os
 import hashlib
 import io
+from subprocess import call
+
 
 ###############
 #
@@ -22,31 +24,110 @@ def get_state(model):
 				m.update(buf)
 				buf = f.read(128)
 		state['created'] = True
-		state['content'] = m.hexdigest()
+		state['content'] = '{md5}' + m.hexdigest()
 	except IOError:
 		state['created'] = False
-		state['content'] = None
+		state['content'] = ''
+
+	if state['created'] and 'content' in model:
+		m = hashlib.md5()
+		m.update(model['content'])
+		state['created'] = (('{md5}' + m.hexdigest()) == state['content'])
 
 	### dump current state
 	print json.dumps(state)
 
-def execute(procedure, parameters):
-	output = {'status':'ok'}
-	print json.dumps(output)
 
+###############
+#
+# Implementation of procedure 'del' (see pyfile.sfp)
+#
+###############
+def delete(model):
+	if 'path' in model:
+		os.remove(model['path'])
+	else:
+		return False
+	return True
+
+
+###############
+#
+# Implementation of procedure 'create' (see pyfile.sfp)
+#
+###############
+def create(model):
+	if 'path' in model:
+		content = model['content'] if 'content' in model else ''
+		try:
+			with open(model['path'], 'w') as f:
+				f.write(content)
+		except IOError, e:
+			print str(e)
+			return False
+	else:
+		return False
+
+	if 'permission' in model:
+		call(["chmod", model['permission'], model['path']])
+
+	return True
+
+
+###############
+#
+# Function to redirect procedure execution request by
+# calling target function
+#
+###############
+def execute(procedure, parameters, model):
+	success = False
+	description = ''
+	if procedure == 'del':
+		success = delete(model)
+	elif procedure == 'create':
+		success = create(model)
+	else:
+		description = 'unrecognized procedure ' + procedure
+	status = 'ok' if success else 'failed'
+	print json.dumps({'status': status, 'description': description})
+
+
+###############
+#
+# Main logic for handling any request
+#
+###############
 if len(sys.argv) <= 1:
+	### invalid request
+	print '{"status":"error","description":"invalid command line argument"}'
 	exit(1)
 else:
+	### parse request data in JSON
 	data = json.loads(sys.argv[1])
+
 	if 'command' in data:
-		if data['command'] == 'state' and 'model' in data:
-			get_state(data['model'])
-		elif data['command'] == 'execute' and 'procedure' in data and 'parameters' in data and 'model' in data:
-			execute(data['procedure'], data['parameters'], data['model'])
-		else:
-			print '{"status":"error","description":"invalid command"}'
-			exit(1)
+		try:
+			if data['command'] == 'state' and 'model' in data:
+				### request for current state
+				get_state(data['model'])
+
+			elif data['command'] == 'execute' and 'procedure' in data and 'parameters' in data and 'model' in data:
+				### request for executing a procedure
+				execute(data['procedure'], data['parameters'], data['model'])
+
+			else:
+				### invalid request
+				print '{"status":"error","description":"invalid command"}'
+				exit(1)
+
+		except Exception, e:
+			### dump exception
+			print json.dumps({'status':'error','description': str(e)})
+
 	else:
+		### invalid request
 		print '{"status":"error","description":"no command"}'
 		exit(1)
+
 exit(0)
