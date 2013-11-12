@@ -32,7 +32,7 @@ where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :json, 'print output in JSON'
-			opt :plain, 'print output in plain text'
+			opt :color, 'enable colorized output'
 			opt :no_push_module, 'disable automatic push module'
 		end
 		help, args = check_help(args)
@@ -49,9 +49,10 @@ EOS
 			state.accept(Sfp::Helper::Sfp2Ruby)
 
 			if opts[:json]
-				puts (opts[:plain] ? JSON.generate(state) : CodeRay.encode(JSON.pretty_generate(state), :json, :terminal))
+				puts (!opts[:color] ? JSON.generate(state) : CodeRay.encode(JSON.pretty_generate(state), :json, :terminal))
 			else
-				puts (opts[:plain] ? YAML.dump(state) : CodeRay.encode(YAML.dump(state), :yaml, :terminal))
+				puts (!opts[:color] ? YAML.dump(state) : CodeRay.encode(YAML.dump(state), :yaml, :terminal))
+
 			end
 		else
 			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
@@ -68,7 +69,8 @@ EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :parallel, 'generate a parallel plan', :short => '-l'
 			opt :apply, 'generate and execute a plan', :short => '-a'
-			opt :plain, 'print output in plain JSON'
+			opt :json, 'print the plan in JSON'
+			opt :color, 'enable colorized output'
 			opt :no_interactive, 'disable interactive input'
 			opt :no_push_module, 'disable automatic push module'
 			opt :image, 'image graph of the generated plan', :default => Dir.home + '/.nuri/plan.png'
@@ -78,6 +80,7 @@ EOS
 	
 		if help
 			parser.educate(STDOUT)
+
 		elsif File.exist?(opts[:model_file])
 			opts[:plan] = true
 			opts[:push_modules] = true if !opts[:no_push_module]
@@ -93,19 +96,22 @@ EOS
 						system "#{File.dirname(__FILE__)}/nuri-sfwgraph #{plan_file} #{opts[:image]}"
 					end
 
-					if opts[:plain]
-						puts JSON.generate(plan)
+					if opts[:json]
+						json = JSON.pretty_generate(plan)
+						puts (opts[:color] ? CodeRay.encode(json, :json, :terminal) : json)
+
 					else
 						actions = plan['workflow']
 						if plan['type'] == 'sequential'
-							p = 'Sequential Plan:'.yellow
+							p = 'Sequential Plan:'
 							actions.each_index { |i| p += "\n#{i+1}. #{actions[i]['name']} #{JSON.generate(actions[i]['parameters'])}" }
 							puts p
 						else
-							p = 'Partial-Order Plan:'.yellow
+							p = 'Partial-Order Plan:'
 							actions.each { |op| p += "\n#{op['id']+1}. #{op['name']} #{JSON.generate(op['parameters'])} (#{op['predecessors'].map{|i|i+1}}, #{op['successors'].map{|i|i+1}})" }
 							puts p
 						end
+
 					end
 
 					if not opts[:apply] and not opts[:no_interactive]
@@ -114,23 +120,23 @@ EOS
 					end
 
 					if opts[:apply]
-						puts 'Executing the plan: '.yellow
+						puts 'Executing the plan:'
 						opts[:plan] = plan
 						if master.execute_plan(opts)
-							puts "Execution success!".green
+							puts (opts[:color] ? "Execution success.".green : "Execution success.")
 						else
-							puts "Execution failed!".red
+							puts (opts[:color] ? "Execution failed.".red : "Execution failed.")
 						end
 					end
 
 				elsif plan['workflow'].length == 0
-					puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.').green
+					puts (opts[:color] ? "Goal state has been achieved.".green : "Goal state has been achieved.")
 				end
 			else
-				$stderr.puts (opts[:plain] ? "No solution!".yellow : "No solution!".red)
+				$stderr.puts (opts[:color] ? "No solution.".red : "No solution.")
 			end
 		else
-			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details."
 		end
 	end
 
@@ -143,7 +149,7 @@ EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :purge, 'purge existing BSig model', :short => '-g'
 			opt :deploy, 'generate and then deploy a BSig model'
-			opt :plain, 'print output in plain JSON'
+			opt :color, 'enable colorized output'
 			opt :no_interactive, 'disable interactive input'
 		end
 		help, args = check_help(args)
@@ -158,21 +164,20 @@ EOS
 			master.set_model(opts)
 	
 			if opts[:purge]
+				print "Purging Behavioural Signature model "
 				if master.purge_bsig(opts)
-					puts "Purging Behavioural Signature model [OK]".green
+					puts (opts[:color] ? "[OK]".green : "[OK]")
 				else
-					puts "Purging Behavioural Signature model [Failed]".red
+					puts (opts[:color] ? "[Failed]".red : "[Failed]")
 				end
+
 			else
 				bsig = master.get_bsig(opts)
 				if bsig.is_a?(Hash) and bsig.length > 0
 					empty_local_bsig = bsig.select { |name,local_bsig| local_bsig['operators'].length <= 0 }
 					if empty_local_bsig.length != bsig.length
-						if opts[:plain]
-							puts JSON.generate(bsig)
-						else
-							puts CodeRay.encode(JSON.pretty_generate(bsig), :json, :terminal)
-						end
+						json = JSON.pretty_generate(bsig)
+						puts (opts[:color] ? CodeRay.encode(json, :json, :terminal) : json)
 		
 						if not opts[:no_interactive] and not opts[:deploy]
 							print "Deploy the BSig model [y/N]? "
@@ -180,23 +185,23 @@ EOS
 						end
 	
 						if opts[:deploy]
-							puts 'Deploying the BSig model: '.yellow
+							print 'Deploying the BSig model '
 							opts[:bsig] = bsig
 							if master.deploy_bsig(opts)
-								puts "Deployment success!".green
+								puts (opts[:color] ? "[OK]".green : "[OK]")
 							else
-								puts "Deployment failed!".red
+								puts (opts[:color] ? "[Failed]".red : "[Failed]")
 							end
 						end
 					else
-						puts (opts[:plain] ? 'Goal state has been achieved.' : 'Goal state has been achieved.').green
+						puts (opts[:color] ? "Goal state has been achieved.".green : "Goal state has been achieved.")
 					end
 				else
-					$stderr.puts (opts[:plain] ? "No solution!".yellow : "No solution!".red)
+					$stderr.puts (opts[:color] ? "No solution.".red : "No solution.")
 				end
 			end
 		else
-			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details."
 		end
 	end
 
@@ -230,6 +235,7 @@ EOS
 			opt :ssh_user, "SSH username", :short => '-u', :default => 'root'
 			opt :ssh_port, "SSH port", :short => '-p', :default => '22'
 			opt :raw, "print a RAW output"
+			opt :color, "enable colorized output"
 		end
 		help, args = check_help(args)
 		subcommand = (args.length > 0 ? args.shift : '')
@@ -272,9 +278,11 @@ EOS
 						state.keys.each { |key| state.delete(key) if state[key]['_context'] != 'object' }
 						state.accept(Sfp::Helper::Sfp2Ruby)
 					end
-					puts CodeRay.encode(YAML.dump(state), :yaml, :terminal)
+					puts (opts[:color] ? CodeRay.encode(YAML.dump(state), :yaml, :terminal) : YAML.dump(state))
+
 				else
 					puts state
+
 				end
 
 			when 'm', 'model'
@@ -285,9 +293,9 @@ EOS
 						model.select! { |k,v| k[0,1] != '_' and (not v.is_a?(Hash) or v['_context'] == 'object') }
 						model.accept(Sfp::Helper::Sfp2Ruby)
 					end
-					puts CodeRay.encode(YAML.dump(model), :yaml, :terminal)
+					puts (opts[:color] ? CodeRay.encode(YAML.dump(model), :yaml, :terminal) : YAML.dump(model))
 				elsif code == '404' or model == '{}'
-					puts "Model of desired state is not exist!"
+					puts "Model of desired state is not exist."
 				else
 					$stderr.puts "Error: #{code}"
 				end
@@ -295,9 +303,10 @@ EOS
 			when 'b', 'bsig'
 				code, bsig = get_data(opts[:address], 1314, "/bsig")
 				if code == '200' and bsig =~ /{.+}/
-					puts CodeRay.encode(JSON.pretty_generate(JSON[json]), :json, :terminal)
+					json = JSON.pretty_generate(JSON[json])
+					puts (opts[:color] ? CodeRay.encode(json, :json, :terminal) : json)
 				elsif code == '404' or bsig == '{}'
-					puts 'Behavioural Signature model is not exist!'
+					puts 'Behavioural Signature model is not exist.'
 				else
 					$stderr.puts "Error: #{code}"
 				end
@@ -305,9 +314,10 @@ EOS
 			when 'mod', 'module', 'modules'
 				code, modules = get_data(opts[:address], 1314, "/modules")
 				if code == '200' and modules =~ /{.+}/
-					puts CodeRay.encode(YAML.dump(JSON[modules]), :yaml, :terminal)
+					output = YAML.dump(JSON[modules])
+					puts (opts[:color] ? CodeRay.encode(output, :yaml, :terminal) : output)
 				elsif code == '404' or modules == '{}'
-					puts 'No module is available!'
+					puts 'No module is available.'
 				else
 					$stderr.puts "Error: #{code}"
 				end
@@ -325,7 +335,11 @@ EOS
 					end
 					data = { 'action' => JSON.generate({ 'name' => name, 'parameters' => parameters }) }
 					code, _ = post_data(opts[:address], 1314, "/execute", data)
-					puts (code == '200' ? "Executing #{name} [OK]".green : "Executing #{name} [Failed]".red)
+					if opts[:color]
+						puts (code == '200' ? "Executing #{name} [OK]".green : "Executing #{name} [Failed]".red)
+					else
+						puts (code == '200' ? "Executing #{name} [OK]" : "Executing #{name} [Failed]")
+					end
 				else
 					$stderr.puts 'Invalid parameters (usage: agent exec <action-path> [action-arguments]).'
 				end
@@ -345,20 +359,20 @@ EOS
 				codes[4], _ = delete_data(opts[:address], 1314, "/agents")
 
 				failed = codes.index { |x| x != '200' }
-				if not failed
-					puts "Reset agent [OK]".green
+				if opts[:color]
+					puts (failed ? "Reset agent [Failed]".red : "Reset agent [OK]".green)
 				else
-					puts "Reset agent [Failed]".red
+					puts (failed ? "Reset agent [Failed]" : "Reset agent [OK]")
 				end
 
 			when 'h', 'help'
 				parser.educate(STDOUT)
 
 			else
-				$stderr.puts 'Unrecognized command! Use -h to print available commands.'.red
+				$stderr.puts 'Unrecognized command! Use -h to print available commands.'
 			end
 		else
-			$stderr.puts 'sfpagent gem is not installed!'.red
+			$stderr.puts 'sfpagent gem is not installed!'
 		end
 	end
 
@@ -394,7 +408,8 @@ EOS
 	end
 
 	def do_console
-		banner = <<-EOS
+		parser = Trollop::Parser.new do
+			banner <<-EOS
 Usage: <command> [options]
 when <command> is:
   state     get current state
@@ -406,12 +421,13 @@ when <command> is:
    exit     exit this console
 
 EOS
+		end
 
 		username = `whoami`.strip
 		puts About
 		loop do
 			begin
-				print "nuri@#{username}> ".green
+				print "nuri@#{username}> ".cyan
 				begin
 					input = STDIN.gets
 					raise Exception if input.nil?
@@ -446,13 +462,13 @@ EOS
 					when 'pwd'
 						puts Dir.pwd
 					when 'ls'
-						system "ls --color #{args.join(" ")}"
+						system "ls #{args.join(" ")}"
 					when 'help'
-						puts banner
+						parser.educate(STDOUT)
 					when 'version', '-v'
 						puts About
 					else
-						$stderr.puts 'Unrecognized command! Use -h option to print available commands.'.red
+						$stderr.puts 'Unrecognized command! Use -h option to print available commands.'
 					end
 				end
 			rescue Exception => e
@@ -470,7 +486,7 @@ where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :json, 'print output in JSON'
-			opt :plain, 'print output in plain format'
+			opt :color, 'enable colorized output'
 		end
 		help, args = check_help(args)
 		opts = process_args args, parser
@@ -487,13 +503,13 @@ EOS
 			model.accept(Sfp::Helper::Sfp2Ruby)
 
 			if opts[:json]
-				puts (opts[:plain] ? JSON.generate(model) : CodeRay.encode(JSON.pretty_generate(model), :json, :terminal))
+				puts (!opts[:color] ? JSON.generate(model) : CodeRay.encode(JSON.pretty_generate(model), :json, :terminal))
 			else
-				puts (opts[:plain] ? YAML.dump(model) : CodeRay.encode(YAML.dump(model), :yaml, :terminal))
+				puts (!opts[:color] ? YAML.dump(model) : CodeRay.encode(YAML.dump(model), :yaml, :terminal))
 			end
 
 		else
-			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
+			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details."
 
 		end
 	
