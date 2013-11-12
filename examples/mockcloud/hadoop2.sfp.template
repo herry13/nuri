@@ -1,0 +1,25 @@
+/***
+ *
+ * Required parameters:
+ * - total : number of slaves
+ *
+ */
+
+include "modules/vm/vm.sfp"
+include "modules/mockcloud/mockcloud.sfp"
+include "modules/hadoop2/hadoop2.sfp"
+proxy isa Node {
+	sfpAddress is "localhost"
+	cloud isa MockCloud
+}
+master isa VM {
+	hadoop isa Hadoop2Master
+}
+slave1 isa VM {
+	hadoop isa Hadoop2Slave {
+		master is master.hadoop
+	}
+}
+<% (2..total.to_i).each do |i| %>
+slave<%= i %> extends slave1
+<% end %>
