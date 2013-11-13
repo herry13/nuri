@@ -64,12 +64,16 @@ class Nuri::Master
 		p[:sfp] = create_plan_task(p)
 		p[:sas_post_processor] = SASPostProcessor
 
+		print "Planning "
+
 		plan = nil
 		planning_time = Benchmark.measure do
 			planner = Sfp::Planner.new
 			plan = planner.solve(p)
 		end
-		puts "Planning time (s): #{planning_time}"
+
+		print (p[:color] ? "[Finish] ".green : "[Finish] ")
+		puts format_benchmark(planning_time)
 
 		plan
 	end
@@ -124,12 +128,23 @@ class Nuri::Master
 	end
 
 	protected
+	def format_benchmark(benchmark)
+		"cpu-time: user=#{benchmark.cutime.round(2)} sys=#{benchmark.cstime.round(2)} total=#{benchmark.total.round(2)}"
+	end
+
 	def create_plan_task(p={})
 		task = get_schemata
 
-		puts "Getting current state [WAIT]".yellow
-		b = Benchmark.measure { task['initial'] = to_state('initial', get_state(p)) }
-		puts "Getting current state [OK] : #{b}".green
+		print "Getting current state "
+		puts (p[:color] ? "[Wait]".yellow : "[Wait]")
+
+		b = Benchmark.measure do
+			task['initial'] = to_state('initial', get_state(p))
+		end
+
+		print "Getting current state "
+		print (p[:color] ? "[OK]".green : "[OK]")
+		puts " " + format_benchmark(b)
 
 		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 		f1 = Sfp::Helper::SfpFlatten.new
@@ -151,17 +166,24 @@ class Nuri::Master
 		dead_nodes.each_key { |name|
 			task['initial'].delete(name)
 			task['goal'].keep_if { |k,v| !(k =~ /(\$\.#{name}\.|\$\.#{name}$)/) }
-			puts "[WARN] Removing node #{name} from the task.".red
+			print (p[:color] ? "[Warn]".red : "[Warn]")
+			puts " Removing node #{name} from the task."
 		}
 
 		# print the status of goal state
-		puts "Goal state:".yellow
+		puts "Goal state:"
 		goalgen.results.each { |k,v|
 			next if k[0,1] == '_'
-			print "  #{k}: " + Sfp::Helper::Sfp2Ruby.val(v['_value']).to_s.green
+
+			print "  #{k}: "
+			value = Sfp::Helper::Sfp2Ruby.val(v['_value']).to_s
+			print (p[:color] ? value.green : value) + " "
+
 			if f1.results.has_key?(k) and f1.results[k] != v['_value']
-				print " " + Sfp::Helper::Sfp2Ruby.val(f1.results[k]).to_s.red
+				value = Sfp::Helper::Sfp2Ruby.val(f1.results[k]).to_s
+				print (p[:color] ? value.red : value)
 			end
+
 			puts ""
 		}
 

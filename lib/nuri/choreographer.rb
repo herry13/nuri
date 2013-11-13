@@ -42,7 +42,7 @@ module Nuri::Choreographer
 				local_bsigs[name] = local
 			end
 		end
-		puts "Choreographing: #{choreographing_time}"
+		puts "Choreographing " + format_benchmark(choreographing_time)
 
 		# bsig
 		local_bsigs
@@ -62,7 +62,7 @@ module Nuri::Choreographer
 			address = @model.at?("$.#{name}.sfpAddress")
 			port = @model.at?("$.#{name}.sfpPort")
 			if !address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
-				puts "Agent #{name} is not exist!".yellow
+				puts (p[:color] ? "[Warn]".yellow : "[Warn]") + " Agent #{name} is not exist!"
 				next
 			end
 
@@ -73,9 +73,9 @@ module Nuri::Choreographer
 			rescue
 			end
 			if code == '200'
-				puts "Deploying BSig model to #{name}@#{address}:#{port} [OK]".green
+				puts "Deploying BSig model to #{name}@#{address}:#{port} " + (p[:color] ? "[OK]".green : "[OK]")
 			else
-				$stderr.puts "Deploying BSig model to #{name}@#{address}:#{port} [Failed]".red
+				$stderr.puts "Deploying BSig model to #{name}@#{address}:#{port} " + (p[:color] ? "[Failed]".red : "[Failed]")
 				success = false
 			end
 		end
@@ -106,9 +106,9 @@ module Nuri::Choreographer
 					rescue
 					end
 					if code == '200'
-						puts "Sending model of #{name} to #{address}:#{port} [OK]".green
+						puts "Sending model of #{name} to #{address}:#{port} " + (p[:color] ? "[OK]".green : "[OK]")
 					else
-						$stderr.puts "Sending model of #{name} to #{address}:#{port} [Failed]".red
+						$stderr.puts "Sending model of #{name} to #{address}:#{port} " + (p[:color] ? "[Failed]".red : "[Failed]")
 						return false
 					end
 				end
@@ -139,9 +139,9 @@ module Nuri::Choreographer
 			rescue
 			end
 			if code1 == '200' and code2 == '200'
-				puts "Purging BSig model: #{name}@#{address}:#{port} [OK]".green
+				puts "Purging BSig model: #{name}@#{address}:#{port} " + (p[:color] ? "[OK]".green : "[OK]")
 			else
-				$stderr.puts "Purging BSig model: #{name}@#{address}:#{port} [Failed]".red
+				$stderr.puts "Purging BSig model: #{name}@#{address}:#{port} " + (p[:color] ? "[Failed]".red : "[Failed]")
 				success = false
 			end
 		end

@@ -30,9 +30,11 @@ module Sfp::Helper
 				value
 			end
 		elsif value.is_a?(Sfp::Unknown)
-			'$.Unknown:' + value.type.to_s
+			t = value.type.to_s
+			"$.Unknown" + (t.length > 2 ? ".#{t[2, t.length-2]}" : "")
 		elsif value.is_a?(Sfp::Undefined)
-			'$.Undefined:' + value.type.to_s
+			t = value.type.to_s
+			"$.Undefined" + (t.length > 2 ? ".#{t[2, t.length-2]}" : "")
 		else
 			value
 		end 
