@@ -104,11 +104,11 @@ module Nuri::Orchestrator
 		begin
 			index = 1 
 			plan['workflow'].each do |action|
-				print "#{index}. #{action['name']} #{JSON.generate(action['parameters'])} ..."
+				puts "#{index}. #{action['name']} #{JSON.generate(action['parameters'])} " + (options[:color] ? "[Wait]".yellow : "[Wait]")
 				if execute_action(action, options)
-					puts (options[:color] ? "[OK]".green : "[OK]")
+					puts "#{index}. #{action['name']} #{JSON.generate(action['parameters'])} " + (options[:color] ? "[OK]".green : "[OK]")
 				else
-					puts (options[:color] ? "[Failed]".red : "[Failed]")
+					puts "#{index}. #{action['name']} #{JSON.generate(action['parameters'])} " + (options[:color] ? "[Failed]".red : "[Failed]")
 					return false
 				end 
 				index += 1
