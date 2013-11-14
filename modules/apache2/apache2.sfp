@@ -1,0 +1,54 @@
+include "../package2/package2.sfp"
+include "../service2/service2.sfp"
+
+schema Apache2 {
+	installed : Bool
+	running : Bool
+
+	package isa Package2 {
+		name = "apache2"
+		version = "latest"
+		provider = "apt"
+
+		synchronized sub install {
+			condition {
+				this.parent.installed != true
+			}
+			effect {
+				this.parent.installed = true
+				this.parent.running = true
+			}
+		}
+		synchronized sub uninstall {
+			condition {
+				this.parent.installed = true
+				this.parent.running = false
+			}
+			effect {
+				this.parent.installed = false
+			}
+		}
+	}
+
+	service isa Service2 {
+		name = "apache2"
+
+		sub start {
+			condition {
+				this.parent.installed = true
+			}
+			effect {
+				this.parent.running = true
+			}
+		}
+	
+		sub stop {
+			condition {
+				this.parent.running = true
+			}
+			effect {
+				this.parent.running = false
+			}
+		}
+	}
+}

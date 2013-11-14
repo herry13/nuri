@@ -1,0 +1,23 @@
+schema Package2 {
+	installed : Bool
+
+	final name = ""
+	final version = "latest"
+	final source = "default"
+	final provider = "apt"
+
+	synchronized sub install {
+		effect {
+			this.installed = true
+		}
+	}
+
+	synchronized sub uninstall {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+}
