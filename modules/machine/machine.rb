@@ -4,6 +4,8 @@ class Sfp::Module::Machine
 	def update_state
 		to_model
 
+		load_kernel_modules(['acpiphp'])
+
 		@state['sfpAddress'] = @model['sfpAddress']
 		@state['sfpPort'] = @model['sfpPort']
 		@state['created'] = true
@@ -28,6 +30,21 @@ class Sfp::Module::Machine
 	##############################
 
 	protected
+
+	def load_kernel_modules(modules=[])
+		loaded = []
+		`lsmod`.each_line do |line|
+			next if line.strip.length <= 0
+			name, size, used, by = line.split(' ', 4)
+			next if name.to_s.downcase == 'module'
+			loaded << name
+		end
+
+		unloaded = modules - loaded
+		unloaded.each do |name|
+			shell "modprobe #{name}"
+		end
+	end
 
 	# generate the disks' state, try to automatically mount the disk to target directory
 	#
