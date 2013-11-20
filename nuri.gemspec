@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
 	s.homepage              = 'https://github.com/herry13/nuri'
 	s.rubyforge_project     = 'nuri'
 
-	s.add_dependency 'sfplanner', '~> 0.1'
+	s.add_dependency 'sfplanner', '~> 0.2.1'
 	s.add_dependency 'sfpagent', '~> 0.3'
 	s.add_dependency 'colorize', '~> 0.6'
 	s.add_dependency 'coderay', '~> 1'

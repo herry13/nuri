@@ -53,10 +53,8 @@ module Nuri
 end
 
 # internal dependencies
-libdir = File.expand_path(File.dirname(__FILE__))
-require libdir + '/nuri/constraint_helper.rb'
-require libdir + '/nuri/helper.rb'
-require libdir + '/nuri/orchestrator.rb'
-require libdir + '/nuri/choreographer.rb'
-#require libdir + '/nuri/server.rb'
-require libdir + '/nuri/master.rb'
+libdir = File.dirname(__FILE__) << '/nuri'
+['constraint_helper.rb', 'helper.rb', 'orchestrator.rb',
+ 'choreographer.rb', 'master.rb'].each do |file|
+	require "#{libdir}/#{file}"
+end
