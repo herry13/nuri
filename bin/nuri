@@ -73,7 +73,7 @@ EOS
 			opt :color, 'enable colorized output'
 			opt :no_interactive, 'disable interactive input'
 			opt :no_push_module, 'disable automatic push module'
-			opt :image, 'image graph of the generated plan', :default => Dir.home + '/.nuri/plan.png'
+			opt :image, 'image graph of the generated plan', :default => '' #Dir.home + '/.nuri/plan.png'
 		end
 		help, args = check_help(args)
 		opts = process_args args, parser
@@ -92,7 +92,7 @@ EOS
 					plan_file = Dir.home + '/.nuri/plan.json'
 					File.open(plan_file, 'w') { |f| f.write(JSON.generate(plan)) }
 
-					if opts[:image]
+					if opts[:image].strip.length > 0
 						system "#{File.dirname(__FILE__)}/nuri-sfwgraph #{plan_file} #{opts[:image]}"
 					end
 
