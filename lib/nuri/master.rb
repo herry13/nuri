@@ -67,7 +67,7 @@ class Nuri::Master
 		print "Planning "
 
 		plan = nil
-		planning_time = Benchmark.measure do
+		planning_time = Benchmark.realtime do
 			planner = Sfp::Planner.new
 			plan = planner.solve(p)
 		end
@@ -129,7 +129,7 @@ class Nuri::Master
 
 	protected
 	def format_benchmark(benchmark)
-		"cpu-time: user=#{benchmark.cutime.round(2)} sys=#{benchmark.cstime.round(2)} total=#{benchmark.total.round(2)}"
+		"elapsed-time: #{benchmark}" #user=#{benchmark.cutime.round(2)} sys=#{benchmark.cstime.round(2)} total=#{benchmark.total.round(2)}"
 	end
 
 	def create_plan_task(p={})
@@ -138,7 +138,7 @@ class Nuri::Master
 		print "Getting current state "
 		puts (p[:color] ? "[Wait]".yellow : "[Wait]")
 
-		b = Benchmark.measure do
+		b = Benchmark.realtime do
 			task['initial'] = to_state('initial', get_state(p))
 		end
 
@@ -250,6 +250,7 @@ class Nuri::Master
 				next if not vms.has_key?(name)
 				if state[name].is_a?(Hash)
 					state[name]['in_cloud'] = cloud
+					state[name]['created'] = true
 				elsif state[name].is_a?(Sfp::Unknown)
 					state[name] = get_dead_vm_state(vms[name], cloud)
 				end
