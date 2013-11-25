@@ -2,9 +2,10 @@ schema Package2 {
 	installed : Bool
 
 	final name = ""
-	final version = "latest"
-	final source = "default"
 	final provider = "apt"
+	final version = "latest"
+	final source = ""
+	final home = ""
 
 	synchronized sub install {
 		effect {
