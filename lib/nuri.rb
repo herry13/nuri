@@ -1,12 +1,3 @@
-# external dependencies
-require 'rubygems'
-require 'json'
-require 'sfplanner'
-require 'colorize'
-require "coderay"
-require 'logger'
-require 'yaml'
-
 # define main module
 module Nuri
 	def self.windows?
@@ -51,6 +42,15 @@ module Nuri
 		}
 	end
 end
+
+# external dependencies
+require 'rubygems'
+require 'json'
+require 'sfplanner'
+require 'colorize'
+require "coderay"
+require 'logger'
+require 'yaml'
 
 # internal dependencies
 libdir = File.dirname(__FILE__) << '/nuri'
