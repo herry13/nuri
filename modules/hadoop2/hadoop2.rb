@@ -1,9 +1,7 @@
-require ::File.dirname(__FILE__) + '/../tarpackage/tarpackage.rb'
+require ::File.dirname(__FILE__) + '/../package2/package2.rb'
 
 module Sfp::Module::Hadoop2Common
 	def update_state
-		to_model
-
 		super
 
 		@state['running'] = running?
@@ -16,7 +14,7 @@ module Sfp::Module::Hadoop2Common
 
 	##############################
 	#
-	# Action methods (see Hadoop.sfp)
+	# Action methods (see hadoop2.sfp)
 	#
 	##############################
 
@@ -216,14 +214,14 @@ module Sfp::Module::Hadoop2Common
 	end
 end
 
-class Sfp::Module::Hadoop2Master < Sfp::Module::TarPackage
+class Sfp::Module::Hadoop2Master < Sfp::Module::Package2
 	include ::Sfp::Module::Hadoop2Common
 
 	Services = ['namenode', 'resourcemanager', 'historyserver', 'proxyserver']
 
 	##############################
 	#
-	# Action methods (see TarPackage.sfp)
+	# Action methods (see hadoop2.sfp)
 	#
 	##############################
 
@@ -330,14 +328,14 @@ class Sfp::Module::Hadoop2Master < Sfp::Module::TarPackage
 	end
 end
 
-class Sfp::Module::Hadoop2Slave < Sfp::Module::TarPackage
+class Sfp::Module::Hadoop2Slave < Sfp::Module::Package2
 	include ::Sfp::Module::Hadoop2Common
 
 	Services = ['datanode', 'nodemanager']
 
 	##############################
 	#
-	# Action methods (see TarPackage.sfp)
+	# Action methods (see hadoop2.sfp)
 	#
 	##############################
 

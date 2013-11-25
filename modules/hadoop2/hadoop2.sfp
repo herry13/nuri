@@ -1,13 +1,14 @@
-include "../tarpackage/tarpackage.sfp"
+include "../package2/package2.sfp"
 
-schema Hadoop2 extends TarPackage {
+schema Hadoop2 extends Package2 {
 	installed = true
 	running = true
 	configured = true
 	
-	final package_name = "hadoop"
+	final name = "hadoop"
+	final provider = "tar"
 	final version = "2.2.0"
-	final source = "http://www.mirrorservice.org/sites/ftp.apache.org/hadoop/common"
+	final source = "http://master.herry.ext9.sup.hpl.hp.com/hadoop"
 	final home = "/opt/hadoop"
 
 	final user = "hadoop"
