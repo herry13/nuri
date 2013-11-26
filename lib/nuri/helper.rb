@@ -80,11 +80,18 @@ module Nuri::Helper
 	end
 
 	def use_http_proxy?(uri)
-		ENV['no_proxy'].to_s.split(',').each { |pattern|
-			pattern.chop! if pattern[-1] == '*'
-			return false if uri.host[0,pattern.length] == pattern
-		}
-		true
+		parts = uri.host.split('.')
+		if parts[0] == '10' or
+			(parts[0] == '172' and parts[1] == '16') or
+			(parts[0] == '192' and parts[1] == '168')
+			false
+		else
+			ENV['no_proxy'].to_s.split(',').each { |pattern|
+				pattern.chop! if pattern[-1] == '*'
+				return false if uri.host[0,pattern.length] == pattern
+			}
+			true
+		end
 	end
 
 	def http_request(uri, request, open_timeout=5, read_timeout=1800)
