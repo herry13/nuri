@@ -4,7 +4,9 @@ class Sfp::Module::Machine
 	def update_state
 		to_model
 
-		load_kernel_modules(['acpiphp'])
+		if platform.include?('linux')
+			load_kernel_modules(['acpiphp'])
+		end
 
 		@state['sfpAddress'] = @model['sfpAddress']
 		@state['sfpPort'] = @model['sfpPort']
@@ -20,7 +22,11 @@ class Sfp::Module::Machine
 		@state["cpus"] = (File.exist?('/proc/cpuinfo') ? `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i : -1)
 		@state['memory'] = (`which free`.strip != '' ? `free`.split("\n")[1].split(" ")[1] : -1)
 
-		@state['disk'] = get_disk_state
+		if platform.include?('linux')
+			@state['disk'] = get_disk_state
+		else
+			@state['disk'] = {}
+		end
 	end
 
 	##############################
@@ -28,6 +34,10 @@ class Sfp::Module::Machine
 	# Helper methods
 	#
 	##############################
+
+	def platform
+		RUBY_PLATFORM.downcase
+	end
 
 	protected
 
