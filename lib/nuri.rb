@@ -1,7 +1,11 @@
 # define main module
 module Nuri
 	def self.windows?
-		RUBY_PLATFORM.downcase.include?("mswin")
+		platform.include?("mswin")
+	end
+
+	def self.platform
+		RUBY_PLATFORM.downcase
 	end
 
 	def self.home
