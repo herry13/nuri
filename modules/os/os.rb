@@ -21,7 +21,7 @@ class Sfp::Module::OS
 		@state["type"] = `uname -s`.strip
 		@state["version"] = `uname -r`.strip
 		@state["arch"] = `uname -p`.strip
-		@state["platform"] = (File.exist?('/etc/issue') ? `cat /etc/issue`.strip : '')
+		@state["platform"] = RUBY_PLATFORM
 	end
 
 	def apply(p={})
