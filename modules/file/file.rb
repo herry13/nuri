@@ -13,14 +13,14 @@ class Sfp::Module::File
 
 	def update_state
 		path = @model['path'].to_s.strip
-		if @model['exists']
-			create(path)
-		else
-			delete(path)
+
+		if not exist? or type? != @model['type']
+			create if del
 		end
 
 		@state['path'] = path
-		@state['exists'] = ::File.exist?(path)
+		@state['exists'] = exist?
+		@state['type'] = type?
 		@state['content'] = content?
 		@state['user'], @state['group'] = user_group?
 		@state['permission'] = permission?
@@ -34,28 +34,58 @@ class Sfp::Module::File
 
 	protected
 
-	def delete(file)
-		::File.delete(file) if ::File.exist?(file)
+	def del(p={})
+		return true if not exist?
+
+		file = @model['path']
+		if ::File.file?(file)
+			::File.delete(file)
+		elsif ::File.directory?(file) and file != '/'
+			shell "rm -rf #{file}"
+		end
+		not exist?
 	end
 
-	def create(file)
-		log.warn "Failed to create/update file #{file}!" if
+	def create(p={})
+		return true if exist?
+		file = @model['path']
+		if @model['type'] == 'file'
 			not set_content(file) or
 			not set_owner(file) or
 			not set_permission(file)
+		elsif @model['type'] == 'directory'
+			Dir.mkdir(file)
+		end
+		exist?
+	end
+
+	def exist?
+		::File.exist?(@model['path'])
+	end
+
+	def type?
+		if exist?
+			(::File.file?(@model['path']) ? 'file' : 'directory')
+		else
+			''
+		end
 	end
 
 	def set_content(file)
-		return true if not @model['content'].is_a?(String)
-		begin
-			current = (::File.exist?(file) ? content? : nil)
-			desired = Digest::SHA1.hexdigest(@model['content'])
-			File.open(file, 'w') { |f| f.write(@model['content']) } if current != desired
-			return true
-		rescue Exception => e
-			log.error "#{e}\n#{e.backtrace.join("\n")}"
+		if @model['type'] == 'directory'
+			shell "mkdir #{@model['path']}"
+		else
+			return true if not @model['content'].is_a?(String)
+			begin
+				current = (::File.exist?(file) ? content? : nil)
+				desired = Digest::SHA1.hexdigest(@model['content'])
+				File.open(file, 'w') { |f| f.write(@model['content']) } if current != desired
+				return true
+			rescue Exception => e
+				log.error "#{e}\n#{e.backtrace.join("\n")}"
+			end
+			false
 		end
-		false
 	end
 
 	def set_owner(file)
@@ -72,7 +102,7 @@ class Sfp::Module::File
 	end
 
 	def content?
-		(::File.exist?(@model['path']) ? Digest::SHA1.hexdigest(::File.read(@model['path'])) : '')
+		(::File.file?(@model['path']) ? Digest::SHA1.hexdigest(::File.read(@model['path'])) : '')
 	end
 
 	def user_group?

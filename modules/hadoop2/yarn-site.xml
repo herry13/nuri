@@ -44,6 +44,11 @@
         <name>yarn.web-proxy.address</name>
         <value><%= yarn_web_proxy_address %>:54315</value>
 </property>
+
+<property>
+        <name>yarn.nodemanager.hostname</name>
+        <value><%= yarn_nodemanager_hostname %></value>
+</property>
 <property>
         <name>yarn.nodemanager.local-dirs</name>
         <value><%= yarn_nodemanager_local_dirs %></value>

@@ -155,6 +155,7 @@ module Sfp::Module::Hadoop2Common
 			'yarn_nodemanager_aux_services' => 'mapreduce_shuffle',
 			'yarn_log_aggregation_retain_seconds' => -1,
 			'yarn_log_aggregation_retain_check_interval_seconds' => -1,
+			'yarn_nodemanager_hostname' => local_address,
 			'yarn_nodemanager_local_dirs' => @model['data_dir'] + "/yarn_local_dir",
 			'yarn_nodemanager_log_dirs' => @model['data_dir'] + "/yarn_log_dir",
 			'yarn_web_proxy_address' => local_address,
@@ -163,8 +164,9 @@ module Sfp::Module::Hadoop2Common
 	end
 
 	def local_address
-		domain = `dnsdomainname`.to_s.strip
-		`hostname`.to_s.strip + (domain.length > 0 ? '.' + domain : '')
+		resolve("$.#{Sfp::Agent.whoami?}.sfpAddress")
+		#domain = `dnsdomainname`.to_s.strip
+		#`hostname`.to_s.strip + (domain.length > 0 ? '.' + domain : '')
 	end
 
 	# TODO -- user "useradd" and "groupadd"
