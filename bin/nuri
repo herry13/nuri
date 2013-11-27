@@ -6,8 +6,6 @@ require "#{dir}/lib/nuri"
 Version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
 About = "Nuri #{Version} (c) 2013"
 
-Nuri.init
-
 class Nuri::Console
 	include Nuri::Helper
 
@@ -27,7 +25,7 @@ class Nuri::Console
 	def do_state(args=ARGV, cmd="nuri ")
 		parser = Trollop::Parser.new do
 			banner <<-EOS
-Usage: #{cmd}state [options]
+Usage: #{cmd}state [options] [path]
 where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
@@ -48,12 +46,17 @@ EOS
 			state = master.get_state opts
 			state.accept(Sfp::Helper::Sfp2Ruby)
 
+			if args.length > 0
+				state = state.at?("$.#{args[0]}")
+				puts (!opts[:color] ? "Path: #{args[0]}" : "Path: " + "#{args[0]}".yellow)
+			end
+
 			if opts[:json]
 				puts (!opts[:color] ? JSON.generate(state) : CodeRay.encode(JSON.pretty_generate(state), :json, :terminal))
 			else
 				puts (!opts[:color] ? YAML.dump(state) : CodeRay.encode(YAML.dump(state), :yaml, :terminal))
-
 			end
+
 		else
 			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
 
@@ -554,4 +557,8 @@ EOS
 	end
 end
 
-Nuri::Console.new.run if $0 == __FILE__
+if $0 == __FILE__
+	Nuri.init
+	Nuri::Console.new.run
+end
+

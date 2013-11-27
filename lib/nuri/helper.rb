@@ -42,27 +42,30 @@ module Sfp::Helper
 end
 
 module Nuri::Helper
-	def post_data(address, port, path, data, open_timeout=5, read_timeout=1800)
+	DefaultHTTPOpenTimeout = 2
+	DefaultHTTPReadTimeout = 1800
+
+	def post_data(address, port, path, data, open_timeout=DefaultHTTPOpenTimeout, read_timeout=DefaultHTTPReadTimeout)
 		uri = create_uri(address, port, path)
 		req = Net::HTTP::Post.new(uri.path)
 		req.set_form_data(data)
 		http_request(uri, req, open_timeout, read_timeout)
 	end
 
-	def put_data(address, port, path, data, open_timeout=5, read_timeout=1800)
+	def put_data(address, port, path, data, open_timeout=DefaultHTTPOpenTimeout, read_timeout=DefaultHTTPReadTimeout)
 		uri = create_uri(address, port, path)
 		req = Net::HTTP::Put.new(uri.path)
 		req.set_form_data(data)
 		http_request(uri, req, open_timeout, read_timeout)
 	end
 
-	def get_data(address, port, path, open_timeout=5, read_timeout=1800)
+	def get_data(address, port, path, open_timeout=DefaultHTTPOpenTimeout, read_timeout=DefaultHTTPReadTimeout)
 		uri = create_uri(address, port, path)
 		req = Net::HTTP::Get.new(uri.path)
 		http_request(uri, req, open_timeout, read_timeout)
 	end
 
-	def delete_data(address, port, path, open_timeout=5, read_timeout=1800)
+	def delete_data(address, port, path, open_timeout=DefaultHTTPOpenTimeout, read_timeout=DefaultHTTPReadTimeout)
 		uri = create_uri(address, port, path)
 		req = Net::HTTP::Delete.new(uri.path)
 		http_request(uri, req, open_timeout, read_timeout)
@@ -94,7 +97,7 @@ module Nuri::Helper
 		end
 	end
 
-	def http_request(uri, request, open_timeout=5, read_timeout=1800)
+	def http_request(uri, request, open_timeout=DefaultHTTPOpenTimeout, read_timeout=DefaultHTTPReadTimeout)
 		if ENV['http_proxy'].to_s.strip != '' and use_http_proxy?(uri)
 			proxy = URI.parse(ENV['http_proxy'])
 			http = Net::HTTP::Proxy(proxy.host, proxy.port).new(uri.host, uri.port)

@@ -67,7 +67,7 @@ class Nuri::Master
 		print "Planning "
 
 		plan = nil
-		planning_time = Benchmark.realtime do
+		planning_time = Benchmark.measure do
 			planner = Sfp::Planner.new
 			plan = planner.solve(p)
 		end
@@ -129,7 +129,11 @@ class Nuri::Master
 
 	protected
 	def format_benchmark(benchmark)
-		"elapsed-time: #{benchmark}" #user=#{benchmark.cutime.round(2)} sys=#{benchmark.cstime.round(2)} total=#{benchmark.total.round(2)}"
+		#"elapsed-time: #{benchmark}"
+		user = (benchmark.utime + benchmark.cutime).round(3)
+		system = (benchmark.stime + benchmark.cstime).round(3)
+		real = benchmark.real.round(3)
+		"bechmark: user=#{user} sys=#{system} real=#{real}"
 	end
 
 	def create_plan_task(p={})
@@ -138,7 +142,7 @@ class Nuri::Master
 		print "Getting current state "
 		puts (p[:color] ? "[Wait]".yellow : "[Wait]")
 
-		b = Benchmark.realtime do
+		b = Benchmark.measure do
 			task['initial'] = to_state('initial', get_state(p))
 		end
 

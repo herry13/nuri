@@ -10,7 +10,7 @@ module Nuri::Orchestrator
 		push_agents_list
 
 		success = false
-		benchmark = Benchmark.realtime {
+		benchmark = Benchmark.measure {
 			plan = (options[:plan] ? options[:plan] : JSON[File.read(options[:execute])])
 			raise Exception, "No plan." if plan['workflow'].nil?
 			if plan.is_a?(Hash) and plan['type'] == 'sequential'
