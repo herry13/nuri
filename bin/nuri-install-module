@@ -9,21 +9,28 @@ module Nuri
 	module Util
 		TarGzip = Object.new.extend(Util::Tar)
 	
-		def self.install_modules(address, port, modules, protocol="http")
+		def self.install_modules(address, port, modules, protocol="http", open_timeout=2, read_timeout=10)
 			data = {}
 			modules.each do |module_name|
 				raise Exception, "Module #{module_name} is not exist!" if not ::File.directory?(module_name)
 				data[module_name] = TarGzip.targzip(module_name, module_name).read
 			end
 
-			url = "#{protocol}://#{address}:#{port}/modules"
-			uri = URI.parse(url)
-			http = Net::HTTP.new(uri.host, uri.port)
-			request = Net::HTTP::Put.new(uri.request_uri)
-			request.set_form_data(data)
-			response = http.request(request)
-
-			(response.code == '200')
+			begin
+				url = "#{protocol}://#{address}:#{port}/modules"
+				uri = URI.parse(url)
+				http = Net::HTTP.new(uri.host, uri.port)
+				http.open_timeout = open_timeout
+				http.read_timeout = read_timeout
+				request = Net::HTTP::Put.new(uri.request_uri)
+				request.set_form_data(data)
+				response = http.request(request)
+	
+				(response.code == '200')
+			rescue Exception => e
+				$stderr.puts e
+				false
+			end
 		end
 	end
 end
