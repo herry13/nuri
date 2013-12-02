@@ -403,8 +403,8 @@ EOS
 		agents = {}
 		state.each do |name,model|
 			agents[name] = {
-				'sfpAddress' => (model['sfpAddress'].is_a?(String) ? model['sfpAddress'] : ''),
-				'sfpPort' => (model['sfpPort'].is_a?(Fixnum) ? model['sfpPort'] : 0)
+				'sfpAddress' => (model.is_a?(Hash) and model['sfpAddress'].is_a?(String) ? model['sfpAddress'] : ''),
+				'sfpPort' => (model.is_a?(Hash) and model['sfpPort'].is_a?(Fixnum) ? model['sfpPort'] : 0)
 			}
 		end
 		agents
