@@ -93,7 +93,8 @@ class Nuri::Master
 			Thread.new {
 				node_name = name
 				node_state = get_node_state(node_name, !!p[:push_modules])
-				mutex.synchronize { state[node_name] = node_state }
+				#mutex.synchronize { state[node_name] = node_state }
+				state[node_name] = node_state
 			}
 		end
 		total = agents.keys.length - vms.keys.length
@@ -109,7 +110,8 @@ class Nuri::Master
 			Thread.new {
 				node_name = name
 				node_state = get_node_state(node_name, !!p[:push_modules])
-				mutex.synchronize { state[node_name] = node_state }
+				#mutex.synchronize { state[node_name] = node_state }
+				state[node_name] = node_state
 			}
 		}
 
@@ -364,7 +366,7 @@ class Nuri::Master
 
 		begin
 			# get modules list
-			code, body = get_data(address, port, '/modules')
+			code, body = get_data(address, port, '/modules', DefaultHTTPOpenTimeout, 5)
 			raise Exception, "Unable to get modules list from #{name}" if code.to_i != 200
 
 			modules = JSON[body]
@@ -440,7 +442,7 @@ class Nuri::Master
 			model = Sfp::Helper.deep_clone(model)
 			model.accept(ParentEliminator)
 			data = {'model' => JSON.generate(model)}
-			code, _ = put_data(address, port, '/model', data)
+			code, _ = put_data(address, port, '/model', data, DefaultHTTPOpenTimeout, 5)
 			return (code.to_i == 200)
 		end
 		false
@@ -453,7 +455,7 @@ class Nuri::Master
 		address = model[name]['sfpAddress'].to_s.strip
 		port = model[name]['sfpPort'].to_s.strip
 		if address != '' and port != ''
-			code, body = get_data(address, port, '/sfpstate')
+			code, body = get_data(address, port, '/sfpstate', DefaultHTTPOpenTimeout, 20)
 			if code.to_i == 200 and body.length >= 2
 				state = JSON[body]
 				return state['state'] if state.is_a?(Hash)
