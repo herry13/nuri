@@ -129,11 +129,10 @@ class Nuri::Master
 
 	protected
 	def format_benchmark(benchmark)
-		#"elapsed-time: #{benchmark}"
 		user = (benchmark.utime + benchmark.cutime).round(3)
 		system = (benchmark.stime + benchmark.cstime).round(3)
 		real = benchmark.real.round(3)
-		"bechmark: user=#{user} sys=#{system} real=#{real}"
+		"benchmark: user=#{user} sys=#{system} real=#{real}"
 	end
 
 	def create_plan_task(p={})
@@ -633,8 +632,11 @@ class Nuri::Master
 				next if var.nil? # the variable is not found
 
 				if v.is_a?(Hash)
-					val = parser.types[v['_value']][0] if v['_context'] == 'null'
-					raise Exception, "Not implemented yet."      # this may arise on Set values
+					if v['_context'] == 'null'
+						val = parser.types[v['_value']][0]
+					else
+						raise Exception, "Not implemented yet."      # this may arise on Set values
+					end
 				else
 					val = v
 				end
