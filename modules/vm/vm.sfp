@@ -7,7 +7,7 @@ schema VM extends Machine {
 
 	final cpus = 1
 	final memory = 512
-	final network { }
+	final networks { }
 	final disk { }
 
 	final username = ""
