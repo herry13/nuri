@@ -1,0 +1,14 @@
+include "modules/node/node.sfp"
+include "modules/apache2/apache2.sfp"
+include "modules/vm/vm.sfp"
+include "modules/mockcloud/mockcloud.sfp"
+
+local isa Node {
+	sfpAddress is "localhost"
+	hpcloud isa MockCloud
+}
+vm1 isa VM {
+	apache isa Apache2 {
+		running is true
+	}
+}

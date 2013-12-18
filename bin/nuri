@@ -150,10 +150,11 @@ Usage: #{cmd}bsig [options]
 where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
+			opt :apply, 'generate and then deploy a BSig model'
 			opt :purge, 'purge existing BSig model', :short => '-g'
-			opt :deploy, 'generate and then deploy a BSig model'
 			opt :color, 'enable colorized output'
 			opt :no_interactive, 'disable interactive input'
+			opt :no_push_module, 'disable automatic push module'
 		end
 		help, args = check_help(args)
 		opts = process_args args, parser
@@ -163,6 +164,7 @@ EOS
 		elsif File.exist?(opts[:model_file])
 			opts[:bsig_deploy] = true
 			opts[:parallel] = true
+			opts[:push_modules] = true if !opts[:no_push_module]
 			master = Nuri::Master.new
 			master.set_model(opts)
 	
@@ -182,17 +184,21 @@ EOS
 						json = JSON.pretty_generate(bsig)
 						puts (opts[:color] ? CodeRay.encode(json, :json, :terminal) : json)
 		
-						if not opts[:no_interactive] and not opts[:deploy]
+						if not opts[:no_interactive] and not opts[:apply]
 							print "Deploy the BSig model [y/N]? "
-							opts[:deploy] = true if STDIN.gets.chomp.upcase == 'Y'
+							opts[:apply] = true if STDIN.gets.chomp.upcase == 'Y'
 						end
 	
-						if opts[:deploy]
+						if opts[:apply]
 							print 'Deploying the BSig model '
+							puts (opts[:color] ? "[Wait]".yellow : "[Wait]")
+							
 							opts[:bsig] = bsig
 							if master.deploy_bsig(opts)
+								print 'Deploying the BSig model '
 								puts (opts[:color] ? "[OK]".green : "[OK]")
 							else
+								print 'Deploying the BSig model '
 								puts (opts[:color] ? "[Failed]".red : "[Failed]")
 							end
 						end
@@ -403,8 +409,8 @@ EOS
 		agents = {}
 		state.each do |name,model|
 			agents[name] = {
-				'sfpAddress' => (model['sfpAddress'].is_a?(String) ? model['sfpAddress'] : ''),
-				'sfpPort' => (model['sfpPort'].is_a?(Fixnum) ? model['sfpPort'] : 0)
+				'sfpAddress' => (model.is_a?(Hash) and model['sfpAddress'].is_a?(String) ? model['sfpAddress'] : ''),
+				'sfpPort' => (model.is_a?(Hash) and model['sfpPort'].is_a?(Fixnum) ? model['sfpPort'] : 0)
 			}
 		end
 		agents

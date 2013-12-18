@@ -9,7 +9,7 @@ module Sfp::Module::Hadoop2Common
 		@state['pids'] = pids
 		@state['java_home'] = java_home
 
-		start if @state['running']
+		#start if @state['running']
 	end
 
 	##############################

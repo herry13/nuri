@@ -94,6 +94,7 @@ class Nuri::Master
 				node_name = name
 				node_state = get_node_state(node_name, !!p[:push_modules])
 				mutex.synchronize { state[node_name] = node_state }
+				state[node_name] = node_state
 			}
 		end
 		total = agents.keys.length - vms.keys.length
@@ -110,6 +111,7 @@ class Nuri::Master
 				node_name = name
 				node_state = get_node_state(node_name, !!p[:push_modules])
 				mutex.synchronize { state[node_name] = node_state }
+				state[node_name] = node_state
 			}
 		}
 
@@ -135,19 +137,19 @@ class Nuri::Master
 		"benchmark: user=#{user} sys=#{system} real=#{real}"
 	end
 
-	def create_plan_task(p={})
+	def create_plan_task(opts={})
 		task = get_schemata
 
 		print "Getting current state "
-		puts (p[:color] ? "[Wait]".yellow : "[Wait]")
+		puts (opts[:color] ? "[Wait]".yellow : "[Wait]")
 
-		b = Benchmark.measure do
-			task['initial'] = to_state('initial', get_state(p))
+		benchmark = Benchmark.measure do
+			task['initial'] = to_state('initial', get_state(opts))
 		end
+#puts YAML.dump(task['initial'])
 
-		print "Getting current state "
-		print (p[:color] ? "[OK]".green : "[OK]")
-		puts " " + format_benchmark(b)
+		puts "Getting current state " + (opts[:color] ? "[OK] ".green : "[OK] ") +
+		     format_benchmark(benchmark)
 
 		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 		f1 = Sfp::Helper::SfpFlatten.new
@@ -165,26 +167,26 @@ class Nuri::Master
 		task['goal'] = goalgen.results
 
 		# find dead-node, remove from the task, print WARNING to the console
-		dead_nodes = task['initial'].select { |k,v| v.is_a?(Sfp::Unknown) }
-		dead_nodes.each_key { |name|
-			task['initial'].delete(name)
-			task['goal'].keep_if { |k,v| !(k =~ /(\$\.#{name}\.|\$\.#{name}$)/) }
-			print (p[:color] ? "[Warn]".red : "[Warn]")
-			puts " Removing node #{name} from the task."
-		}
+		init = task['initial']
+		init.keys.each do |name|
+			next if not init[name].is_a?(Sfp::Unknown)
+			init.delete(name)
+			task['goal'].keep_if { |var,val| !(var =~ /(\$\.#{name}\.|\$\.#{name}$)/) }
+			puts (opts[:color] ? "[Warn]".red : "[Warn]") + " Remove node #{name} from the planning task."
+		end
 
 		# print the status of goal state
 		puts "Goal state:"
-		goalgen.results.each { |k,v|
-			next if k[0,1] == '_'
+		goalgen.results.each { |var,val|
+			next if var[0] == '_'
 
-			print "  #{k}: "
-			value = Sfp::Helper::Sfp2Ruby.val(v['_value']).to_s
-			print (p[:color] ? value.green : value) + " "
+			print "  #{var}: "
+			value = Sfp::Helper::Sfp2Ruby.val(val['_value']).to_s
+			print (opts[:color] ? value.green : value)
 
-			if f1.results.has_key?(k) and f1.results[k] != v['_value']
-				value = Sfp::Helper::Sfp2Ruby.val(f1.results[k]).to_s
-				print (p[:color] ? value.red : value)
+			if f1.results.has_key?(var) and f1.results[var] != val['_value']
+				value = Sfp::Helper::Sfp2Ruby.val(f1.results[var]).to_s
+				print " ( " + (opts[:color] ? value.red : value) + " )"
 			end
 
 			puts ""
@@ -235,12 +237,12 @@ class Nuri::Master
 	end
 
 	def get_not_exist_vm_state(model)
-		s = {'state' => Sfp::Helper.deep_clone(model)}
+		state = Sfp::Helper.deep_clone(model)
+		s = {'state' => state}
 		s.accept(VisitorNotExistNodeState)
-		s.accept(ParentEliminator)
-		s['state']['created'] = false
-		s['state']['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
-		s['state']
+		state['created'] = false
+		state['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
+		state
 	end
 
 	def update_cloud_vm_relations(state, vms)
@@ -363,7 +365,7 @@ class Nuri::Master
 
 		begin
 			# get modules list
-			code, body = get_data(address, port, '/modules')
+			code, body = get_data(address, port, '/modules', DefaultHTTPOpenTimeout, 5)
 			raise Exception, "Unable to get modules list from #{name}" if code.to_i != 200
 
 			modules = JSON[body]
@@ -439,7 +441,7 @@ class Nuri::Master
 			model = Sfp::Helper.deep_clone(model)
 			model.accept(ParentEliminator)
 			data = {'model' => JSON.generate(model)}
-			code, _ = put_data(address, port, '/model', data)
+			code, _ = put_data(address, port, '/model', data, DefaultHTTPOpenTimeout, 5)
 			return (code.to_i == 200)
 		end
 		false
@@ -452,7 +454,7 @@ class Nuri::Master
 		address = model[name]['sfpAddress'].to_s.strip
 		port = model[name]['sfpPort'].to_s.strip
 		if address != '' and port != ''
-			code, body = get_data(address, port, '/sfpstate')
+			code, body = get_data(address, port, '/sfpstate', DefaultHTTPOpenTimeout, 20)
 			if code.to_i == 200 and body.length >= 2
 				state = JSON[body]
 				return state['state'] if state.is_a?(Hash)
@@ -501,8 +503,18 @@ class Nuri::Master
 
 	VisitorNotExistNodeState = Object.new
 	def VisitorNotExistNodeState.visit(name, value, parent)
+		parent.delete(name) if name == '_parent'
 		return false if name[0,1] == '_'
-		if not value.is_a?(Hash)
+		if value.is_a?(Hash)
+			case value['_context']
+			when 'null', 'any_value'
+				parent[name] = Sfp::Undefined.create(value['_isa'])
+			when 'object', 'procedure'
+				# do nothing
+			else
+				parent.delete(name)
+			end
+		else
 			if value.is_a?(String)
 				if value.isref
 					ref_value = parent.at?(value)
@@ -526,10 +538,6 @@ class Nuri::Master
 				puts "[WARN] Sfp::Undefined => " + parent.ref.push(name) + ": " + value.class.name
 				parent[name] = SfpUndefined
 			end
-		elsif value['_context'] == 'null' or value['_context'] == 'any_value'
-			parent[name] = Sfp::Undefined.create(value['_isa'])
-		elsif value['_context'] != 'object'
-			parent.delete(name)
 		end
 		true
 	end

@@ -15,7 +15,8 @@ schema Apache extends Service {
 	// load balancer config
 	is_load_balancer : Bool
 	lb_members isset Node
-	lb_method : String  // byrequests, bytraffic, bybusyness
+	// byrequests, bytraffic, bybusyness
+	lb_method : String
 
 	sub set_port(target isref Integer) {
 		condition {
