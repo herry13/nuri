@@ -240,6 +240,7 @@ class Nuri::Master
 		state = Sfp::Helper.deep_clone(model)
 		s = {'state' => state}
 		s.accept(VisitorNotExistNodeState)
+		s.accept(ParentEliminator)
 		state['created'] = false
 		state['in_cloud'] = {'_context' => 'null', '_value' => CloudSchema}
 		state
