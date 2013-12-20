@@ -78,6 +78,59 @@ class Nuri::Master
 		plan
 	end
 
+	def get_state(opts={})
+		state = {}
+		model = Sfp::Helper.deep_clone(@model)
+		agents = ::Nuri::Master.agents(model)
+
+		lock = Mutex.new
+
+		# push agents list to each agent
+		push_agents_list(agents)
+
+		agents.each_key do |path1|
+			# remove other agents in agent's model
+			agents.each_key do |path2|
+				if path1[0, path2.length] == path2 and path1[path2.length] == '.'
+					parts = path1.split('.')
+					child = parts.pop
+					parent = agents[path2].at?(parts.join('.'))
+					parent.delete(child)
+				end
+			end
+		end
+
+		# sort agents' path
+		paths = agents.keys
+		paths.sort! { |x,y| x <=> y }
+
+		# get state of each agent
+		agents_state = {}
+		paths.each do |path|
+			Thread.new {
+				s = get_node_state(path, agents[path], !!opts[:push_modules])
+				lock.synchronize { agents_state[path] = s }
+			}
+		end
+
+		wait? { (agents_state.length >= paths.length) }
+
+		# reconstruct agents' state as well as their namespace as defined in the model
+		paths.each do |path|
+			parts = path.split('.')
+			child = parts.pop
+			if parts.length > 1
+				parent = state.at?(parts.join('.'))
+				parent[child] = agents_state[path]
+			else
+				state[child] = agents_state[path]
+			end
+		end
+
+		state
+	end
+
+=begin
 	def get_state(p={})
 		state = {}
 		vms = get_vms
@@ -128,6 +181,7 @@ class Nuri::Master
 
 		state
 	end
+=end
 
 	protected
 	def format_benchmark(benchmark)
@@ -146,7 +200,6 @@ class Nuri::Master
 		benchmark = Benchmark.measure do
 			task['initial'] = to_state('initial', get_state(opts))
 		end
-#puts YAML.dump(task['initial'])
 
 		puts "Getting current state " + (opts[:color] ? "[OK] ".green : "[OK] ") +
 		     format_benchmark(benchmark)
@@ -317,6 +370,11 @@ class Nuri::Master
 		true
 	end
 
+	def push_agents_list(agents=nil)
+		# TODO
+	end
+
+=begin
 	def push_agents_list
 		begin
 			agents = {}
@@ -340,7 +398,55 @@ class Nuri::Master
 		end
 		false
 	end
+=end
 
+	def push_modules(path, model, address=nil, port=nil)
+		address = model['sfpAddress'] if address.nil?
+		port = model['sfpPort'] if port.nil?
+
+		return false if not address.is_a?(String) or not port.is_a?(Fixnum)
+
+		collector = Sfp::Helper::SchemaCollector.new
+		{:agent => model}.accept(collector)
+		schemata = collector.schemata.uniq.map { |schema| schema.sub(/^\$\./, '') }
+
+		begin
+			# get agent's modules list
+			code, body = get_data(address, port, '/modules', DefaultHTTPOpenTimeout, 5)
+			raise Exception, "Cannot get modules list from #{path}" if code != '200'
+
+			modules = JSON[body]
+			modules_to_be_installed = []
+			schemata.each do |name|
+				next if modules.has_key?(name) or modules[name] == get_local_module_hash(name).to_s
+				module_dir = "#{@modules_dir}/#{name}"
+				if File.directory?(module_dir)
+					modules_to_be_installed << name
+				else
+					msg = "[Warn] Module #{name} is not exist!"
+					puts msg.yellow
+				end
+			end
+
+			if modules_to_be_installed.length > 0
+				list = modules_to_be_installed.join(" ")
+				output = JSON.parse(`cd #{@modules_dir} && #{InstallModule} #{address}:#{port} #{list}`)
+				if output['installed_modules'].length > 0
+					puts ("Push modules: " + output['installed_modules'].join(" ") + " to agent #{path} [OK]").green
+				end
+				if output['missing_modules'].length > 0
+					puts ("Missing modules: " + output['missing_modules'].join(" ") + ".").red
+				end
+			end
+
+		rescue Exception => e
+			puts "[Warn] Cannot push modules to #{path} - #{e}".yellow
+		end
+
+		true
+	end
+
+=begin
 	###############
 	#
 	# Push required modules to agent based on schemata available in agent's model
@@ -399,6 +505,7 @@ class Nuri::Master
 
 		false
 	end
+=end
 
 	# return the list of Hash value of all modules
 	#
@@ -414,6 +521,30 @@ class Nuri::Master
 		nil
 	end
 
+	def get_node_state(path, model, do_push_modules=false)
+		address = model['sfpAddress'] if address.nil?
+		port = model['sfpPort'] if port.nil?
+
+		push_modules(path, model, address, port) if do_push_modules
+
+		begin
+			if http_put_agent_model(path, model, address, port)
+				code, body = get_data(address, port, '/sfpstate', DefaultHTTPOpenTimeout, 20)
+				if code == '200' and body.length >= 2
+					data = JSON[body]
+					return data['state'] if data.has_key?('state')
+				end
+				raise Exception, "Cannot get state of agent #{path}"
+			end
+
+		rescue Exception => e
+			puts "[Warn] Cannot get state of #{path} - #{e}".yellow
+		end
+
+		SfpUnknown
+	end
+
+=begin
 	def get_node_state(name, do_push_modules=false)
 		push_modules(@model[name]) if do_push_modules
 
@@ -431,7 +562,26 @@ class Nuri::Master
 		end
 		SfpUnknown
 	end
+=end
 
+	##
+	# Put model to target agent.
+	# TODO - sfpagent's implementation should be updated to keep agent's namespace (in "path");
+	#        the agent also needs to maintain the agent's namespace
+	#
+	##
+	def http_put_agent_model(path, model, address, port)
+		data = {'model' => model, 'path' => path}
+		data.accept(ParentEliminator)
+		data['model'] = JSON.generate(data['model'])
+		code, _ = put_data(address, port, '/model', data, DefaultHTTPOpenTimeout, 5)
+		(code == '200')
+	end
+
+#	def http_get_agent_state(address, port)
+#	end
+
+=begin
 	# send HTTP PUT request to push agent's model
 	#
 	def http_send_agent_model(name, model)
@@ -464,6 +614,7 @@ class Nuri::Master
 		end
 		nil
 	end
+=end
 
 	def get_schemata
 		@model.select { |k,v| k[0,1] != '_' and v.is_a?(Hash) and
@@ -475,11 +626,19 @@ class Nuri::Master
 		Nuri::Master.agents(@model)
 	end
 
+	def self.agents(model)
+		collector = Nuri::Master::AgentCollector.new
+		model.accept(collector)
+		collector.agents
+	end
+
+=begin
 	def self.agents(sfp)
 		sfp.select { |k,v| !(k[0] == '_' or not v.is_a?(Hash) or
 			v['_context'] != 'object' or v['_classes'].index(AgentSchema).nil?)
 		}
 	end
+=end
 
 	def get_vms
 		get_agents.select { |k,v| not v['_classes'].index(VMSchema).nil? }
@@ -501,6 +660,22 @@ class Nuri::Master
 	SfpUndefinedString = Sfp::Undefined.create('$.String')
 	SfpUndefinedNumber = Sfp::Undefined.create('$.Number')
 	SfpUndefinedBoolean = Sfp::Undefined.create('$.Boolean')
+
+=begin
+	AgentModelCleaner = Object.new
+	def AgentModelClearner.visit(name, value, parent)
+		if name == '_parent'
+			parent.delete(name)
+			false
+		elsif name[0] == '_'
+			false
+		elsif value.is_a?(Hash)
+			if value['_classes'].is_a?(Array) and value['_classes'].include?(Nuri::Master::AgentSchema)
+		else
+			true
+		end
+	end
+=end
 
 	VisitorNotExistNodeState = Object.new
 	def VisitorNotExistNodeState.visit(name, value, parent)
@@ -691,6 +866,24 @@ class Nuri::Master::GoalGenerator
 			@results[ parent.ref.push(name) ] = Sfp::Helper::Constraint.equals(value)
 		end
 		false
+	end
+end
+
+class Nuri::Master::AgentCollector
+	attr_reader :agents
+	def initialize
+		@agents = {}
+	end
+
+	def visit(name, value, parent)
+		if name[0] != '_' and value.is_a?(Hash) and value['_context'] == 'object'
+			if value['_classes'].is_a?(Array) and value['_classes'].include?(Nuri::Master::AgentSchema)
+				@agents[parent.ref.push(name)] = value
+			end
+			true
+		else
+			false
+		end
 	end
 end
 
