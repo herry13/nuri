@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+apt-get install ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 libxml2-dev libxslt-dev make gcc
+gem install sfpagent sfplanner coderay colorize
+
+#echo "export PATH=$PATH:$BASEDIR" >> ~/.bashrc
