@@ -58,9 +58,13 @@ Assume that the model of your system is in file "model.sfp".
 
   press 'Y' and enter to execute the plan (if the plan exists).
 
-- to execute any generated plan
+- to execute any generated plan with orchestration
 
 		$ nuri plan -m model.sfp -a
+
+- to execute any generated plan with choreography
+
+		$ nuri bsig -a
 
 
 Console mode
