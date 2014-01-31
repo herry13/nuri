@@ -35,15 +35,24 @@ Requirements
 	- colorize
 	- coderay
 
-Tested on Linux: **Ubuntu 12.04**, **Debian Squeeze**, and **Fedora 13**
+Tested on
+---------
+- Linux: **Ubuntu 12.04**, **Debian Squeeze**, and **Fedora 13**
+- MacOS X
 
 
 To install
 ----------
+- Installing the Gem:
 
-	$ apt-get install curl ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 libxml2-dev libxslt-dev make gcc
-	$ gem install nuri
+		$ apt-get install ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 libxml2-dev libxslt-dev make gcc
+		$ gem install nuri
 
+- Clone from Github:
+
+		$ apt-get install git ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 libxml2-dev libxslt-dev make gcc
+		$ gem install sfplanner coderay colorize
+		$ git clone https://github.com/herry13/nuri
 
 Usage
 -----
