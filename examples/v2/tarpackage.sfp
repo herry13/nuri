@@ -1,0 +1,5 @@
+include "package.sfp"
+
+schema TarPackage extends Package {
+	final home = "/opt/local"
+}

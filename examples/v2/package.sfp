@@ -1,0 +1,22 @@
+schema Package {
+	installed = true
+
+	final package_name = ""
+	final version = ""
+	final source = ""
+
+	synchronized sub install {
+		effect {
+			this.installed = true
+		}
+	}
+
+	synchronized sub uninstall {
+		condition {
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+		}
+	}
+}

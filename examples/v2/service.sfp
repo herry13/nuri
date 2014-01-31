@@ -1,0 +1,94 @@
+include "aptpackage.sfp"
+
+schema Service {
+	running = true
+	configured = true
+
+	final service_name = ""
+
+	sub start {
+		condition {
+			this.running != true
+			this.configured = true
+		}
+		effect {
+			this.running = true
+		}
+	}
+
+	sub stop {
+		condition {
+			this.running = true
+		}
+		effect {
+			this.running = false
+		}
+	}
+
+	sub configure {
+		condition {
+			this.running = false
+		}
+		effect {
+			this.configured = true
+		}
+	}
+}
+
+schema SysVService extends Service {
+	final runlevel isset String
+}
+
+schema AptService extends AptPackage {
+	synchronized sub install {
+		condition {
+			this.installed != true
+		}
+		effect {
+			this.installed = true
+			this.running = false
+			this.configured = false
+		}
+	}
+	
+	synchronized sub uninstall {
+		condition {
+			this.running = false
+			this.installed = true
+		}
+		effect {
+			this.installed = false
+			this.configured = true
+		}
+	}
+
+	sub start {
+		condition {
+			this.running != true
+			this.installed = true
+			this.configured = true
+		}
+		effect {
+			this.running = true
+		}
+	}
+
+	sub stop {
+		condition {
+			this.running = true
+		}
+		effect {
+			this.running = false
+		}
+	}
+
+	sub configure {
+		condition {
+			this.installed = true
+			this.running = false
+		}
+		effect {
+			this.configured = true
+		}
+	}
+}

@@ -1,0 +1,12 @@
+include "../../modules/mockcloud/mockcloud.sfp"
+include "../../modules/vm/vm.sfp"
+include "apache.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+	mockcloud isa MockCloud
+}
+vm1 isa VM {
+	//apache isa Apache
+	s isa Service
+}

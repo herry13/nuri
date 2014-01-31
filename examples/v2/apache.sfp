@@ -1,0 +1,30 @@
+include "service.sfp"
+
+schema Apache extends Service {
+	package_name = "apache2"
+	service_name = "apache2"
+	installed = true
+	running = true
+	configured = true
+
+	final port = 80
+	final document_root = "/var/www"
+	final modules isset String
+	final server_name = ""
+
+	// load balancer config
+	final load_balancer = false
+	final lb_members isset Node
+	final lb_method = "byrequests"  // byrequests, bytraffic, bybusyness
+
+	sub configure {
+		condition {
+			this.installed = true
+			this.running = false
+			this.configured = false
+		}
+		effect {
+			this.configured = true
+		}
+	}
+}

@@ -1,0 +1,6 @@
+include "package.sfp"
+
+schema AptPackage extends Package {
+	final version = "latest"
+	final source = "default"
+}
