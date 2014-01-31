@@ -1,0 +1,37 @@
+include "modules/vm/vm.sfp"
+include "modules/openstack/openstack.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+	herry isa OpenStack {
+		// replace the value of OpenStack Identity's URL plus "/tokens/"
+		auth_uri is "http://16.25.166.21:5000/v2.0/tokens/"
+
+		// replace the value with your SSH key name, and then put
+		// the private key (with name <key-name>.pem) in module's directory.
+		vm_ssh_key_name is "nurikey"
+
+		// an image that already has nuri agent
+		vm_image is "8fe14786-5388-4787-8aaf-96feebfa8aae"
+	}
+}
+
+include "modules/hadoop1/hadoop1.sfp"
+
+vm1 isa VM {
+	hadoop isa Hadoop1Master {
+		// replace this with the URL of hadoop1 tar package file
+		source is "http://master.nuri.ext9.sup.hpl.hp.com/hadoop"
+	}
+}
+vm2 isa VM {
+	hadoop isa Hadoop1Slave {
+		master is vm1.hadoop
+		// replace this with the URL of hadoop1 tar package file
+		source is "http://master.nuri.ext9.sup.hpl.hp.com/hadoop"
+	}
+}
+vm3 extends vm2
+vm4 extends vm2
+vm5 extends vm2
+vm6 extends vm2

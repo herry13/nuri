@@ -1,0 +1,39 @@
+include "modules/vm/vm.sfp"
+include "modules/openstack/openstack.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+	herry isa OpenStack {
+		auth_uri is "http://16.25.166.21:5000/v2.0/tokens/"
+
+		// use m1.medium (id="2") flavor because Hadoop2 requires minimum 4GB of memory
+		vm_flavor is "3"
+
+		// - replace the value with your key name
+		// - put the key file <key-name>.pem in module's directory
+		vm_ssh_key_name is "nurikey"
+
+		// a VM image that already has Nuri agent
+		vm_image is "8fe14786-5388-4787-8aaf-96feebfa8aae"
+	}
+}
+
+include "modules/hadoop2/hadoop2.sfp"
+
+vm1 isa VM {
+	hadoop isa Hadoop2Master {
+		// replace this with the URL of hadoop2 tar package file
+		source is "http://master.nuri.ext9.sup.hpl.hp.com/hadoop"
+	}
+}
+vm2 isa VM {
+	hadoop isa Hadoop2Slave {
+		master is vm1.hadoop
+		// replace this with the URL of hadoop2 tar package file
+		source is "http://master.nuri.ext9.sup.hpl.hp.com/hadoop"
+	}
+}
+vm3 extends vm2
+vm4 extends vm2
+vm5 extends vm2
+vm6 extends vm2
