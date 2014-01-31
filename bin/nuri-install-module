@@ -28,6 +28,7 @@ module Nuri
 	
 				(response.code == '200')
 			rescue Exception => e
+				$stderr.puts "Cannot install module with URL: #{url}"
 				$stderr.puts e
 				false
 			end

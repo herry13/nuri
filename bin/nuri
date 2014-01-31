@@ -151,6 +151,7 @@ where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :apply, 'generate and then deploy a BSig model'
+			opt :status, 'get BSig status of all agents'
 			opt :purge, 'purge existing BSig model', :short => '-g'
 			opt :color, 'enable colorized output'
 			opt :no_interactive, 'disable interactive input'
@@ -161,6 +162,33 @@ EOS
 
 		if help
 			parser.educate(STDOUT)
+
+		elsif opts[:status]
+			opts[:push_modules] = true if !opts[:no_push_module]
+			master = Nuri::Master.new
+			master.set_model opts
+			master.get_state(opts).each do |name,state|
+				print "- #{name}: "
+				if not state.is_a?(Hash) or not state.has_key?('sfpAddress')
+					puts (opts[:color] ? "unknown address".yellow : "unknown address")
+				else
+					address = state['sfpAddress']
+					port = (state['sfpPort'] ? state['sfpPort'] : 1314)
+					if address.is_a?(String) and port.is_a?(Fixnum)
+						status = Net::HTTP.get(URI("http://#{address}:#{port}/bsig/flaws"))
+						if status == '{}'
+							puts (opts[:color] ? "no-flaws".green : "no-flaws")
+						else
+							puts (opts[:color] ? status.yellow : status)
+						end
+					elsif address.is_a?(Sfp::Undefined)
+						puts (opts[:color] ? "not-exist".yellow : "not-exist")
+					elsif address.is_a?(Sfp::Unknown)
+						puts (opts[:color] ? "unknown".yellow : "unknown")
+					end
+				end
+			end
+
 		elsif File.exist?(opts[:model_file])
 			opts[:bsig_deploy] = true
 			opts[:parallel] = true
@@ -170,7 +198,12 @@ EOS
 	
 			if opts[:purge]
 				print "Purging Behavioural Signature model "
-				if master.purge_bsig(opts)
+				puts (opts[:color] ? "[Wait]".yellow : "[Wait]")
+
+				status = master.purge_bsig(opts)
+				print "Purging Behavioural Signature model "
+
+				if status
 					puts (opts[:color] ? "[OK]".green : "[OK]")
 				else
 					puts (opts[:color] ? "[Failed]".red : "[Failed]")
