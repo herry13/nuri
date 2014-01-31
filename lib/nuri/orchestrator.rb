@@ -164,7 +164,7 @@ module Nuri::Orchestrator
 							success = execute_action(action, options)
 						rescue Exception => exp
 							puts "Executing(#{i}) #{action[:string]} - thread ##{tid} " + (options[:color] ? "[Failed]".red : "[Failed]")
-							puts "#{exp}\n#{exp.backtrace.join("\n")}"
+							puts "#{exp}" #\n#{exp.backtrace.join("\n")}"
 						end
 						break if success
 					end

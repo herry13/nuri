@@ -126,6 +126,9 @@ class Nuri::Master
 		# update <vm>.in_cloud value
 		update_cloud_vm_relations(state, vms)
 
+		agents.merge!(exist_vms)
+		push_agents_list(agents, {:reset => true})
+
 		state
 	end
 
@@ -146,11 +149,12 @@ class Nuri::Master
 		benchmark = Benchmark.measure do
 			task['initial'] = to_state('initial', get_state(opts))
 		end
-#puts YAML.dump(task['initial'])
+		#puts YAML.dump(task['initial'])
 
 		puts "Getting current state " + (opts[:color] ? "[OK] ".green : "[OK] ") +
 		     format_benchmark(benchmark)
 
+		task['initial'].accept(FinalAttributeRemover)
 		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
 		f1 = Sfp::Helper::SfpFlatten.new
 		task['initial'].accept(f1)
@@ -317,26 +321,33 @@ class Nuri::Master
 		true
 	end
 
-	def push_agents_list
+	def push_agents_list(agents=nil, options={})
 		begin
-			agents = {}
+			agents ||= get_agents
+			data = {}
 			# generate agents list
 			get_agents.each do |name, model|
 				next if not model['sfpAddress'].is_a?(String)
 				address = model['sfpAddress'].to_s.strip
 				port = model['sfpPort'].to_s.strip.to_i
 				next if address == '' or port <= 0
-				agents[name] = {:sfpAddress => address, :sfpPort => port}
+				data[name] = {:sfpAddress => address, :sfpPort => port}
 			end
-			data = {'agents' => JSON.generate(agents)}
+			json = {'agents' => JSON.generate(data)}
 
 			# send the list to all agents
-			agents.each do |name, agent|
-				code, _ = put_data(agent[:sfpAddress], agent[:sfpPort], '/agents', data, 5, 20)
+			data.each do |name, agent|
+				if options[:reset]
+					delete_data(agent[:sfpAddress], agent[:sfpPort], '/agents')
+				end
+
+				# update current agents list
+				code, _ = put_data(agent[:sfpAddress], agent[:sfpPort], '/agents', json, 5, 20)
 				raise Exception, "Push agents list to #{agent[:sfpAddress]}:#{agent[:sfpPort]} [Failed]" if code.to_i != 200
 			end
 			return true
 		rescue Exception => exp
+			#$stderr.puts "#{exp}\n#{exp.backtrace.join("\n")}"
 		end
 		false
 	end
@@ -369,6 +380,8 @@ class Nuri::Master
 			code, body = get_data(address, port, '/modules', DefaultHTTPOpenTimeout, 5)
 			raise Exception, "Unable to get modules list from #{name}" if code.to_i != 200
 
+			#puts "#{name}'s modules: #{body}"
+
 			modules = JSON[body]
 			tobe_installed_modules = []
 			schemata.each do |name|
@@ -383,7 +396,9 @@ class Nuri::Master
 
 			### install new modules and replace old ones
 			list = tobe_installed_modules.join(" ")
-			output = JSON.parse(`cd #{@modules_dir}; #{InstallModule} #{address}:#{port} #{list}`)
+			cmd = "#{InstallModule} #{address}:#{port} #{list}"
+			#puts cmd
+			output = JSON.parse(`cd #{@modules_dir}; #{cmd}`)
 			if output['installed_modules'].length > 0
 				puts ("Push modules: " + output['installed_modules'].join(" ") + " to agent #{name} [OK]").green
 			end
@@ -471,12 +486,9 @@ class Nuri::Master
 		}
 	end
 
-	def get_agents
-		Nuri::Master.agents(@model)
-	end
-
-	def self.agents(sfp)
-		sfp.select { |k,v| !(k[0] == '_' or not v.is_a?(Hash) or
+	def get_agents(model=nil)
+		model ||= @model
+		model.select { |k,v| !(k[0] == '_' or not v.is_a?(Hash) or
 			v['_context'] != 'object' or v['_classes'].index(AgentSchema).nil?)
 		}
 	end
@@ -525,7 +537,7 @@ class Nuri::Master
 					elsif ref_value.is_a?(Sfp::Undefined) or ref_value.is_a?(Sfp::Unknown)
 						parent[name] = ref_value
 					else
-						puts "[WARN] Sfp::Undefined => #{parent.ref.push(name)}: #{ref_value.class.name}"
+						#puts "[WARN] Sfp::Undefined => #{parent.ref.push(name)}: #{ref_value.class.name}"
 						parent[name] = SfpUndefined
 					end
 				else
@@ -536,7 +548,7 @@ class Nuri::Master
 			elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
 				parent[name] = SfpUndefinedBoolean
 			else
-				puts "[WARN] Sfp::Undefined => " + parent.ref.push(name) + ": " + value.class.name
+				#puts "[WARN] Sfp::Undefined => " + parent.ref.push(name) + ": " + value.class.name
 				parent[name] = SfpUndefined
 			end
 		end
@@ -556,7 +568,7 @@ class Nuri::Master
 					elsif ref_value.is_a?(Sfp::Unknown) or ref_value.is_a?(Sfp::Unknown)
 						parent[name] = ref_value
 					else
-						puts "[WARN] Sfp::Unknown => #{parent.ref.push(name)}: #{ref_value.class.name}"
+						#puts "[WARN] Sfp::Unknown => #{parent.ref.push(name)}: #{ref_value.class.name}"
 						parent[name] = SfpUnknown
 					end
 				else
@@ -567,7 +579,7 @@ class Nuri::Master
 			elsif value.is_a?(TrueClass) or value.is_a?(FalseClass)
 				parent[name] = Sfp::Unknown.create('$.Boolean')
 			else
-				puts "[WARN] Sfp::Unknown => " + parent.ref.push(name) + ": " + value.class.name
+				#puts "[WARN] Sfp::Unknown => " + parent.ref.push(name) + ": " + value.class.name
 				parent[name] = SfpUnknown
 			end
 		elsif value['_context'] == 'null' or value['_context'] == 'any_value'

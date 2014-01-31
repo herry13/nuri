@@ -35,10 +35,10 @@ module Nuri::Choreographer
 			# generate local BSig model
 			local_bsigs = {}
 			self.get_agents.each do |name,model|
-				ref = model.ref
+				namespace = model.ref + '.'
 				local = {'id' => bsig['id'], 'operators' => [], 'goal' => {}}
-				bsig['operators'].each { |op| local['operators'] << op if op['name'][0, ref.length] == ref }
-				bsig['goal_operator'].each { |var,op_name| local['goal'][var] = bsig['goal'][var] if op_name[0, ref.length] == ref }
+				bsig['operators'].each { |op| local['operators'] << op if op['name'][0, namespace.length] == namespace }
+				bsig['goal_operator'].each { |var,op_name| local['goal'][var] = bsig['goal'][var] if op_name[0, namespace.length] == namespace }
 				local_bsigs[name] = local
 			end
 		end
