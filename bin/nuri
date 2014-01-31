@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 home = File.expand_path('../', File.dirname(__FILE__))
-puts home
 require "#{home}/lib/nuri"
 
 Version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
@@ -599,6 +598,10 @@ EOS
 		end
 	end
 end
+
+puts home
+puts $0
+puts __FILE__
 
 if $0 == __FILE__
 	Nuri.init
