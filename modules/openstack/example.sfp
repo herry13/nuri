@@ -1,0 +1,9 @@
+include "modules/vm/vm.sfp"
+include "modules/openstack/openstack.sfp"
+
+proxy isa Node {
+	sfpAddress is "localhost"
+	openstack isa OpenStack {
+		auth_uri is "http://16.25.166.21:5000/v2.0/tokens"
+	}
+}

@@ -8,11 +8,12 @@ schema VM extends Machine {
 	final cpus = 1
 	final memory = 512
 	final networks { }
-	final disk { }
+	final disks { }
 
-	final username = ""
 	final flavor = ""
 	final image = ""
 	final security_group = ""
+
+	final ssh_user = ""
 	final ssh_key_name = ""
 }

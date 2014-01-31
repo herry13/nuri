@@ -1,0 +1,24 @@
+include "../cloud/cloud.sfp"
+
+schema OpenStack extends Cloud {
+	final description = "Openstack"
+	final auth_uri = "https://openstack.com/v2.0/tokens"
+
+	// default SSH username
+	final vm_ssh_user = "root"
+
+	// small instance
+	final vm_flavor = "2"
+
+	// default image
+	final vm_image = "67074"
+
+	// default key pair which will be used to SSH to VM
+	final vm_ssh_key_name = "default"
+
+	// default security group
+	final vm_security_group = "default"
+
+	// default network
+	final vm_network = "default"
+}

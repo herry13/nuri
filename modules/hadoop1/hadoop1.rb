@@ -24,7 +24,7 @@ class Sfp::Module::Hadoop1Common
 		model = OpenStruct.new(@model)
 
 		# add group hadoop
-		if `grep '^#{model.group}' /etc/group`.length <= 0
+		if %x[grep '^#{model.group}' /etc/group].length <= 0
 			log.info "adding group #{model.group}"
 			shell "echo '#{model.group}:x:8000:' >> /etc/group"
 		else
@@ -32,7 +32,7 @@ class Sfp::Module::Hadoop1Common
 		end
 
 		# add user hadoop
-		if `grep '^#{model.user}' /etc/passwd`.length <= 0
+		if %x[grep '^#{model.user}' /etc/passwd].length <= 0
 			log.info "adding user #{model.user}"
 			shell "echo '#{model.user}:x:8000:8000::#{model.home}:/bin/bash' >> /etc/passwd &&
 			        echo '#{model.user}:#{model.password}:15958:0:99999:7:::' >> /etc/shadow"
@@ -46,11 +46,13 @@ class Sfp::Module::Hadoop1Common
 		
 		# download and extract hadoop binaries
 		log.info "download and install hadoop binaries"
-		source = (model.source[-7,7] == '.tar.gz' or model.source[-4,4] == '.tgz' ? model.source : "#{model.source}/hadoop-#{model.version}/hadoop-#{model.version}.tar.gz")
+		#source = (model.source[-7,7] == '.tar.gz' or model.source[-4,4] == '.tgz' ? model.source : "#{model.source}/hadoop-#{model.version}/hadoop-#{model.version}.tar.gz")
+		source = (model.source[-7,7] == '.tar.gz' or model.source[-4,4] == '.tgz' ? model.source : "#{model.source}/hadoop-#{model.version}.tar.gz")
 
 		file = source.split('/').last.to_s
 		basename = (::File.extname(file) == '.gz' ? ::File.basename(file, '.tar.gz') : ::File.basename(file, ::File.extname(file)))
 		destination = "#{model.home}/#{file}"
+log.info "download #{source} to #{destination}"
 		download source, destination
 		return false if not ::File.exist?(destination)
 		shell "cd #{model.home} &&
@@ -92,8 +94,10 @@ class Sfp::Module::Hadoop1Common
 		services.each { |name|
 			pid = pids[name]
 			if pid <= 0
-				cmd = "#{@model['home']}/bin/hadoop-daemon.sh start #{name}"
-				log.info `su -c '#{cmd} && sleep 3' #{@model['user']}`
+				cmd = "su -c '#{@model['home']}/bin/hadoop-daemon.sh start #{name} && sleep 3' #{@model['user']}"
+				pid = spawn(cmd)
+				Process.wait pid
+				#log.info %x[sudo su -c '#{cmd} && sleep 3' #{@model['user']}]
 			end
 		}
 
@@ -105,8 +109,10 @@ class Sfp::Module::Hadoop1Common
 		services.reverse.each { |name|
 			pid = pids[name]
 			if pid > 0
-				cmd = "#{@model['home']}/bin/hadoop-daemon.sh stop #{name}"
-				log.info `su -c '#{cmd}' #{@model['user']}`
+				cmd = "su -c '#{@model['home']}/bin/hadoop-daemon.sh stop #{name}' #{@model['user']}"
+				pid = spawn(cmd)
+				Process.wait pid
+				#log.info %x[sudo su -c '#{cmd}' #{@model['user']}]
 			end
 		}
 
@@ -141,7 +147,7 @@ class Sfp::Module::Hadoop1Common
 
 	def java_home
 		return @model['java_home'] if @model['java_home'].to_s.strip.length > 0
-		java = resolve_link(`which java`.strip)
+		java = resolve_link(%x[which java].strip)
 		return '' if java.length <= 0
 		::File.expand_path(java + '/../../')
 	end
@@ -158,7 +164,7 @@ class Sfp::Module::Hadoop1Common
 	def pids
 		data = {}
 		services.each { |name|
-			data[name] = `ps axf | grep java | grep -v grep | grep hadoop | grep Dproc_#{name}`.to_s.strip.split(' ', 2)[0].to_i
+			data[name] = %x[ps axf | grep java | grep -v grep | grep hadoop | grep Dproc_#{name}].to_s.strip.split(' ', 2)[0].to_i
 		}
 		data
 	end
@@ -185,7 +191,7 @@ class Sfp::Module::Hadoop1Master < Sfp::Module::Hadoop1Common
 	def uninstall(p={})
 		super
 
-		shell "rm -rf #{model.data_dir}"
+		shell "rm -rf #{@model['data_dir']}"
 
 		not installed?
 	end
@@ -206,7 +212,7 @@ class Sfp::Module::Hadoop1Master < Sfp::Module::Hadoop1Common
 	def map
 		{
 			'user' => @model['user'],
-			'master' => `hostname`.strip,
+			'master' => resolve("$." + Sfp::Agent.whoami? + ".sfpAddress"), #'master' => %x[hostname].strip,
 			'java_home' => java_home,
 			'tmp_dir' => @model['data_dir'],
 			'replication' => @model['replication'],
@@ -240,6 +246,7 @@ class Sfp::Module::Hadoop1Slave < Sfp::Module::Hadoop1Common
 			'user' => @model['user'],
 			'master' => resolve(@model['master'] + '.parent.sfpAddress'),
 			'java_home' => java_home,
+			'tmp_dir' => @model['data_dir'],
 			'replication' => resolve(@model['master'] + '.replication')
 		}
 	end

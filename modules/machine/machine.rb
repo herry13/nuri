@@ -23,9 +23,9 @@ class Sfp::Module::Machine
 		@state['memory'] = (`which free`.strip != '' ? `free`.split("\n")[1].split(" ")[1] : -1)
 
 		if platform.include?('linux')
-			@state['disk'] = get_disk_state
+			@state['disks'] = get_disks_state
 		else
-			@state['disk'] = {}
+			@state['disks'] = {}
 		end
 	end
 
@@ -58,12 +58,12 @@ class Sfp::Module::Machine
 
 	# generate the disks' state, try to automatically mount the disk to target directory
 	#
-	def get_disk_state
+	def get_disks_state
 		def generate_state
-			disk = {}
+			disks = {}
 			# get disks UUID
 			uuids = {}
-			`blkid`.each_line do |line|
+			`/sbin/blkid`.each_line do |line|
 				line.strip!
 				next if line.length <= 0
 				device, info = line.split(':', 2)
@@ -79,32 +79,32 @@ class Sfp::Module::Machine
 				if data[0][0..4] == '/dev/'
 					name = 'root'
 					if data[5] != '/'
-						model = (@model['disk'].is_a?(Hash) ? @model['disk'].select { |k,v| v['mount'] == data[5] if k[0] != '_' } : {})
+						model = (@model['disks'].is_a?(Hash) ? @model['disks'].select { |k,v| v['mount'] == data[5] if k[0] != '_' } : {})
 						name = (model.length > 0 ? model.keys.first : "uuid_#{uuids[data[0]]}")
 					end
-					disk[name] = {
+					disks[name] = {
 						'size' => (data[1].to_f / 1000.0).to_i,
 						'mount' => data[5],
 						'uuid' => uuids[data[0]]
 					}
 				end
 			end
-			disk
+			disks
 		end
 
-		disk = generate_state
+		disks = generate_state
 
-		if @model['disk'].is_a?(Hash)
-			names = @model['disk'].keys.sort { |x,y| x <=> y }
+		if @model['disks'].is_a?(Hash)
+			names = @model['disks'].keys.sort { |x,y| x <=> y }
 			device = "/dev/vdb"
 			# format unformatted disks, mount unmount disks
 			names.each { |name|
-				next if name[0] == '_' or disk.has_key?(name)
-				spec = @model['disk'][name]
+				next if name[0] == '_' or disks.has_key?(name)
+				spec = @model['disks'][name]
 				status = `file -s #{device}`
 				if not (status =~ /ERROR/)
 					target = spec['mount'].to_s.strip
-					# format the disk if not yet formatted
+					# format the disks if not yet formatted
 					system "mkfs.ext4 #{device}" if not (status =~ /.+ filesystem data/)
 					# create target directory if not exist
 					system "mkdir -p #{target}" if !File.exist? target

@@ -9,13 +9,13 @@ schema Hadoop2 extends Package2 {
 	final provider = "tar"
 	final version = "2.2.0"
 	final source = "http://master.herry.ext9.sup.hpl.hp.com/hadoop"
-	final home = "/opt/hadoop"
+	final home = "/opt/hadoop2"
 
 	final user = "hadoop"
 	final group = "hadoop"
 	final password = "!"
 	final java_home = ""
-	final data_dir = "/opt/hadoop/data"
+	final data_dir = "/opt/hadoop2/data"
 
 	sub install {
 		condition {
