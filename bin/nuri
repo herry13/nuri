@@ -453,7 +453,7 @@ EOS
 		parser = Trollop::Parser.new do
 			banner <<-EOS
 Usage: <command> [options]
-when <command> is:
+where <command> is:
   state     get current state
    plan     generate a plan
    bsig     deployment with distributed mechanism
@@ -510,7 +510,7 @@ EOS
 					when 'version', '-v'
 						puts About
 					else
-						$stderr.puts 'Unrecognized command! Use -h option to print available commands.'
+						$stderr.puts 'Unrecognized command! Type "help" to print available commands.'
 					end
 				end
 			rescue Exception => e
