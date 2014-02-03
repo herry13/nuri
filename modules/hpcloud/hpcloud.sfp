@@ -1,22 +1,33 @@
 include "../cloud/cloud.sfp"
+include "../vm/vm.sfp"
 
 schema HPCloud extends Cloud {
 	final description = "HPCloud US West Zone 2"
 	final auth_uri = "https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
-	final zone = "az-2.region-a.geo-1"
-
-	// default SSH username
-	final vm_username = "ubuntu"
+	final zone = "region-a.geo-1"
 
 	// small instance
 	final vm_flavor = "100"
 
 	// Ubuntu 12.04 image
-	final vm_image = "67074"
+	final vm_image = "81078"
 
 	// key pair which will be used to SSH to VM
 	final vm_ssh_key_name = "default"
 
+	// default SSH username
+	final vm_ssh_user = "ubuntu"
+
 	// security group of the VM
 	final vm_security_group = "default"
 }
+
+abstract hp_vm_private_ip isa VM {
+	final associate_public_ip is false
+}
+
+// a prototype VM with public IP
+abstract hp_vm_public_ip isa VM {
+	final associate_public_ip is true
+}
+

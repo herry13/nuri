@@ -39,6 +39,8 @@ class Sfp::Module::HPCloud
 
 		@state['running'] = running?
 		@state['vms'] = get_vms
+
+log.info conn.addresses.inspect
 	end
 
 	##############################
@@ -66,37 +68,62 @@ class Sfp::Module::HPCloud
 		flavor = (vm_model['flavor'].to_s.length > 0 ? vm_model['flavor'].to_s : @model['vm_flavor'])
 		image = (vm_model['image'].to_s.length > 0 ? vm_model['image'].to_s : @model['vm_image'])
 		security_group = (vm_model['security_group'].to_s.length > 0 ? vm_model['security_group'].to_s : @model['vm_security_group'])
+		ssh_user = (vm_model['ssh_user'].to_s.length > 0 ? vm_model['ssh_user'].to_s : @model['vm_ssh_user'])
 		ssh_key_name = (vm_model['ssh_key_name'].to_s.length > 0 ? vm_model['ssh_key_name'].to_s : @model['vm_ssh_key_name'])
 		ssh_key_file = self.ssh_key_file(ssh_key_name)
+
+		### get network
+		networks = vm_model['networks'].keys.select! { |k| k[0] != '_' }
+		networks = Array(@model['vm_network']) if networks.length <= 0 and @model['vm_network'].strip.length > 0
+		avail_nets = get_networks
+		networks.map! { |net| {'net_id' => nets[net]['id'] } }
 
 		### check SSH key file
 		if ssh_key_file.nil?
 			log.info "SSH key file '#{ssh_key_file}' is not available! #{ssh_key_name} - Creating VM #{name} [Failed]"
 			return false
 		end
+		log.info "#{name}:VM - ssh user: #{ssh_user}, key file: #{ssh_key_file}"
 
 		### if not exist, then create the VM
 		created = false
 		begin
 			### submit create VM request
-			vm = @conn.servers.create({
+			spec = {
 				:name => name,
 				:flavor_id => flavor,
 				:image_id => image,
 				:key_name => ssh_key_name,
 				:security_groups => [security_group],
 				:metadata => {'name' => name},
-			})
+			}
+			spec['nics'] = networks if networks.length > 0
+			log.info "#{name}:VM - spec=#{JSON.generate(spec)}"
+
+			vm = @conn.servers.create(spec)
+			log.info "#{name}:VM - spec has been submitted"
 
 			### set SSH config
-			vm.username = 'ubuntu'
+			vm.username = ssh_user
 			vm.private_key_path = ssh_key_file
 
-			### wait until SSH is enabled
-			vm.wait_for { ready? and sshable? }
+			### wait until VM is ready
+			vm.wait_for { ready? }
+			raise Exception "#{name}:VM is never ready (timeout)" if not vm.ready?
+			log.info "#{name}:VM is ready"
 
-			### install sfpagent
-			created = (vm.ready? and vm.sshable? and install_agent(vm, name, ssh_key_file))
+			vms = get_vms
+			if vms.has_key?(name)
+				vm.ssh_ip_address = vms[name]['ip'] if vm.public_ip_address.to_s.length <= 0
+
+				### wait until SSH is enabled
+				vm.wait_for { sshable? }
+				raise Exception "#{name}:VM is never sshable (timeout)" if not vm.sshable?
+				log.info "#{name}:VM is sshable at #{vm.ssh_ip_address}"
+
+				### install sfpagent
+				created = install_agent(vm, name)
+			end
 
 		rescue Exception => exp
 			log.info "#{exp}\n#{exp.backtrace.join("\n")}"
@@ -148,6 +175,44 @@ class Sfp::Module::HPCloud
 		deleted
 	end
 
+
+	def get_flavors(params={})
+		return {} if not running?
+		flavors = {}
+		begin
+			@conn.flavors.each { |f| flavors[f.name] = f.id }
+		rescue Exception => exp
+			log.error exp.to_s
+		end
+		log.info YAML.dump(flavors)
+		flavors
+	end
+
+	def get_images(params={})
+		return {} if not running?
+		images = {}
+		begin
+			@conn.images.each { |im| images[im.name] = im.id }
+		rescue Exception => exp
+			log.error exp.to_s
+		end
+		log.info YAML.dump(images)
+		images
+	end
+
+	def get_key_pairs(params={})
+		key_pairs = {}
+		if running?
+			begin
+				@conn.key_pairs.each { |key| key_pairs[key.name] = key.public_key }
+			rescue Exception => exp
+				log.error exp.to_s
+			end
+		end
+		log.info YAML.dump(key_pairs)
+		key_pairs
+	end
+
 	##############################
 	#
 	# Helper methods
@@ -188,14 +253,17 @@ class Sfp::Module::HPCloud
 		return true if not @conn.nil?
 		begin
 			config = self.read_config
-			@conn = Fog::Compute.new({
+			credentials = {
 				:provider => "HP",
+				:version => :v2,
 				:hp_tenant_id => config['tenant_id'],
 				:hp_access_key => config['access_key'],
 				:hp_secret_key => config['secret_key'],
 				:hp_auth_uri => @model['auth_uri'],
 				:hp_avl_zone => @model['zone']
-			})
+			}
+			@conn = Fog::Compute.new(credentials)
+			@network = Fog::Network.new(credentials)
 		rescue Exception => exp
 			log.error "#{exp}\n#{exp.backtrace.join("\n")}"
 			@conn = nil
@@ -211,11 +279,30 @@ class Sfp::Module::HPCloud
 				'running' => s.ready?,
 				'ip' => s.public_ip_address
 			}
+			if s.public_ip_address.to_s.length <= 0
+				s.addresses.each do |name,network|
+					if network.length > 0
+						vms[s.name]['ip'] = network.first['addr']
+						break
+					end
+				end
+			end
 		}
 		vms
 	end
 
-	def install_agent(vm, name, ssh_key_file=nil, ssh_user="ubuntu")
+	def get_networks
+		nets = {}
+		@network.networks.each do |net|
+			nets[net.name] = {
+				'status' => net.status.downcase,
+				'id' => net.id
+			}
+		end
+		nets
+	end
+
+	def install_agent(vm, name)
 		log.info "Installing agent in VM #{name} [WAIT]"
 
 		result = vm.ssh(['sudo apt-get update',
@@ -223,7 +310,7 @@ class Sfp::Module::HPCloud
 		                 'sudo gem install sfp sfpagent fog --no-ri --no-rdoc && sudo sfpagent -s'])
 
 		if result
-			Net::SSH.start(vm.public_ip_address, ssh_user, :keys => [ssh_key_file]) do |ssh|
+			Net::SSH.start(vm.public_ip_address, vm.username, :keys => [vm.private_key_path]) do |ssh|
 				log.info ssh.exec!('sudo sfpagent -s')
 				result = (ssh.exec!('sudo sfpagent -a') =~ /Agent is running/)
 			end
