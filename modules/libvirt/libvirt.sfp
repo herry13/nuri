@@ -1,0 +1,11 @@
+include "../cloud/cloud.sfp"
+
+schema Libvirt extends Cloud {
+	running : Bool
+
+	sub start {
+		effect {
+			this.running is true
+		}
+	}
+}
