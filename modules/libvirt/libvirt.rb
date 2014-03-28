@@ -2,9 +2,11 @@ class Sfp::Module::Libvirt
 	include Sfp::Resource
 
 	def update_state
-		state['installed'] = installed?
-		state['running'] = running?
-		state['vms'] = get_vms
+		to_model
+
+		@state['installed'] = installed?
+		@state['running'] = running?
+		@state['vms'] = get_vms
 	end
 
 	def start(params={})
@@ -12,7 +14,7 @@ class Sfp::Module::Libvirt
 		running?
 	end
 
-	private
+	protected
 	def installed?
 		!!(`rpm -q -a libvirt`.strip =~ /^libvirt.*/)
 	end
@@ -25,6 +27,7 @@ class Sfp::Module::Libvirt
 		out = `virsh list --all`.strip.split("\n")
 		out.shift(2)
 		vms = {}
+		domain = @model['dns_domain'].to_s.strip
 		out.each do |line|
 			line.strip!
 			if line.length > 0
@@ -32,7 +35,7 @@ class Sfp::Module::Libvirt
 				if info.length >= 3
 					vms[info[1]] = {
 						'running' => (info[2] == 'running'),
-						'ip' => '',
+						'ip' => (domain.length > 0 ? "#{info[1]}.#{domain}" : info[1]),
 						'state' => info[2]
 					}
 				end

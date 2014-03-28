@@ -2,6 +2,7 @@ include "../cloud/cloud.sfp"
 
 schema Libvirt extends Cloud {
 	running : Bool
+	final dns_domain is ""
 
 	sub start {
 		effect {

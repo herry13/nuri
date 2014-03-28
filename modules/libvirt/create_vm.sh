@@ -5,7 +5,7 @@ NAME="hpvm1"
 # hardware
 CPU=1
 MEMORY_SIZE=256 # in MB
-DISKSIZE=3 # in GB
+DISKSIZE=4 # in GB
 
 # network
 MAC="54:52:00:6C:46:01"
@@ -16,7 +16,8 @@ STORAGE="/nfs/vms/herry/images"
 IMAGE="$STORAGE/$NAME.img,size=$DISKSIZE"
 
 # operating system
-LOCATION="http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/"
+VERSION="precise"
+LOCATION="http://archive.ubuntu.com/ubuntu/dists/$VERSION/main/installer-amd64/"
 OS_TYPE=linux
 OS_VARIANT=ubuntumaverick
 
