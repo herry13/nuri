@@ -314,7 +314,8 @@ class Nuri::Master
 				code, _ = delete_data(address, port, '/agents')
 				fail "Bad response: #{code}" if code != '200'
 			rescue Exception => exp
-				$stderr.puts "Cannot delete agents data on #{name} - #{model['sfpAddress']}:#{model['sfpPort']} - #{exp}\n#{exp.backtrace.join("\n")}"
+				#$stderr.puts "Cannot delete agents data on #{name} - #{model['sfpAddress']}:#{model['sfpPort']} - #{exp}\n#{exp.backtrace.join("\n")}"
+				$stderr.puts "[Warn] Cannot delete agents data on #{name} - #{model['sfpAddress']}:#{model['sfpPort']} - #{exp}" 
 				return false
 			end
 		end
