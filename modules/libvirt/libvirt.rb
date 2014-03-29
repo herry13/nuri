@@ -37,7 +37,7 @@ class Sfp::Module::Libvirt
 		ks_file = generate_kickstart_file(vm_name)
 		script_file = generate_script_file(vm_name, ks_file)
 
-		log.info `/bin/bash #{script_file}`
+		log.info `/bin/bash #{script_file} 2>&1`
 
 		File.delete(ks_file) if File.exists?(ks_file)
 		File.delete(script_file) if File.exists?(script_file)
@@ -101,8 +101,9 @@ class Sfp::Module::Libvirt
 
 	def get_vms
 		out = `virsh list --all`.strip.split("\n")
-		out.shift(2)
 		vms = {}
+		return vms if out.length <= 0
+		out.shift(2)
 		domain = @model['dns_domain'].to_s.strip
 		out.each do |line|
 			line.strip!
@@ -111,8 +112,10 @@ class Sfp::Module::Libvirt
 				if info.length >= 3
 					vms[info[1]] = {
 						'running' => (info[2] == 'running'),
+						#'mac_address' => mac_address_of(info[1]),
+						#'ip_address' => ip_address_of(info[1]),
 						'ip' => (domain.length > 0 ? "#{info[1]}.#{domain}" : info[1]),
-						'state' => info[2]
+						'state' => info[2],
 					}
 				end
 			end
@@ -193,5 +196,19 @@ class Sfp::Module::Libvirt
 		get_vms.each do |name,state|
 			start_vm({'vm' => "$.#{name}"}) if not state['running']
 		end
+	end
+
+	def mac_address_of(name)
+		out = `virsh domiflist #{name}`.strip.split("\n")
+		return '' if out.length < 3
+		out = out[2].split(" ")
+		out[4].to_s
+	end
+
+	def ip_address_of(name)
+		mac = mac_address_of(name)
+		out = `arp -a | grep "#{mac}"`.strip.split(" ")
+		return '' if out.length < 2
+		out[1].gsub(/[\(\)]/, '')
 	end
 end
