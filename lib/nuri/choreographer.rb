@@ -87,9 +87,9 @@ module Nuri::Choreographer
 		p[:bsig].each do |name,bsig|
 			address = @model.at?("$.#{name}.sfpAddress")
 			port = @model.at?("$.#{name}.sfpPort")
-			next if !address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
+			next if not address.is_a?(String) or address.length <= 0 or !port.is_a?(Fixnum) or port <= 0
 
-			bsig['operators'].each { |operator|	
+			bsig['operators'].each do |operator|
 				if operator['name'] =~ /^\$(\.[a-zA-Z0-9_]+)*\.create_vm/
 					target_ref = operator['parameters']['$.vm']
 					_, target_name, _ = target_ref.split('.', 3)
@@ -113,12 +113,10 @@ module Nuri::Choreographer
 						return false
 					end
 				end
-			}
-
-			return true
+			end
 		end
 
-		false
+		true
 	end
 
 	def purge_bsig(p={})
