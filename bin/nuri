@@ -4,7 +4,7 @@ home = File.expand_path('../', File.dirname(__FILE__))
 require "#{home}/lib/nuri"
 
 Version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
-About = "Nuri #{Version} (c) 2013"
+About = "Nuri #{Version} (c) #{Time.now.year}"
 
 class Nuri::Console
 	include Nuri::Helper
