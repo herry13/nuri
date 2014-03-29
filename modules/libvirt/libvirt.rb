@@ -34,27 +34,31 @@ class Sfp::Module::Libvirt
 		log.info "creating vm:#{vm_name} [Wait]"
 		status = false
 
-		ks_file = generate_kickstart_file(vm_name)
-		script_file = generate_script_file(vm_name, ks_file)
-
-		log.info `/bin/bash #{script_file} 2>&1`
-
-		File.delete(ks_file) if File.exists?(ks_file)
-		File.delete(script_file) if File.exists?(script_file)
-
-		vms = get_vms
-		if vms[vm_name] and vms[vm_name]['ip'].to_s.length > 0
-			address = vms[vm_name]['ip'].to_s
-			log.info "vm:#{vm_name} is created - address=#{address}"
-			log.info "vm:#{vm_name} - wait until ssh server is running"
-			wait_time = WaitTime
-			until sshable?(address, 22) or wait_time < 0 do
-				sleep SleepTime
-				wait_time -= SleepTime
-				start_vm(params)
+		begin
+			ks_file = generate_kickstart_file(vm_name)
+			script_file = generate_script_file(vm_name, ks_file)
+	
+			log.info `/bin/bash #{script_file} 2>&1`
+	
+			File.delete(ks_file) if File.exists?(ks_file)
+			File.delete(script_file) if File.exists?(script_file)
+	
+			vms = get_vms
+			if vms[vm_name] and vms[vm_name]['ip'].to_s.length > 0
+				address = vms[vm_name]['ip'].to_s
+				log.info "vm:#{vm_name} is created - address=#{address}"
+				log.info "vm:#{vm_name} - wait until ssh server is running"
+				wait_time = WaitTime
+				until sshable?(address, 22) or wait_time < 0 do
+					sleep SleepTime
+					wait_time -= SleepTime
+					start_vm(params)
+				end
+				status = sshable?(address, 22)
+				log.warn "agent on vm:#{vm_name} is not running" if status and nuriable?(address)
 			end
-			status = sshable?(address, 22)
-			log.warn "agent on vm:#{vm_name} is not running" if status and nuriable?(address)
+		rescue Exception => e
+			log.error "fail to create vm:#{vm_name} - #{e}\n#{e.backtrace.join("\n")}"
 		end
 		
 		if status
@@ -140,7 +144,9 @@ class Sfp::Module::Libvirt
 	end
 
 	def get_spec(name)
-		model = resolve_model("$.#{name}").delete_if { |k,v| k[0] == '_' }
+		model = resolve_model("$.#{name}")
+		fail "model of vm:#{name} is not exist" if not model.is_a?(Hash)
+		model = model.delete_if { |k,v| k[0] == '_' }
 		{
 			'name' => name,
 			'cpus' => 1,
