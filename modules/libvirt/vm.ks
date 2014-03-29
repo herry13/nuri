@@ -12,7 +12,7 @@ reboot
 url --url=http://archive.ubuntu.com/ubuntu/
 
 # network setting
-network --onboot yes --device eth0 --mtu=1500 --bootproto dhcp --hostname hpvm1.diy.inf.ed.ac.uk
+network --onboot yes --device eth0 --mtu=1500 --bootproto dhcp --hostname <%= name %>.diy.inf.ed.ac.uk
 firewall --disabled
 
 # authentication type

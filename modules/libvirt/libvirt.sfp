@@ -9,4 +9,10 @@ schema Libvirt extends Cloud {
 			this.running is true
 		}
 	}
+
+	sub stop {
+		effect {
+			this.running is false
+		}
+	}
 }

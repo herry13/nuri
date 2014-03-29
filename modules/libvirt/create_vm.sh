@@ -1,32 +1,32 @@
 #!/bin/sh
 
-NAME="hpvm1"
+NAME="<%= name %>"
 
 # hardware
-CPU=1
-MEMORY_SIZE=256 # in MB
-DISKSIZE=4 # in GB
+CPU=<%= cpus %>
+MEMORY=<%= memory %>
+DISKSIZE=<%= disksize %>
 
 # network
-MAC="54:52:00:6C:46:01"
+MAC="<%= mac_address %>"
 BRIDGE=br0
 
 # disk
-STORAGE="/nfs/vms/herry/images"
-IMAGE="$STORAGE/$NAME.img,size=$DISKSIZE"
+STORAGE=<%= image_location %>
+IMAGE="$STORAGE/$NAME.img"
 
 # operating system
-VERSION="precise"
+VERSION=<%= os_version %>
 LOCATION="http://archive.ubuntu.com/ubuntu/dists/$VERSION/main/installer-amd64/"
 OS_TYPE=linux
 OS_VARIANT=ubuntumaverick
 
 # others
-KS="ks=file:/$NAME.cfg"
+KS="ks=file:/<%= File.basename(ks_file) %>"
 CONSOLE="console=ttyS0,9600n8"
-INITRD="/tmp/$NAME.cfg"
+INITRD="<%= ks_file %>"
 
-virt-install -n $NAME -r $MEMORY_SIZE -f $IMAGE \
+virt-install -n $NAME -r $MEMORY -f $IMAGE \
 	-s $DISKSIZE --vcpus=$CPU --os-type $OS_TYPE \
 	--os-variant=$OS_VARIANT --accelerate \
 	--mac=$MAC --network bridge:$BRIDGE \
