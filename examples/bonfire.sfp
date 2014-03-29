@@ -20,7 +20,7 @@ vmlb isa VM {
 	apache isa Apache {
 		running is true
 		is_load_balancer is true
-		lb_members is (vmapp1,vmapp2,vmapp3,vmapp4,vmapp5)
+		lb_members is [vmapp1,vmapp2,vmapp3,vmapp4,vmapp5]
 	}
 	in_cloud is proxy.epcc
 }
