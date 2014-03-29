@@ -53,7 +53,8 @@ module Nuri::Choreographer
 
 		return false if not push_cache_model(p)
 
-		return false if not clear_agents_list
+		#return false if not clear_agents_list
+		clear_agents_list
 
 		push_agents_list
 
