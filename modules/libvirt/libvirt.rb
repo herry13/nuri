@@ -6,6 +6,8 @@ class Sfp::Module::Libvirt
 
 		@state['installed'] = installed?
 		@state['running'] = running?
+
+		check_vm_status
 		@state['vms'] = get_vms
 	end
 
@@ -49,7 +51,7 @@ class Sfp::Module::Libvirt
 			until sshable?(address, 22) or wait_time < 0 do
 				sleep SleepTime
 				wait_time -= SleepTime
-				start_vm(vm_name)
+				start_vm(params)
 			end
 			status = sshable?(address, 22)
 			log.warn "agent on vm:#{vm_name} is not running" if status and nuriable?(address)
@@ -74,6 +76,15 @@ class Sfp::Module::Libvirt
 		!!system("virsh destroy #{vm_name} && virsh undefine #{vm_name}")
 	end
 
+	def start_vm(params={})
+		name = params['vm'].to_s.sub(/^\$\./, '')
+		return false if name.length <= 0
+		vms = get_vms
+		system("virsh start #{name}") if vms[name] and not vms[name]['running']
+
+		vm_running?(name)
+	end
+
 	protected
 	def installed?
 		!!(`rpm -q -a libvirt`.strip =~ /^libvirt.*/)
@@ -81,6 +92,11 @@ class Sfp::Module::Libvirt
 
 	def running?
 		!!(`service libvirtd status`.strip =~ /.*is running.*/)
+	end
+
+	def vm_running?(name)
+		vms = get_vms
+		(vms[name] and vms[name]['running'])
 	end
 
 	def get_vms
@@ -127,7 +143,7 @@ class Sfp::Module::Libvirt
 			'cpus' => 1,
 			'memory' => 256,
 			'disksize' => 4,
-			'mac_address' => '54:52:00:6C:46:01',
+			'mac_address' => (1..6).map{"%0.2X"%rand(256)}.join(":"), # '54:52:00:6C:46:01',
 			'os' => 'ubuntu-linux',
 			'os_version' => 'precise',
 			'image_location' => '/nfs/vms/herry/images',
@@ -173,8 +189,9 @@ class Sfp::Module::Libvirt
 		serveable?(ip, 1314)
 	end
 
-	def start_vm(name)
-		vms = get_vms
-		system("virsh start #{name}") if vms[name] and not vms[name]['running']
+	def check_vm_status
+		get_vms.each do |name,state|
+			start_vm({'vm' => "$.#{name}"}) if not state['running']
+		end
 	end
 end
