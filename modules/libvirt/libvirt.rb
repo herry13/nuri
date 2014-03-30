@@ -77,7 +77,10 @@ class Sfp::Module::Libvirt
 			return true
 		end
 
-		!!system("virsh destroy #{vm_name} && virsh undefine #{vm_name}")
+		disk = disk_of(vm_name)
+		status = !!system("virsh destroy #{vm_name} && virsh undefine #{vm_name}")
+		log.info `rm -f #{disk}` if status
+		status
 	end
 
 	def start_vm(params={})
@@ -155,7 +158,7 @@ class Sfp::Module::Libvirt
 			'mac_address' => (1..6).map{"%0.2X"%rand(256)}.join(":"), # '54:52:00:6C:46:01',
 			'os' => 'ubuntu-linux',
 			'os_version' => 'precise',
-			'image_location' => '/nfs/vms/herry/images',
+			'image_location' => '/disk/scratch/images',
 
 		}.merge(model)
 	end
@@ -216,5 +219,11 @@ class Sfp::Module::Libvirt
 		out = `arp -a | grep "#{mac}"`.strip.split(" ")
 		return '' if out.length < 2
 		out[1].gsub(/[\(\)]/, '')
+	end
+
+	def disk_of(name)
+		out = `virsh domblklist #{name}`.strip.split("\n")
+		return '' if out.length < 3
+		out[2].split(" ")[1].to_s
 	end
 end
