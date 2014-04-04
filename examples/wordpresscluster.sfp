@@ -1,0 +1,55 @@
+include "modules/vm/vm.sfp"
+include "modules/mysql/mysql.sfp"
+include "modules/wordpresscluster/wordpresscluster.sfp"
+include "modules/apache/apache.sfp"
+
+vm1 isa VM {
+	mysql isa Mysql {
+		running is true
+	}
+	wp_db isa WordpressDB {
+		installed is true
+		mysql is vm1.mysql
+	}
+}
+vm2 isa VM {
+	apache isa Apache {
+		running is true
+		php_module is true
+		php_mysql_module is true
+		server_name is "vm7"
+	}
+	wp_web isa WordpressWeb {
+		http is vm2.apache
+		database is vm1.wp_db
+	}
+}
+vm3 extends vm2 {
+	apache isa Apache {
+		running is true
+		php_module is true
+		php_mysql_module is true
+		server_name is "vm7"
+	}
+	wp_web isa WordpressWeb {
+		http is vm3.apache
+		database is vm1.wp_db
+	}
+}
+vm7 isa VM {
+	apachelb isa Apache {
+		running is true
+		load_balancer is true
+		lb_members is [vm2, vm3]
+	}
+}
+
+global {
+	if vm7.apachelb.running then {
+		vm2.apache.running
+		vm3.apache.running
+	}
+	if vm2.apache.running then vm1.mysql.running
+	if vm3.apache.running then vm1.mysql.running
+}
+
