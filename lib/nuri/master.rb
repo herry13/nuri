@@ -523,8 +523,10 @@ class Nuri::Master
 			case value['_context']
 			when 'null', 'any_value'
 				parent[name] = Sfp::Undefined.create(value['_isa'])
-			when 'object', 'procedure'
+			when 'object'
 				# do nothing
+			when 'procedure'
+				return false
 			else
 				parent.delete(name)
 			end
