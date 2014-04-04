@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-home = File.expand_path('../', File.dirname(__FILE__))
-require "#{home}/lib/nuri"
+Home = File.expand_path('../', File.dirname(__FILE__))
+require "#{Home}/lib/nuri"
 
 Version = File.read(File.dirname(__FILE__) + "/../VERSION").strip
 About = "Nuri #{Version} (c) #{Time.now.year}"
@@ -30,7 +30,7 @@ where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :json, 'print output in JSON'
-			opt :color, 'enable colorized output'
+			opt :color, 'enable colorized output', :default => true
 			opt :no_push_module, 'disable automatic push module'
 		end
 		help, args = check_help(args)
@@ -73,10 +73,10 @@ EOS
 			opt :parallel, 'generate a parallel plan', :short => '-l'
 			opt :apply, 'generate and execute a plan', :short => '-a'
 			opt :json, 'print the plan in JSON'
-			opt :color, 'enable colorized output'
+			opt :color, 'enable colorized output', :default => true
 			opt :no_interactive, 'disable interactive input'
 			opt :no_push_module, 'disable automatic push module'
-			opt :image, 'image graph of the generated plan', :default => ''
+			opt :image, 'image graph of the generated plan', :default => Dir.home + "/.nuri/plan.png" # ''
 		end
 		help, args = check_help(args)
 		opts = process_args args, parser
@@ -96,7 +96,7 @@ EOS
 					File.open(plan_file, 'w') { |f| f.write(JSON.generate(plan)) }
 
 					if opts[:image].strip.length > 0
-						system "#{File.dirname(__FILE__)}/nuri-sfwgraph #{plan_file} #{opts[:image]}"
+						system "#{Home}/bin/nuri-sfwgraph #{plan_file} #{opts[:image]}"
 					end
 
 					if opts[:json]
@@ -153,7 +153,7 @@ EOS
 			opt :apply, 'generate and then deploy a BSig model'
 			opt :status, 'get BSig status of all agents'
 			opt :purge, 'purge existing BSig model', :short => '-g'
-			opt :color, 'enable colorized output'
+			opt :color, 'enable colorized output', :default => true
 			opt :no_interactive, 'disable interactive input'
 			opt :no_push_module, 'disable automatic push module'
 		end
@@ -277,7 +277,7 @@ EOS
 			opt :ssh_user, "SSH username", :short => '-u', :default => 'root'
 			opt :ssh_port, "SSH port", :short => '-p', :default => '22'
 			opt :raw, "print a RAW output"
-			opt :color, "enable colorized output"
+			opt :color, 'enable colorized output', :default => true
 		end
 		help, args = check_help(args)
 		subcommand = (args.length > 0 ? args.shift : '')
@@ -454,13 +454,14 @@ EOS
 			banner <<-EOS
 Usage: <command> [options]
 where <command> is:
-  state     get current state
-   plan     generate a plan
-   bsig     deployment with distributed mechanism
-  agent     manage the agent
-   edit     edit model file
-   help     print this help
-   exit     exit this console
+  [s]tate     get current state
+  [p]lan      generate a plan
+  [b]sig      deployment with distributed mechanism
+  [a]gent     manage the agent
+  [e]dit      edit model file
+  [m]odel     generate the desired state
+  help        print this help
+  exit        exit this console
 
 EOS
 		end
@@ -487,24 +488,26 @@ EOS
 					args = args.to_s.split(' ')
 					command = args[0] and args = ['-h'] if command == 'help' and args.length > 0
 					case command
-					when 'state'
+					when 's', 'state'
 						do_state args, ''
-					when 'plan'
+					when 'p', 'plan', 'orchestrate'
 						do_plan args, ''
-					when 'bsig'
+					when 'b', 'bsig', 'choreograph'
 						do_bsig args, ''
-					when 'agent'
+					when 'a', 'agent'
 						do_agent args, ''
-					when 'edit'
+					when 'e', 'edit'
 						do_edit args
-					when 'model'
+					when 'm', 'model'
 						do_model args
 					when 'cd'
 						Dir.chdir(args[0].to_s)
 					when 'pwd'
 						puts Dir.pwd
-					when 'ls'
+					when 'l', 'ls'
 						system "ls #{args.join(" ")}"
+					when 'ws', 'workspace'
+						Dir.chdir(File.dirname(Nuri.main))
 					when 'help'
 						parser.educate(STDOUT)
 					when 'version', '-v'
@@ -528,7 +531,7 @@ where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :json, 'print output in JSON'
-			opt :color, 'enable colorized output'
+			opt :color, 'enable colorized output', :default => true
 		end
 		help, args = check_help(args)
 		opts = process_args args, parser
