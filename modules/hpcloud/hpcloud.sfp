@@ -3,7 +3,7 @@ include "../vm/vm.sfp"
 
 schema HPCloud extends Cloud {
 	final description = "HPCloud US West Zone 1"
-	final auth_uri = "https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/"
+	final auth_uri = "https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0/tokens"
 	final zone = "region-a.geo-1"
 
 	// small instance
