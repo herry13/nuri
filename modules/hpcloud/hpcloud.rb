@@ -39,8 +39,6 @@ class Sfp::Module::HPCloud
 
 		@state['running'] = running?
 		@state['vms'] = get_vms
-
-log.info conn.addresses.inspect
 	end
 
 	##############################
@@ -263,7 +261,7 @@ log.info conn.addresses.inspect
 				:hp_avl_zone => @model['zone']
 			}
 			@conn = Fog::Compute.new(credentials)
-			@network = Fog::Network.new(credentials)
+			#@network = Fog::Network.new(credentials)
 		rescue Exception => exp
 			log.error "#{exp}\n#{exp.backtrace.join("\n")}"
 			@conn = nil
@@ -293,12 +291,12 @@ log.info conn.addresses.inspect
 
 	def get_networks
 		nets = {}
-		@network.networks.each do |net|
-			nets[net.name] = {
-				'status' => net.status.downcase,
-				'id' => net.id
-			}
-		end
+		#@network.networks.each do |net|
+		#	nets[net.name] = {
+		#		'status' => net.status.downcase,
+		#		'id' => net.id
+		#	}
+		#end
 		nets
 	end
 

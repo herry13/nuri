@@ -125,9 +125,9 @@ schema Apache extends Service {
 			this.installed = true
 			this.running = false
 			this.is_load_balancer = true
-			foreach (members as node) {
+			/*foreach (members as node) {
 				node.created = true
-			}
+			}*/
 		}
 		effect {
 			this.lb_members = members
