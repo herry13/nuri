@@ -1,6 +1,5 @@
 schema File {
-	exists : Bool
-
+	final exists : Bool
 	final path is ""
 	final content : String
 	final user : String

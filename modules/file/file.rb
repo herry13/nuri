@@ -14,7 +14,7 @@ class Sfp::Module::File
 	def update_state
 		path = @model['path'].to_s.strip
 
-		if not exist? or type? != @model['type']
+		if not exist? or type? != @model['type'] or target? != content?
 			create if del
 		end
 
@@ -75,11 +75,8 @@ class Sfp::Module::File
 		if @model['type'] == 'directory'
 			shell "mkdir #{@model['path']}"
 		else
-			return true if not @model['content'].is_a?(String)
 			begin
-				current = (::File.exist?(file) ? content? : nil)
-				desired = Digest::SHA1.hexdigest(@model['content'])
-				File.open(file, 'w') { |f| f.write(@model['content']) } if current != desired
+				File.open(file, 'w') { |f| f.write(@model['content'].to_s) } if content? != target?
 				return true
 			rescue Exception => e
 				log.error "#{e}\n#{e.backtrace.join("\n")}"
@@ -103,6 +100,10 @@ class Sfp::Module::File
 
 	def content?
 		(::File.file?(@model['path']) ? Digest::SHA1.hexdigest(::File.read(@model['path'])) : '')
+	end
+
+	def target?
+		Digest::SHA1.hexdigest(@model['content'].to_s)
 	end
 
 	def user_group?
