@@ -30,6 +30,8 @@ class Sfp::Module::HPCloud
 	### Number of tries in waiting a task to be finished - default: 120 (10 minutes)
 	Tries = 600 / SleepTime
 
+	MutexIP = Mutex.new
+
 	def initialize
 		@conn = nil
 	end
@@ -39,8 +41,6 @@ class Sfp::Module::HPCloud
 
 		@state['running'] = running?
 		@state['vms'] = get_vms
-
-log.info conn.addresses.inspect
 	end
 
 	##############################
@@ -74,9 +74,11 @@ log.info conn.addresses.inspect
 
 		### get network
 		networks = vm_model['networks'].keys.select! { |k| k[0] != '_' }
-		networks = Array(@model['vm_network']) if networks.length <= 0 and @model['vm_network'].strip.length > 0
-		avail_nets = get_networks
-		networks.map! { |net| {'net_id' => nets[net]['id'] } }
+		if @model['vm_network'].is_a?(Hash)
+			networks = Array(@model['vm_network']) if networks.length <= 0 and @model['vm_network'].strip.length > 0
+			avail_nets = get_networks
+			networks.map! { |net| {'net_id' => nets[net]['id'] } }
+		end
 
 		### check SSH key file
 		if ssh_key_file.nil?
@@ -114,15 +116,30 @@ log.info conn.addresses.inspect
 
 			vms = get_vms
 			if vms.has_key?(name)
-				vm.ssh_ip_address = vms[name]['ip'] if vm.public_ip_address.to_s.length <= 0
+				#if vm.public_ip_address.length <= 0
+				### set public ip if required
+				if vm_model['associate_public_ip']
+					log.info "#{name}:VM - associating public ip address [Wait]"
+					MutexIP.synchronize {
+						address = get_next_public_ip_addresses
+						address.server = vm
+						address.reload
+					}
 
-				### wait until SSH is enabled
-				vm.wait_for { sshable? }
-				raise Exception "#{name}:VM is never sshable (timeout)" if not vm.sshable?
-				log.info "#{name}:VM is sshable at #{vm.ssh_ip_address}"
+					### wait until SSH is enabled
+					vm.wait_for { sshable? }
+					raise Exception "#{name}:VM is never sshable (timeout)" if not vm.sshable?
+					log.info "#{name}:VM is sshable at #{vm.public_ip_address}"
+					#log.info "#{name}:VM is sshable at #{vm.ssh_ip_address}"
 
-				### install sfpagent
-				created = install_agent(vm, name)
+					### install sfpagent
+					created = install_agent(vm, name)
+					created = install_agent(vm, name) if not created
+				else
+					log.warn "#{name}:vm does not have public ip address"
+					#vm.ssh_ip_address = vms[name]['ip'] if vm.public_ip_address.to_s.length <= 0
+					created = true
+				end
 			end
 
 		rescue Exception => exp
@@ -263,7 +280,7 @@ log.info conn.addresses.inspect
 				:hp_avl_zone => @model['zone']
 			}
 			@conn = Fog::Compute.new(credentials)
-			@network = Fog::Network.new(credentials)
+			@network = Fog::HP::Network.new(credentials)
 		rescue Exception => exp
 			log.error "#{exp}\n#{exp.backtrace.join("\n")}"
 			@conn = nil
@@ -274,21 +291,39 @@ log.info conn.addresses.inspect
 	def get_vms
 		return {} if not running?
 		vms = {}
+		addresses = @conn.addresses
 		@conn.servers.each { |s|
 			vms[s.name] = {
-				'running' => s.ready?,
-				'ip' => s.public_ip_address
+				'running' => true, # s.ready?,
+				'ip' => s.public_ip_address.to_s
 			}
 			if s.public_ip_address.to_s.length <= 0
-				s.addresses.each do |name,network|
-					if network.length > 0
-						vms[s.name]['ip'] = network.first['addr']
-						break
+				if s.addresses
+					s.addresses.each do |name,network|
+						if network.length > 0
+							vms[s.name]['ip'] = network.first['addr']
+							break
+						end
+					end
+				else
+					addr = addresses.select { |addr| addr.instance_id == s.id }.first
+					if not addr.nil?
+						vms[s.name]['ip'] = addr.ip
+						vms[s.name]['private_ip'] = addr.fixed_ip
 					end
 				end
 			end
 		}
 		vms
+	end
+
+	def get_next_public_ip_addresses
+		available = @conn.addresses.select { |addr| addr.instance_id.nil? }
+		if available.length > 0
+			available.first
+		else
+			@conn.addresses.create
+		end
 	end
 
 	def get_networks
@@ -303,26 +338,28 @@ log.info conn.addresses.inspect
 	end
 
 	def install_agent(vm, name)
-		log.info "Installing agent in VM #{name} [WAIT]"
+		log.info "Installing agent on #{name}:VM [WAIT]"
 
-		result = vm.ssh(['sudo apt-get update',
-		                 'sudo apt-get -y install sudo ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 make gcc libxml2-dev libxslt-dev libreadline-dev',
-		                 'sudo gem install sfp sfpagent fog --no-ri --no-rdoc && sudo sfpagent -s'])
+		vm.ssh([
+			"sudo su -c \"echo '#{vm.public_ip_address} #{name}' >> /etc/hosts\"",
+			"sudo mkdir -p /var/sfpagent",
+			"sudo su -c \"echo '#{path}' > /var/sfpagent/vm.in_cloud\""
+		])
 
-		if result
-			Net::SSH.start(vm.public_ip_address, vm.username, :keys => [vm.private_key_path]) do |ssh|
-				log.info ssh.exec!('sudo sfpagent -s')
-				result = (ssh.exec!('sudo sfpagent -a') =~ /Agent is running/)
-			end
-		end
+		vm.ssh([
+			'sudo apt-get update',
+			'sudo apt-get -y install sudo ruby1.9.1 ruby1.9.1-dev libz-dev libaugeas-ruby1.9.1 make gcc libxml2-dev libxslt-dev libreadline-dev',
+			'sudo gem install sfp sfpagent --no-ri --no-rdoc && sudo sfpagent -s && sudo sfpagent -s'
+		])
 
-		if !result
-			log.error "Installing agent in VM #{name} [Failed]"
-		else
+		out = vm.ssh('sudo sfpagent -a').first.stdout
+		if out =~ /Agent is running/
 			log.info "Installing agent in VM #{name} [OK]"
+			true
+		else
+			log.error "Installing agent in VM #{name} [Failed] -- #{out}"
+			false
 		end
-
-		result
 	end
 end
 

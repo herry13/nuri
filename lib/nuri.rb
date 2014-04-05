@@ -59,6 +59,6 @@ require 'yaml'
 # internal dependencies
 libdir = File.dirname(__FILE__) << '/nuri'
 ['constraint_helper.rb', 'helper.rb', 'orchestrator.rb',
- 'choreographer.rb', 'master.rb'].each do |file|
+ 'choreographer.rb', 'master.rb', 'console.rb'].each do |file|
 	require "#{libdir}/#{file}"
 end

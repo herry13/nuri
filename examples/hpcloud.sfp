@@ -1,17 +1,16 @@
-include "../modules/node/node.sfp"
-include "../modules/hpcloud/hpcloud.sfp"
 include "../modules/vm/vm.sfp"
+include "../modules/hpcloud/hpcloud.sfp"
 include "../modules/apache/apache.sfp"
-
+// cloud proxy node
 proxy isa Node {
 	sfpAddress is "localhost"
 	hpcloud isa HPCloud {
-		key_name is "herry_key"
+		vm_image is "af1f026e-750b-496e-aae4-1635941a472a"
+		vm_ssh_key_name is "default"
 	}
 }
-
-vm1 isa VM {
-	created = true
+vm isa VM {
+	in_cloud is proxy.hpcloud
 	apache isa Apache {
 		running is true
 	}

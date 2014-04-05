@@ -72,7 +72,7 @@ class Nuri::Master
 			plan = planner.solve(p)
 		end
 
-		print (p[:color] ? "[Finish] ".green : "[Finish] ")
+		print (p[:no_color] ? "[Finish]" : "[Finish] ".green)
 		puts format_benchmark(planning_time)
 
 		plan
@@ -144,15 +144,14 @@ class Nuri::Master
 		task = get_schemata
 
 		print "Getting current state "
-		puts (opts[:color] ? "[Wait]".yellow : "[Wait]")
+		putf "[Wait]", opts, :yellow
 
 		benchmark = Benchmark.measure do
 			task['initial'] = to_state('initial', get_state(opts))
 		end
 		#puts YAML.dump(task['initial'])
 
-		puts "Getting current state " + (opts[:color] ? "[OK] ".green : "[OK] ") +
-		     format_benchmark(benchmark)
+		puts "Getting current state #{f("[OK]", opts, :green)} #{format_benchmark(benchmark)}"
 
 		task['initial'].accept(FinalAttributeRemover)
 		task['initial'].accept(Sfp::Visitor::SfpGenerator.new(task))
@@ -176,7 +175,7 @@ class Nuri::Master
 			next if not init[name].is_a?(Sfp::Unknown)
 			init.delete(name)
 			task['goal'].keep_if { |var,val| !(var =~ /(\$\.#{name}\.|\$\.#{name}$)/) }
-			puts (opts[:color] ? "[Warn]".red : "[Warn]") + " Remove node #{name} from the planning task."
+			puts "#{f("[Warn]", opts, :yellow)} Remove node #{name} from the planning task."
 		end
 
 		# print the status of goal state
@@ -186,11 +185,11 @@ class Nuri::Master
 
 			print "  #{var}: "
 			value = Sfp::Helper::Sfp2Ruby.val(val['_value']).to_s
-			print (opts[:color] ? value.green : value)
+			print f(value, opts, :green)
 
 			if f1.results.has_key?(var) and f1.results[var] != val['_value']
 				value = Sfp::Helper::Sfp2Ruby.val(f1.results[var]).to_s
-				print " ( " + (opts[:color] ? value.red : value) + " )"
+				print " ( #{f(value, opts, :red)} )"
 			end
 
 			puts ""
@@ -314,8 +313,7 @@ class Nuri::Master
 				code, _ = delete_data(address, port, '/agents')
 				fail "Bad response: #{code}" if code != '200'
 			rescue Exception => exp
-				#$stderr.puts "Cannot delete agents data on #{name} - #{model['sfpAddress']}:#{model['sfpPort']} - #{exp}\n#{exp.backtrace.join("\n")}"
-				$stderr.puts "[Warn] Cannot delete agents data on #{name} - #{model['sfpAddress']}:#{model['sfpPort']} - #{exp}" 
+				$stderr.puts f("[Warn] Cannot delete agents data on #{name} - #{model['sfpAddress']}:#{model['sfpPort']} - #{exp}", opts, :red)
 				return false
 			end
 		end
@@ -348,7 +346,6 @@ class Nuri::Master
 			end
 			return true
 		rescue Exception => exp
-			#$stderr.puts "#{exp}\n#{exp.backtrace.join("\n")}"
 		end
 		false
 	end
@@ -381,8 +378,6 @@ class Nuri::Master
 			code, body = get_data(address, port, '/modules', DefaultHTTPOpenTimeout, 5)
 			raise Exception, "Unable to get modules list from #{name}" if code.to_i != 200
 
-			#puts "#{name}'s modules: #{body}"
-
 			modules = JSON[body]
 			tobe_installed_modules = []
 			schemata.each do |name|
@@ -398,19 +393,18 @@ class Nuri::Master
 			### install new modules and replace old ones
 			list = tobe_installed_modules.join(" ")
 			cmd = "#{InstallModule} #{address}:#{port} #{list}"
-			#puts cmd
 			output = JSON.parse(`cd #{@modules_dir}; #{cmd}`)
 			if output['installed_modules'].length > 0
-				puts ("Push modules: " + output['installed_modules'].join(" ") + " to agent #{name} [OK]").green
+				putf "Push modules: #{output['installed_modules'].join(" ")} to agent #{name} [OK]", opts, :green
 			end
 			if output['missing_modules'].length > 0
-				puts ("Missing modules: " + output['missing_modules'].join(" ") + ".").red
+				putf "Missing modules: #{output['missing_modules'].join(" ")}", opts, :red
 			end
 
 			return true
 
 		rescue Exception => e
-			puts "[WARN] Cannot push module to #{name} - #{e}".red
+			putf "[WARN] Cannot push module to #{name} - #{e}", opts, :red
 		end
 
 		false
@@ -443,7 +437,7 @@ class Nuri::Master
 				return agent_state[name]
 			end
 		rescue Exception => e
-			puts "[WARN] Cannot get the current state of #{name} : #{e}".red
+			putf "[WARN] Cannot get the current state of #{name} : #{e}", opts, :red
 		end
 		SfpUnknown
 	end
@@ -523,8 +517,10 @@ class Nuri::Master
 			case value['_context']
 			when 'null', 'any_value'
 				parent[name] = Sfp::Undefined.create(value['_isa'])
-			when 'object', 'procedure'
+			when 'object'
 				# do nothing
+			when 'procedure'
+				return false
 			else
 				parent.delete(name)
 			end
@@ -672,6 +668,25 @@ class Nuri::Master
 				operator[var.name] = parameter
 			}
 		end
+	end
+
+	private
+	def f(msg, opts={}, color=:yellow)
+		if not opts[:no_color]
+			case color
+			when :yellow
+				return msg.yellow
+			when :red
+				return msg.red
+			when :green
+				return msg.green
+			end
+		end
+		msg
+	end
+
+	def putf(msg, opts={}, color=:yellow)
+		puts f(msg, opts, color)
 	end
 end
 
