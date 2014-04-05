@@ -30,7 +30,7 @@ where [options] are:
 EOS
 			opt :model_file, 'file contains a model of desired state', :default => Nuri.main, :short => '-m'
 			opt :json, 'print output in JSON'
-			opt :color, 'enable colorized output', :default => true
+			opt :no_color, 'disable colorized output'
 			opt :no_push_module, 'disable automatic push module'
 		end
 		help, args = check_help(args)
@@ -45,21 +45,11 @@ EOS
 			master.set_model opts
 			state = master.get_state opts
 			state.accept(Sfp::Helper::Sfp2Ruby)
-
-			if args.length > 0
-				state = state.at?("$.#{args[0]}")
-				puts (!opts[:color] ? "Path: #{args[0]}" : "Path: " + "#{args[0]}".yellow)
-			end
-
-			if opts[:json]
-				puts (!opts[:color] ? JSON.generate(state) : CodeRay.encode(JSON.pretty_generate(state), :json, :terminal))
-			else
-				puts (!opts[:color] ? YAML.dump(state) : CodeRay.encode(YAML.dump(state), :yaml, :terminal))
-			end
+			state = state.at?("$.#{args[0]}") if args.length > 0
+			print_hash(state, opts)
 
 		else
-			$stderr.puts "Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.".red
-
+			$stderr.puts format("Model file '#{opts[:model_file]}' is not exist! Use \"-h\" option for more details.", opts, :red)
 		end
 	end
 
@@ -73,6 +63,7 @@ EOS
 			opt :parallel, 'generate a parallel plan', :short => '-l'
 			opt :apply, 'generate and execute a plan', :short => '-a'
 			opt :json, 'print the plan in JSON'
+			opt :yaml, 'print the plan in YAML'
 			opt :color, 'enable colorized output', :default => true
 			opt :no_interactive, 'disable interactive input'
 			opt :no_push_module, 'disable automatic push module'
@@ -87,21 +78,24 @@ EOS
 		elsif File.exist?(opts[:model_file])
 			opts[:plan] = true
 			opts[:push_modules] = true if !opts[:no_push_module]
+			# generate plan
 			master = Nuri::Master.new
 			master.set_model(opts)
 			plan = master.get_plan(opts)
+			# processing plan
 			if plan.is_a?(Hash) and !plan['workflow'].nil?
+				# workflow exists
 				if plan['workflow'].length > 0
-					plan_file = Dir.home + '/.nuri/plan.json'
+					plan_file = "#{Dir.home}/.nuri/plan.json"
+					# dump the workflow to file
 					File.open(plan_file, 'w') { |f| f.write(JSON.generate(plan)) }
+					# generate image of the workflow
+					system "#{Home}/bin/nuri-sfwgraph #{plan_file} #{opts[:image]}" if opts[:image].strip.length > 0
 
-					if opts[:image].strip.length > 0
-						system "#{Home}/bin/nuri-sfwgraph #{plan_file} #{opts[:image]}"
-					end
-
-					if opts[:json]
-						json = JSON.pretty_generate(plan)
-						puts (opts[:color] ? CodeRay.encode(json, :json, :terminal) : json)
+					if opts[:json] or opts[:yaml]
+						print_hash(plan, opts)
+						#json = JSON.pretty_generate(plan)
+						#puts (opts[:color] ? CodeRay.encode(json, :json, :terminal) : json)
 
 					else
 						actions = plan['workflow']
@@ -599,6 +593,29 @@ EOS
 		else
 			puts banner
 		end
+	end
+
+	private
+	def print_hash(hash, opts={})
+		if opts[:json]
+			print (opts[:no_color] ? JSON.pretty_generate(hash) : CodeRay.encode(JSON.pretty_generate(hash), :json, :terminal))
+		else
+			print (opts[:no_color] ? YAML.dump(hash) : CodeRay.encode(YAML.dump(hash), :yaml, :terminal))
+		end
+	end
+
+	def format(msg, opts={}, color=:yellow)
+		if not opts[:no_color]
+			case color
+			when :yellow
+				return msg.yellow
+			when :red
+				return msg.red
+			when :green
+				return msg.green
+			end
+		end
+		msg
 	end
 end
 
