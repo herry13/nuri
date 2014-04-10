@@ -155,12 +155,17 @@ class Sfp::Module::Libvirt
 			'cpus' => 1,
 			'memory' => 256,
 			'disksize' => 4,
-			'mac_address' => (1..6).map{"%0.2X"%rand(256)}.join(":"), # '54:52:00:6C:46:01',
-			'os' => 'ubuntu-linux',
+			'mac_address' => get_mac_address,
+			'os' => 'ubuntu',
 			'os_version' => 'precise',
+			'os_arch' => 'i386',
 			'image_location' => '/disk/scratch/images',
 
 		}.merge(model)
+	end
+
+	def get_mac_address
+ 		(1..6).map{"%0.2X"%rand(256)}.join(":")
 	end
 
 	def generate_script_file(name, ks_file)

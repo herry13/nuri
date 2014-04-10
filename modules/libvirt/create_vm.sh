@@ -17,7 +17,7 @@ IMAGE="$STORAGE/$NAME.img"
 
 # operating system
 VERSION=<%= os_version %>
-LOCATION="http://archive.ubuntu.com/ubuntu/dists/$VERSION/main/installer-amd64/"
+LOCATION="http://archive.ubuntu.com/ubuntu/dists/$VERSION/main/installer-<%= os_arch %>/"
 OS_TYPE=linux
 OS_VARIANT=ubuntumaverick
 

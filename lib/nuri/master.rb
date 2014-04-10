@@ -144,7 +144,7 @@ class Nuri::Master
 		task = get_schemata
 
 		print "Getting current state "
-		putf "[Wait]", opts, :yellow
+		putf "[Wait]", {}, :yellow
 
 		benchmark = Benchmark.measure do
 			task['initial'] = to_state('initial', get_state(opts))
@@ -395,16 +395,16 @@ class Nuri::Master
 			cmd = "#{InstallModule} #{address}:#{port} #{list}"
 			output = JSON.parse(`cd #{@modules_dir}; #{cmd}`)
 			if output['installed_modules'].length > 0
-				putf "Push modules: #{output['installed_modules'].join(" ")} to agent #{name} [OK]", opts, :green
+				putf "Push modules: #{output['installed_modules'].join(" ")} to agent #{name} [OK]", {}, :green
 			end
 			if output['missing_modules'].length > 0
-				putf "Missing modules: #{output['missing_modules'].join(" ")}", opts, :red
+				putf "Missing modules: #{output['missing_modules'].join(" ")}", {}, :red
 			end
 
 			return true
 
 		rescue Exception => e
-			putf "[WARN] Cannot push module to #{name} - #{e}", opts, :red
+			putf "[WARN] Cannot push module to #{name} - #{e}", {}, :red
 		end
 
 		false
@@ -437,7 +437,7 @@ class Nuri::Master
 				return agent_state[name]
 			end
 		rescue Exception => e
-			putf "[WARN] Cannot get the current state of #{name} : #{e}", opts, :red
+			putf "[WARN] Cannot get the current state of #{name} : #{e}", {}, :red
 		end
 		SfpUnknown
 	end

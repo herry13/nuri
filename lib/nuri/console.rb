@@ -422,6 +422,7 @@ EOS
 			puts <<-EOS
 Usage: edit <filepath>
 EOS
+		opts = process_args args, parser
 
 		elsif File.exist?(file)
 			system "#{Nuri.config['editor']} #{file}"
@@ -448,8 +449,7 @@ EOS
 	end
 
 	def do_console
-		parser = Trollop::Parser.new do
-			banner <<-EOS
+		banner = <<-EOS
 Usage: <command> [options]
 where <command> is:
   [s]tate     get current state
@@ -462,7 +462,6 @@ where <command> is:
   exit        exit this console
 
 EOS
-		end
 
 		username = `whoami`.strip
 		puts About
@@ -507,18 +506,18 @@ EOS
 					when 'ws', 'workspace'
 						Dir.chdir(File.dirname(Nuri.main))
 					when 'help'
-						parser.educate(STDOUT)
+						puts banner
 					when 'version', '-v'
 						puts About
 					else
-						$stderr.puts format('Unrecognized command! Type "help" to print available commands.', opts, :red)
+						$stderr.puts format('Unrecognized command! Type "help" to print available commands.', {}, :red)
 					end
 				end
 			rescue Exception => e
-				$stderr.puts "#{e}\n#{e.backtrace.join("\n")}"
+				$stderr.puts format("#{e}\n#{e.backtrace.join("\n")}", {}, :red)
 			end
 		end
-		puts "Bye!\n"
+		putf "Bye!\n", {}, :green
 	end
 
 	def do_model(args=ARGV, cmd='nuri')
