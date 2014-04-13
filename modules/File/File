@@ -3,7 +3,9 @@
 
 import sys
 import json
-
+import os
+import hashlib
+from pwd import getpwuid
 
 ###############
 #
@@ -12,9 +14,38 @@ import json
 ###############
 def get_state(model):
 	state = {}
-	for key in model:
-		if key[0] != '_':
-			state[key] = model[key]
+	state['path'] = model['path']
+	state['exists'] = os.path.exists(model['path'])
+
+	if os.path.isfile(model['path']):
+		state['type'] = 'file'
+	elif os.path.isdir(model['path']):
+		state['type'] = 'directory'
+	elif os.path.islink(model['path']):
+		state['type'] = 'link'
+	else:
+		state['type'] = ''
+
+	if state['type'] == 'file':
+		md5 = hashlib.md5()
+		with open(model['path'], 'rb') as f:
+			while True:
+				data = f.read(8192)
+				if not data:
+					break
+				md5.update(data)
+		state['content'] = md5.hexdigest()
+	else:
+		state['content'] = ''
+
+	if state['exists']:
+		status = os.stat(model['path'])
+		state['user'] = getpwuid(status.st_uid).pw_name
+		state['uid'] = status.st_uid
+		state['permission'] = status.st_mode
+	else:
+		state['user'] = state['uid'] = state['permission'] = ''
+
 	### dump current state
 	print json.dumps({'status': 'ok', 'state': state})
 

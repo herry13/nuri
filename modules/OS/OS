@@ -3,7 +3,10 @@
 
 import sys
 import json
-
+import os
+import io
+import commands
+import platform
 
 ###############
 #
@@ -12,9 +15,16 @@ import json
 ###############
 def get_state(model):
 	state = {}
-	for key in model:
-		if key[0] != '_':
-			state[key] = model[key]
+	state['memory_total'] = 0
+	state['memory_free'] = 0
+	state['node'] = platform.node()
+	state['system'] = platform.system()
+	state['release'] = platform.release()
+	state['arch'] = platform.machine()
+	state['processor'] = platform.processor()
+	state['platform'] = platform.platform()
+	state['python'] = platform.python_version()
+	state['dist'] = platform.linux_distribution()
 	### dump current state
 	print json.dumps({'status': 'ok', 'state': state})
 
