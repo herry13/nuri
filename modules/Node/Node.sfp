@@ -1,6 +1,3 @@
-include "../os/os.sfp"
-include "../cloud/cloud.sfp"
-
 schema Node {
 	final sfpAddress is ""
 	final sfpPort is 1314
