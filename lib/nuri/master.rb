@@ -8,9 +8,9 @@ class Nuri::Master
 	SfpUnknown = Sfp::Unknown.new
 	SfpUndefined = Sfp::Undefined.new
 
-	AgentSchema = '$.Node'
-	CloudSchema = '$.Cloud'
-	VMSchema = '$.VM'
+	AgentSchema = '$.node'
+	CloudSchema = '$.cloud'
+	VMSchema = '$.vm'
 
 	InstallModule = File.dirname(__FILE__) + '/../../bin/nuri-install-module'
 
@@ -371,7 +371,7 @@ class Nuri::Master
 		name = agent_model['_self']
 		finder = Sfp::Helper::SchemaCollector.new
 		{:agent => agent_model}.accept(finder)
-		schemata = finder.schemata.uniq.map { |x| x.sub(/^\$\./, '').downcase }
+		schemata = finder.schemata.uniq.map { |x| x.sub(/^\$\./, '') }
 
 		begin
 			# get modules list
@@ -773,7 +773,7 @@ class Sfp::Helper::SchemaCollector
 end
 
 class Sfp::Helper::CloudFinder
-	CloudSchema = '$.Cloud'
+	CloudSchema = Nuri::Master::CloudSchema
 	attr_accessor :clouds
 
 	def reset
