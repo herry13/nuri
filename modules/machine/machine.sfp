@@ -1,9 +1,9 @@
 include "../node/node.sfp"
 include "../os/os.sfp"
 
-schema Machine extends Node {
+schema machine extends node {
 	created is true
-	hypervisor : String
+	final hypervisor : String
 
-	os isa OS
+	os isa os
 }

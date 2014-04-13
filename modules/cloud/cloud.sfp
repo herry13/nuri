@@ -1,7 +1,7 @@
-schema Cloud {
-	running : Bool
+schema cloud {
+	running : Boolean
 
-	sub create_vm (vm isref VM) {
+	def create_vm (vm isref vm) {
 		condition {
 			this.running = true
 			vm.created = false
@@ -12,7 +12,7 @@ schema Cloud {
 		}
 	}
 
-	sub delete_vm (vm isref VM) {
+	def delete_vm (vm isref vm) {
 		condition {
 			this.running = true
 			vm.created = true

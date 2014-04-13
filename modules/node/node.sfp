@@ -1,4 +1,4 @@
-schema Node {
+schema node {
 	final sfpAddress is ""
 	final sfpPort is 1314
 }
