@@ -24,7 +24,7 @@ def get_state(model):
 	state['processor'] = platform.processor()
 	state['platform'] = platform.platform()
 	state['python'] = platform.python_version()
-	state['dist'] = platform.linux_distribution()
+	#state['dist'] = platform.linux_distribution()
 	### dump current state
 	print json.dumps({'status': 'ok', 'state': state})
 

@@ -1,8 +1,21 @@
-schema File {
-	final exists : Bool
-	final path is ""
-	final content : String
-	final user : String
+schema file {
+	configured = true
+	path = ""
+	final state : String
+	final owner : String
 	final group : String
-	final permission : String
+	final mode : String
+	final src : String
+	final seuser : String
+	final setype : String
+	final serole : String
+	final selevel : String
+	final recurse : Boolean
+	final force : Boolean
+
+	def configure {
+		effect {
+			this.configured = true
+		}
+	}
 }
