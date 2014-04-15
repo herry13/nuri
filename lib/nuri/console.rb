@@ -400,9 +400,9 @@ EOS
 				codes[4], _ = delete_data(opts[:address], 1314, "/agents")
 
 				if (codes.index { |x| x != '200' })
-					putf "Reset agent [OK]", opts, :green
+					putf "Reset agent [Failed] - #{codes.inspect}", opts, :red
 				else
-					putf "Reset agent [Failed]", opts, :red
+					putf "Reset agent [OK]", opts, :green
 				end
 
 			when 'h', 'help'
