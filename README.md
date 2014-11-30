@@ -3,7 +3,7 @@
 - author: Herry [herry13@gmail.com]
 - license: BSD
 
-[![Build Status](https://travis-ci.org/herry13/nuri.svg?branch=master)](https://travis-ci.org/herry13/nuri)
+[![Build Status](https://travis-ci.org/nurilabs/nuri.svg?branch=master)](https://travis-ci.org/nurilabs/nuri)
 [![Gem Version](https://badge.fury.io/rb/nuri.png)](https://badge.fury.io/rb/nuri)
 
 Nuri is an automated workflow configuration tool. It allows us to define the desired state of
