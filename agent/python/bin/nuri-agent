@@ -1,0 +1,5 @@
+#!/bin/bash
+
+home="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$home/../lib/agent.py $@
