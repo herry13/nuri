@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type" />
+	<link rel="stylesheet" href="../assets/site.css" type="text/css" />
+	<link href="../assets/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<script src="../assets/jquery.js"></script>
+	<script src="../assets/ace.js"></script>
+	<script src="../assets/theme-twilight.js"></script>
+	<script src="../assets/mode-javascript.js"></script>
+	<script src="../assets/worker-javascript.js"></script>
+	<script src="../assets/site.js"></script>
+	<title>Nuri Planner</title>
+</head>
+<body>
+
+<div class="menu">
+	<a class="menu-item" href="javascript:user.signout();"><i class="fa fa-power-off fa-fw"></i> Sign-out</a>
+	<a class="menu-item" href="javascript:api.plan();"><i class="fa fa-magic fa-fw"></i> Plan</a>
+	<!--<a class="menu-item" href="#"><i class="fa fa-gears fa-fw"></i> Compile</a>-->
+    <a class="menu-item" href="mailto:herry@nurilabs.com"><i class="fa fa-envelope fa-fw"></i> Contact</a>
+    &nbsp;&nbsp;&nbsp;<span class="beta">Beta!</span>
+</div>
+
+<div class="center">
+	<div class="left">
+		<div class="left-menu">
+			<a class="menu-item" tooltip="New File" href="javascript:editor.newFile();" title="New File"><i class="fa fa-file-o"></i></a>
+			<a class="menu-item" href="javascript:editor.saveFile();" title="Save File"><i class="fa fa-save"></i></a>
+			<a class="menu-item" href="javascript:editor.renameFile();" title="Rename File"><i class="fa fa-code"></i></a>
+			<a class="menu-item" href="javascript:editor.deleteFile();" title="Delete File"><i class="fa fa-trash-o"></i></a>
+			<a class="menu-item" href="javascript:files.update();" title="Refresh"><i class="fa fa-refresh"></i></a>
+		</div>
+		<div class="file-list">
+			<ul>
+			</ul>
+		</div>
+		<div class="problem-list">
+			<h3>Planning</h3> <!-- <i class="fa fa-sitemap" title="Plan Graph"></i> -->
+			<ul>
+			</ul>
+		</div>
+	</div>
+	<div class="middle">
+		<div id="editor"></div>
+        <div id="plangraph">
+            <div id="plan-exec"><a class="menu-item" href="#"><i class="fa fa-play fa-lg"></i> Execute</a></div>
+            <div id="graph"></div>
+        </div>
+	</div>
+</div>
+
+<div class="popup login">
+	<input class="form login" placeholder="Username" type="text" name="username">
+	<input class="form login" placeholder="Password" type="password" name="password">
+	<button class="form login"><i class="fa fa-sign-in fa-fw"></i> Sign-in</button>
+    <div class="form login">Don't have an account? <a href="..">Create one.</a></div>
+</div>
+<div class="popup-block"></div>
+
+<div class="popup message">
+    <p></p>
+    <button>Close</button>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+BASEDIR="$(dirname $0)"
+WORKER="$BASEDIR/../lib/worker.rb"
+ruby $WORKER $@

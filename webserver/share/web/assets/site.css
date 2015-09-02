@@ -1,0 +1,215 @@
+body {
+	padding: 0px;
+	margin: 0px;
+	background-color: #eee;
+	width: 100%;
+	min-width: 800px;
+	height: 100%;
+	color: #333;
+	font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+	font-size: 13px;
+}
+a:link, a:visited {
+	color: #333;
+	text-decoration: none;
+}
+a:active, a:hover {
+	color: #333;
+	text-decoration: underline;
+}
+h3 {
+	display: inline;
+	font-size: 13px;
+	margin: 5px 10px 5px 10px;
+	padding: 0;
+}
+.beta {
+    color: red;
+    text-decoration: underline;
+}
+.menu {
+	display: block;
+	padding: 5px;
+	margin: 0;
+}
+.menu-item {
+	margin: 0;
+	position: relative;
+	padding: 5px 10px 5px 8px;
+}
+.menu-item:hover {
+	color: #eee;
+	background-color: #21b384;
+	text-decoration: none;
+}
+.center {
+	display: block;
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+.left {
+	display: inline;
+	position: relative;
+	float: left;
+	width: 180px;
+	border-top: 1px solid #888;
+	z-index: 2;
+}
+.middle {
+	display: inline;
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+.right {
+}
+#editor {
+	height: 400px;
+}
+#plangraph {
+    left: 180px;
+    position: relative;
+    overflow: auto;
+    padding: 0px;
+    border-left: #888 solid 1px;
+    /*background-color: white;*/
+}
+#plan-exec {
+    margin: 10px 5px 5px 5px;
+}
+#graph svg {
+    margin: -20px 10px 10px 10px;
+    -ms-transform: scale(0.8,0.8);
+    -webkit-transform: scale(0.8,0.8);
+    transform: scale(0.8,0.8);
+}
+#graph svg g polygon {
+    fill: #eeeeee;
+}
+#graph svg g g ellipse:hover {
+	fill: #21b384;
+}
+#graph svg g g text {
+    font-weight: bold;
+	font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+    pointer-events: none;
+}
+
+label {
+	display: block;
+	padding: 0;
+	margin: 5px 0px 5px 0px;
+}
+input {
+	display: block;
+	font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+	font-size: 1em;
+	padding: 5px 10px 5px 10px;
+	margin: 5px 0px 5px 0px;
+	border: 1px solid #666;
+	border-radius: 5px;
+}
+input.login {
+    font-size: 1.2em;
+    padding: 10px;
+    margin-bottom: 15px;
+    width: 200px;
+}
+button {
+	display: block;
+	font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+	font-size: 1em;
+	padding: 5px 15px 5px 10px;
+	margin: 5px 0px 5px 0px;
+	border: 1px solid #666;
+	border-radius: 5px;
+	background-color: #333;
+	color: #eee;
+	cursor: pointer;
+}
+button.login {
+    font-size: 1.2em;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 10px;
+    text-align: center;
+}
+div.login a {
+    text-decoration: underline;
+}
+div.login a:hover {
+    text-decoration: none;
+}
+button:hover {
+	background-color: #21b384;
+	color: #eee;
+	border: 1px solid #060;
+}
+.popup {
+	position: absolute;
+	float: left;
+	display: none;
+	z-index: 11;
+	margin: 0px;
+	padding: 10px;
+	border: 1px solid #888;
+	border-radius: 8px;
+	-webkit-box-shadow: 5px 5px 5px 0px rgba(51,51,51,0.75);
+	-moz-box-shadow: 5px 5px 5px 0px rgba(51,51,51,0.75);
+	box-shadow: 5px 5px 5px 0px rgba(51,51,51,0.75);
+}
+.popup-close {
+	display: block;
+	margin: 0px 0px 5px 0px;
+	padding: 0;
+}
+.popup-block {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	display: none;
+	z-index: 10;
+	background-color: #eee;
+	margin: 0;
+	padding: 0;
+}
+.popup-block.tranparent {
+	background-color: rgba(0,0,0,0.75);
+}
+/*** left pane ***/
+.left-menu {
+	padding: 5px 8px 5px 8px;
+	margin: 0;
+	border-bottom: 1px solid #666;
+}
+.file-list {
+	overflow: auto;
+}
+.problem-list {
+	border-top: 1px solid #888;
+	width: 100%;
+	padding: 0;
+	margin: 20px 0px 0px 0px;
+}
+.file-list ul, .problem-list ul {
+	padding: 5px;
+	margin: 0;
+	list-style-type: none;
+}
+.file-list ul li, .problem-list ul li {
+	padding: 3px;
+	margin: 0px 3px 0px 3px;
+	cursor: pointer;
+	border-bottom: 1px solid #ccc;
+}
+.file-list ul li:hover, .problem-list ul li:hover {
+	color: #eee;
+	background-color: #21b384;
+}
+.file-selected, .problem-selected {
+	color: #f00;
+}
+.file-list ul li.file-selected:hover, .problem-list ul li.problem-selected:hover {
+	color: #f00;
+}

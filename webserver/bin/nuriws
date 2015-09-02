@@ -1,0 +1,53 @@
+#!/bin/bash
+
+BASEDIR="$(dirname $0)"
+RACK_FILE="$BASEDIR/../lib/config.ru"
+HOST="localhost"
+PORT=3000
+MODE="production"
+PID_FILE="/tmp/nuri-planner-webservice.pid"
+LOG_FILE="/tmp/nuri-planner-webservice.log"
+USER="www-data"
+GROUP="www-data"
+
+if [[ "$1" != "" && "$2" != "" ]]; then
+	MODE="$1"
+	shift
+fi
+
+OPTIONS="-p $PORT -a $HOST"
+if [ "$MODE" == "production" ]; then
+	OPTIONS="$OPTIONS -u $USER -g $GROUP --pid $PID_FILE -e $MODE -l $LOG_FILE -d"
+fi
+
+function is_alive {
+	pid=$(cat $PID_FILE)
+	kill -0 $pid 1>/dev/null 2>/dev/null
+	if [ "$?" == "0" ]; then
+		return true
+	else
+		return false
+	fi
+}
+
+if [ "$1" == "status" ]; then
+	if [[ -f $PID_FILE && is_alive ]]; then
+		echo "Server is running with pid $(cat $PID_FILE)."
+	else
+		echo "Server is not running."
+	fi
+elif [ "$1" == "start" ]; then
+	if [[ -f $PID_FILE && is_alive ]]; then
+		echo "Server is already running with pid $(cat $PID_FILE)."
+	else
+		thin $OPTIONS -R $RACK_FILE start
+	fi
+elif [ "$1" == "stop" ]; then
+	if [ -f $PID_FILE ]; then
+		thin --pid $PID_FILE stop
+	else
+		echo "Server has stopped."
+	fi
+else
+	echo "Usage: nuriws [start|stop|status]"
+fi

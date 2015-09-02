@@ -1,0 +1,6 @@
+.*.swp
+nuri-planner
+config.json
+config.yaml
+config.sfp
+/share/web/assets/ace/

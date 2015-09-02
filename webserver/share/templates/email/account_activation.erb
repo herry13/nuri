@@ -1,0 +1,12 @@
+From: <%= from_alias %> <<%= from %>>
+To: <%= to %>
+Subject: Account Registration
+
+You have registered an account at nurilabs.com. Please click the following link or copy and paste into your web browser to activate your account.
+
+<%= activation_url %>?client_id=<%= client_id %>&token=<%= activation_token %>
+
+Please ignore this message if you did not register yourself.
+
+Thank you,
+Nurilabs team.

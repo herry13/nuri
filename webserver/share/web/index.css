@@ -1,0 +1,118 @@
+body {
+	padding: 0px;
+	margin: 0px;
+	background-color: #eee;
+	width: 100%;
+	height: 100%;
+	color: #333;
+	font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+	font-size: 1em;
+}
+a:link, a:visited {
+	color: #130380;
+	text-decoration: underline;
+}
+a:active, a:hover {
+	color: #130380;
+	text-decoration: none;
+}
+.box {
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	width: 300px;
+	padding: 15px 30px 15px 15px;
+	border: 2px solid #888;
+	border-radius: 15px;
+}
+.box.form {
+	padding-top: 0px;
+}
+.box.form.signup {
+	margin-top: 100px;
+}
+input {
+	width: 100%;
+	padding: 10px;
+	font-size: 1em;
+	font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+	font-color: #130380;
+}
+input.form {
+	margin: 15px 0px 0px 0px;
+	width: 290px;
+}
+.button {
+	text-align: center;
+	padding: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	cursor: pointer;
+	text-decoration: underline;
+}
+.button.submit {
+	width: 295px;
+	margin-top: 10px;
+	border-radius: 5px;
+	color: #eee;
+	background-color: #009900;
+	text-decoration: none;
+}
+.button.submit:hover {
+	text-decoration: underline;
+}
+.top {
+	border-bottom: 1px solid #666;
+}
+.button.menu-login {
+	width: 70px;
+}
+.button.menu-login:hover {
+	color: #eee;
+	background-color: #666;
+	text-decoration: none;
+}
+.form.message {
+	color: red;
+	font-size: 0.8em;
+}
+p {
+	margin: 10px;
+}
+.popup {
+	position: absolute;
+	float: left;
+	display: none;
+	z-index: 3;
+	border: 2px solid #444;
+	border-radius: 15px;
+	background-color: rgba(255,255,255,0.8);
+	margin: 0px;
+	padding: 10px;
+}
+.popup-close {
+	position: relative;
+	display: block;
+	border: none;
+	margin: -5px 0px 5px 0px;
+	padding: 0px;
+	background-color: transparent;
+	width: 100%;
+	cursor: pointer;
+}
+.popup.signup {
+	width: 400px;
+	height: 200px;
+	line-height: 1.5;
+}
+.popup-block {
+	position: absolute;
+	display: none;
+	width: 100%;
+	height: 100%;
+	z-index: 2;
+	background-color: rgba(0,0,0,0.5);
+}
+.box.form.login {
+	top: 100px;
+}

@@ -1,0 +1,33 @@
+// file : model.sfp
+schema Machine {
+  dns = "ns.foo";
+}
+schema Client extends Machine {
+  refer: *Service = null;
+  def redirect(s: Service) {
+    condition { }
+    effect {
+      this.refer = s;
+    }
+  }
+}
+schema Service {
+  running = true;
+  port = 80;
+  def start {
+    condition {
+      this.running = false;
+    }
+    effect {
+      this.running = true;
+    }
+  }
+  def stop {
+    condition {
+      this.running = true;
+    }
+    effect {
+      this.running = false;
+    }
+  }
+}

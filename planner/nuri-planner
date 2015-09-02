@@ -1,0 +1,31 @@
+#!/bin/bash
+
+BASEDIR="$(dirname $0)"
+
+SOURCE=$0
+while [ -h "$SOURCE" ]; do
+	DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+	SOURCE="$(readlink "$SOURCE")"
+	[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+
+COMPILER="/var/www/nuri-lang/ocaml/nuric -p"
+PREPROCESS="/var/www/fast-downward/src/preprocess/preprocess"
+SEARCH="/var/www/fast-downward/src/search/downward-release"
+NURI_GRAPH_PLAN="$BASEDIR/nuri-graph-plan --svg" # --with-transitive"
+
+export FD_PREPROCESS=$PREPROCESS
+export FD_SEARCH=$SEARCH
+export FD_DEBUG=1
+
+if [[ "$1" != "" && "$2" != "" ]]; then
+	$COMPILER -p "$1" "$2" > plan.json
+	PLAN=$(cat plan.json)
+	if [ "$PLAN" != "" ]; then
+		$NURI_GRAPH_PLAN plan.json
+	fi
+else
+	echo "Usage: nuri-planner <initial-file> <goal-file>"
+fi

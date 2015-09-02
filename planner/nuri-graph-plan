@@ -1,0 +1,141 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'trollop'
+
+module Nuri
+  # A class that represents a grounded action
+  class Action
+    attr_accessor :predecessors, :cost, :name, :conditions, :effects, :id,
+                  :parameters
+
+    def initialize(opts)
+      @name         = opts[:name].sub(/^\$\./, '')
+      @parameters   = opts[:parameters]
+      @cost         = (opts[:cost] ? opts[:cost] : 1)
+      @conditions   = opts[:conditions]
+      @effects      = opts[:effects]
+      @predecessors = opts[:predecessors]
+      @id           = opts[:id]
+    end
+
+    def transitive_predecessor?(action)
+      @predecessors.each do |pre|
+        return true if pre != action && pre.predecessor?(action)
+      end
+      false
+    end
+
+    def predecessor?(action)
+      return true if @predecessors.include? action
+      @predecessors.each do |pre|
+        return true if pre.predecessor?(action)
+      end
+      false
+    end
+
+    def dot_label
+      label = "#{@id}:#{@name}("
+      @parameters.each { |k, v| label << "#{k}=#{v.to_s.sub(/^\$/, '')}," }
+      label.chop! if label[-1] == ','
+      label << ')'
+    end
+
+    def self.from_json(json, id = nil)
+      Nuri::Action.new name:         json['name'],
+                       parameters:   json['parameters'],
+                       cost:         json['cost'],
+                       conditions:   json['conditions'],
+                       effects:      json['effects'],
+                       predecessors: json['before'],
+                       id:           id
+    end
+  end
+
+  # A class that represents a plan
+  class Plan < Array
+    def self.from_json(json)
+      plan = Nuri::Plan.new
+      json.each_index { |i| plan << Nuri::Action.from_json(json[i], i) }
+      plan.each do |a|
+        pre = []
+        a.predecessors.each { |i| pre << plan[i] }
+        a.predecessors = pre
+      end
+      plan
+    end
+
+    def remove_transitive_predecessors!
+      each do |a|
+        predecessors = []
+        a.predecessors.each do |pre|
+          predecessors << pre unless a.transitive_predecessor? pre
+        end
+        a.predecessors = predecessors
+      end
+      self
+    end
+
+    def to_dot
+      dot = "strict digraph {\n"
+      each do |a|
+        dot << "\"#{a.id}\" [id=\"#{a.id}\",label=\"#{a.dot_label}\"];"
+        a.predecessors.each do |pre|
+          dot << "\"#{pre.id}\" -> \"#{a.id}\""
+          dot << " [weight=1,id=\"#{pre.id},#{a.id}\"];\n"
+        end
+      end
+      dot << '}'
+    end
+  end
+end
+
+if $PROGRAM_NAME == __FILE__
+  usage = 'Usage: nuri-graph-plan [options] <plan.json>'
+  opts = Trollop::options do
+    version 'nuri-graph-plan 0.0.1 (c) 2014 Herry'
+    banner <<-EOS
+Generate a graph of a JSON Plan.\n
+#{usage}
+EOS
+    opt :out, 'Target file output.'
+    opt :png, 'Generate a PNG file.'
+    opt :svg, 'Generate an SVG file.'
+    opt :debug, 'Debug mode.'
+    opt :with_transitive, 'Do not remove transitive edges.'
+  end
+
+  if `which dot`.length <= 0
+    STDERR.puts 'Graphviz is not available. Please install it!'
+    exit 2
+  end
+
+  if ARGV.length < 1
+    puts usage
+  else
+    begin
+      opts['plan'] = JSON[File.read(ARGV[0])]
+    rescue
+      STDERR.puts 'The input file is not a JSON.'
+      exit 1
+    end
+
+    # generate Nuri::Plan object from JSON
+    plan = Nuri::Plan.from_json opts['plan']['actions']
+
+    # remove transitive predecessors
+    plan.remove_transitive_predecessors! unless opts[:with_transitive]
+
+    # generate graphviz DOT
+    dot_file = "/tmp/#{ARGV[0]}.dot"
+    dot = plan.to_dot
+    File.open(dot_file, 'w') { |f| f.write dot }
+
+    basename = File.basename ARGV[0], File.extname(ARGV[0])
+
+    system "dot -Tpng -o #{basename}.png #{dot_file}" if opts[:png]
+    system "dot -Tsvg -o #{basename}.svg #{dot_file}" if opts[:svg]
+
+    File.unlink dot_file unless opts[:debug]
+  end
+end

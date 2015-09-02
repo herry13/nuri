@@ -1,0 +1,151 @@
+<html>
+<head>
+<link rel="stylesheet" href="assets/github-markdown.css">
+</head>
+<body>
+<div class="markdown-body">
+<h1>Nuri Planner as a Service</h1>
+
+<p>The Nuri planner is available as a service which can be accessed using an HTTP
+POST, GET, or DELETE request.</p>
+
+<p>All requests should use the following service endpoint:</p>
+
+<pre><code>https://nurilabs.com/api/v1/planner
+</code></pre>
+
+<p>You can use/create any program to make the HTTP request. However, we will give
+examples using <code>curl</code> command.</p>
+
+<h2>POST Method</h2>
+
+<p>POST method is used to submit a planning problem which will be solved by the
+Nuri planner. Each request should send:</p>
+
+<ul>
+<li>the type of the specifications</li>
+<li>the initial state</li>
+<li>the goal state</li>
+<li>other imported/included files</li>
+</ul>
+
+<pre lang="bash"><code>curl -i -X POST https://nurilabs.com/api/v1/planner \
+  -d type=nuri \
+  --data-urlencode initial@initial-state.nuri \
+  --data-urlencode goal@goal-state.nuri
+</code></pre>
+
+<p>Assume file <code>initial-state.nuri</code> contains the specification of initial state,
+and file <code>goal-state.nuri</code> contains the specification of goal state. Then the
+above curl command should be used to submit a planning problem to the
+service. Note that we should define the type of our specification i.e.
+<code>type=nuri</code>, which means that the specifications are specified in the Nuri
+language.</p>
+
+<p>If the specifications are importing/including other files, then we should
+include these files in the curl command.</p>
+
+<p>For example, our initial and goal specifications have the following statement:</p>
+
+<pre lang="java"><code>import &quot;schemas&quot;;
+
+...
+...
+</code></pre>
+
+<p>The above means that the specifications are importing file <code>schemas.nuri</code>.
+Thus, we should use the filename (without extension) as the key, and use the
+content of the file as the value.</p>
+
+<pre lang="bash"><code>curl -i -X POST https://nurilabs.com/api/v1/planner \
+  -d type=nuri \
+  --data-urlencode initial@initial-state.nuri \
+  --data-urlencode goal@goal-state.nuri \
+  --data-urlencode schemas@schemas.nuri
+</code></pre>
+
+<p>There are two possible response codes for POST request i.e.:</p>
+
+<ul>
+<li><p><code>201</code> : this means that the problem has been received and being processed,
+and you will receive the following data: </p>
+
+<pre lang="json"><code>{
+  &quot;problem-id&quot;: &quot;11aa22bb&quot;,
+  &quot;message&quot;: &quot;The problem was created.&quot;
+}
+</code></pre>
+
+<p>The above data has key <code>problem-id</code> whose value is the identifier of your
+problem. This identifier should be used to retrieve the planning result.</p></li>
+<li><p><code>500</code> : there is an internal server error.</p></li>
+</ul>
+
+<h2>GET Method</h2>
+
+<p>GET method is used to retrieve the planning result. As mentioned above, we
+should use the problem&#39;s identifier in our request so that the service can
+return the right answer. The response code of the request will show whether
+the planner can or cannot find the solution plan of your problem. If the
+solution plan can be found, then it will be returned in JSON.</p>
+
+<p>A common URL of the GET request is
+    <code>https://nurilabs.com/api/v1/planner/&lt;problem-id&gt;</code></p>
+
+<p>Assume that your problem&#39;s identifier is <code>11aa22bb</code>, then the following curl
+command will send a GET request to retrieve the planning result:</p>
+
+<pre lang="bash"><code>curl -i https://nurilabs.com/api/v1/planner/11aa22bb
+</code></pre>
+
+<p>There are several possible response codes:</p>
+
+<ul>
+<li><code>400</code> or <code>405</code> : you have given an invalid problem&#39;s identifier.</li>
+<li><p><code>404</code> : the planner cannot find the solution plan of your problem. This has
+several meanings:</p>
+
+<ul>
+<li>the problem is unsolvable</li>
+<li>the planner is timeout or running out of memory</li>
+</ul>
+
+<p>Note that due to a limited resource of our server, the planner is only
+given 20 minutes and maximum 512 MB of memory to solve a planning problem.</p></li>
+<li><p><code>202</code> : the planning has not completed because either the problem is still in
+in queue, or the planner is still finding the solution.</p></li>
+<li><p><code>200</code> : the planner can find the solution plan, which will be return in JSON.
+This <a href="https://github.com/nurilabs/nuri-lang#solution-plan">link</a> gives
+an explanation about the JSON format of the plan.</p></li>
+</ul>
+
+<h2>DELETE Method</h2>
+
+<p>DELETE method is used to delete a submitted planning problem and its solution
+plan (if exist). The problem&#39;s identifier should be used in the request to
+determine which problem that should be deleted. This request will return a code
+that indicates whether the problem (and its plan) has been deleted or not.</p>
+
+<p>A common URL of the DELETE request is
+    <code>https://nurilabs.com/api/v1/planner/&lt;problem-id&gt;</code></p>
+
+<p>Assume that your problem&#39;s identifier is <code>11aa22bb</code>, then the following curl
+command will send a DELETE request to delete the planning problem:</p>
+
+<pre lang="bash"><code>curl -i -X DELETE https://nurilabs.com/api/v1/planner/11aa22bb
+</code></pre>
+
+<p>There are several possible response codes:</p>
+
+<ul>
+<li><code>404</code> : you have given an invalid problem&#39;s identifier.</li>
+<li><code>200</code> : the problem has been deleted.</li>
+</ul>
+
+<h2>Question</h2>
+
+<p>If you have any question, please send an email to:
+    <a href="mailto:%20herry13@gmail.com">herry13@gmail.com</a></p>
+</div>
+</body>
+</html>
